@@ -1,0 +1,6 @@
+# Core dependency for JianYing draft generation
+pyJianYingDraft>=0.2.5
+
+# Additional dependencies that may be useful for a Coze assistant
+requests>=2.25.0
+python-dotenv>=0.19.0
