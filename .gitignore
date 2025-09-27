@@ -141,3 +141,6 @@ dmypy.json
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# GitHub agent files (exclude agents directory but keep copilot-instructions.md)
+.github/agents/

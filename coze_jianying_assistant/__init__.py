@@ -8,6 +8,6 @@ __version__ = "0.1.0"
 __author__ = "Gardene-el"
 __email__ = ""
 
-from .main import main
+from .main import main, CozeJianYingAssistant
 
-__all__ = ["main"]
+__all__ = ["main", "CozeJianYingAssistant"]
