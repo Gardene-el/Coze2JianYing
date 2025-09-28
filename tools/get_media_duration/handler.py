@@ -31,6 +31,61 @@ def validate_url(url: str) -> bool:
         return False
 
 
+def is_volcano_tts_url(url: str) -> bool:
+    """Check if URL is from Volcano Engine TTS service"""
+    return ('oceancloudapi.com' in url and 
+            ('VolcanoUserVoice' in url or 'speech_' in url))
+
+
+def handle_volcano_tts_url(url: str, logger=None) -> dict:
+    """
+    Special handling for Volcano Engine TTS URLs
+    
+    Returns:
+        Dict with success status and any extracted info
+    """
+    from urllib.parse import urlparse, parse_qs
+    import time
+    
+    try:
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query)
+        
+        # Check if URL has expired
+        expires = params.get('x-expires', [None])[0]
+        if expires:
+            expires_timestamp = int(expires)
+            current_timestamp = int(time.time())
+            
+            if expires_timestamp < current_timestamp:
+                if logger:
+                    logger.warning(f"Volcano TTS URL has expired. Expired {current_timestamp - expires_timestamp} seconds ago")
+                return {
+                    'success': False,
+                    'error': 'signed_url_expired',
+                    'message': f'TTS URL expired {current_timestamp - expires_timestamp} seconds ago'
+                }
+        
+        # Extract any useful metadata from the URL
+        filename = parsed.path.split('/')[-1]
+        if logger:
+            logger.info(f"Volcano TTS URL analysis - filename: {filename}")
+        
+        return {
+            'success': True,
+            'filename': filename,
+            'service': 'volcano_tts',
+            'expires': expires
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'error': 'analysis_failed',
+            'message': str(e)
+        }
+
+
 def check_media_url_accessibility(url: str, timeout: int = 10) -> dict:
     """
     Check if a media URL is accessible and get basic info
@@ -52,6 +107,13 @@ def check_media_url_accessibility(url: str, timeout: int = 10) -> dict:
         if 'oceancloudapi.com' in url or 'volccdn.com' in url or 'bytedance.com' in url:
             headers['Referer'] = 'https://www.coze.cn/'
             headers['Origin'] = 'https://www.coze.cn'
+            
+            # Special handling for Volcano TTS URLs
+            if 'VolcanoUserVoice' in url or 'speech_' in url:
+                headers['Accept'] = 'audio/mpeg,audio/*,*/*;q=0.9'
+                headers['Accept-Language'] = 'zh-CN,zh;q=0.9,en;q=0.8'
+                headers['Cache-Control'] = 'no-cache'
+                headers['Pragma'] = 'no-cache'
         
         response = requests.head(url, headers=headers, timeout=timeout)
         
@@ -132,6 +194,16 @@ def download_media_file(url: str, timeout: int = 30) -> str:
                 if 'oceancloudapi.com' in url or 'volccdn.com' in url or 'bytedance.com' in url:
                     headers['Referer'] = 'https://www.coze.cn/'
                     headers['Origin'] = 'https://www.coze.cn'
+                    
+                    # Special handling for Volcano TTS URLs
+                    if 'VolcanoUserVoice' in url or 'speech_' in url:
+                        headers['Accept'] = 'audio/mpeg,audio/*,*/*;q=0.9'
+                        headers['Accept-Language'] = 'zh-CN,zh;q=0.9,en;q=0.8'
+                        headers['Cache-Control'] = 'no-cache'
+                        headers['Pragma'] = 'no-cache'
+                        # Preserve all query parameters exactly as provided
+                        headers['Connection'] = 'keep-alive'
+                        
                 elif 'amazonaws.com' in url or 'cloudfront.net' in url:
                     headers['Referer'] = 'https://aws.amazon.com/'
                 elif 'googleapis.com' in url or 'gstatic.com' in url:
@@ -170,7 +242,10 @@ def download_media_file(url: str, timeout: int = 30) -> str:
         # Provide more specific error messages
         error_msg = str(e)
         if "403" in error_msg or "Forbidden" in error_msg:
-            raise Exception(f"Access denied to {url}. This may be a signed URL that requires specific authentication or has expired. Original error: {error_msg}")
+            if is_volcano_tts_url(url):
+                raise Exception(f"Access denied to Volcano TTS URL: {url}. This signed URL may have expired, require re-authentication, or need to be accessed from the original Coze session. Original error: {error_msg}")
+            else:
+                raise Exception(f"Access denied to {url}. This may be a signed URL that requires specific authentication or has expired. Original error: {error_msg}")
         elif "404" in error_msg or "Not Found" in error_msg:
             raise Exception(f"Media file not found at {url}. Please verify the URL is correct and accessible.")
         elif "timeout" in error_msg.lower():
@@ -260,6 +335,20 @@ def handler(args: Args) -> Output:
                 logger.info(f"Processing link {i+1}/{len(links)}: {url}")
             
             try:
+                # Special handling for Volcano TTS URLs
+                if is_volcano_tts_url(url):
+                    if logger:
+                        logger.info(f"Detected Volcano TTS URL, applying special handling")
+                    
+                    tts_info = handle_volcano_tts_url(url, logger)
+                    if not tts_info['success']:
+                        if logger:
+                            logger.warning(f"TTS URL validation failed: {tts_info.get('message', 'Unknown error')}")
+                        
+                        # For expired URLs, skip entirely
+                        if tts_info.get('error') == 'signed_url_expired':
+                            continue
+                
                 # First check URL accessibility for better error reporting
                 if logger:
                     logger.info(f"Checking accessibility of {url}")

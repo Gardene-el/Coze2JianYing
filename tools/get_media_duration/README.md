@@ -108,9 +108,17 @@ print(f"文件数量: {len(result.timelines)}")
 ### CDN 和云存储支持
 工具针对常见的 CDN 和云存储服务进行了优化：
 - **字节跳动 CDN** (oceancloudapi.com, volccdn.com): 自动添加 Coze 平台 referer
-- **AWS CloudFront**: 优化请求头配置
+- **火山引擎 TTS** (VolcanoUserVoice): 专门优化语音合成服务的签名 URL 处理
+- **AWS CloudFront**: 优化请求头配置  
 - **Google Cloud Storage**: 添加适当的 referer 策略
 - **多重策略**: 如果一种请求方式失败，会自动尝试其他策略
+
+### 火山引擎语音合成特殊处理
+对于 Coze 平台的语音合成插件生成的 URL，工具提供专门的处理：
+- **签名 URL 检测**: 自动识别火山引擎 TTS 服务的 URL
+- **过期检查**: 检测签名 URL 是否已过期
+- **特殊认证头**: 针对 TTS 服务优化的请求头配置
+- **详细错误信息**: 提供 TTS 特定的错误说明和解决建议
 
 ## 注意事项
 
@@ -155,6 +163,14 @@ Error processing [URL]: Access denied to [URL]. This may be a signed URL that re
 2. **缺少认证**: URL 需要特定的 referer 或 origin 头
 3. **防盗链保护**: 媒体服务启用了防盗链，只允许特定域名访问
 4. **会话过期**: 如果 URL 来自用户会话，可能需要重新登录
+
+**火山引擎 TTS 特殊情况：**
+```
+Access denied to Volcano TTS URL: [URL]. This signed URL may have expired, require re-authentication, or need to be accessed from the original Coze session.
+```
+- TTS 签名 URL 通常有较短的有效期（通常几小时）
+- 需要在生成 URL 后尽快使用
+- 如果 URL 来自 Coze 工作流，确保及时调用本工具
 
 #### 404 Not Found 错误
 ```
