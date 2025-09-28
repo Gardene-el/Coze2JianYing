@@ -16,7 +16,7 @@ from runtime import Args
 # Input/Output type definitions (required for each Coze tool)
 class Input(NamedTuple):
     """Input parameters for create_draft tool"""
-    project_name: str = "Coze剪映项目"
+    draft_name: str = "Coze剪映项目"
     width: int = 1920
     height: int = 1080
     fps: int = 30
@@ -130,7 +130,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
     timestamp = time.time()
     
     # Handle None values and provide defaults
-    project_name = getattr(input_data, 'project_name', None) or "Coze剪映项目"
+    draft_name = getattr(input_data, 'draft_name', None) or "Coze剪映项目"
     width = getattr(input_data, 'width', None) or 1920
     height = getattr(input_data, 'height', None) or 1080
     fps = getattr(input_data, 'fps', None) or 30
@@ -142,7 +142,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
     draft_config = {
         "draft_id": draft_id,
         "project": {
-            "name": project_name,
+            "name": draft_name,
             "width": width,
             "height": height,
             "fps": fps,
@@ -188,7 +188,7 @@ def handler(args: Args[Input]) -> Output:
             logger.info(f"Received parameters - width: {getattr(args.input, 'width', None)}, "
                        f"height: {getattr(args.input, 'height', None)}, "
                        f"fps: {getattr(args.input, 'fps', None)}, "
-                       f"project_name: {getattr(args.input, 'project_name', None)}")
+                       f"draft_name: {getattr(args.input, 'draft_name', None)}")
         
         # Validate input parameters
         is_valid, error_msg = validate_input_parameters(args.input)

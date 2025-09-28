@@ -432,7 +432,7 @@ class DraftConfig:
 @dataclass
 class CreateDraftInput:
     """Input for create_draft tool"""
-    project_name: str = "Coze剪映项目"
+    draft_name: str = "Coze剪映项目"
     width: int = 1920
     height: int = 1080
     fps: int = 30

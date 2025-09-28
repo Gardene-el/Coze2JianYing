@@ -30,7 +30,7 @@
 ### Input 类型定义
 ```python
 class Input(NamedTuple):
-    project_name: str = "Coze剪映项目"    # 项目名称
+    draft_name: str = "Coze剪映项目"    # 项目名称
     width: int = 1920                    # 视频宽度(像素)
     height: int = 1080                   # 视频高度(像素)
     fps: int = 30                        # 帧率
@@ -41,7 +41,7 @@ class Input(NamedTuple):
 
 ### 参数详细说明
 
-#### project_name (string)
+#### draft_name (string)
 - **描述**: 项目名称，用于标识草稿
 - **默认值**: "Coze剪映项目"
 - **约束**: 任意字符串，建议使用有意义的项目名称
@@ -110,7 +110,7 @@ class Output(NamedTuple):
 #### 使用默认参数创建草稿
 ```json
 {
-  "project_name": "我的第一个项目"
+  "draft_name": "我的第一个项目"
 }
 ```
 
@@ -126,7 +126,7 @@ class Output(NamedTuple):
 #### 创建4K高质量草稿
 ```json
 {
-  "project_name": "4K超清项目",
+  "draft_name": "4K超清项目",
   "width": 3840,
   "height": 2160,
   "fps": 60,
@@ -139,7 +139,7 @@ class Output(NamedTuple):
 #### 创建竖屏短视频草稿
 ```json
 {
-  "project_name": "抖音短视频",
+  "draft_name": "抖音短视频",
   "width": 1080,
   "height": 1920,
   "fps": 30,
@@ -155,7 +155,7 @@ class Output(NamedTuple):
 {
   "tool": "create_draft",
   "input": {
-    "project_name": "{{user_project_name}}",
+    "draft_name": "{{user_project_name}}",
     "width": 1920,
     "height": 1080,
     "fps": 30,

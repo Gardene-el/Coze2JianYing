@@ -27,7 +27,7 @@
 {
   "tool": "create_draft",
   "input": {
-    "project_name": "我的项目",
+    "draft_name": "我的项目",
     "width": 1920,
     "height": 1080,
     "fps": 30,
@@ -94,7 +94,7 @@
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `project_name` | string | "Coze剪映项目" | 项目名称 |
+| `draft_name` | string | "Coze剪映项目" | 项目名称 |
 | `width` | integer | 1920 | 视频宽度(像素) |
 | `height` | integer | 1080 | 视频高度(像素) |
 | `fps` | integer | 30 | 帧率 |
@@ -107,7 +107,7 @@
 **4K超清项目**:
 ```json
 {
-  "project_name": "4K宣传片",
+  "draft_name": "4K宣传片",
   "width": 3840,
   "height": 2160,
   "fps": 60,
@@ -119,7 +119,7 @@
 **移动端竖版视频**:
 ```json
 {
-  "project_name": "抖音短视频",
+  "draft_name": "抖音短视频",
   "width": 1080,
   "height": 1920,
   "fps": 30
@@ -129,7 +129,7 @@
 **教程录屏**:
 ```json
 {
-  "project_name": "操作教程",
+  "draft_name": "操作教程",
   "width": 1920,
   "height": 1080,
   "fps": 24,
@@ -331,7 +331,7 @@ A: 考虑分批导出或减少复杂的配置
       "name": "创建项目",
       "tool": "create_draft",
       "input": {
-        "project_name": "{{user.project_name}}",
+        "draft_name": "{{user.project_name}}",
         "width": 1920,
         "height": 1080
       },
