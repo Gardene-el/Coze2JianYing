@@ -265,16 +265,40 @@ def handler(args: Args) -> Output:
                     logger.info(f"Checking accessibility of {url}")
                 
                 access_info = check_media_url_accessibility(url)
+                
+                # Only skip for definitive failures, not authentication issues
+                should_skip = False
                 if not access_info['accessible']:
-                    error_detail = f"URL not accessible (status: {access_info.get('status_code', 'unknown')})"
-                    if 'error' in access_info:
-                        error_detail += f". Error: {access_info['error']}"
+                    status_code = access_info.get('status_code')
+                    error_msg = access_info.get('error', '')
                     
-                    if logger:
-                        logger.warning(f"Skipping {url}: {error_detail}")
+                    # Skip only for definitive failures
+                    if (status_code == 404 or 
+                        'NameResolutionError' in error_msg or 
+                        'Connection refused' in error_msg or
+                        'timeout' in error_msg.lower()):
+                        
+                        error_detail = f"URL not accessible (status: {status_code})"
+                        if 'error' in access_info:
+                            error_detail += f". Error: {access_info['error']}"
+                        
+                        if logger:
+                            logger.warning(f"Skipping {url}: {error_detail}")
+                        should_skip = True
+                    
+                    elif status_code == 403:
+                        # For 403 errors, log warning but continue with download attempt
+                        if logger:
+                            logger.warning(f"HEAD request returned 403 for {url}, will attempt download with enhanced headers")
+                    else:
+                        # For other errors, log but still attempt download
+                        if logger:
+                            logger.warning(f"Accessibility check failed for {url} (status: {status_code}), will attempt download")
+                
+                if should_skip:
                     continue
                 
-                if logger:
+                if access_info['accessible'] and logger:
                     content_type = access_info.get('content_type', 'unknown')
                     logger.info(f"URL accessible, content-type: {content_type}")
                 
