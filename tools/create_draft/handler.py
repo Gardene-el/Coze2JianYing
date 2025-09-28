@@ -60,29 +60,35 @@ def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
     Returns:
         Tuple of (is_valid, error_message)
     """
-    # Validate dimensions
-    if input_data.width <= 0 or input_data.height <= 0:
-        return False, f"Invalid dimensions: {input_data.width}x{input_data.height}"
+    # Validate dimensions (handle None values)
+    width = getattr(input_data, 'width', None) or 1920
+    height = getattr(input_data, 'height', None) or 1080
+    if width <= 0 or height <= 0:
+        return False, f"Invalid dimensions: {width}x{height}"
     
-    # Validate fps
-    if input_data.fps <= 0 or input_data.fps > 120:
-        return False, f"Invalid fps: {input_data.fps}"
+    # Validate fps (handle None values)
+    fps = getattr(input_data, 'fps', None) or 30
+    if fps <= 0 or fps > 120:
+        return False, f"Invalid fps: {fps}"
     
-    # Validate video quality
+    # Validate video quality (handle None values)
+    video_quality = getattr(input_data, 'video_quality', None) or "1080p"
     valid_video_qualities = [VideoQuality.SD_480P, VideoQuality.HD_720P, 
                            VideoQuality.FHD_1080P, VideoQuality.QHD_1440P, VideoQuality.UHD_4K]
-    if input_data.video_quality not in valid_video_qualities:
-        return False, f"Invalid video quality: {input_data.video_quality}"
+    if video_quality not in valid_video_qualities:
+        return False, f"Invalid video quality: {video_quality}"
     
-    # Validate audio quality
+    # Validate audio quality (handle None values)
+    audio_quality = getattr(input_data, 'audio_quality', None) or "320k"
     valid_audio_qualities = [AudioQuality.LOW_128K, AudioQuality.MEDIUM_192K, 
                            AudioQuality.HIGH_320K, AudioQuality.LOSSLESS]
-    if input_data.audio_quality not in valid_audio_qualities:
-        return False, f"Invalid audio quality: {input_data.audio_quality}"
+    if audio_quality not in valid_audio_qualities:
+        return False, f"Invalid audio quality: {audio_quality}"
     
-    # Validate background color (should be hex color)
-    if not input_data.background_color.startswith('#') or len(input_data.background_color) != 7:
-        return False, f"Invalid background color: {input_data.background_color}"
+    # Validate background color (handle None values)
+    background_color = getattr(input_data, 'background_color', None) or "#000000"
+    if not background_color.startswith('#') or len(background_color) != 7:
+        return False, f"Invalid background color: {background_color}"
     
     return True, ""
 
@@ -123,17 +129,26 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
     """
     timestamp = time.time()
     
+    # Handle None values and provide defaults
+    project_name = getattr(input_data, 'project_name', None) or "Coze剪映项目"
+    width = getattr(input_data, 'width', None) or 1920
+    height = getattr(input_data, 'height', None) or 1080
+    fps = getattr(input_data, 'fps', None) or 30
+    video_quality = getattr(input_data, 'video_quality', None) or "1080p"
+    audio_quality = getattr(input_data, 'audio_quality', None) or "320k"
+    background_color = getattr(input_data, 'background_color', None) or "#000000"
+    
     # Create initial draft configuration
     draft_config = {
         "draft_id": draft_id,
         "project": {
-            "name": input_data.project_name,
-            "width": input_data.width,
-            "height": input_data.height,
-            "fps": input_data.fps,
-            "video_quality": input_data.video_quality,
-            "audio_quality": input_data.audio_quality,
-            "background_color": input_data.background_color
+            "name": project_name,
+            "width": width,
+            "height": height,
+            "fps": fps,
+            "video_quality": video_quality,
+            "audio_quality": audio_quality,
+            "background_color": background_color
         },
         "media_resources": [],
         "tracks": [],
@@ -168,6 +183,13 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Creating new draft with parameters: {args.input}")
     
     try:
+        # Log the actual received parameters for debugging
+        if logger:
+            logger.info(f"Received parameters - width: {getattr(args.input, 'width', None)}, "
+                       f"height: {getattr(args.input, 'height', None)}, "
+                       f"fps: {getattr(args.input, 'fps', None)}, "
+                       f"project_name: {getattr(args.input, 'project_name', None)}")
+        
         # Validate input parameters
         is_valid, error_msg = validate_input_parameters(args.input)
         if not is_valid:
@@ -226,6 +248,9 @@ def handler(args: Args[Input]) -> Output:
         error_msg = f"Unexpected error in create_draft handler: {str(e)}"
         if logger:
             logger.error(error_msg)
+            logger.error(f"Exception type: {type(e).__name__}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
         
         return Output(
             draft_id="",
