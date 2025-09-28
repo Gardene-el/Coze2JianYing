@@ -103,6 +103,14 @@ print(f"文件数量: {len(result.timelines)}")
 - **下载失败**: 网络错误或文件不存在时跳过该文件
 - **格式不支持**: 不支持的媒体格式将被跳过
 - **分析失败**: 无法获取时长的文件将被跳过
+- **访问权限**: 处理 403 Forbidden 错误，可能因为签名 URL 过期或需要特定认证
+
+### CDN 和云存储支持
+工具针对常见的 CDN 和云存储服务进行了优化：
+- **字节跳动 CDN** (oceancloudapi.com, volccdn.com): 自动添加 Coze 平台 referer
+- **AWS CloudFront**: 优化请求头配置
+- **Google Cloud Storage**: 添加适当的 referer 策略
+- **多重策略**: 如果一种请求方式失败，会自动尝试其他策略
 
 ## 注意事项
 
@@ -130,9 +138,43 @@ print(f"文件数量: {len(result.timelines)}")
 
 ### 调试信息
 工具会通过 `args.logger` 输出详细的处理日志：
-- 文件下载进度
+- URL 可访问性检查结果
+- 文件下载进度和策略
 - 时长分析结果
 - 错误信息详情
+
+### 常见问题解决
+
+#### 403 Forbidden 错误
+```
+Error processing [URL]: Access denied to [URL]. This may be a signed URL that requires specific authentication or has expired.
+```
+
+**可能原因和解决方案：**
+1. **签名 URL 过期**: 重新生成 URL 或检查过期时间
+2. **缺少认证**: URL 需要特定的 referer 或 origin 头
+3. **防盗链保护**: 媒体服务启用了防盗链，只允许特定域名访问
+4. **会话过期**: 如果 URL 来自用户会话，可能需要重新登录
+
+#### 404 Not Found 错误
+```
+Media file not found at [URL]. Please verify the URL is correct and accessible.
+```
+
+**解决方案：**
+- 检查 URL 是否正确
+- 确认文件是否仍然存在于服务器上
+- 验证 URL 中的路径和参数
+
+#### 超时错误
+```
+Download timeout for [URL]. The file may be too large or the server is slow to respond.
+```
+
+**解决方案：**
+- 检查网络连接
+- 文件可能过大（建议 < 100MB）
+- 服务器响应慢，可以重试
 
 ## 扩展说明
 此工具是 CozeJianYingAssistent 项目的一部分，专门为 Coze 平台的剪映草稿生成工作流设计。时长信息将用于后续的视频编辑和时间轴规划。
