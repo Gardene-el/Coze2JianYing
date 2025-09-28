@@ -18,40 +18,8 @@ try:
 except ImportError:
     MediaInfo = None
 
-# Coze runtime imports (these would be provided by Coze platform)
-try:
-    from runtime import Args
-    from typings.get_media_duration.get_media_duration import Input, Output
-except ImportError:
-    # Fallback for local development/testing - use shared data models
-    import sys
-    import os
-    # Add project root to path for accessing data structures
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    sys.path.insert(0, project_root)
-    
-    try:
-        from data_structures.media_models.models import (
-            MediaProcessingInput as Input, 
-            MediaProcessingOutput as Output,
-            MediaDurationResult,
-            validate_media_url as validate_url_shared
-        )
-    except ImportError:
-        # Final fallback if data structures not available
-        from typing import NamedTuple
-        
-        class Input(NamedTuple):
-            links: List[str]
-        
-        class Output(NamedTuple):
-            all_timelines: List[Dict[str, int]]
-            timelines: List[Dict[str, int]]
-    
-    class Args:
-        def __init__(self, input_data: Input):
-            self.input = input_data
-            self.logger = None
+from runtime import Args
+from typings.get_media_duration.get_media_duration import Input, Output
 
 
 def validate_url(url: str) -> bool:
@@ -208,46 +176,36 @@ def handler(args: Args) -> Output:
                 # For failed files, we'll skip them rather than fail entirely
                 continue
         
-        # Calculate timelines using shared data model if available
+        # Calculate timelines
         if not durations:
             return Output(
                 all_timelines=[],
                 timelines=[]
             )
         
-        try:
-            # Try to use shared MediaDurationResult for better calculation
-            result_data = MediaDurationResult.from_durations(durations)
-            return Output(
-                all_timelines=result_data.all_timelines,
-                timelines=result_data.timelines
-            )
-        except NameError:
-            # Fallback to manual calculation if MediaDurationResult not available
-            timelines = []
-            current_start = 0
-            
-            for duration in durations:
-                timeline = {
-                    "start": current_start,
-                    "end": current_start + duration
-                }
-                timelines.append(timeline)
-                current_start += duration
-            
-            # Total timeline
-            total_duration = sum(durations)
-            all_timelines = [{"start": 0, "end": total_duration}]
-            
-            return Output(
-                all_timelines=all_timelines,
-                timelines=timelines
-            )
+        # Calculate cumulative timelines
+        timelines = []
+        current_start = 0
+        
+        for duration in durations:
+            timeline = {
+                "start": current_start,
+                "end": current_start + duration
+            }
+            timelines.append(timeline)
+            current_start += duration
+        
+        # Total timeline
+        total_duration = sum(durations)
+        all_timelines = [{"start": 0, "end": total_duration}]
         
         if logger:
-            logger.info(f"Generated {len(durations)} individual timelines, total duration: {sum(durations)}ms")
+            logger.info(f"Generated {len(timelines)} individual timelines, total duration: {total_duration}ms")
         
-        # The return statement is now inside the try block above
+        return Output(
+            all_timelines=all_timelines,
+            timelines=timelines
+        )
         
     except Exception as e:
         error_msg = f"Unexpected error in handler: {str(e)}"
@@ -265,19 +223,3 @@ def handler(args: Args) -> Output:
         for temp_file in temp_files:
             cleanup_temp_file(temp_file)
 
-
-# For local testing
-if __name__ == "__main__":
-    # Test data
-    test_input = Input(links=[
-        "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
-    ])
-    
-    test_args = Args(test_input)
-    result = handler(test_args)
-    
-    print("Test Result:")
-    print(json.dumps({
-        "all_timelines": result.all_timelines,
-        "timelines": result.timelines
-    }, indent=2))

@@ -4,37 +4,26 @@ Example usage of the get_media_duration Coze plugin tool
 
 This example demonstrates how to use the media duration tool in different scenarios
 that would be encountered in Coze workflows.
+
+Note: This example shows the expected input/output format and usage patterns.
+Actual usage requires the Coze platform runtime environment.
 """
 
-import sys
-import os
 import json
-
-# Add project root to path
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(project_root, 'tools', 'get_media_duration'))
-sys.path.insert(0, project_root)
-
-from handler import handler, Input, Args
-from data_structures.media_models.models import format_duration
 
 
 def example_single_video():
     """Example: Processing a single video file"""
     print("=== Example 1: Single Video ===")
     
-    test_input = Input(links=[
-        "https://example.com/my-video.mp4"
-    ])
+    input_data = {
+        "links": [
+            "https://example.com/my-video.mp4"
+        ]
+    }
     
-    # This would be provided by Coze runtime
-    args = Args(test_input)
-    
-    # Mock the duration for demo (in real usage, this would download and analyze)
     print("Input:")
-    print(json.dumps({
-        "links": test_input.links
-    }, indent=2))
+    print(json.dumps(input_data, indent=2))
     
     # For demo, we'll show expected output format
     expected_output = {
@@ -44,23 +33,23 @@ def example_single_video():
     
     print("\nExpected Output:")
     print(json.dumps(expected_output, indent=2))
-    print(f"Duration: {format_duration(30000)}")
+    print(f"Duration: 30.0s")
 
 
 def example_multiple_videos():
     """Example: Processing multiple video files for a complete timeline"""
     print("\n=== Example 2: Multiple Videos ===")
     
-    test_input = Input(links=[
-        "https://example.com/intro.mp4",
-        "https://example.com/main-content.mp4", 
-        "https://example.com/outro.mp4"
-    ])
+    input_data = {
+        "links": [
+            "https://example.com/intro.mp4",
+            "https://example.com/main-content.mp4", 
+            "https://example.com/outro.mp4"
+        ]
+    }
     
     print("Input:")
-    print(json.dumps({
-        "links": test_input.links
-    }, indent=2))
+    print(json.dumps(input_data, indent=2))
     
     # Mock durations: 5s intro, 120s main, 10s outro
     mock_durations = [5000, 120000, 10000]
@@ -77,31 +66,38 @@ def example_multiple_videos():
     print(json.dumps(expected_output, indent=2))
     
     print("\nTimeline Breakdown:")
-    for i, (timeline, duration) in enumerate(zip(expected_output["timelines"], mock_durations)):
-        print(f"  Video {i+1}: {format_duration(timeline['start'])} - {format_duration(timeline['end'])} "
-              f"(duration: {format_duration(duration)})")
+    media_info = [
+        ("Video 1", 5000, "5.0s"),
+        ("Video 2", 120000, "2m 0.0s"), 
+        ("Video 3", 10000, "10.0s")
+    ]
+    
+    for i, (timeline, (name, duration, duration_str)) in enumerate(zip(expected_output["timelines"], media_info)):
+        start_str = f"{timeline['start']/1000:.1f}s" if timeline['start'] < 60000 else f"{timeline['start']//60000}m {(timeline['start']%60000)/1000:.1f}s"
+        end_str = f"{timeline['end']/1000:.1f}s" if timeline['end'] < 60000 else f"{timeline['end']//60000}m {(timeline['end']%60000)/1000:.1f}s"
+        print(f"  {name}: {start_str} - {end_str} (duration: {duration_str})")
     
     total_duration = expected_output["all_timelines"][0]["end"]
-    print(f"  Total: {format_duration(total_duration)}")
+    total_str = f"{total_duration//60000}m {(total_duration%60000)/1000:.1f}s"
+    print(f"  Total: {total_str}")
 
 
 def example_mixed_media():
     """Example: Processing mixed audio and video files"""
     print("\n=== Example 3: Mixed Media ===")
     
-    test_input = Input(links=[
-        "https://example.com/background-music.mp3",
-        "https://example.com/narration.wav",
-        "https://example.com/video-clip.mp4"
-    ])
+    input_data = {
+        "links": [
+            "https://example.com/background-music.mp3",
+            "https://example.com/narration.wav",
+            "https://example.com/video-clip.mp4"
+        ]
+    }
     
     print("Input:")
-    print(json.dumps({
-        "links": test_input.links
-    }, indent=2))
+    print(json.dumps(input_data, indent=2))
     
     # Mock durations: 180s music, 90s narration, 60s video
-    mock_durations = [180000, 90000, 60000]
     expected_output = {
         "all_timelines": [{"start": 0, "end": 330000}],
         "timelines": [
@@ -116,26 +112,29 @@ def example_mixed_media():
     
     print("\nMedia Breakdown:")
     media_types = ["Background Music", "Narration", "Video Clip"]
-    for i, (timeline, duration, media_type) in enumerate(zip(expected_output["timelines"], mock_durations, media_types)):
-        print(f"  {media_type}: {format_duration(timeline['start'])} - {format_duration(timeline['end'])} "
-              f"(duration: {format_duration(duration)})")
+    durations = ["3m 0.0s", "1m 30.0s", "1m 0.0s"]
+    
+    for i, (timeline, media_type, duration_str) in enumerate(zip(expected_output["timelines"], media_types, durations)):
+        start_str = f"{timeline['start']//60000}m {(timeline['start']%60000)/1000:.1f}s" if timeline['start'] >= 60000 else f"{timeline['start']/1000:.1f}s"
+        end_str = f"{timeline['end']//60000}m {(timeline['end']%60000)/1000:.1f}s"
+        print(f"  {media_type}: {start_str} - {end_str} (duration: {duration_str})")
 
 
 def example_error_handling():
     """Example: How the tool handles errors"""
     print("\n=== Example 4: Error Handling ===")
     
-    test_input = Input(links=[
-        "https://example.com/valid-video.mp4",
-        "invalid-url",  # Invalid URL
-        "https://example.com/missing-file.mp4",  # File doesn't exist
-        "https://example.com/another-valid.mp3"
-    ])
+    input_data = {
+        "links": [
+            "https://example.com/valid-video.mp4",
+            "invalid-url",  # Invalid URL
+            "https://example.com/missing-file.mp4",  # File doesn't exist
+            "https://example.com/another-valid.mp3"
+        ]
+    }
     
     print("Input (with some invalid URLs):")
-    print(json.dumps({
-        "links": test_input.links
-    }, indent=2))
+    print(json.dumps(input_data, indent=2))
     
     # In real usage, invalid files would be skipped
     # Only valid files contribute to timeline
