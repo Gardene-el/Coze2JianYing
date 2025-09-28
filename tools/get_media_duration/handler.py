@@ -23,15 +23,30 @@ try:
     from runtime import Args
     from typings.get_media_duration.get_media_duration import Input, Output
 except ImportError:
-    # Fallback for local development/testing
-    from typing import NamedTuple
+    # Fallback for local development/testing - use shared data models
+    import sys
+    import os
+    # Add project root to path for accessing data structures
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.insert(0, project_root)
     
-    class Input(NamedTuple):
-        links: List[str]
-    
-    class Output(NamedTuple):
-        all_timelines: List[Dict[str, int]]
-        timelines: List[Dict[str, int]]
+    try:
+        from data_structures.media_models.models import (
+            MediaProcessingInput as Input, 
+            MediaProcessingOutput as Output,
+            MediaDurationResult,
+            validate_media_url as validate_url_shared
+        )
+    except ImportError:
+        # Final fallback if data structures not available
+        from typing import NamedTuple
+        
+        class Input(NamedTuple):
+            links: List[str]
+        
+        class Output(NamedTuple):
+            all_timelines: List[Dict[str, int]]
+            timelines: List[Dict[str, int]]
     
     class Args:
         def __init__(self, input_data: Input):
@@ -193,36 +208,46 @@ def handler(args: Args) -> Output:
                 # For failed files, we'll skip them rather than fail entirely
                 continue
         
-        # Calculate timelines
+        # Calculate timelines using shared data model if available
         if not durations:
             return Output(
                 all_timelines=[],
                 timelines=[]
             )
         
-        # Calculate cumulative timelines
-        timelines = []
-        current_start = 0
-        
-        for duration in durations:
-            timeline = {
-                "start": current_start,
-                "end": current_start + duration
-            }
-            timelines.append(timeline)
-            current_start += duration
-        
-        # Total timeline
-        total_duration = sum(durations)
-        all_timelines = [{"start": 0, "end": total_duration}]
+        try:
+            # Try to use shared MediaDurationResult for better calculation
+            result_data = MediaDurationResult.from_durations(durations)
+            return Output(
+                all_timelines=result_data.all_timelines,
+                timelines=result_data.timelines
+            )
+        except NameError:
+            # Fallback to manual calculation if MediaDurationResult not available
+            timelines = []
+            current_start = 0
+            
+            for duration in durations:
+                timeline = {
+                    "start": current_start,
+                    "end": current_start + duration
+                }
+                timelines.append(timeline)
+                current_start += duration
+            
+            # Total timeline
+            total_duration = sum(durations)
+            all_timelines = [{"start": 0, "end": total_duration}]
+            
+            return Output(
+                all_timelines=all_timelines,
+                timelines=timelines
+            )
         
         if logger:
-            logger.info(f"Generated {len(timelines)} individual timelines, total duration: {total_duration}ms")
+            logger.info(f"Generated {len(durations)} individual timelines, total duration: {sum(durations)}ms")
         
-        return Output(
-            all_timelines=all_timelines,
-            timelines=timelines
-        )
+        # The return statement is now inside the try block above
         
     except Exception as e:
         error_msg = f"Unexpected error in handler: {str(e)}"
