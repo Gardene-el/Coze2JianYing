@@ -95,7 +95,7 @@ def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
 
 def create_draft_folder(draft_id: str) -> str:
     """
-    Create draft folder in /tmp directory
+    Create draft folder in /tmp/jianying_assistant/drafts/ directory
     
     Args:
         draft_id: UUID string for the draft
@@ -106,9 +106,12 @@ def create_draft_folder(draft_id: str) -> str:
     Raises:
         Exception: If folder creation fails
     """
-    draft_folder = os.path.join("/tmp", draft_id)
+    # Create the base directory structure
+    base_dir = os.path.join("/tmp", "jianying_assistant", "drafts")
+    draft_folder = os.path.join(base_dir, draft_id)
     
     try:
+        # Create the full directory structure including parents
         os.makedirs(draft_folder, exist_ok=True)
         return draft_folder
     except Exception as e:

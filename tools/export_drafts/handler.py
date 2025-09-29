@@ -15,8 +15,9 @@ from runtime import Args
 # Input/Output type definitions (required for each Coze tool)
 class Input(NamedTuple):
     """Input parameters for export_drafts tool"""
-    draft_ids: Union[str, List[str]]  # Single UUID string or list of UUIDs
+    draft_ids: Union[str, List[str], None] = None  # Single UUID string, list of UUIDs, or None for export_all
     remove_temp_files: bool = False   # Whether to remove temp files after export
+    export_all: bool = False          # Whether to export all drafts in the directory
 
 
 class Output(NamedTuple):
@@ -45,17 +46,19 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def normalize_draft_ids(draft_ids: Union[str, List[str]]) -> List[str]:
+def normalize_draft_ids(draft_ids: Union[str, List[str], None]) -> List[str]:
     """
     Normalize draft_ids input to list format
     
     Args:
-        draft_ids: Single UUID string or list of UUIDs
+        draft_ids: Single UUID string, list of UUIDs, or None
         
     Returns:
         List of UUID strings
     """
-    if isinstance(draft_ids, str):
+    if draft_ids is None:
+        return []
+    elif isinstance(draft_ids, str):
         return [draft_ids]
     elif isinstance(draft_ids, list):
         return draft_ids
@@ -73,7 +76,7 @@ def load_draft_config(draft_id: str) -> tuple[bool, dict, str]:
     Returns:
         Tuple of (success, config_dict, error_message)
     """
-    draft_folder = os.path.join("/tmp", draft_id)
+    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
     # Check if draft folder exists
@@ -124,9 +127,39 @@ def create_draft_generator_data(draft_configs: List[dict]) -> dict:
         }
 
 
+def discover_all_drafts() -> List[str]:
+    """
+    Discover all draft IDs in the drafts directory
+    
+    Returns:
+        List of draft UUID strings found in the directory
+    """
+    drafts_dir = os.path.join("/tmp", "jianying_assistant", "drafts")
+    
+    if not os.path.exists(drafts_dir):
+        return []
+    
+    draft_ids = []
+    try:
+        # List all directories in the drafts folder
+        for item in os.listdir(drafts_dir):
+            item_path = os.path.join(drafts_dir, item)
+            # Check if it's a directory and has a valid UUID format
+            if os.path.isdir(item_path) and validate_uuid_format(item):
+                # Check if it has a draft_config.json file
+                config_file = os.path.join(item_path, "draft_config.json")
+                if os.path.exists(config_file):
+                    draft_ids.append(item)
+    except Exception:
+        # Return empty list if there's any error accessing the directory
+        return []
+    
+    return draft_ids
+
+
 def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
     """
-    Remove draft files from /tmp directory
+    Remove draft files from /tmp/jianying_assistant/drafts/ directory
     
     Args:
         draft_id: UUID string for the draft
@@ -134,7 +167,7 @@ def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
     Returns:
         Tuple of (success, error_message)
     """
-    draft_folder = os.path.join("/tmp", draft_id)
+    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     
     if not os.path.exists(draft_folder):
         return True, ""  # Already doesn't exist
@@ -162,34 +195,49 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Exporting drafts with parameters: {args.input}")
     
     try:
-        # Normalize and validate input
-        draft_ids = normalize_draft_ids(args.input.draft_ids)
+        # Handle export_all mode
+        export_all = getattr(args.input, 'export_all', None) or False
+        
+        if export_all:
+            # Discover all drafts in the directory
+            draft_ids = discover_all_drafts()
+            if logger:
+                logger.info(f"Export all mode: discovered {len(draft_ids)} drafts")
+        else:
+            # Normalize and validate input
+            draft_ids = normalize_draft_ids(args.input.draft_ids)
         
         if not draft_ids:
+            if export_all:
+                message = "未找到任何草稿文件"
+            else:
+                message = "未提供草稿ID"
+            
             if logger:
-                logger.error("No draft IDs provided")
+                logger.error(message)
             return Output(
                 draft_data="",
                 exported_count=0,
                 success=False,
-                message="未提供草稿ID"
+                message=message
             )
         
-        # Validate UUID formats
-        invalid_uuids = []
-        for draft_id in draft_ids:
-            if not validate_uuid_format(draft_id):
-                invalid_uuids.append(draft_id)
-        
-        if invalid_uuids:
-            if logger:
-                logger.error(f"Invalid UUID formats: {invalid_uuids}")
-            return Output(
-                draft_data="",
-                exported_count=0,
-                success=False,
-                message=f"无效的UUID格式: {', '.join(invalid_uuids)}"
-            )
+        # Validate UUID formats (only if not from export_all discovery)
+        if not export_all:
+            invalid_uuids = []
+            for draft_id in draft_ids:
+                if not validate_uuid_format(draft_id):
+                    invalid_uuids.append(draft_id)
+            
+            if invalid_uuids:
+                if logger:
+                    logger.error(f"Invalid UUID formats: {invalid_uuids}")
+                return Output(
+                    draft_data="",
+                    exported_count=0,
+                    success=False,
+                    message=f"无效的UUID格式: {', '.join(invalid_uuids)}"
+                )
         
         if logger:
             logger.info(f"Processing {len(draft_ids)} draft(s): {draft_ids}")

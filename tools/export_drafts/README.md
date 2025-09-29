@@ -30,23 +30,31 @@
 ### Input 类型定义
 ```python
 class Input(NamedTuple):
-    draft_ids: Union[str, List[str]]  # 单个UUID或UUID列表
+    draft_ids: Union[str, List[str], None] = None  # 单个UUID、UUID列表，或None（用于export_all）
     remove_temp_files: bool = False   # 是否删除临时文件
+    export_all: bool = False          # 是否导出所有草稿
 ```
 
 ### 参数详细说明
 
-#### draft_ids (string | array)
+#### draft_ids (string | array | null)
 - **描述**: 要导出的草稿ID，可以是单个UUID字符串或UUID字符串数组
 - **单个草稿**: `"123e4567-e89b-12d3-a456-426614174000"`
 - **多个草稿**: `["uuid1", "uuid2", "uuid3"]`
-- **约束**: 必须是有效的UUID格式
+- **导出所有**: `null` (当export_all=true时)
+- **约束**: 必须是有效的UUID格式，或在export_all模式下为null
 
 #### remove_temp_files (boolean)
-- **描述**: 是否在导出成功后删除`/tmp`中的临时文件
+- **描述**: 是否在导出成功后删除`/tmp/jianying_assistant/drafts/`中的临时文件
 - **默认值**: `false`
 - **true**: 导出后删除对应的草稿文件夹
 - **false**: 保留临时文件，便于后续操作
+
+#### export_all (boolean)
+- **描述**: 是否导出目录中的所有草稿
+- **默认值**: `false`
+- **true**: 自动发现并导出所有草稿，忽略draft_ids参数
+- **false**: 按draft_ids指定的草稿进行导出
 
 ## 输出结果
 
@@ -114,7 +122,7 @@ class Output(NamedTuple):
 
 ### 批量草稿导出
 
-#### 导出多个草稿
+#### 导出多个指定草稿
 ```json
 {
   "draft_ids": [
@@ -122,7 +130,8 @@ class Output(NamedTuple):
     "234f5678-f90c-23e4-b567-537725285111",
     "345a6789-a01d-34f5-c678-648836396222"
   ],
-  "remove_temp_files": true
+  "remove_temp_files": true,
+  "export_all": false
 }
 ```
 
@@ -135,6 +144,31 @@ class Output(NamedTuple):
   "message": "成功导出 3 个草稿; 临时文件已清理"
 }
 ```
+
+#### 导出所有草稿（export_all模式）
+```json
+{
+  "draft_ids": null,
+  "remove_temp_files": false,
+  "export_all": true
+}
+```
+
+**预期输出**:
+```json
+{
+  "draft_data": "{\"format_version\":\"1.0\",\"export_type\":\"batch_draft\",\"draft_count\":5,\"drafts\":[...]}",
+  "exported_count": 5,
+  "success": true,
+  "message": "成功导出 5 个草稿"
+}
+```
+
+**export_all模式特点**:
+- 自动发现`/tmp/jianying_assistant/drafts/`目录中的所有有效草稿
+- 无需指定具体的draft_ids
+- 适合批量处理和清理场景
+- 只导出包含有效配置文件的草稿
 
 ### 在Coze工作流中的使用
 
@@ -156,9 +190,23 @@ class Output(NamedTuple):
   "tool": "export_drafts",
   "input": {
     "draft_ids": ["{{draft1.draft_id}}", "{{draft2.draft_id}}", "{{draft3.draft_id}}"],
-    "remove_temp_files": false
+    "remove_temp_files": false,
+    "export_all": false
   },
   "output_variable": "batch_exported_drafts"
+}
+```
+
+#### 导出所有草稿（适合清理场景）
+```json
+{
+  "tool": "export_drafts",
+  "input": {
+    "draft_ids": null,
+    "remove_temp_files": true,
+    "export_all": true
+  },
+  "output_variable": "all_exported_drafts"
 }
 ```
 
