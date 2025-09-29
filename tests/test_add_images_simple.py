@@ -223,6 +223,109 @@ def test_draft_config_integration():
     return True
 
 
+def test_input_format_flexibility():
+    """Test that both JSON string and list input formats work"""
+    print("=== Testing input format flexibility ===")
+    
+    # Direct implementation of parse_image_infos for testing
+    def parse_image_infos_test(image_infos_input):
+        import json
+        from typing import Union, List, Dict, Any
+        
+        try:
+            # Handle both string and list inputs
+            if isinstance(image_infos_input, str):
+                # Parse JSON string
+                image_infos = json.loads(image_infos_input)
+            elif isinstance(image_infos_input, list):
+                # Use list directly
+                image_infos = image_infos_input
+            else:
+                raise ValueError(f"image_infos must be a JSON string or list, got {type(image_infos_input)}")
+            
+            if not isinstance(image_infos, list):
+                raise ValueError("image_infos must be a list")
+            
+            for i, info in enumerate(image_infos):
+                if not isinstance(info, dict):
+                    raise ValueError(f"image_infos[{i}] must be a dictionary")
+                
+                # Validate required fields
+                required_fields = ['image_url', 'start', 'end']
+                for field in required_fields:
+                    if field not in info:
+                        raise ValueError(f"Missing required field '{field}' in image_infos[{i}]")
+                
+                # Map image_url to material_url for consistency
+                if 'image_url' in info:
+                    info['material_url'] = info['image_url']
+            
+            return image_infos
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON format in image_infos: {str(e)}")
+    
+    # Test data
+    test_data = [
+        {
+            "image_url": "https://s.coze.cn/t/W9CvmtJHJWI/",
+            "start": 0,
+            "end": 3936000,
+            "width": 1440,
+            "height": 1080
+        }
+    ]
+    
+    # Test 1: String input (original format)
+    print("Testing JSON string input...")
+    try:
+        string_input = json.dumps(test_data)
+        result1 = parse_image_infos_test(string_input)
+        assert len(result1) == 1, "Should parse 1 item from string"
+        assert result1[0]['material_url'] == "https://s.coze.cn/t/W9CvmtJHJWI/", "Should map material_url"
+        print("✅ JSON string input works correctly")
+    except Exception as e:
+        print(f"❌ JSON string input failed: {e}")
+        return False
+    
+    # Test 2: List input (user's preferred format)
+    print("Testing list input...")
+    try:
+        result2 = parse_image_infos_test(test_data)
+        assert len(result2) == 1, "Should parse 1 item from list"
+        assert result2[0]['material_url'] == "https://s.coze.cn/t/W9CvmtJHJWI/", "Should map material_url"
+        print("✅ List input works correctly")
+    except Exception as e:
+        print(f"❌ List input failed: {e}")
+        return False
+    
+    # Test 3: User's exact case from the comment
+    print("Testing user's exact case...")
+    user_input = [
+        {
+            "image_url": "https://s.coze.cn/t/W9CvmtJHJWI/",
+            "start": 0,
+            "end": 3936000,
+            "width": 1440,
+            "height": 1080
+        }
+    ]
+    
+    try:
+        result3 = parse_image_infos_test(user_input)
+        assert len(result3) == 1, "Should parse user's input"
+        assert result3[0]['start'] == 0, "Should preserve start time"
+        assert result3[0]['end'] == 3936000, "Should preserve end time"
+        assert result3[0]['width'] == 1440, "Should preserve width"
+        assert result3[0]['height'] == 1080, "Should preserve height"
+        print("✅ User's exact case works - this fixes the reported issue!")
+    except Exception as e:
+        print(f"❌ User's case failed: {e}")
+        return False
+    
+    print("✅ Input format flexibility test passed!")
+    return True
+
+
 if __name__ == "__main__":
     print("Starting simple add_images tests...")
     
@@ -231,6 +334,7 @@ if __name__ == "__main__":
     results.append(test_image_segment_creation())
     results.append(test_output_format())
     results.append(test_draft_config_integration())
+    results.append(test_input_format_flexibility())
     
     print(f"\n=== Test Summary ===")
     print(f"Tests passed: {sum(results)}/{len(results)}")

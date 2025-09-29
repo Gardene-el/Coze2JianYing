@@ -8,7 +8,7 @@ Each call creates a new track containing all the specified images.
 import os
 import json
 import uuid
-from typing import NamedTuple, List, Dict, Any, Optional
+from typing import NamedTuple, List, Dict, Any, Optional, Union
 from runtime import Args
 
 
@@ -16,7 +16,7 @@ from runtime import Args
 class Input(NamedTuple):
     """Input parameters for add_images tool"""
     draft_id: str                # UUID of the existing draft
-    image_infos: str             # JSON string containing image information
+    image_infos: Union[str, List[Dict[str, Any]]]  # JSON string or list containing image information
 
 
 class Output(NamedTuple):
@@ -97,10 +97,19 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def parse_image_infos(image_infos_str: str) -> List[Dict[str, Any]]:
-    """Parse image_infos JSON string and validate format"""
+def parse_image_infos(image_infos_input: Union[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    """Parse image_infos JSON string or list and validate format"""
     try:
-        image_infos = json.loads(image_infos_str)
+        # Handle both string and list inputs
+        if isinstance(image_infos_input, str):
+            # Parse JSON string
+            image_infos = json.loads(image_infos_input)
+        elif isinstance(image_infos_input, list):
+            # Use list directly
+            image_infos = image_infos_input
+        else:
+            raise ValueError(f"image_infos must be a JSON string or list, got {type(image_infos_input)}")
+        
         if not isinstance(image_infos, list):
             raise ValueError("image_infos must be a list")
         

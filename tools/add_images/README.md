@@ -10,12 +10,20 @@
 
 ```python
 class Input(NamedTuple):
-    draft_id: str        # 现有草稿的UUID
-    image_infos: str     # 图片信息的JSON字符串
+    draft_id: str                              # 现有草稿的UUID
+    image_infos: Union[str, List[Dict]]        # 图片信息：JSON字符串或数组
 ```
 
-### image_infos JSON 格式
+### image_infos 输入格式
 
+支持两种输入格式：
+
+#### 格式1：JSON 字符串
+```json
+"[{\"image_url\":\"https://s.coze.cn/t/W9CvmtJHJWI/\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080}]"
+```
+
+#### 格式2：数组对象（推荐）
 ```json
 [
   {
@@ -89,14 +97,22 @@ class Output(NamedTuple):
 
 ### 基本用法
 
+#### 方法1：使用数组格式（推荐）
+
 ```python
 from tools.add_images.handler import handler, Input
 from runtime import Args
 
-# 创建输入参数
+# 创建输入参数（数组格式）
 input_data = Input(
     draft_id="d5eaa880-ae11-441c-ae7e-1872d95d108f",
-    image_infos='[{"image_url":"https://s.coze.cn/t/W9CvmtJHJWI/","start":0,"end":3936000,"width":1440,"height":1080}]'
+    image_infos=[{
+        "image_url": "https://s.coze.cn/t/W9CvmtJHJWI/",
+        "start": 0,
+        "end": 3936000,
+        "width": 1440,
+        "height": 1080
+    }]
 )
 
 # 模拟Args对象
@@ -112,8 +128,43 @@ print(f"片段数量: {len(result.segment_ids)}")
 print(f"片段ID: {result.segment_ids}")
 ```
 
+#### 方法2：使用JSON字符串格式
+
+```python
+# 创建输入参数（JSON字符串格式）
+input_data = Input(
+    draft_id="d5eaa880-ae11-441c-ae7e-1872d95d108f",
+    image_infos='[{"image_url":"https://s.coze.cn/t/W9CvmtJHJWI/","start":0,"end":3936000,"width":1440,"height":1080}]'
+)
+```
+
 ### 复杂参数示例
 
+#### 数组格式：
+```json
+{
+    "draft_id": "d5eaa880-ae11-441c-ae7e-1872d95d108f",
+    "image_infos": [
+        {
+            "image_url": "https://s.coze.cn/t/W9CvmtJHJWI/",
+            "start": 0,
+            "end": 3936000,
+            "width": 1440,
+            "height": 1080,
+            "in_animation": "轻微放大",
+            "in_animation_duration": 100000,
+            "position_x": 0.1,
+            "position_y": 0.1,
+            "scale_x": 1.2,
+            "scale_y": 1.2,
+            "filter_type": "暖冬",
+            "filter_intensity": 0.8
+        }
+    ]
+}
+```
+
+#### JSON字符串格式：
 ```json
 {
     "draft_id": "d5eaa880-ae11-441c-ae7e-1872d95d108f",
