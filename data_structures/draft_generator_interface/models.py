@@ -141,6 +141,55 @@ class AudioSegmentConfig:
 
 
 @dataclass
+class ImageSegmentConfig:
+    """Configuration for an image segment"""
+    material_url: str
+    time_range: TimeRange
+    
+    # Transform properties
+    position_x: float = 0.0
+    position_y: float = 0.0
+    scale_x: float = 1.0
+    scale_y: float = 1.0
+    rotation: float = 0.0
+    opacity: float = 1.0
+    
+    # Image dimensions (original or desired)
+    width: Optional[int] = None
+    height: Optional[int] = None
+    
+    # Crop settings
+    crop_enabled: bool = False
+    crop_left: float = 0.0
+    crop_top: float = 0.0
+    crop_right: float = 1.0
+    crop_bottom: float = 1.0
+    
+    # Effects and filters
+    filter_type: Optional[str] = None
+    filter_intensity: float = 1.0
+    transition_type: Optional[str] = None
+    transition_duration: int = 500  # milliseconds
+    
+    # Background filling (for aspect ratio mismatch)
+    background_blur: bool = False
+    background_color: Optional[str] = None
+    fit_mode: str = "fit"  # "fit", "fill", "stretch"
+    
+    # Animation properties
+    intro_animation: Optional[str] = None  # "轻微放大", etc.
+    intro_animation_duration: int = 500  # milliseconds
+    outro_animation: Optional[str] = None
+    outro_animation_duration: int = 500  # milliseconds
+    
+    # Keyframes for animations
+    position_keyframes: List[KeyframeProperty] = field(default_factory=list)
+    scale_keyframes: List[KeyframeProperty] = field(default_factory=list)
+    rotation_keyframes: List[KeyframeProperty] = field(default_factory=list)
+    opacity_keyframes: List[KeyframeProperty] = field(default_factory=list)
+
+
+@dataclass
 class TextStyle:
     """Text styling configuration"""
     font_family: str = "默认"
@@ -215,8 +264,8 @@ class EffectSegmentConfig:
 @dataclass
 class TrackConfig:
     """Configuration for a single track"""
-    track_type: str  # "video", "audio", "text", "effect"
-    segments: List[Union[VideoSegmentConfig, AudioSegmentConfig, TextSegmentConfig, EffectSegmentConfig]] = field(default_factory=list)
+    track_type: str  # "video", "audio", "image", "text", "effect"
+    segments: List[Union[VideoSegmentConfig, AudioSegmentConfig, ImageSegmentConfig, TextSegmentConfig, EffectSegmentConfig]] = field(default_factory=list)
     muted: bool = False
     volume: float = 1.0  # For audio tracks
 
@@ -291,6 +340,8 @@ class DraftConfig:
                 result.append(self._serialize_video_segment(segment))
             elif isinstance(segment, AudioSegmentConfig):
                 result.append(self._serialize_audio_segment(segment))
+            elif isinstance(segment, ImageSegmentConfig):
+                result.append(self._serialize_image_segment(segment))
             elif isinstance(segment, TextSegmentConfig):
                 result.append(self._serialize_text_segment(segment))
             elif isinstance(segment, EffectSegmentConfig):
@@ -358,6 +409,56 @@ class DraftConfig:
             },
             "keyframes": {
                 "volume": [{"time": kf.time, "value": kf.value} for kf in segment.volume_keyframes]
+            }
+        }
+    
+    def _serialize_image_segment(self, segment: ImageSegmentConfig) -> Dict[str, Any]:
+        """Serialize image segment configuration"""
+        return {
+            "type": "image",
+            "material_url": segment.material_url,
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
+            "transform": {
+                "position_x": segment.position_x,
+                "position_y": segment.position_y,
+                "scale_x": segment.scale_x,
+                "scale_y": segment.scale_y,
+                "rotation": segment.rotation,
+                "opacity": segment.opacity
+            },
+            "dimensions": {
+                "width": segment.width,
+                "height": segment.height
+            },
+            "crop": {
+                "enabled": segment.crop_enabled,
+                "left": segment.crop_left,
+                "top": segment.crop_top,
+                "right": segment.crop_right,
+                "bottom": segment.crop_bottom
+            },
+            "effects": {
+                "filter_type": segment.filter_type,
+                "filter_intensity": segment.filter_intensity,
+                "transition_type": segment.transition_type,
+                "transition_duration": segment.transition_duration
+            },
+            "background": {
+                "blur": segment.background_blur,
+                "color": segment.background_color,
+                "fit_mode": segment.fit_mode
+            },
+            "animations": {
+                "intro": segment.intro_animation,
+                "intro_duration": segment.intro_animation_duration,
+                "outro": segment.outro_animation,
+                "outro_duration": segment.outro_animation_duration
+            },
+            "keyframes": {
+                "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
+                "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
+                "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
+                "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
             }
         }
     
