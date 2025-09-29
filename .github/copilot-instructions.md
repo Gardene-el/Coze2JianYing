@@ -53,6 +53,28 @@
 - **功能覆盖**: 确保剪映中所有可选择的参数设置都能在本项目的工具函数中体现
 - **标准化输出**: 为草稿生成器提供标准化的数据结构和参数格式
 
+## 项目当前状态
+
+### ✅ 已完成的核心功能
+1. **create_draft 工具** - UUID 草稿创建，支持完整的项目配置参数
+2. **export_drafts 工具** - 单个和批量草稿导出，支持 `export_all` 功能
+3. **get_media_duration 工具** - 网络媒体时长分析和时间轴计算
+4. **完整数据模型** - 草稿生成器接口和媒体处理模型
+5. **测试体系** - 7个测试文件，覆盖主要功能模块
+6. **文档体系** - 完整的项目文档和开发指南
+
+### 🔄 技术架构特点
+- **UUID 管理系统**: 解决 Coze 平台状态管理难题
+- **网络资源处理**: 支持 Coze 平台的链接资源模式  
+- **向后兼容性**: 所有系统更新保持 100% 向后兼容
+- **错误处理完善**: 包含 NoneType 处理、参数验证等关键修复
+
+### 📋 待扩展功能
+- `add_video_track` - 视频轨道添加工具
+- `add_audio_track` - 音频轨道添加工具
+- `add_text_track` - 文本/字幕轨道添加工具
+- `add_effects` - 特效和滤镜添加工具
+
 ## Coze 平台特性与约束
 
 ### 代码架构约束
@@ -108,42 +130,56 @@ def handler(args: Args[Input])->Output:
 - 文本和字幕相关类
 - 同名的 README.md 文档
 
-### 目录结构
+### 实际项目结构 (当前状态)
 ```
 CozeJianYingAssistent/
 ├── coze_jianying_assistant/    # 主包目录
-├── tools/                      # Coze 工具函数脚本
-│   ├── create_draft/
-│   │   ├── handler.py         # 创建剪映草稿工具
-│   │   └── README.md          # 工具说明文档
-│   ├── process_video/
-│   │   ├── handler.py         # 视频处理工具
+│   ├── __init__.py            # 包初始化文件
+│   └── main.py                # 主程序入口
+├── tools/                     # Coze 工具函数脚本 (已实现)
+│   ├── create_draft/          # ✅ 创建草稿工具
+│   │   ├── handler.py         
+│   │   └── README.md          
+│   ├── export_drafts/         # ✅ 导出草稿工具
+│   │   ├── handler.py         
 │   │   └── README.md
-│   ├── process_audio/
-│   │   ├── handler.py         # 音频处理工具
-│   │   └── README.md
-│   ├── process_text/
-│   │   ├── handler.py         # 文本/字幕处理工具
-│   │   └── README.md
-│   └── export_draft_json/
-│       ├── handler.py         # 导出草稿 JSON 数据工具
+│   └── get_media_duration/    # ✅ 媒体时长分析工具
+│       ├── handler.py         
 │       └── README.md
-├── data_structures/           # 数据结构定义
-│   ├── draft_models/
-│   │   ├── models.py         # 草稿相关数据模型
+├── data_structures/           # 数据结构定义 (已实现)
+│   ├── draft_generator_interface/  # ✅ 草稿生成器接口
+│   │   ├── models.py         
 │   │   └── README.md
-│   ├── media_models/
-│   │   ├── models.py         # 媒体文件相关模型 (链接处理)
-│   │   └── README.md
-│   ├── processing_models/
-│   │   ├── models.py         # 处理参数模型
-│   │   └── README.md
-│   └── draft_generator_interface/
-│       ├── models.py         # 草稿生成器接口数据模型
-│       └── README.md         # *占位符：待草稿生成器项目建立后补充*
-└── examples/                  # 使用示例
-    ├── coze_workflow_examples/ # Coze 工作流示例
-    └── json_output_samples/    # JSON 输出样例
+│   └── media_models/          # ✅ 媒体文件模型
+│       ├── models.py         
+│       └── README.md
+├── examples/                  # ✅ 使用示例
+│   ├── coze_workflow_examples/
+│   │   ├── draft_management_example.py
+│   │   └── get_media_duration_example.py
+│   └── json_output_samples/
+│       ├── batch_draft_export.json
+│       └── complete_draft_export.json
+├── tests/                     # ✅ 测试文件目录 (新增)
+│   ├── __init__.py
+│   ├── README.md             # 测试指南
+│   ├── test_basic.py         # 基础功能测试
+│   ├── test_tools.py         # 工具函数测试
+│   └── [其他测试文件...]
+├── requirements.txt           # ✅ 项目依赖
+├── setup.py                  # ✅ 安装配置
+├── DRAFT_MANAGEMENT_GUIDE.md # ✅ 草稿管理指南
+├── DEVELOPMENT_ROADMAP.md    # ✅ 项目发展路线图 (新增)
+└── README.md                 # ✅ 项目说明 (已更新)
+```
+
+### 规划中的扩展结构
+```
+tools/ (待扩展)
+├── add_video_track/          # 计划：添加视频轨道工具
+├── add_audio_track/          # 计划：添加音频轨道工具  
+├── add_text_track/           # 计划：添加文本轨道工具
+└── add_effects/              # 计划：添加特效工具
 ```
 
 ## 编码指南
@@ -289,7 +325,65 @@ class Output:
 - 使用流式处理处理大型媒体文件
 - 合理使用内存缓存
 
-### 测试考虑
+### 测试指南
+
+项目在 `tests/` 目录中包含完整的测试体系，遵循以下原则：
+
+#### 测试组织
+- **`tests/`** 目录包含所有测试文件
+- 每个测试文件独立运行，无相互依赖
+- 使用 `/tmp` 目录进行临时文件操作，自动清理
+- 测试文件命名：`test_[功能名称].py`
+
+#### 测试类型
+- **基础功能测试** (`test_basic.py`): 数据结构和核心功能
+- **工具函数测试** (`test_tools.py`): Coze 工具的端到端测试
+- **修复验证测试**: 验证特定bug修复的有效性
+- **架构变更测试**: 验证系统升级的向后兼容性
+
+#### 测试编写规范
+```python
+#!/usr/bin/env python3
+"""
+Test description and purpose
+"""
+
+def test_specific_function():
+    """Test the specific function with description"""
+    print("=== Testing specific function ===")
+    
+    # Setup
+    # Test execution
+    # Assertions
+    # Cleanup
+    
+    print("✅ Test passed!")
+    return True
+
+if __name__ == "__main__":
+    # Run all tests
+    results = []
+    results.append(test_specific_function())
+    
+    print(f"\\n=== Test Summary ===")
+    print(f"Tests passed: {sum(results)}/{len(results)}")
+```
+
+#### 测试运行
+```bash
+# 运行单个测试
+python tests/test_basic.py
+
+# 运行所有测试
+cd tests && python test_*.py
+```
+
+### 性能优化
+- 避免大文件在 `/tmp` 中的长期存储
+- 使用流式处理处理大型媒体文件
+- 合理使用内存缓存
+
+### 原有测试考虑
 - 每个工具函数都应该可以独立测试
 - 提供不同场景的测试用例
 - 考虑边界条件和异常情况
@@ -346,6 +440,56 @@ class Output:
 - **验证机制**: 提供数据格式验证和错误处理
 
 *注：具体接口规范将在草稿生成器项目建立后进行详细补充和完善*
+
+## 开发历程文档规范
+
+### DEVELOPMENT_ROADMAP.md 编写规范
+
+当添加新功能或进行重要更新时，必须在 `DEVELOPMENT_ROADMAP.md` 中记录开发过程。遵循以下规范：
+
+#### 文档目标
+- 帮助开发者和学习者快速理解项目架构
+- 解释每个功能出现的应用背景和原因
+- 记录具体的实现方法和技术决策
+- 保持简洁务实，避免营销性语言
+
+#### 内容结构
+每个新功能的记录应包含以下部分：
+
+```markdown
+### N. 功能名称 - [Issue #X](链接), [PR #Y](链接)
+
+**应用背景**: 说明为什么需要这个功能，解决什么实际问题
+
+**实现需求**: (如果复杂功能需要)
+- 列出主要的技术需求
+- 说明约束条件和挑战
+
+**具体做法**:
+- 详细说明实现方案
+- 列出关键的技术细节
+- 包含重要的代码结构或API设计
+- 说明如何解决主要挑战
+```
+
+#### 编写原则
+1. **重点在于技术实现**: 重点解释应用背景、原因和具体做法
+2. **链接到实际Issues/PRs**: 必须包含GitHub issue和PR的完整链接
+3. **避免时间线营销**: 不强调"第几阶段"、"里程碑"等营销性描述
+4. **保持实用性**: 专注于帮助理解架构和功能，不包含项目展望或成长数据
+5. **按开发顺序**: 按照功能开发的实际顺序记录，体现依赖关系
+
+#### 禁止内容
+- 避免"第一阶段"、"成熟化"等阶段性描述
+- 不包含"核心技术概念演进"、"设计决策记录"等理论性章节
+- 不添加"项目成长数据"、"未来展望"等市场化内容
+- 减少时间戳和日期，除非对理解技术演进必要
+
+#### 更新要求
+- 每次添加新功能时必须更新此文档
+- 保持文档与实际代码同步
+- 定期检查链接有效性
+- 确保新内容符合既定格式
 
 ## 相关资源
 
