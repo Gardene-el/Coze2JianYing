@@ -8,7 +8,8 @@ Each call creates a new track containing all the specified images.
 import os
 import json
 import uuid
-from typing import NamedTuple, List, Dict, Any, Optional, Union
+import time
+from typing import NamedTuple, List, Dict, Any
 from runtime import Args
 
 
@@ -100,62 +101,80 @@ def validate_uuid_format(uuid_str: str) -> bool:
 def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
     """Parse image_infos from any input format and validate"""
     try:
-        # Handle multiple input formats
+        # Handle multiple input formats with extensive debugging
         if isinstance(image_infos_input, str):
             # Parse JSON string
             image_infos = json.loads(image_infos_input)
+        elif isinstance(image_infos_input, list):
+            # Direct list - most common case
+            image_infos = image_infos_input
         elif hasattr(image_infos_input, '__iter__') and not isinstance(image_infos_input, (str, bytes)):
-            # It's some kind of iterable (list, tuple, etc.) - convert to list
+            # Other iterable types
             image_infos = list(image_infos_input)
         else:
-            # Try to handle other types by converting to string first then parsing
+            # Last resort - try string conversion
             try:
                 image_infos_str = str(image_infos_input)
                 image_infos = json.loads(image_infos_str)
             except (json.JSONDecodeError, ValueError):
-                raise ValueError(f"Cannot parse image_infos from type {type(image_infos_input)}: {image_infos_input}")
+                raise ValueError(f"Cannot parse image_infos from type {type(image_infos_input)}")
         
         # Ensure it's a list
         if not isinstance(image_infos, list):
             raise ValueError(f"image_infos must resolve to a list, got {type(image_infos)}")
         
-        # Process each item
+        # Process each item with very robust handling
+        result = []
         for i, info in enumerate(image_infos):
-            # Very flexible type checking - check if it behaves like a dictionary
-            if hasattr(info, '__getitem__') and hasattr(info, 'keys'):
-                # It's dict-like, ensure it's a proper dict
-                if not isinstance(info, dict):
-                    try:
-                        # Convert to dict
-                        info = {k: info[k] for k in info.keys()}
-                        image_infos[i] = info
-                    except (TypeError, AttributeError):
-                        raise ValueError(f"image_infos[{i}] cannot be converted to dictionary")
+            # Convert to plain dict - handle various object types
+            if isinstance(info, dict):
+                # Already a plain dict
+                converted_info = dict(info)  # Make a copy to be safe
             else:
-                # Not dict-like at all
-                raise ValueError(f"image_infos[{i}] must be dictionary-like, got {type(info)}: {info}")
+                # Try various conversion strategies
+                converted_info = {}
+                
+                # Strategy 1: Try to access like a dict
+                try:
+                    if hasattr(info, 'keys') and hasattr(info, '__getitem__'):
+                        for key in info.keys():
+                            converted_info[key] = info[key]
+                    else:
+                        raise TypeError("Not dict-like")
+                except Exception:
+                    # Strategy 2: Try vars() for object attributes
+                    try:
+                        converted_info = vars(info)
+                    except Exception:
+                        # Strategy 3: Try dir() and getattr
+                        try:
+                            for attr in dir(info):
+                                if not attr.startswith('_'):
+                                    converted_info[attr] = getattr(info, attr)
+                        except Exception:
+                            raise ValueError(f"image_infos[{i}] cannot be converted to dictionary (type: {type(info)})")
             
             # Validate required fields
             required_fields = ['image_url', 'start', 'end']
             for field in required_fields:
-                if field not in info:
+                if field not in converted_info:
                     raise ValueError(f"Missing required field '{field}' in image_infos[{i}]")
             
             # Map image_url to material_url for consistency
-            if 'image_url' in info:
-                info['material_url'] = info['image_url']
+            converted_info['material_url'] = converted_info['image_url']
+            
+            result.append(converted_info)
         
-        return image_infos
+        return result
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON format in image_infos: {str(e)}")
     except Exception as e:
-        # Catch any other unexpected errors and provide debug info
         raise ValueError(f"Error parsing image_infos (type: {type(image_infos_input)}): {str(e)}")
 
 
 def load_draft_config(draft_id: str) -> Dict[str, Any]:
     """Load existing draft configuration"""
-    draft_folder = f"/tmp/{draft_id}"
+    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
     if not os.path.exists(draft_folder):
@@ -173,7 +192,7 @@ def load_draft_config(draft_id: str) -> Dict[str, Any]:
 
 def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
     """Save updated draft configuration"""
-    draft_folder = f"/tmp/{draft_id}"
+    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
     try:
@@ -183,76 +202,93 @@ def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def create_image_segments(image_infos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Create image segment configurations from image_infos"""
+def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple[List[str], List[Dict[str, Any]], Dict[str, Any]]:
+    """
+    Create a properly structured image track with segments following data structure patterns
+    
+    Returns:
+        tuple: (segment_ids, segment_infos, track_dict)
+    """
+    segment_ids = []
+    segment_infos = []
     segments = []
     
     for info in image_infos:
         segment_id = str(uuid.uuid4())
+        segment_ids.append(segment_id)
         
-        # Create time range
-        time_range = TimeRange(start=info['start'], end=info['end'])
+        # Create segment info for return
+        segment_infos.append({
+            "id": segment_id,
+            "start": info['start'],
+            "end": info['end']
+        })
         
-        # Create segment config
-        segment_config = ImageSegmentConfig(
-            material_url=info['material_url'],
-            time_range=time_range,
-            **info
-        )
-        
-        # Convert to serializable dictionary format
-        segment_dict = {
+        # Create segment following the proper data structure format
+        # This matches the _serialize_image_segment format from DraftConfig
+        segment = {
             "id": segment_id,
             "type": "image",
-            "material_url": segment_config.material_url,
-            "time_range": {"start": segment_config.time_range.start, "end": segment_config.time_range.end},
+            "material_url": info['material_url'],
+            "time_range": {
+                "start": info['start'],
+                "end": info['end']
+            },
             "transform": {
-                "position_x": segment_config.position_x,
-                "position_y": segment_config.position_y,
-                "scale_x": segment_config.scale_x,
-                "scale_y": segment_config.scale_y,
-                "rotation": segment_config.rotation,
-                "opacity": segment_config.opacity
+                "position_x": info.get('position_x', 0.0),
+                "position_y": info.get('position_y', 0.0),
+                "scale_x": info.get('scale_x', 1.0),
+                "scale_y": info.get('scale_y', 1.0),
+                "rotation": info.get('rotation', 0.0),
+                "opacity": info.get('opacity', 1.0)
             },
             "dimensions": {
-                "width": segment_config.width,
-                "height": segment_config.height
+                "width": info.get('width'),
+                "height": info.get('height')
             },
             "crop": {
-                "enabled": segment_config.crop_enabled,
-                "left": segment_config.crop_left,
-                "top": segment_config.crop_top,
-                "right": segment_config.crop_right,
-                "bottom": segment_config.crop_bottom
+                "enabled": info.get('crop_enabled', False),
+                "left": info.get('crop_left', 0.0),
+                "top": info.get('crop_top', 0.0),
+                "right": info.get('crop_right', 1.0),
+                "bottom": info.get('crop_bottom', 1.0)
             },
             "effects": {
-                "filter_type": segment_config.filter_type,
-                "filter_intensity": segment_config.filter_intensity,
-                "transition_type": segment_config.transition_type,
-                "transition_duration": segment_config.transition_duration
+                "filter_type": info.get('filter_type'),
+                "filter_intensity": info.get('filter_intensity', 1.0),
+                "transition_type": info.get('transition_type'),
+                "transition_duration": info.get('transition_duration', 500)
             },
             "background": {
-                "blur": segment_config.background_blur,
-                "color": segment_config.background_color,
-                "fit_mode": segment_config.fit_mode
+                "blur": info.get('background_blur', False),
+                "color": info.get('background_color'),
+                "fit_mode": info.get('fit_mode', 'fit')
             },
             "animations": {
-                "intro": segment_config.intro_animation,
-                "intro_duration": segment_config.intro_animation_duration,
-                "outro": segment_config.outro_animation,
-                "outro_duration": segment_config.outro_animation_duration
+                "intro": info.get('in_animation'),  # Map in_animation to intro
+                "intro_duration": info.get('in_animation_duration', 500),
+                "outro": info.get('outro_animation'),
+                "outro_duration": info.get('outro_animation_duration', 500)
             },
             "keyframes": {
-                "position": segment_config.position_keyframes,
-                "scale": segment_config.scale_keyframes,
-                "rotation": segment_config.rotation_keyframes,
-                "opacity": segment_config.opacity_keyframes
+                "position": [],
+                "scale": [],
+                "rotation": [],
+                "opacity": []
             }
         }
         
-        segments.append(segment_dict)
+        segments.append(segment)
     
-    return segments
+    # Create track following the proper TrackConfig format
+    track = {
+        "track_type": "image",
+        "muted": False,
+        "volume": 1.0,
+        "segments": segments
+    }
+    
+    return segment_ids, segment_infos, track
 
 
 def handler(args: Args[Input]) -> Output:
@@ -288,7 +324,7 @@ def handler(args: Args[Input]) -> Output:
                 message="无效的 draft_id 格式"
             )
         
-        if not args.input.image_infos:
+        if args.input.image_infos is None:
             return Output(
                 segment_ids=[],
                 segment_infos=[],
@@ -296,11 +332,10 @@ def handler(args: Args[Input]) -> Output:
                 message="缺少必需的 image_infos 参数"
             )
         
-        # Parse image information
+        # Parse image information with detailed logging
         try:
-            # Add debugging info
             if logger:
-                logger.info(f"About to parse image_infos: type={type(args.input.image_infos)}, value={args.input.image_infos}")
+                logger.info(f"About to parse image_infos: type={type(args.input.image_infos)}, value={repr(args.input.image_infos)[:500]}...")
             
             image_infos = parse_image_infos(args.input.image_infos)
             
@@ -336,16 +371,8 @@ def handler(args: Args[Input]) -> Output:
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create image segments
-        image_segments = create_image_segments(image_infos)
-        
-        # Create new image track
-        image_track = {
-            "track_type": "image",
-            "muted": False,
-            "volume": 1.0,
-            "segments": image_segments
-        }
+        # Create image track with segments using proper data structure patterns
+        segment_ids, segment_infos, image_track = create_image_track_with_segments(image_infos)
         
         # Add track to draft configuration
         if "tracks" not in draft_config:
@@ -354,7 +381,6 @@ def handler(args: Args[Input]) -> Output:
         draft_config["tracks"].append(image_track)
         
         # Update timestamp
-        import time
         draft_config["last_modified"] = time.time()
         
         # Save updated configuration
@@ -368,25 +394,14 @@ def handler(args: Args[Input]) -> Output:
                 message=f"保存草稿配置失败: {str(e)}"
             )
         
-        # Prepare output
-        segment_ids = [segment["id"] for segment in image_segments]
-        segment_infos = [
-            {
-                "id": segment["id"],
-                "start": segment["time_range"]["start"],
-                "end": segment["time_range"]["end"]
-            }
-            for segment in image_segments
-        ]
-        
         if logger:
-            logger.info(f"Successfully added {len(image_segments)} images to draft {args.input.draft_id}")
+            logger.info(f"Successfully added {len(image_infos)} images to draft {args.input.draft_id}")
         
         return Output(
             segment_ids=segment_ids,
             segment_infos=segment_infos,
             success=True,
-            message=f"成功添加 {len(image_segments)} 张图片到草稿"
+            message=f"成功添加 {len(image_infos)} 张图片到草稿"
         )
         
     except Exception as e:
