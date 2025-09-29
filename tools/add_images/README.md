@@ -9,35 +9,43 @@
 ```python
 class Input(NamedTuple):
     draft_id: str                               # 要修改的草稿UUID
-    image_urls: List[str]                       # 要添加的图片URL列表
-    durations: Optional[List[int]] = None       # 每个图片的可选显示时长(毫秒)
-    transitions: Optional[List[str]] = None     # 图片间的可选转场类型
-    positions_x: Optional[List[float]] = None   # 可选水平位置(-1到1)
-    positions_y: Optional[List[float]] = None   # 可选垂直位置(-1到1)
-    scales: Optional[List[float]] = None        # 可选缩放因子
-    start_time: int = 0                         # 时间轴上的开始时间(毫秒)
+    image_infos: str                            # JSON字符串，包含图片信息数组
+```
+
+### 图片信息格式
+`image_infos` 参数是一个JSON字符串，包含图片信息对象数组，每个对象格式如下：
+
+```json
+{
+  "image_url": "https://example.com/image.jpg",  # 必需：图片URL
+  "start": 0,                                    # 必需：开始时间(毫秒)
+  "end": 3000,                                   # 必需：结束时间(毫秒)
+  "width": 1440,                                 # 可选：图片宽度
+  "height": 1080,                                # 可选：图片高度
+  "in_animation": "轻微放大",                      # 可选：入场动画
+  "in_animation_duration": 100000                # 可选：入场动画时长(毫秒)
+}
 ```
 
 ### 参数说明
 
 - **draft_id**: 目标草稿的UUID字符串，必需参数
-- **image_urls**: 图片文件URL列表，必需参数，至少包含一个有效URL
-- **durations**: 可选显示时长列表(毫秒)，默认每张图片3秒，如果提供则长度必须与image_urls相同
-- **transitions**: 可选转场效果列表，如果提供则长度必须与image_urls相同
-- **positions_x**: 可选水平位置列表(-1到1)，如果提供则长度必须与image_urls相同
-- **positions_y**: 可选垂直位置列表(-1到1)，如果提供则长度必须与image_urls相同
-- **scales**: 可选缩放因子列表(>0)，如果提供则长度必须与image_urls相同
-- **start_time**: 在时间轴上放置图片的起始时间(毫秒)，默认为0
+- **image_infos**: JSON字符串，包含图片信息数组，必需参数
+  - **image_url**: 图片文件URL，必需字段
+  - **start**: 图片在时间轴上的开始时间(毫秒)，必需字段
+  - **end**: 图片在时间轴上的结束时间(毫秒)，必需字段，必须大于start
+  - **width**: 图片宽度(像素)，可选字段
+  - **height**: 图片高度(像素)，可选字段
+  - **in_animation**: 入场动画名称，可选字段
+  - **in_animation_duration**: 入场动画时长(毫秒)，可选字段
 
 ## 输出结果
 
 ### Output 类型定义
 ```python
 class Output(NamedTuple):
-    success: bool = True          # 操作成功状态
-    message: str = "图片轨道添加成功"  # 状态消息
-    track_index: int = -1         # 创建的轨道索引
-    total_duration: int = 0       # 添加图片的总时长(毫秒)
+    segment_ids: List[str]                      # 生成的片段UUID列表
+    segment_infos: List[dict]                   # 片段信息列表，包含id、start、end
 ```
 
 ## 使用示例
@@ -48,50 +56,59 @@ class Output(NamedTuple):
   "tool": "add_images",
   "input": {
     "draft_id": "uuid-of-draft",
-    "image_urls": [
-      "https://example.com/photo1.jpg",
-      "https://example.com/photo2.png"
-    ]
+    "image_infos": "[{\"image_url\":\"https://example.com/photo1.jpg\",\"start\":0,\"end\":3000},{\"image_url\":\"https://example.com/photo2.png\",\"start\":3000,\"end\":6000}]"
   }
 }
 ```
 
-### 自定义时长和转场
+### 带动画和尺寸信息
 ```json
 {
   "tool": "add_images",
   "input": {
     "draft_id": "uuid-of-draft",
-    "image_urls": [
-      "https://example.com/intro.jpg",
-      "https://example.com/main.jpg",
-      "https://example.com/end.jpg"
-    ],
-    "durations": [2000, 5000, 3000],
-    "transitions": ["淡化", "切镜", "滑动"],
-    "start_time": 1000
+    "image_infos": "[{\"image_url\":\"https://example.com/image1.jpg\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080},{\"image_url\":\"https://example.com/image2.jpg\",\"start\":3936000,\"end\":7176000,\"width\":1440,\"height\":1080,\"in_animation\":\"轻微放大\",\"in_animation_duration\":100000}]"
   }
 }
 ```
 
-### 带位置和缩放效果
+### 复杂示例（用户提供的格式）
 ```json
 {
   "tool": "add_images",
   "input": {
-    "draft_id": "uuid-of-draft",
-    "image_urls": [
-      "https://example.com/logo.png",
-      "https://example.com/background.jpg"
-    ],
-    "durations": [4000, 6000],
-    "positions_x": [0.8, 0.0],
-    "positions_y": [-0.8, 0.0],
-    "scales": [0.3, 1.2],
-    "transitions": ["淡入", "缩放"]
+    "draft_id": "d5eaa880-ae11-441c-ae7e-1872d95d108f",
+    "image_infos": "[{\"image_url\":\"https://s.coze.cn/t/W9CvmtJHJWI/\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080},{\"image_url\":\"https://s.coze.cn/t/iGLRGx6JvZ0/\",\"start\":3936000,\"end\":7176000,\"width\":1440,\"height\":1080,\"in_animation\":\"轻微放大\",\"in_animation_duration\":100000},{\"image_url\":\"https://s.coze.cn/t/amCMhpjzEC8/\",\"start\":7176000,\"end\":11688000,\"width\":1440,\"height\":1080}]"
   }
 }
 ```
+
+### 预期输出格式
+```json
+{
+  "segment_ids": [
+    "efde9038-64b8-40d2-bdab-fca68e6bf943",
+    "7dc6650c-cacf-420a-ae88-be38f51b5bdc",
+    "1a5ddb57-621b-40c5-b369-7b6af822b39d"
+  ],
+  "segment_infos": [
+    {
+      "end": 3936000,
+      "id": "efde9038-64b8-40d2-bdab-fca68e6bf943",
+      "start": 0
+    },
+    {
+      "end": 7176000,
+      "id": "7dc6650c-cacf-420a-ae88-be38f51b5bdc",
+      "start": 3936000
+    },
+    {
+      "end": 11688000,
+      "id": "1a5ddb57-621b-40c5-b369-7b6af822b39d",
+      "start": 7176000
+    }
+  ]
+}
 
 ### 在Coze工作流中使用
 ```json

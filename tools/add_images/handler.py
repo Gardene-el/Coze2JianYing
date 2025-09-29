@@ -17,21 +17,13 @@ from runtime import Args
 class Input(NamedTuple):
     """Input parameters for add_images tool"""
     draft_id: str                               # UUID of the draft to modify
-    image_urls: List[str]                       # List of image URLs to add
-    durations: Optional[List[int]] = None       # Optional duration for each image in ms
-    transitions: Optional[List[str]] = None     # Optional transition types between images
-    positions_x: Optional[List[float]] = None   # Optional horizontal positions (0-1)
-    positions_y: Optional[List[float]] = None   # Optional vertical positions (0-1)
-    scales: Optional[List[float]] = None        # Optional scale factors
-    start_time: int = 0                         # Start time in milliseconds on timeline
+    image_infos: str                            # JSON string containing array of image info objects
 
 
 class Output(NamedTuple):
     """Output for add_images tool"""
-    success: bool = True
-    message: str = "图片轨道添加成功"
-    track_index: int = -1                       # Index of the created track
-    total_duration: int = 0                     # Total duration of added images in ms
+    segment_ids: List[str]                      # List of generated segment UUIDs
+    segment_infos: List[dict]                   # List of segment info with id, start, end
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
@@ -54,68 +46,63 @@ def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
     if not validate_uuid_format(draft_id):
         return False, f"Invalid UUID format: {draft_id}"
     
-    # Validate image_urls
-    image_urls = getattr(input_data, 'image_urls', None)
-    if not image_urls or not isinstance(image_urls, list) or len(image_urls) == 0:
-        return False, "image_urls must be a non-empty list"
+    # Validate image_infos JSON string
+    image_infos_str = getattr(input_data, 'image_infos', None)
+    if not image_infos_str:
+        return False, "image_infos is required"
     
-    # Validate URLs
-    for i, url in enumerate(image_urls):
-        if not isinstance(url, str) or not url.strip():
-            return False, f"Invalid image URL at index {i}: {url}"
+    if not isinstance(image_infos_str, str):
+        return False, "image_infos must be a JSON string"
     
-    # Validate optional lists lengths match image_urls
-    durations = getattr(input_data, 'durations', None)
-    if durations is not None:
-        if not isinstance(durations, list) or len(durations) != len(image_urls):
-            return False, f"durations list length ({len(durations) if isinstance(durations, list) else 'not list'}) must match image_urls length ({len(image_urls)})"
+    # Parse JSON
+    try:
+        image_infos = json.loads(image_infos_str)
+    except json.JSONDecodeError as e:
+        return False, f"Invalid JSON in image_infos: {str(e)}"
+    
+    if not isinstance(image_infos, list) or len(image_infos) == 0:
+        return False, "image_infos must contain a non-empty array"
+    
+    # Validate each image info object
+    for i, image_info in enumerate(image_infos):
+        if not isinstance(image_info, dict):
+            return False, f"Image info at index {i} must be an object"
         
-        # Validate duration values
-        for i, duration in enumerate(durations):
-            if not isinstance(duration, int) or duration <= 0:
-                return False, f"Invalid duration at index {i}: {duration} (must be positive integer)"
-    
-    transitions = getattr(input_data, 'transitions', None)
-    if transitions is not None:
-        if not isinstance(transitions, list) or len(transitions) != len(image_urls):
-            return False, f"transitions list length ({len(transitions) if isinstance(transitions, list) else 'not list'}) must match image_urls length ({len(image_urls)})"
-    
-    positions_x = getattr(input_data, 'positions_x', None)
-    if positions_x is not None:
-        if not isinstance(positions_x, list) or len(positions_x) != len(image_urls):
-            return False, f"positions_x list length ({len(positions_x) if isinstance(positions_x, list) else 'not list'}) must match image_urls length ({len(image_urls)})"
+        # Required fields
+        if "image_url" not in image_info:
+            return False, f"Image info at index {i} must have 'image_url' field"
         
-        # Validate position values
-        for i, pos_x in enumerate(positions_x):
-            if not isinstance(pos_x, (int, float)) or pos_x < -1 or pos_x > 1:
-                return False, f"Invalid position_x at index {i}: {pos_x} (must be float between -1 and 1)"
-    
-    positions_y = getattr(input_data, 'positions_y', None)
-    if positions_y is not None:
-        if not isinstance(positions_y, list) or len(positions_y) != len(image_urls):
-            return False, f"positions_y list length ({len(positions_y) if isinstance(positions_y, list) else 'not list'}) must match image_urls length ({len(image_urls)})"
+        if not isinstance(image_info["image_url"], str) or not image_info["image_url"].strip():
+            return False, f"Image info at index {i}: image_url must be a non-empty string"
         
-        # Validate position values
-        for i, pos_y in enumerate(positions_y):
-            if not isinstance(pos_y, (int, float)) or pos_y < -1 or pos_y > 1:
-                return False, f"Invalid position_y at index {i}: {pos_y} (must be float between -1 and 1)"
-    
-    scales = getattr(input_data, 'scales', None)
-    if scales is not None:
-        if not isinstance(scales, list) or len(scales) != len(image_urls):
-            return False, f"scales list length ({len(scales) if isinstance(scales, list) else 'not list'}) must match image_urls length ({len(image_urls)})"
+        if "start" not in image_info:
+            return False, f"Image info at index {i} must have 'start' field"
         
-        # Validate scale values
-        for i, scale in enumerate(scales):
-            if not isinstance(scale, (int, float)) or scale <= 0:
-                return False, f"Invalid scale at index {i}: {scale} (must be positive number)"
-    
-    # Validate start_time
-    start_time = getattr(input_data, 'start_time', 0)
-    if not isinstance(start_time, int) or start_time < 0:
-        return False, f"Invalid start_time: {start_time} (must be non-negative integer)"
+        if not isinstance(image_info["start"], int) or image_info["start"] < 0:
+            return False, f"Image info at index {i}: start must be a non-negative integer"
+        
+        if "end" not in image_info:
+            return False, f"Image info at index {i} must have 'end' field"
+        
+        if not isinstance(image_info["end"], int) or image_info["end"] <= image_info["start"]:
+            return False, f"Image info at index {i}: end must be greater than start"
+        
+        # Optional fields validation
+        if "width" in image_info and (not isinstance(image_info["width"], int) or image_info["width"] <= 0):
+            return False, f"Image info at index {i}: width must be a positive integer"
+        
+        if "height" in image_info and (not isinstance(image_info["height"], int) or image_info["height"] <= 0):
+            return False, f"Image info at index {i}: height must be a positive integer"
+        
+        if "in_animation_duration" in image_info and (not isinstance(image_info["in_animation_duration"], int) or image_info["in_animation_duration"] < 0):
+            return False, f"Image info at index {i}: in_animation_duration must be a non-negative integer"
     
     return True, ""
+
+
+def parse_image_infos(image_infos_str: str) -> List[dict]:
+    """Parse and return image infos from JSON string"""
+    return json.loads(image_infos_str)
 
 
 def load_draft_config(draft_id: str) -> tuple[bool, dict, str]:
@@ -153,39 +140,64 @@ def save_draft_config(draft_id: str, config: dict) -> tuple[bool, str]:
         return False, f"Failed to save draft config: {str(e)}"
 
 
-def create_image_segments(input_data: Input) -> tuple[List[dict], int]:
-    """Create image segments from input parameters (treated as video segments)"""
-    image_urls = input_data.image_urls
-    durations = getattr(input_data, 'durations', None) or [3000] * len(image_urls)  # Default 3 seconds per image
-    transitions = getattr(input_data, 'transitions', None) or [None] * len(image_urls)
-    positions_x = getattr(input_data, 'positions_x', None) or [0.0] * len(image_urls)
-    positions_y = getattr(input_data, 'positions_y', None) or [0.0] * len(image_urls)
-    scales = getattr(input_data, 'scales', None) or [1.0] * len(image_urls)
-    start_time = getattr(input_data, 'start_time', 0)
+def create_image_segments(input_data: Input) -> tuple[List[dict], List[str], List[dict]]:
+    """Create image segments from input parameters (treated as video segments)
+    
+    Returns:
+        tuple: (segments, segment_ids, segment_infos)
+    """
+    import uuid
+    
+    # Parse image infos from JSON string
+    image_infos = parse_image_infos(input_data.image_infos)
     
     segments = []
-    current_time = start_time
+    segment_ids = []
+    segment_infos = []
     
-    for i, image_url in enumerate(image_urls):
-        duration = durations[i]
+    for i, image_info in enumerate(image_infos):
+        # Generate unique segment ID
+        segment_id = str(uuid.uuid4())
+        segment_ids.append(segment_id)
+        
+        # Extract parameters from image_info
+        image_url = image_info["image_url"]
+        start_time = image_info["start"]
+        end_time = image_info["end"]
+        duration = end_time - start_time
+        
+        # Optional parameters with defaults
+        width = image_info.get("width")
+        height = image_info.get("height")
+        in_animation = image_info.get("in_animation")
+        in_animation_duration = image_info.get("in_animation_duration", 0)
+        
+        # Create segment info for output
+        segment_info = {
+            "id": segment_id,
+            "start": start_time,
+            "end": end_time
+        }
+        segment_infos.append(segment_info)
         
         # Create image segment (treated as video)
         segment = {
             "type": "video",  # Images are treated as video segments
             "material_url": image_url,
+            "segment_id": segment_id,  # Add segment ID to track
             "time_range": {
-                "start": current_time,
-                "end": current_time + duration
+                "start": start_time,
+                "end": end_time
             },
             "material_range": {
                 "start": 0,
                 "end": duration
             },
             "transform": {
-                "position_x": positions_x[i],
-                "position_y": positions_y[i],
-                "scale_x": scales[i],
-                "scale_y": scales[i],
+                "position_x": 0.0,  # Default position
+                "position_y": 0.0,
+                "scale_x": 1.0,     # Default scale
+                "scale_y": 1.0,
                 "rotation": 0.0,
                 "opacity": 1.0
             },
@@ -199,7 +211,7 @@ def create_image_segments(input_data: Input) -> tuple[List[dict], int]:
             "effects": {
                 "filter_type": None,
                 "filter_intensity": 1.0,
-                "transition_type": transitions[i],
+                "transition_type": None,  # Can be extended
                 "transition_duration": 500
             },
             "speed": {
@@ -215,14 +227,19 @@ def create_image_segments(input_data: Input) -> tuple[List[dict], int]:
                 "scale": [],
                 "rotation": [],
                 "opacity": []
+            },
+            # Additional image-specific properties
+            "image_properties": {
+                "width": width,
+                "height": height,
+                "in_animation": in_animation,
+                "in_animation_duration": in_animation_duration
             }
         }
         
         segments.append(segment)
-        current_time += duration
     
-    total_duration = current_time - start_time
-    return segments, total_duration
+    return segments, segment_ids, segment_infos
 
 
 def handler(args: Args[Input]) -> Output:
@@ -230,10 +247,10 @@ def handler(args: Args[Input]) -> Output:
     Main handler function for adding images to a draft
     
     Args:
-        args: Input arguments containing draft_id and image parameters
+        args: Input arguments containing draft_id and image_infos
         
     Returns:
-        Output containing success status and track information
+        Output containing segment_ids and segment_infos
     """
     logger = getattr(args, 'logger', None)
     
@@ -247,10 +264,8 @@ def handler(args: Args[Input]) -> Output:
             if logger:
                 logger.error(f"Input validation failed: {error_msg}")
             return Output(
-                success=False,
-                message=f"参数验证失败: {error_msg}",
-                track_index=-1,
-                total_duration=0
+                segment_ids=[],
+                segment_infos=[]
             )
         
         # Load existing draft configuration
@@ -259,32 +274,34 @@ def handler(args: Args[Input]) -> Output:
             if logger:
                 logger.error(f"Failed to load draft config: {error_msg}")
             return Output(
-                success=False,
-                message=f"加载草稿失败: {error_msg}",
-                track_index=-1,
-                total_duration=0
+                segment_ids=[],
+                segment_infos=[]
             )
         
         # Create image segments
-        image_segments, total_duration = create_image_segments(args.input)
+        image_segments, segment_ids, segment_infos = create_image_segments(args.input)
+        
+        # Parse image infos to add media resources
+        image_infos = parse_image_infos(args.input.image_infos)
         
         # Add media resources to the draft
         if "media_resources" not in config:
             config["media_resources"] = []
         
-        for i, image_url in enumerate(args.input.image_urls):
+        for i, image_info in enumerate(image_infos):
+            image_url = image_info["image_url"]
             # Check if this resource already exists
             existing = any(res.get("url") == image_url for res in config["media_resources"])
             if not existing:
-                durations = getattr(args.input, 'durations', None) or [3000] * len(args.input.image_urls)
+                duration = image_info["end"] - image_info["start"]
                 config["media_resources"].append({
                     "url": image_url,
                     "resource_type": "image",
-                    "duration_ms": durations[i],
+                    "duration_ms": duration,
                     "file_size": None,
                     "format": image_url.split('.')[-1].lower() if '.' in image_url else "jpg",
-                    "width": None,
-                    "height": None,
+                    "width": image_info.get("width"),
+                    "height": image_info.get("height"),
                     "filename": None
                 })
         
@@ -301,12 +318,12 @@ def handler(args: Args[Input]) -> Output:
             config["tracks"] = []
         
         config["tracks"].append(new_track)
-        track_index = len(config["tracks"]) - 1
         
         # Update total duration if necessary
-        max_end_time = max([seg["time_range"]["end"] for seg in image_segments])
-        if max_end_time > config.get("total_duration_ms", 0):
-            config["total_duration_ms"] = max_end_time
+        if image_segments:
+            max_end_time = max([seg["time_range"]["end"] for seg in image_segments])
+            if max_end_time > config.get("total_duration_ms", 0):
+                config["total_duration_ms"] = max_end_time
         
         # Save updated configuration
         success, error_msg = save_draft_config(args.input.draft_id, config)
@@ -314,20 +331,16 @@ def handler(args: Args[Input]) -> Output:
             if logger:
                 logger.error(f"Failed to save draft config: {error_msg}")
             return Output(
-                success=False,
-                message=f"保存草稿失败: {error_msg}",
-                track_index=-1,
-                total_duration=0
+                segment_ids=[],
+                segment_infos=[]
             )
         
         if logger:
-            logger.info(f"Successfully added {len(args.input.image_urls)} images to draft {args.input.draft_id}")
+            logger.info(f"Successfully added {len(image_infos)} images to draft {args.input.draft_id}")
         
         return Output(
-            success=True,
-            message=f"成功添加 {len(args.input.image_urls)} 个图片到新轨道",
-            track_index=track_index,
-            total_duration=total_duration
+            segment_ids=segment_ids,
+            segment_infos=segment_infos
         )
         
     except Exception as e:
@@ -335,8 +348,6 @@ def handler(args: Args[Input]) -> Output:
         if logger:
             logger.error(error_msg)
         return Output(
-            success=False,
-            message=f"添加图片失败: {error_msg}",
-            track_index=-1,
-            total_duration=0
+            segment_ids=[],
+            segment_infos=[]
         )
