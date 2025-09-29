@@ -48,6 +48,8 @@ pip install -e .
 
 ### 已实现的 Coze 工具函数
 
+#### 草稿管理工具
+
 #### 1. create_draft - 创建剪映草稿
 创建基础的剪映项目草稿，支持分辨率、帧率、质量等全面配置。
 
@@ -56,6 +58,23 @@ pip install -e .
 
 #### 3. get_media_duration - 获取媒体时长
 分析音视频链接，计算时长和时间轴信息，支持累积时间轴计算。
+
+#### 内容添加工具
+
+#### 4. add_videos - 添加视频轨道
+将视频内容添加到草稿，创建新的视频轨道，支持滤镜、转场、音量控制。
+
+#### 5. add_audios - 添加音频轨道
+将音频内容添加到草稿，创建新的音频轨道，支持音量、淡入淡出、音效处理。
+
+#### 6. add_captions - 添加字幕轨道
+将文本字幕添加到草稿，创建新的文本轨道，支持字体、颜色、位置定制。
+
+#### 7. add_images - 添加图片轨道
+将图片内容添加到草稿，创建新的视频轨道，支持时长、位置、缩放、转场。
+
+#### 8. add_effects - 添加特效轨道
+将视觉特效添加到草稿，创建新的特效轨道，支持光效、粒子、动态效果。
 
 ### Coze 工作流示例
 
@@ -68,6 +87,36 @@ pip install -e .
     "width": 1920,
     "height": 1080,
     "fps": 30
+  }
+}
+```
+
+#### 添加视频内容
+```json
+{
+  "tool": "add_videos",
+  "input": {
+    "draft_id": "{{draft.draft_id}}",
+    "video_urls": ["https://example.com/video1.mp4"],
+    "filters": ["暖冬"],
+    "transitions": ["淡化"]
+  }
+}
+```
+
+#### 添加字幕
+```json
+{
+  "tool": "add_captions",
+  "input": {
+    "draft_id": "{{draft.draft_id}}",
+    "captions": [
+      {
+        "text": "欢迎使用Coze剪映助手",
+        "start_time": 0,
+        "end_time": 3000
+      }
+    ]
   }
 }
 ```
@@ -114,7 +163,22 @@ CozeJianYingAssistent/
 │   ├── export_drafts/         # 导出草稿工具
 │   │   ├── handler.py
 │   │   └── README.md
-│   └── get_media_duration/    # 媒体时长工具
+│   ├── get_media_duration/    # 媒体时长工具
+│   │   ├── handler.py
+│   │   └── README.md
+│   ├── add_videos/            # 添加视频轨道工具
+│   │   ├── handler.py
+│   │   └── README.md
+│   ├── add_audios/            # 添加音频轨道工具
+│   │   ├── handler.py
+│   │   └── README.md
+│   ├── add_captions/          # 添加字幕轨道工具
+│   │   ├── handler.py
+│   │   └── README.md
+│   ├── add_images/            # 添加图片轨道工具
+│   │   ├── handler.py
+│   │   └── README.md
+│   └── add_effects/           # 添加特效轨道工具
 │       ├── handler.py
 │       └── README.md
 ├── data_structures/           # 数据结构定义
