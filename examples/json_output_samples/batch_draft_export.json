@@ -1,0 +1,283 @@
+{
+  "format_version": "1.0",
+  "export_type": "batch_draft",
+  "draft_count": 3,
+  "drafts": [
+    {
+      "draft_id": "123e4567-e89b-12d3-a456-426614174000",
+      "project": {
+        "name": "短视频项目1",
+        "width": 1080,
+        "height": 1920,
+        "fps": 30,
+        "video_quality": "1080p",
+        "audio_quality": "320k",
+        "background_color": "#000000"
+      },
+      "media_resources": [
+        {
+          "url": "https://example.com/video1.mp4",
+          "resource_type": "video",
+          "duration_ms": 30000,
+          "format": "mp4"
+        }
+      ],
+      "tracks": [
+        {
+          "track_type": "video",
+          "muted": false,
+          "volume": 1.0,
+          "segments": [
+            {
+              "type": "video",
+              "material_url": "https://example.com/video1.mp4",
+              "time_range": {"start": 0, "end": 30000},
+              "transform": {
+                "position_x": 0.0,
+                "position_y": 0.0,
+                "scale_x": 1.0,
+                "scale_y": 1.0,
+                "rotation": 0.0,
+                "opacity": 1.0
+              },
+              "effects": {
+                "filter_type": "青春",
+                "filter_intensity": 0.9,
+                "transition_type": null,
+                "transition_duration": 0
+              }
+            }
+          ]
+        }
+      ],
+      "total_duration_ms": 30000,
+      "created_timestamp": 1703123456.789,
+      "last_modified": 1703123456.789,
+      "status": "created"
+    },
+    {
+      "draft_id": "234f5678-f90c-23e4-b567-537725285111",
+      "project": {
+        "name": "宣传片项目",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "video_quality": "1080p",
+        "audio_quality": "320k",
+        "background_color": "#FFFFFF"
+      },
+      "media_resources": [
+        {
+          "url": "https://example.com/promo-video.mp4",
+          "resource_type": "video",
+          "duration_ms": 60000,
+          "format": "mp4"
+        },
+        {
+          "url": "https://example.com/promo-music.mp3",
+          "resource_type": "audio",
+          "duration_ms": 80000,
+          "format": "mp3"
+        }
+      ],
+      "tracks": [
+        {
+          "track_type": "video",
+          "muted": false,
+          "volume": 1.0,
+          "segments": [
+            {
+              "type": "video",
+              "material_url": "https://example.com/promo-video.mp4",
+              "time_range": {"start": 0, "end": 60000},
+              "transform": {
+                "position_x": 0.0,
+                "position_y": 0.0,
+                "scale_x": 1.0,
+                "scale_y": 1.0,
+                "rotation": 0.0,
+                "opacity": 1.0
+              },
+              "effects": {
+                "filter_type": "商务",
+                "filter_intensity": 0.7,
+                "transition_type": "推移",
+                "transition_duration": 1000
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "audio",
+          "muted": false,
+          "volume": 0.6,
+          "segments": [
+            {
+              "type": "audio",
+              "material_url": "https://example.com/promo-music.mp3",
+              "time_range": {"start": 0, "end": 60000},
+              "audio": {
+                "volume": 0.6,
+                "fade_in": 3000,
+                "fade_out": 3000,
+                "effect_type": null,
+                "effect_intensity": 1.0,
+                "speed": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "text",
+          "muted": false,
+          "volume": 1.0,
+          "segments": [
+            {
+              "type": "text",
+              "content": "专业服务，值得信赖",
+              "time_range": {"start": 20000, "end": 40000},
+              "transform": {
+                "position_x": 0.5,
+                "position_y": 0.5,
+                "scale": 1.0,
+                "rotation": 0.0,
+                "opacity": 1.0
+              },
+              "style": {
+                "font_family": "思源黑体",
+                "font_size": 48,
+                "color": "#003366"
+              },
+              "alignment": "center"
+            }
+          ]
+        }
+      ],
+      "total_duration_ms": 60000,
+      "created_timestamp": 1703124567.890,
+      "last_modified": 1703124567.890,
+      "status": "created"
+    },
+    {
+      "draft_id": "345a6789-a01d-34f5-c678-648836396222",
+      "project": {
+        "name": "教程视频",
+        "width": 1920,
+        "height": 1080,
+        "fps": 24,
+        "video_quality": "1080p",
+        "audio_quality": "192k",
+        "background_color": "#F5F5F5"
+      },
+      "media_resources": [
+        {
+          "url": "https://example.com/tutorial-screen.mp4",
+          "resource_type": "video",
+          "duration_ms": 180000,
+          "format": "mp4"
+        },
+        {
+          "url": "https://example.com/tutorial-voice.wav",
+          "resource_type": "audio",
+          "duration_ms": 180000,
+          "format": "wav"
+        }
+      ],
+      "tracks": [
+        {
+          "track_type": "video",
+          "muted": false,
+          "volume": 1.0,
+          "segments": [
+            {
+              "type": "video",
+              "material_url": "https://example.com/tutorial-screen.mp4",
+              "time_range": {"start": 0, "end": 180000},
+              "transform": {
+                "position_x": 0.0,
+                "position_y": 0.0,
+                "scale_x": 1.0,
+                "scale_y": 1.0,
+                "rotation": 0.0,
+                "opacity": 1.0
+              },
+              "effects": {
+                "filter_type": "清晰",
+                "filter_intensity": 1.0,
+                "transition_type": null,
+                "transition_duration": 0
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "audio",
+          "muted": false,
+          "volume": 1.0,
+          "segments": [
+            {
+              "type": "audio",
+              "material_url": "https://example.com/tutorial-voice.wav",
+              "time_range": {"start": 0, "end": 180000},
+              "audio": {
+                "volume": 1.0,
+                "fade_in": 0,
+                "fade_out": 1000,
+                "effect_type": "降噪",
+                "effect_intensity": 0.5,
+                "speed": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "text",
+          "muted": false,
+          "volume": 1.0,
+          "segments": [
+            {
+              "type": "text",
+              "content": "步骤1：打开应用程序",
+              "time_range": {"start": 5000, "end": 15000},
+              "transform": {
+                "position_x": 0.5,
+                "position_y": 0.9,
+                "scale": 1.0,
+                "rotation": 0.0,
+                "opacity": 1.0
+              },
+              "style": {
+                "font_family": "微软雅黑",
+                "font_size": 36,
+                "color": "#333333"
+              },
+              "alignment": "center"
+            },
+            {
+              "type": "text",
+              "content": "步骤2：选择功能模块",
+              "time_range": {"start": 45000, "end": 55000},
+              "transform": {
+                "position_x": 0.5,
+                "position_y": 0.9,
+                "scale": 1.0,
+                "rotation": 0.0,
+                "opacity": 1.0
+              },
+              "style": {
+                "font_family": "微软雅黑",
+                "font_size": 36,
+                "color": "#333333"
+              },
+              "alignment": "center"
+            }
+          ]
+        }
+      ],
+      "total_duration_ms": 180000,
+      "created_timestamp": 1703125678.901,
+      "last_modified": 1703125678.901,
+      "status": "created"
+    }
+  ]
+}
