@@ -11,19 +11,14 @@
 ```python
 class Input(NamedTuple):
     draft_id: str                              # 现有草稿的UUID
-    image_infos: Union[str, List[Dict]]        # 图片信息：JSON字符串或数组
+    image_infos: Any                           # 图片信息：支持多种格式输入
 ```
 
 ### image_infos 输入格式
 
-支持两种输入格式：
+支持多种输入格式，自动识别和处理：
 
-#### 格式1：JSON 字符串
-```json
-"[{\"image_url\":\"https://s.coze.cn/t/W9CvmtJHJWI/\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080}]"
-```
-
-#### 格式2：数组对象（推荐）
+#### 格式1：数组对象（推荐）
 ```json
 [
   {
@@ -45,6 +40,14 @@ class Input(NamedTuple):
   }
 ]
 ```
+
+#### 格式2：JSON字符串
+```json
+"[{\"image_url\":\"https://s.coze.cn/t/W9CvmtJHJWI/\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080}]"
+```
+
+#### 格式3：其他可迭代类型
+工具还支持元组(tuple)等其他可迭代类型，会自动转换为列表处理。
 
 #### 必需字段
 - `image_url`: 图片的URL链接

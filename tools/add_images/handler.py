@@ -16,7 +16,7 @@ from runtime import Args
 class Input(NamedTuple):
     """Input parameters for add_images tool"""
     draft_id: str                # UUID of the existing draft
-    image_infos: Union[str, List[Dict[str, Any]]]  # JSON string or list containing image information
+    image_infos: Any             # JSON string or list containing image information (flexible type)
 
 
 class Output(NamedTuple):
@@ -97,25 +97,43 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def parse_image_infos(image_infos_input: Union[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
-    """Parse image_infos JSON string or list and validate format"""
+def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
+    """Parse image_infos from any input format and validate"""
     try:
-        # Handle both string and list inputs
+        # Handle multiple input formats
         if isinstance(image_infos_input, str):
             # Parse JSON string
             image_infos = json.loads(image_infos_input)
-        elif isinstance(image_infos_input, list):
-            # Use list directly
-            image_infos = image_infos_input
+        elif hasattr(image_infos_input, '__iter__') and not isinstance(image_infos_input, (str, bytes)):
+            # It's some kind of iterable (list, tuple, etc.) - convert to list
+            image_infos = list(image_infos_input)
         else:
-            raise ValueError(f"image_infos must be a JSON string or list, got {type(image_infos_input)}")
+            # Try to handle other types by converting to string first then parsing
+            try:
+                image_infos_str = str(image_infos_input)
+                image_infos = json.loads(image_infos_str)
+            except (json.JSONDecodeError, ValueError):
+                raise ValueError(f"Cannot parse image_infos from type {type(image_infos_input)}: {image_infos_input}")
         
+        # Ensure it's a list
         if not isinstance(image_infos, list):
-            raise ValueError("image_infos must be a list")
+            raise ValueError(f"image_infos must resolve to a list, got {type(image_infos)}")
         
+        # Process each item
         for i, info in enumerate(image_infos):
-            if not isinstance(info, dict):
-                raise ValueError(f"image_infos[{i}] must be a dictionary")
+            # Very flexible type checking - check if it behaves like a dictionary
+            if hasattr(info, '__getitem__') and hasattr(info, 'keys'):
+                # It's dict-like, ensure it's a proper dict
+                if not isinstance(info, dict):
+                    try:
+                        # Convert to dict
+                        info = {k: info[k] for k in info.keys()}
+                        image_infos[i] = info
+                    except (TypeError, AttributeError):
+                        raise ValueError(f"image_infos[{i}] cannot be converted to dictionary")
+            else:
+                # Not dict-like at all
+                raise ValueError(f"image_infos[{i}] must be dictionary-like, got {type(info)}: {info}")
             
             # Validate required fields
             required_fields = ['image_url', 'start', 'end']
@@ -130,6 +148,9 @@ def parse_image_infos(image_infos_input: Union[str, List[Dict[str, Any]]]) -> Li
         return image_infos
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON format in image_infos: {str(e)}")
+    except Exception as e:
+        # Catch any other unexpected errors and provide debug info
+        raise ValueError(f"Error parsing image_infos (type: {type(image_infos_input)}): {str(e)}")
 
 
 def load_draft_config(draft_id: str) -> Dict[str, Any]:
@@ -277,8 +298,18 @@ def handler(args: Args[Input]) -> Output:
         
         # Parse image information
         try:
+            # Add debugging info
+            if logger:
+                logger.info(f"About to parse image_infos: type={type(args.input.image_infos)}, value={args.input.image_infos}")
+            
             image_infos = parse_image_infos(args.input.image_infos)
+            
+            if logger:
+                logger.info(f"Successfully parsed {len(image_infos)} image infos")
+                
         except ValueError as e:
+            if logger:
+                logger.error(f"Failed to parse image_infos: {str(e)}")
             return Output(
                 segment_ids=[],
                 segment_infos=[],
