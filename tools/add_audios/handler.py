@@ -1,31 +1,31 @@
 """
-Add Images Tool Handler
+Add Audios Tool Handler
 
-Adds image segments to an existing draft by creating a new image track.
-Each call creates a new track containing all the specified images.
+Adds audio segments to an existing draft by creating a new audio track.
+Each call creates a new track containing all the specified audio segments.
 """
 
 import os
 import json
 import uuid
 import time
-from typing import NamedTuple, List, Dict, Any
+from typing import NamedTuple, List, Dict, Any, Optional
 from runtime import Args
 
 
 # Input/Output type definitions (required for each Coze tool)
 class Input(NamedTuple):
-    """Input parameters for add_images tool"""
+    """Input parameters for add_audios tool"""
     draft_id: str                # UUID of the existing draft
-    image_infos: Any             # JSON string or list containing image information (flexible type)
+    audio_infos: Any             # JSON string or list containing audio information (flexible type)
 
 
 class Output(NamedTuple):
-    """Output for add_images tool"""
+    """Output for add_audios tool"""
     segment_ids: List[str]       # List of generated segment UUIDs
     segment_infos: List[Dict[str, Any]]  # List of segment info (id, start, end)
     success: bool = True         # Operation success status
-    message: str = "图片添加成功"  # Status message
+    message: str = "音频添加成功"  # Status message
 
 
 # Data models (duplicated here for Coze tool independence)
@@ -40,53 +40,29 @@ class TimeRange:
         return self.end - self.start
 
 
-class ImageSegmentConfig:
-    """Configuration for an image segment"""
+class AudioSegmentConfig:
+    """Configuration for an audio segment"""
     def __init__(self, material_url: str, time_range: TimeRange, **kwargs):
         self.material_url = material_url
         self.time_range = time_range
         
-        # Transform properties
-        self.position_x = kwargs.get('position_x', 0.0)
-        self.position_y = kwargs.get('position_y', 0.0) 
-        self.scale_x = kwargs.get('scale_x', 1.0)
-        self.scale_y = kwargs.get('scale_y', 1.0)
-        self.rotation = kwargs.get('rotation', 0.0)
-        self.opacity = kwargs.get('opacity', 1.0)
+        # Material range (for audio clipping)
+        self.material_range = kwargs.get('material_range')
         
-        # Image dimensions
-        self.width = kwargs.get('width')
-        self.height = kwargs.get('height')
+        # Audio properties
+        self.volume = kwargs.get('volume', 1.0)
+        self.fade_in = kwargs.get('fade_in', 0)  # milliseconds
+        self.fade_out = kwargs.get('fade_out', 0)  # milliseconds
         
-        # Crop settings
-        self.crop_enabled = kwargs.get('crop_enabled', False)
-        self.crop_left = kwargs.get('crop_left', 0.0)
-        self.crop_top = kwargs.get('crop_top', 0.0)
-        self.crop_right = kwargs.get('crop_right', 1.0)
-        self.crop_bottom = kwargs.get('crop_bottom', 1.0)
+        # Audio effects
+        self.effect_type = kwargs.get('effect_type')
+        self.effect_intensity = kwargs.get('effect_intensity', 1.0)
         
-        # Effects
-        self.filter_type = kwargs.get('filter_type')
-        self.filter_intensity = kwargs.get('filter_intensity', 1.0)
-        self.transition_type = kwargs.get('transition_type')
-        self.transition_duration = kwargs.get('transition_duration', 500)
+        # Speed control
+        self.speed = kwargs.get('speed', 1.0)
         
-        # Background
-        self.background_blur = kwargs.get('background_blur', False)
-        self.background_color = kwargs.get('background_color')
-        self.fit_mode = kwargs.get('fit_mode', 'fit')
-        
-        # Animations
-        self.intro_animation = kwargs.get('in_animation')  # Maps to intro_animation
-        self.intro_animation_duration = kwargs.get('in_animation_duration', 500)
-        self.outro_animation = kwargs.get('outro_animation')
-        self.outro_animation_duration = kwargs.get('outro_animation_duration', 500)
-        
-        # Keyframes (empty by default)
-        self.position_keyframes = []
-        self.scale_keyframes = []
-        self.rotation_keyframes = []
-        self.opacity_keyframes = []
+        # Volume keyframes (empty by default)
+        self.volume_keyframes = []
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
@@ -98,34 +74,34 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
-    """Parse image_infos from any input format and validate"""
+def parse_audio_infos(audio_infos_input: Any) -> List[Dict[str, Any]]:
+    """Parse audio_infos from any input format and validate"""
     try:
         # Handle multiple input formats with extensive debugging
-        if isinstance(image_infos_input, str):
+        if isinstance(audio_infos_input, str):
             # Parse JSON string
-            image_infos = json.loads(image_infos_input)
-        elif isinstance(image_infos_input, list):
+            audio_infos = json.loads(audio_infos_input)
+        elif isinstance(audio_infos_input, list):
             # Direct list - most common case
-            image_infos = image_infos_input
-        elif hasattr(image_infos_input, '__iter__') and not isinstance(image_infos_input, (str, bytes)):
+            audio_infos = audio_infos_input
+        elif hasattr(audio_infos_input, '__iter__') and not isinstance(audio_infos_input, (str, bytes)):
             # Other iterable types
-            image_infos = list(image_infos_input)
+            audio_infos = list(audio_infos_input)
         else:
             # Last resort - try string conversion
             try:
-                image_infos_str = str(image_infos_input)
-                image_infos = json.loads(image_infos_str)
+                audio_infos_str = str(audio_infos_input)
+                audio_infos = json.loads(audio_infos_str)
             except (json.JSONDecodeError, ValueError):
-                raise ValueError(f"Cannot parse image_infos from type {type(image_infos_input)}")
+                raise ValueError(f"Cannot parse audio_infos from type {type(audio_infos_input)}")
         
         # Ensure it's a list
-        if not isinstance(image_infos, list):
-            raise ValueError(f"image_infos must resolve to a list, got {type(image_infos)}")
+        if not isinstance(audio_infos, list):
+            raise ValueError(f"audio_infos must resolve to a list, got {type(audio_infos)}")
         
         # Process each item with very robust handling
         result = []
-        for i, info in enumerate(image_infos):
+        for i, info in enumerate(audio_infos):
             # Convert to plain dict - handle various object types
             if isinstance(info, dict):
                 # Already a plain dict
@@ -152,24 +128,24 @@ def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
                                 if not attr.startswith('_'):
                                     converted_info[attr] = getattr(info, attr)
                         except Exception:
-                            raise ValueError(f"image_infos[{i}] cannot be converted to dictionary (type: {type(info)})")
+                            raise ValueError(f"audio_infos[{i}] cannot be converted to dictionary (type: {type(info)})")
             
             # Validate required fields
-            required_fields = ['image_url', 'start', 'end']
+            required_fields = ['audio_url', 'start', 'end']
             for field in required_fields:
                 if field not in converted_info:
-                    raise ValueError(f"Missing required field '{field}' in image_infos[{i}]")
+                    raise ValueError(f"Missing required field '{field}' in audio_infos[{i}]")
             
-            # Map image_url to material_url for consistency
-            converted_info['material_url'] = converted_info['image_url']
+            # Map audio_url to material_url for consistency
+            converted_info['material_url'] = converted_info['audio_url']
             
             result.append(converted_info)
         
         return result
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format in image_infos: {str(e)}")
+        raise ValueError(f"Invalid JSON format in audio_infos: {str(e)}")
     except Exception as e:
-        raise ValueError(f"Error parsing image_infos (type: {type(image_infos_input)}): {str(e)}")
+        raise ValueError(f"Error parsing audio_infos (type: {type(audio_infos_input)}): {str(e)}")
 
 
 def load_draft_config(draft_id: str) -> Dict[str, Any]:
@@ -202,9 +178,9 @@ def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple[List[str], List[Dict[str, Any]], Dict[str, Any]]:
+def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple[List[str], List[Dict[str, Any]], Dict[str, Any]]:
     """
-    Create a properly structured image track with segments following data structure patterns
+    Create a properly structured audio track with segments following data structure patterns
     
     Returns:
         tuple: (segment_ids, segment_infos, track_dict)
@@ -213,7 +189,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
     segment_infos = []
     segments = []
     
-    for info in image_infos:
+    for info in audio_infos:
         segment_id = str(uuid.uuid4())
         segment_ids.append(segment_id)
         
@@ -225,56 +201,29 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         })
         
         # Create segment following the proper data structure format
-        # This matches the _serialize_image_segment format from DraftConfig
+        # This matches the _serialize_audio_segment format from DraftConfig
         segment = {
             "id": segment_id,
-            "type": "image",
+            "type": "audio",
             "material_url": info['material_url'],
             "time_range": {
                 "start": info['start'],
                 "end": info['end']
             },
-            "transform": {
-                "position_x": info.get('position_x', 0.0),
-                "position_y": info.get('position_y', 0.0),
-                "scale_x": info.get('scale_x', 1.0),
-                "scale_y": info.get('scale_y', 1.0),
-                "rotation": info.get('rotation', 0.0),
-                "opacity": info.get('opacity', 1.0)
-            },
-            "dimensions": {
-                "width": info.get('width'),
-                "height": info.get('height')
-            },
-            "crop": {
-                "enabled": info.get('crop_enabled', False),
-                "left": info.get('crop_left', 0.0),
-                "top": info.get('crop_top', 0.0),
-                "right": info.get('crop_right', 1.0),
-                "bottom": info.get('crop_bottom', 1.0)
-            },
-            "effects": {
-                "filter_type": info.get('filter_type'),
-                "filter_intensity": info.get('filter_intensity', 1.0),
-                "transition_type": info.get('transition_type'),
-                "transition_duration": info.get('transition_duration', 500)
-            },
-            "background": {
-                "blur": info.get('background_blur', False),
-                "color": info.get('background_color'),
-                "fit_mode": info.get('fit_mode', 'fit')
-            },
-            "animations": {
-                "intro": info.get('in_animation'),  # Map in_animation to intro
-                "intro_duration": info.get('in_animation_duration', 500),
-                "outro": info.get('outro_animation'),
-                "outro_duration": info.get('outro_animation_duration', 500)
+            "material_range": {
+                "start": info.get('material_start', 0),
+                "end": info.get('material_end', info['end'] - info['start'])
+            } if info.get('material_start') is not None or info.get('material_end') is not None else None,
+            "audio": {
+                "volume": info.get('volume', 1.0),
+                "fade_in": info.get('fade_in', 0),
+                "fade_out": info.get('fade_out', 0),
+                "effect_type": info.get('effect_type'),
+                "effect_intensity": info.get('effect_intensity', 1.0),
+                "speed": info.get('speed', 1.0)
             },
             "keyframes": {
-                "position": [],
-                "scale": [],
-                "rotation": [],
-                "opacity": []
+                "volume": []  # Will be populated if volume keyframes are provided
             }
         }
         
@@ -282,7 +231,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
     
     # Create track following the proper TrackConfig format
     track = {
-        "track_type": "image",
+        "track_type": "audio",
         "muted": False,
         "volume": 1.0,
         "segments": segments
@@ -293,10 +242,10 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
 
 def handler(args) -> Output:
     """
-    Main handler function for adding images to a draft
+    Main handler function for adding audios to a draft
     
     Args:
-        args: Input arguments containing draft_id and image_infos
+        args: Input arguments containing draft_id and audio_infos
         
     Returns:
         Output containing segment_ids and segment_infos
@@ -304,7 +253,7 @@ def handler(args) -> Output:
     logger = getattr(args, 'logger', None)
     
     if logger:
-        logger.info(f"Adding images to draft: {args.input.draft_id}")
+        logger.info(f"Adding audios to draft: {args.input.draft_id}")
     
     try:
         # Validate input parameters
@@ -324,40 +273,40 @@ def handler(args) -> Output:
                 message="无效的 draft_id 格式"
             )
         
-        if args.input.image_infos is None:
+        if args.input.audio_infos is None:
             return Output(
                 segment_ids=[],
                 segment_infos=[],
                 success=False,
-                message="缺少必需的 image_infos 参数"
+                message="缺少必需的 audio_infos 参数"
             )
         
-        # Parse image information with detailed logging
+        # Parse audio information with detailed logging
         try:
             if logger:
-                logger.info(f"About to parse image_infos: type={type(args.input.image_infos)}, value={repr(args.input.image_infos)[:500]}...")
+                logger.info(f"About to parse audio_infos: type={type(args.input.audio_infos)}, value={repr(args.input.audio_infos)[:500]}...")
             
-            image_infos = parse_image_infos(args.input.image_infos)
+            audio_infos = parse_audio_infos(args.input.audio_infos)
             
             if logger:
-                logger.info(f"Successfully parsed {len(image_infos)} image infos")
+                logger.info(f"Successfully parsed {len(audio_infos)} audio infos")
                 
         except ValueError as e:
             if logger:
-                logger.error(f"Failed to parse image_infos: {str(e)}")
+                logger.error(f"Failed to parse audio_infos: {str(e)}")
             return Output(
                 segment_ids=[],
                 segment_infos=[],
                 success=False,
-                message=f"解析 image_infos 失败: {str(e)}"
+                message=f"解析 audio_infos 失败: {str(e)}"
             )
         
-        if not image_infos:
+        if not audio_infos:
             return Output(
                 segment_ids=[],
                 segment_infos=[],
                 success=False,
-                message="image_infos 不能为空"
+                message="audio_infos 不能为空"
             )
         
         # Load existing draft configuration
@@ -371,14 +320,14 @@ def handler(args) -> Output:
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create image track with segments using proper data structure patterns
-        segment_ids, segment_infos, image_track = create_image_track_with_segments(image_infos)
+        # Create audio track with segments using proper data structure patterns
+        segment_ids, segment_infos, audio_track = create_audio_track_with_segments(audio_infos)
         
         # Add track to draft configuration
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
-        draft_config["tracks"].append(image_track)
+        draft_config["tracks"].append(audio_track)
         
         # Update timestamp
         draft_config["last_modified"] = time.time()
@@ -395,23 +344,21 @@ def handler(args) -> Output:
             )
         
         if logger:
-            logger.info(f"Successfully added {len(image_infos)} images to draft {args.input.draft_id}")
+            logger.info(f"Successfully added {len(audio_infos)} audios to draft {args.input.draft_id}")
         
         return Output(
             segment_ids=segment_ids,
             segment_infos=segment_infos,
             success=True,
-            message=f"成功添加 {len(image_infos)} 张图片到草稿"
+            message=f"成功添加 {len(audio_infos)} 个音频片段"
         )
         
     except Exception as e:
-        error_msg = f"添加图片时发生错误: {str(e)}"
         if logger:
-            logger.error(error_msg)
-        
+            logger.error(f"Unexpected error in add_audios handler: {str(e)}")
         return Output(
             segment_ids=[],
             segment_infos=[],
             success=False,
-            message=error_msg
+            message=f"处理音频添加时发生错误: {str(e)}"
         )

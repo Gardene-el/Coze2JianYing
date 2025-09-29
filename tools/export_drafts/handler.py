@@ -179,7 +179,7 @@ def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
         return False, f"删除草稿文件失败: {str(e)}"
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args) -> Output:
     """
     Main handler function for exporting drafts
     

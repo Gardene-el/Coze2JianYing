@@ -170,7 +170,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args) -> Output:
     """
     Main handler function for creating a draft
     
