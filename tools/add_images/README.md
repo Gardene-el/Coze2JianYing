@@ -65,9 +65,9 @@ class Input(NamedTuple):
 - `end`: 结束时间（毫秒）
 
 #### 可选字段
-- `width`, `height`: 图片尺寸
+- `width`, `height`: 图片尺寸（**元数据字段**，不影响实际显示，可省略）
 - `position_x`, `position_y`: 位置坐标（浮点数）
-- `scale_x`, `scale_y`: 缩放比例（默认1.0）
+- `scale_x`, `scale_y`: 缩放比例（默认1.0，**控制实际显示大小**）
 - `rotation`: 旋转角度（默认0.0）
 - `opacity`: 透明度（0.0-1.0，默认1.0）
 - `in_animation`: 入场动画类型（如"轻微放大"）
@@ -80,7 +80,9 @@ class Input(NamedTuple):
 - `crop_left`, `crop_top`, `crop_right`, `crop_bottom`: 裁剪区域（0.0-1.0）
 - `background_blur`: 背景模糊（默认false）
 - `background_color`: 背景颜色
-- `fit_mode`: 适配模式（"fit", "fill", "stretch"，默认"fit"）
+- `fit_mode`: 适配模式（"fit", "fill", "stretch"，默认"fit"，**控制适配方式**）
+
+**关于尺寸参数**: `width` 和 `height` 是可选的元数据字段，用于记录图片原始尺寸信息。它们不会影响图片的实际显示效果。实际显示由 `scale_x/scale_y`（缩放）和 `fit_mode`（适配模式）控制。
 
 ## 输出结果
 
