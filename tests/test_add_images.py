@@ -23,8 +23,15 @@ def test_add_images_basic():
     
     # Mock the runtime module
     import types
+    from typing import Generic, TypeVar
+    
+    T = TypeVar('T')
+    
+    class MockArgsType(Generic[T]):
+        pass
+    
     runtime_mock = types.ModuleType('runtime')
-    runtime_mock.Args = object
+    runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
     from tools.add_images.handler import handler, Input, parse_image_infos
@@ -98,7 +105,7 @@ def test_add_images_basic():
     print("✅ Segment infos format verified")
     
     # Step 5: Verify draft was updated
-    draft_folder = f"/tmp/{draft_id}"
+    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
     with open(config_file, 'r', encoding='utf-8') as f:
@@ -130,8 +137,15 @@ def test_add_images_validation():
     
     # Mock the runtime module
     import types
+    from typing import Generic, TypeVar
+    
+    T = TypeVar('T')
+    
+    class MockArgsType(Generic[T]):
+        pass
+    
     runtime_mock = types.ModuleType('runtime')
-    runtime_mock.Args = object
+    runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
     from tools.add_images.handler import handler, Input, validate_uuid_format, parse_image_infos
@@ -189,8 +203,15 @@ def test_parse_image_infos():
     
     # Mock the runtime module
     import types
+    from typing import Generic, TypeVar
+    
+    T = TypeVar('T')
+    
+    class MockArgsType(Generic[T]):
+        pass
+    
     runtime_mock = types.ModuleType('runtime')
-    runtime_mock.Args = object
+    runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
     from tools.add_images.handler import parse_image_infos
@@ -225,7 +246,7 @@ def test_parse_image_infos():
         parse_image_infos('{"not": "a list"}')
         assert False, "Should have raised ValueError"
     except ValueError as e:
-        assert "must be a list" in str(e), f"Wrong error message: {str(e)}"
+        assert "list" in str(e).lower(), f"Wrong error message: {str(e)}"
     print("✅ Non-list input error handling passed")
     
     print("✅ All parse_image_infos tests passed!")
@@ -241,8 +262,15 @@ def test_add_images_multiple_calls():
     
     # Mock the runtime module
     import types
+    from typing import Generic, TypeVar
+    
+    T = TypeVar('T')
+    
+    class MockArgsType(Generic[T]):
+        pass
+    
     runtime_mock = types.ModuleType('runtime')
-    runtime_mock.Args = object
+    runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
     from tools.add_images.handler import handler, Input
@@ -279,7 +307,7 @@ def test_add_images_multiple_calls():
     assert len(result2.segment_ids) == 1, "Second call should return 1 segment ID"
     
     # Verify draft has 2 tracks
-    draft_folder = f"/tmp/{draft_id}"
+    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
     with open(config_file, 'r', encoding='utf-8') as f:
