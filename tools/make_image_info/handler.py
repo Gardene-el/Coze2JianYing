@@ -4,6 +4,9 @@ Make Image Info Tool Handler
 Creates a JSON string representation of image configuration with all possible parameters.
 This is a helper tool for add_images - generates a single image info string that can be
 collected into an array and passed to add_images.
+
+Total parameters: 27 (3 required + 24 optional)
+Based on pyJianYingDraft library's VideoSegment, ClipSettings, and CropSettings.
 """
 
 import json

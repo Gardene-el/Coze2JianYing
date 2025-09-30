@@ -11,6 +11,14 @@
 2. 将这些字符串收集到一个数组中
 3. 将该数组作为 `image_infos` 参数传递给 `add_images` 工具
 
+### 参数数量说明
+
+本工具共有 **27 个参数**：
+- **3 个必需参数**: `image_url`, `start`, `end`
+- **24 个可选参数**: 包括尺寸、变换、裁剪、效果、背景、动画等设置
+
+这些参数基于 `pyJianYingDraft` 库的功能设计，映射了剪映中图片/视频片段的主要可配置属性。
+
 ## 输入参数
 
 ### Input 类型定义
@@ -68,6 +76,59 @@ class Input(NamedTuple):
 
 #### 可选参数
 所有其他参数都是可选的，只有在设置了非默认值时才会包含在输出字符串中。这样可以保持输出紧凑。
+
+#### 参数来源与 pyJianYingDraft 的关系
+
+本工具的参数设计基于以下 `pyJianYingDraft` 库的组件：
+
+1. **VideoSegment 参数** (7个): 
+   - `material`, `target_timerange`, `source_timerange`, `speed`, `volume`, `change_pitch`, `clip_settings`
+   - 在本工具中映射为: `image_url`(material), `start/end`(target_timerange)
+
+2. **ClipSettings 参数** (8个):
+   - `alpha`, `rotation`, `scale_x`, `scale_y`, `transform_x`, `transform_y`, `flip_horizontal`, `flip_vertical`
+   - 在本工具中映射为: `opacity`(alpha), `rotation`, `scale_x`, `scale_y`, `position_x`(transform_x), `position_y`(transform_y)
+
+3. **CropSettings 参数** (8个):
+   - 裁剪四个角点的坐标
+   - 在本工具中简化为: `crop_enabled`, `crop_left`, `crop_top`, `crop_right`, `crop_bottom`
+
+4. **其他扩展参数**:
+   - 尺寸: `width`, `height`
+   - 效果: `filter_type`, `filter_intensity`, `transition_type`, `transition_duration`
+   - 背景: `background_blur`, `background_color`, `fit_mode`
+   - 动画: `in_animation`, `in_animation_duration`, `outro_animation`, `outro_animation_duration`
+
+这些参数虽然不是所有都直接对应 pyJianYingDraft 的单个类，但都是基于剪映实际支持的功能设计的。
+
+#### 动画类型说明
+
+`in_animation` 和 `outro_animation` 的可用值来自 `pyJianYingDraft.IntroType` 和 `pyJianYingDraft.OutroType` 枚举。
+
+**入场动画示例** (部分):
+- `"轻微放大"` - 图片轻微放大进入
+- `"缩小"` - 从大缩小进入
+- `"渐显"` - 淡入效果
+- `"放大"` - 放大进入
+- `"旋转"` - 旋转进入
+- `"向上滑动"` - 从下向上滑入
+- `"向下滑动"` - 从上向下滑入
+- `"动感放大"` - 动态放大效果
+- 等等...（共 90+ 种动画类型）
+
+**出场动画示例** (部分):
+- `"轻微缩小"` - 图片轻微缩小退出
+- `"渐隐"` - 淡出效果
+- `"向上滑出"` - 向上滑出
+- `"向下滑出"` - 向下滑出
+- 等等...
+
+完整的动画类型列表可以通过 `pyJianYingDraft.IntroType` 和 `pyJianYingDraft.OutroType` 枚举查看。
+
+**注意**: 
+- 动画名称必须使用中文（这是剪映的要求）
+- 如果提供了不支持的动画名称，剪映可能会忽略该设置或使用默认值
+- 动画时长单位为毫秒，默认 500ms
 
 ## 输出结果
 
