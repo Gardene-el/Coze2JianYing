@@ -5,8 +5,9 @@ Creates a JSON string representation of image configuration with all possible pa
 This is a helper tool for add_images - generates a single image info string that can be
 collected into an array and passed to add_images.
 
-Total parameters: 27 (3 required + 24 optional)
+Total parameters: 25 (3 required + 22 optional)
 Based on pyJianYingDraft library's VideoSegment, ClipSettings, and CropSettings.
+Note: width/height removed as they are non-functional metadata fields.
 """
 
 import json
@@ -21,10 +22,6 @@ class Input(NamedTuple):
     image_url: str                              # Image URL
     start: int                                  # Start time in milliseconds
     end: int                                    # End time in milliseconds
-    
-    # Optional dimension fields
-    width: Optional[int] = None                 # Image width
-    height: Optional[int] = None                # Image height
     
     # Optional transform fields
     position_x: Optional[float] = 0.0           # X position (default 0.0)
@@ -128,12 +125,6 @@ def handler(args: Args[Input]) -> Output:
         
         # Add optional parameters only if they are not None
         # This keeps the output clean and only includes specified parameters
-        
-        # Dimensions
-        if args.input.width is not None:
-            image_info["width"] = args.input.width
-        if args.input.height is not None:
-            image_info["height"] = args.input.height
         
         # Transform (only add if not default values)
         if args.input.position_x != 0.0:

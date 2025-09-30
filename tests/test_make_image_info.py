@@ -68,21 +68,19 @@ def test_make_image_info_basic():
         image_url="https://s.coze.cn/t/W9CvmtJHJWI/",
         start=0,
         end=3936000,
-        width=1440,
-        height=1080,
         in_animation="轻微放大",
         in_animation_duration=100000,
         filter_type="暖冬",
-        filter_intensity=0.8
+        filter_intensity=0.8,
+        scale_x=1.2
     )
     result = handler(MockArgs(input_data))
     
     assert result.success, f"Should succeed: {result.message}"
     parsed = json.loads(result.image_info_string)
-    assert parsed["width"] == 1440
-    assert parsed["height"] == 1080
     assert parsed["in_animation"] == "轻微放大"
     assert parsed["filter_type"] == "暖冬"
+    assert parsed["scale_x"] == 1.2
     print(f"✅ Output with optional params: {result.image_info_string[:100]}...")
     
     # Test 3: Default values should not be included
@@ -254,9 +252,8 @@ def test_integration_make_image_info_to_add_images():
         image_url="https://s.coze.cn/t/W9CvmtJHJWI/",
         start=0,
         end=3936000,
-        width=1440,
-        height=1080,
-        in_animation="轻微放大"
+        in_animation="轻微放大",
+        scale_x=1.2
     )))
     assert image1_result.success
     print(f"  Image 1: {image1_result.image_info_string}")

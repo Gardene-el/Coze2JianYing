@@ -13,11 +13,13 @@
 
 ### 参数数量说明
 
-本工具共有 **27 个参数**：
+本工具共有 **25 个参数**：
 - **3 个必需参数**: `image_url`, `start`, `end`
-- **24 个可选参数**: 包括尺寸、变换、裁剪、效果、背景、动画等设置
+- **22 个可选参数**: 包括变换、裁剪、效果、背景、动画等设置
 
 这些参数基于 `pyJianYingDraft` 库的功能设计，映射了剪映中图片/视频片段的主要可配置属性。
+
+**注意**: 移除了 `width` 和 `height` 参数，因为它们是不影响实际显示的元数据字段，容易引起误解。图片尺寸由剪映自动处理，显示效果通过 `scale_x/scale_y` 和 `fit_mode` 控制。
 
 ## 输入参数
 
@@ -29,10 +31,6 @@ class Input(NamedTuple):
     image_url: str                              # 图片URL
     start: int                                  # 开始时间（毫秒）
     end: int                                    # 结束时间（毫秒）
-    
-    # 可选：尺寸字段
-    width: Optional[int] = None                 # 图片宽度
-    height: Optional[int] = None                # 图片高度
     
     # 可选：变换字段
     position_x: Optional[float] = 0.0           # X位置（默认0.0）
@@ -77,27 +75,12 @@ class Input(NamedTuple):
 #### 可选参数
 所有其他参数都是可选的，只有在设置了非默认值时才会包含在输出字符串中。这样可以保持输出紧凑。
 
-#### 关于 width 和 height 参数的说明
+**图片尺寸控制**: 图片的显示尺寸由以下参数控制：
+- `scale_x` 和 `scale_y` - 缩放比例（相对于原图）
+- `fit_mode` - 适配模式（"fit"、"fill"、"stretch"）
+- 项目的画布尺寸（由 `create_draft` 设置）
 
-⚠️ **重要提示**: `width` 和 `height` 参数是**可选的元数据字段**，主要用于以下目的：
-
-1. **记录原始图片尺寸**: 这两个参数可以用来记录图片的原始尺寸信息，便于后续处理或参考
-2. **不影响实际显示**: 这些参数**不会改变**图片在剪映中的实际显示尺寸
-3. **实际尺寸控制**: 图片的显示尺寸由以下参数控制：
-   - `scale_x` 和 `scale_y` - 缩放比例（相对于原图）
-   - `fit_mode` - 适配模式（"fit"、"fill"、"stretch"）
-   - 项目的画布尺寸（由 `create_draft` 设置）
-
-**与其他参数的关系**:
-- ✅ `width/height` 与 `scale_x/scale_y` **不冲突** - scale 是相对缩放
-- ✅ `width/height` 与 `crop` **不冲突** - crop 是裁剪操作
-- ✅ `width/height` 与 `fit_mode` **不冲突** - fit_mode 控制适配方式
-
-**实际使用建议**:
-- 如果不确定，可以**省略** `width` 和 `height` 参数
-- 剪映会自动使用图片文件的实际尺寸
-- 如果设置了不匹配的值，剪映会忽略这些值并使用实际图片尺寸
-- 这些参数主要是为了在配置中保留尺寸信息供参考
+剪映会自动使用图片文件的实际尺寸，无需手动指定 width/height。
 
 #### 参数来源与 pyJianYingDraft 的关系
 
@@ -116,12 +99,11 @@ class Input(NamedTuple):
    - 在本工具中简化为: `crop_enabled`, `crop_left`, `crop_top`, `crop_right`, `crop_bottom`
 
 4. **其他扩展参数**:
-   - 尺寸: `width`, `height`
    - 效果: `filter_type`, `filter_intensity`, `transition_type`, `transition_duration`
    - 背景: `background_blur`, `background_color`, `fit_mode`
    - 动画: `in_animation`, `in_animation_duration`, `outro_animation`, `outro_animation_duration`
 
-这些参数虽然不是所有都直接对应 pyJianYingDraft 的单个类，但都是基于剪映实际支持的功能设计的。
+这些参数都是基于剪映实际支持的功能设计的。
 
 #### 动画类型说明
 
@@ -168,7 +150,13 @@ class Output(NamedTuple):
 输出是一个紧凑的 JSON 字符串，例如：
 
 ```json
-"{\"image_url\":\"https://example.com/image.jpg\",\"start\":0,\"end\":3000,\"width\":1920,\"height\":1080}"
+"{\"image_url\":\"https://example.com/image.jpg\",\"start\":0,\"end\":3000}"
+```
+
+或带有可选参数：
+
+```json
+"{\"image_url\":\"https://example.com/image.jpg\",\"start\":0,\"end\":3000,\"scale_x\":1.2,\"in_animation\":\"轻微放大\"}"
 ```
 
 ## 使用示例
@@ -207,8 +195,6 @@ input_data = Input(
     image_url="https://s.coze.cn/t/W9CvmtJHJWI/",
     start=0,
     end=3936000,
-    width=1440,
-    height=1080,
     in_animation="轻微放大",
     in_animation_duration=100000,
     position_x=0.1,
@@ -221,7 +207,7 @@ input_data = Input(
 
 result = handler(MockArgs(input_data))
 print(result.image_info_string)
-# 输出: {"image_url":"https://s.coze.cn/t/W9CvmtJHJWI/","start":0,"end":3936000,"width":1440,"height":1080,"position_x":0.1,"position_y":0.1,"scale_x":1.2,"scale_y":1.2,"in_animation":"轻微放大","in_animation_duration":100000,"filter_type":"暖冬","filter_intensity":0.8}
+# 输出: {"image_url":"https://s.coze.cn/t/W9CvmtJHJWI/","start":0,"end":3936000,"position_x":0.1,"position_y":0.1,"scale_x":1.2,"scale_y":1.2,"in_animation":"轻微放大","in_animation_duration":100000,"filter_type":"暖冬","filter_intensity":0.8}
 ```
 
 ### 示例 3: 与 add_images 配合使用（完整工作流）
@@ -234,10 +220,9 @@ image1_info = make_image_info(
     image_url="https://example.com/image1.jpg",
     start=0,
     end=3000,
-    width=1920,
-    height=1080
+    scale_x=1.2
 )
-# 返回: {"image_url":"https://example.com/image1.jpg","start":0,"end":3000,"width":1920,"height":1080}
+# 返回: {"image_url":"https://example.com/image1.jpg","start":0,"end":3000,"scale_x":1.2}
 
 image2_info = make_image_info(
     image_url="https://example.com/image2.jpg",
