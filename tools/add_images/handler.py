@@ -106,8 +106,21 @@ def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
             # Parse JSON string
             image_infos = json.loads(image_infos_input)
         elif isinstance(image_infos_input, list):
-            # Direct list - most common case
-            image_infos = image_infos_input
+            # Direct list - could be list of dicts OR list of strings
+            # Check if first element is a string (array of strings format)
+            if image_infos_input and isinstance(image_infos_input[0], str):
+                # Array of strings - parse each string as JSON
+                parsed_infos = []
+                for i, info_str in enumerate(image_infos_input):
+                    try:
+                        parsed_info = json.loads(info_str)
+                        parsed_infos.append(parsed_info)
+                    except json.JSONDecodeError as e:
+                        raise ValueError(f"Invalid JSON in image_infos[{i}]: {str(e)}")
+                image_infos = parsed_infos
+            else:
+                # List of objects (original behavior)
+                image_infos = image_infos_input
         elif hasattr(image_infos_input, '__iter__') and not isinstance(image_infos_input, (str, bytes)):
             # Other iterable types
             image_infos = list(image_infos_input)

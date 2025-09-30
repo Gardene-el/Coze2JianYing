@@ -18,7 +18,7 @@ class Input(NamedTuple):
 
 支持多种输入格式，自动识别和处理：
 
-#### 格式1：数组对象（推荐）
+#### 格式1：数组对象（推荐用于静态配置）
 ```json
 [
   {
@@ -41,12 +41,22 @@ class Input(NamedTuple):
 ]
 ```
 
-#### 格式2：JSON字符串
+#### 格式2：数组字符串（推荐用于动态配置）
+数组中每个元素是 JSON 字符串。通常与 `make_image_info` 工具配合使用：
+```json
+[
+  "{\"image_url\":\"https://s.coze.cn/t/W9CvmtJHJWI/\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080}",
+  "{\"image_url\":\"https://example.com/image2.jpg\",\"start\":3936000,\"end\":7872000,\"in_animation\":\"轻微放大\"}"
+]
+```
+
+#### 格式3：JSON字符串
+整个数组作为一个 JSON 字符串：
 ```json
 "[{\"image_url\":\"https://s.coze.cn/t/W9CvmtJHJWI/\",\"start\":0,\"end\":3936000,\"width\":1440,\"height\":1080}]"
 ```
 
-#### 格式3：其他可迭代类型
+#### 格式4：其他可迭代类型
 工具还支持元组(tuple)等其他可迭代类型，会自动转换为列表处理。
 
 #### 必需字段
@@ -100,7 +110,7 @@ class Output(NamedTuple):
 
 ### 基本用法
 
-#### 方法1：使用数组格式（推荐）
+#### 方法1：使用数组格式（推荐用于静态配置）
 
 ```python
 from tools.add_images.handler import handler, Input
@@ -131,7 +141,46 @@ print(f"片段数量: {len(result.segment_ids)}")
 print(f"片段ID: {result.segment_ids}")
 ```
 
-#### 方法2：使用JSON字符串格式
+#### 方法2：使用数组字符串格式（推荐用于动态配置）
+
+配合 `make_image_info` 工具使用：
+
+```python
+from tools.make_image_info.handler import handler as make_image_info_handler
+from tools.add_images.handler import handler as add_images_handler
+
+# 步骤1: 使用 make_image_info 生成图片信息字符串
+image1_result = make_image_info_handler(MockArgs(Input(
+    image_url="https://s.coze.cn/t/W9CvmtJHJWI/",
+    start=0,
+    end=3936000,
+    width=1440,
+    height=1080
+)))
+
+image2_result = make_image_info_handler(MockArgs(Input(
+    image_url="https://example.com/image2.jpg",
+    start=3936000,
+    end=7872000,
+    in_animation="轻微放大"
+)))
+
+# 步骤2: 将字符串收集到数组中
+image_infos_array = [
+    image1_result.image_info_string,
+    image2_result.image_info_string
+]
+
+# 步骤3: 传递数组字符串给 add_images
+result = add_images_handler(MockArgs(Input(
+    draft_id="d5eaa880-ae11-441c-ae7e-1872d95d108f",
+    image_infos=image_infos_array  # 数组字符串格式
+)))
+
+print(f"成功添加 {len(result.segment_ids)} 张图片")
+```
+
+#### 方法3：使用JSON字符串格式
 
 ```python
 # 创建输入参数（JSON字符串格式）
