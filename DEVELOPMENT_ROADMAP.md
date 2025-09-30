@@ -82,4 +82,69 @@
 - 创建 `tests/` 目录，移动所有测试文件并添加测试文档
 - 更新 README.md，准确描述四阶段工作流架构和已实现功能
 - 创建本文档，记录功能开发的背景和实现方法
+
+### 6. 图片轨道添加功能 - [Issue #16](https://github.com/Gardene-el/CozeJianYingAssistent/issues/16), [PR #17](https://github.com/Gardene-el/CozeJianYingAssistent/pull/17), [PR #25](https://github.com/Gardene-el/CozeJianYingAssistent/pull/25)
+
+**应用背景**: 需要向草稿添加图片内容，支持 Coze 工作流中的动态图片配置需求
+
+**核心需求**:
+- 支持 Coze 传递的图片链接数组
+- 实现图片片段的完整参数配置（位置、缩放、动画、滤镜等）
+- 需要辅助工具来动态生成图片配置字符串
+- 支持多种输入格式以适应不同使用场景
+
+**具体做法**:
+- 实现 `add_images` 工具：向草稿添加图片轨道
+  - 支持三种输入格式：数组对象、数组字符串、JSON 字符串
+  - 每次调用创建一个新的图片轨道
+  - 基于 ImageSegmentConfig 数据结构（25个参数：3必需 + 22可选）
+  - 包含完整的变换、裁剪、效果、背景、动画参数
+- 实现 `make_image_info` 工具：生成单个图片配置 JSON 字符串
+  - 只输出非默认值参数，保持输出紧凑
+  - 完整的参数验证（时间范围、数值范围等）
+  - 输出可直接用于 add_images 的数组字符串格式
+- PR #25 添加数组字符串格式支持，解决 Coze 工作流中动态配置的传递问题
+- 移除 width/height 元数据字段，避免用户误解（实际尺寸由 scale_x/y 和 fit_mode 控制）
+
+### 7. 音频轨道添加功能 - [Issue #26](https://github.com/Gardene-el/CozeJianYingAssistent/issues/26)
+
+**应用背景**: 参考图片工具的完整设计过程，实现音频轨道添加功能以支持背景音乐、旁白、音效等需求
+
+**设计参考**:
+- PR #17 和 #25 的 add_images 和 make_image_info 实现过程
+- Issue #16 和 #24 中发现和解决的问题
+- AudioSegmentConfig 数据模型（简化版，无视觉相关参数）
+
+**核心需求**:
+- 支持多种音频配置：背景音乐、旁白、音效等
+- 实现音频特有参数：音量、淡入淡出、音频效果、速度控制
+- 支持音频裁剪（material_range）从长音频中提取片段
+- 保持与图片工具相同的输入格式灵活性
+
+**具体做法**:
+- 实现 `make_audio_info` 工具（`tools/make_audio_info/`）：
+  - 10个参数：3个必需（audio_url, start, end）+ 7个可选
+  - 可选参数：volume, fade_in, fade_out, effect_type, effect_intensity, speed, material_start/end
+  - 参数验证：volume (0.0-2.0), speed (0.5-2.0), fade 时间 >= 0
+  - material_range 验证：start 和 end 必须同时提供
+  - 只输出非默认值，保持紧凑输出
+- 实现 `add_audios` 工具（`tools/add_audios/`）：
+  - 支持三种输入格式（与 add_images 一致）
+  - 每次调用创建新的音频轨道
+  - 基于 AudioSegmentConfig 数据结构
+  - 创建完整的音频片段结构：time_range, material_range, audio properties, keyframes
+- 完整的测试体系：
+  - `test_make_audio_info.py`：3个测试套件（基础功能、参数验证、边界情况）
+  - `test_add_audios.py`：4个测试套件（基础功能、格式支持、集成测试、验证）
+  - 所有测试通过，覆盖主要功能和错误场景
+- 示例和文档：
+  - `make_audio_info_demo.py`：7个示例场景（BGM、旁白、效果、裁剪等）
+  - `add_audios_demo.py`：完整工作流演示（从创建草稿到添加多层音频）
+  - 详细的 README 文档，包含参数说明和使用示例
+
+**与图片工具的对比**:
+- 图片：25个参数（包含变换、裁剪、动画等视觉参数）
+- 音频：10个参数（专注于音量、淡入淡出、效果、速度）
+- 相同点：支持相同的输入格式、相同的工具组合模式（make_*_info + add_*s）
+- 不同点：音频无视觉参数（position, scale, rotation, crop, animations 等）
 - 更新 `.github/copilot-instructions.md`，基于实际项目结构优化开发规范
