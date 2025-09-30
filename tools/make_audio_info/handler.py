@@ -161,22 +161,22 @@ def handler(args: Args[Input]) -> Output:
         # Add optional parameters only if they are not None or not default values
         # This keeps the output clean and only includes specified parameters
         
-        # Audio properties (only add if not default values)
-        if args.input.volume != 1.0:
+        # Audio properties (only add if not None and not default values)
+        if args.input.volume is not None and args.input.volume != 1.0:
             audio_info["volume"] = args.input.volume
-        if args.input.fade_in != 0:
+        if args.input.fade_in is not None and args.input.fade_in != 0:
             audio_info["fade_in"] = args.input.fade_in
-        if args.input.fade_out != 0:
+        if args.input.fade_out is not None and args.input.fade_out != 0:
             audio_info["fade_out"] = args.input.fade_out
         
         # Audio effects
         if args.input.effect_type is not None:
             audio_info["effect_type"] = args.input.effect_type
-            if args.input.effect_intensity != 1.0:
+            if args.input.effect_intensity is not None and args.input.effect_intensity != 1.0:
                 audio_info["effect_intensity"] = args.input.effect_intensity
         
         # Speed control
-        if args.input.speed != 1.0:
+        if args.input.speed is not None and args.input.speed != 1.0:
             audio_info["speed"] = args.input.speed
         
         # Material range (trim)

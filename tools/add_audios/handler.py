@@ -97,7 +97,9 @@ def parse_audio_infos(audio_infos_input: Any) -> List[Dict[str, Any]]:
                         parsed_info = json.loads(info_str)
                         parsed_infos.append(parsed_info)
                     except json.JSONDecodeError as e:
-                        raise ValueError(f"Invalid JSON in audio_infos[{i}]: {str(e)}")
+                        # Provide helpful error message with snippet of malformed string
+                        snippet = info_str[:100] + ('...' if len(info_str) > 100 else '')
+                        raise ValueError(f"Invalid JSON in audio_infos[{i}]: {str(e)}. String snippet: {snippet}")
                 audio_infos = parsed_infos
             else:
                 # List of objects (original behavior)
