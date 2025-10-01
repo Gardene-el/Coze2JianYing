@@ -106,6 +106,10 @@ class VideoSegmentConfig:
     speed: float = 1.0
     reverse: bool = False
     
+    # Audio control (video can have audio)
+    volume: float = 1.0
+    change_pitch: bool = False  # Whether to preserve pitch when changing speed
+    
     # Background filling
     background_blur: bool = False
     background_color: Optional[str] = None
@@ -135,6 +139,7 @@ class AudioSegmentConfig:
     
     # Speed control
     speed: float = 1.0
+    change_pitch: bool = False  # Whether to preserve pitch when changing speed
     
     # Volume keyframes
     volume_keyframes: List[KeyframeProperty] = field(default_factory=list)
@@ -380,6 +385,10 @@ class DraftConfig:
                 "speed": segment.speed,
                 "reverse": segment.reverse
             },
+            "audio": {
+                "volume": segment.volume,
+                "change_pitch": segment.change_pitch
+            },
             "background": {
                 "blur": segment.background_blur,
                 "color": segment.background_color
@@ -405,7 +414,8 @@ class DraftConfig:
                 "fade_out": segment.fade_out,
                 "effect_type": segment.effect_type,
                 "effect_intensity": segment.effect_intensity,
-                "speed": segment.speed
+                "speed": segment.speed,
+                "change_pitch": segment.change_pitch
             },
             "keyframes": {
                 "volume": [{"time": kf.time, "value": kf.value} for kf in segment.volume_keyframes]
