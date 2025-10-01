@@ -77,11 +77,11 @@ def main():
         height=1080
     )))
     
-    if image1_result.success:
+    if image1_result["success"]:
         print(f"✅ 图片 1 配置字符串:")
-        print(f"   {image1_result.image_info_string}")
+        print(f"   {image1_result["image_info_string"]}")
     else:
-        print(f"❌ 生成失败: {image1_result.message}")
+        print(f"❌ 生成失败: {image1_result["message"]}")
         return
     
     # 图片 2: 带动画和滤镜
@@ -97,11 +97,11 @@ def main():
         filter_intensity=0.8
     )))
     
-    if image2_result.success:
+    if image2_result["success"]:
         print(f"✅ 图片 2 配置字符串:")
-        print(f"   {image2_result.image_info_string}")
+        print(f"   {image2_result["image_info_string"]}")
     else:
-        print(f"❌ 生成失败: {image2_result.message}")
+        print(f"❌ 生成失败: {image2_result["message"]}")
         return
     
     # 图片 3: 带位置和缩放
@@ -119,11 +119,11 @@ def main():
         opacity=0.9
     )))
     
-    if image3_result.success:
+    if image3_result["success"]:
         print(f"✅ 图片 3 配置字符串:")
-        print(f"   {image3_result.image_info_string}")
+        print(f"   {image3_result["image_info_string"]}")
     else:
-        print(f"❌ 生成失败: {image3_result.message}")
+        print(f"❌ 生成失败: {image3_result["message"]}")
         return
     
     # 步骤 3: 将字符串收集到数组中
@@ -132,9 +132,9 @@ def main():
     
     # 这是核心：创建一个数组字符串 (数组中的每个元素是字符串)
     image_infos_array = [
-        image1_result.image_info_string,
-        image2_result.image_info_string,
-        image3_result.image_info_string
+        image1_result["image_info_string"],
+        image2_result["image_info_string"],
+        image3_result["image_info_string"]
     ]
     
     print(f"✅ 创建了包含 {len(image_infos_array)} 个字符串的数组")
@@ -153,11 +153,11 @@ def main():
         image_infos=image_infos_array  # 数组字符串格式！
     )))
     
-    if not add_result.success:
-        print(f"❌ 添加图片失败: {add_result.message}")
+    if not add_result["success"]:
+        print(f"❌ 添加图片失败: {add_result["message"]}")
         return
     
-    print(f"✅ {add_result.message}")
+    print(f"✅ {add_result["message"]}")
     print(f"   生成的片段 ID: {add_result.segment_ids}")
     print(f"   片段信息:")
     for info in add_result.segment_infos:

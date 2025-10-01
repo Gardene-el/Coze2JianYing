@@ -52,11 +52,11 @@ def example_1_simple_caption():
         end=3000
     )))
     
-    print(f"Success: {result.success}")
-    print(f"Message: {result.message}")
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Success: {result["success"]}")
+    print(f"Message: {result["message"]}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_2_title_caption():
@@ -73,9 +73,9 @@ def example_2_title_caption():
         color="#FFD700"       # Gold color
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_3_styled_caption():
@@ -95,9 +95,9 @@ def example_3_styled_caption():
         stroke_width=4
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_4_shadow_caption():
@@ -115,9 +115,9 @@ def example_4_shadow_caption():
         shadow_blur=8
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_5_background_caption():
@@ -134,9 +134,9 @@ def example_5_background_caption():
         font_size=52
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_6_animated_caption():
@@ -153,9 +153,9 @@ def example_6_animated_caption():
         color="#00FF00"
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_7_fully_styled():
@@ -186,9 +186,9 @@ def example_7_fully_styled():
         outro_animation="淡出"
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_8_left_aligned():
@@ -203,9 +203,9 @@ def example_8_left_aligned():
         position_x=0.1   # Near left edge
     )))
     
-    print(f"Caption String: {result.caption_info_string}")
+    print(f"Caption String: {result["caption_info_string"]}")
     print(f"\nParsed JSON:")
-    print(json.dumps(json.loads(result.caption_info_string), ensure_ascii=False, indent=2))
+    print(json.dumps(json.loads(result["caption_info_string"]), ensure_ascii=False, indent=2))
 
 
 def example_9_multiple_captions_workflow():
@@ -221,7 +221,7 @@ def example_9_multiple_captions_workflow():
         end=2000,
         intro_animation="淡入"
     )))
-    captions.append(result1.caption_info_string)
+    captions.append(result1["caption_info_string"])
     
     # Title caption
     result2 = handler(MockArgs(Input(
@@ -233,7 +233,7 @@ def example_9_multiple_captions_workflow():
         font_weight="bold",
         color="#FFD700"
     )))
-    captions.append(result2.caption_info_string)
+    captions.append(result2["caption_info_string"])
     
     # Regular captions
     result3 = handler(MockArgs(Input(
@@ -241,14 +241,14 @@ def example_9_multiple_captions_workflow():
         start=5000,
         end=8000
     )))
-    captions.append(result3.caption_info_string)
+    captions.append(result3["caption_info_string"])
     
     result4 = handler(MockArgs(Input(
         content="第二段内容说明",
         start=8000,
         end=11000
     )))
-    captions.append(result4.caption_info_string)
+    captions.append(result4["caption_info_string"])
     
     # Closing caption
     result5 = handler(MockArgs(Input(
@@ -257,7 +257,7 @@ def example_9_multiple_captions_workflow():
         end=13000,
         outro_animation="淡出"
     )))
-    captions.append(result5.caption_info_string)
+    captions.append(result5["caption_info_string"])
     
     print(f"Generated {len(captions)} caption strings:")
     for i, caption in enumerate(captions, 1):
@@ -281,8 +281,8 @@ def example_10_error_handling():
         start=0,
         end=3000
     )))
-    print(f"  Success: {result.success}")
-    print(f"  Message: {result.message}\n")
+    print(f"  Success: {result["success"]}")
+    print(f"  Message: {result["message"]}\n")
     
     # Error 2: Invalid time range
     print("Test 2: Invalid time range (end < start)")
@@ -291,8 +291,8 @@ def example_10_error_handling():
         start=5000,
         end=3000
     )))
-    print(f"  Success: {result.success}")
-    print(f"  Message: {result.message}\n")
+    print(f"  Success: {result["success"]}")
+    print(f"  Message: {result["message"]}\n")
     
     # Error 3: Invalid position
     print("Test 3: Invalid position (> 1.0)")
@@ -302,8 +302,8 @@ def example_10_error_handling():
         end=3000,
         position_x=1.5
     )))
-    print(f"  Success: {result.success}")
-    print(f"  Message: {result.message}\n")
+    print(f"  Success: {result["success"]}")
+    print(f"  Message: {result["message"]}\n")
     
     # Error 4: Invalid alignment
     print("Test 4: Invalid alignment")
@@ -313,8 +313,8 @@ def example_10_error_handling():
         end=3000,
         alignment="invalid"
     )))
-    print(f"  Success: {result.success}")
-    print(f"  Message: {result.message}\n")
+    print(f"  Success: {result["success"]}")
+    print(f"  Message: {result["message"]}\n")
 
 
 def main():

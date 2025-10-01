@@ -57,12 +57,12 @@ def demo_make_audio_info():
     )
     
     result = handler(MockArgs(bgm_input))
-    print(f"\nStatus: {result.message}")
+    print(f"\nStatus: {result["message"]}")
     print(f"Generated JSON string:")
-    print(result.audio_info_string)
+    print(result["audio_info_string"])
     
     # Parse and display nicely
-    parsed = json.loads(result.audio_info_string)
+    parsed = json.loads(result["audio_info_string"])
     print(f"\nParsed configuration:")
     print(json.dumps(parsed, indent=2, ensure_ascii=False))
     
@@ -79,9 +79,9 @@ def demo_make_audio_info():
     )
     
     result = handler(MockArgs(narration_input))
-    print(f"\nStatus: {result.message}")
+    print(f"\nStatus: {result["message"]}")
     print(f"Generated JSON string:")
-    print(result.audio_info_string)
+    print(result["audio_info_string"])
     
     # Example 3: Audio with effects
     print("\n" + "=" * 70)
@@ -99,11 +99,11 @@ def demo_make_audio_info():
     )
     
     result = handler(MockArgs(effect_input))
-    print(f"\nStatus: {result.message}")
+    print(f"\nStatus: {result["message"]}")
     print(f"Generated JSON string:")
-    print(result.audio_info_string)
+    print(result["audio_info_string"])
     
-    parsed = json.loads(result.audio_info_string)
+    parsed = json.loads(result["audio_info_string"])
     print(f"\nParsed configuration:")
     print(json.dumps(parsed, indent=2, ensure_ascii=False))
     
@@ -125,11 +125,11 @@ def demo_make_audio_info():
     )
     
     result = handler(MockArgs(trimmed_input))
-    print(f"\nStatus: {result.message}")
+    print(f"\nStatus: {result["message"]}")
     print(f"Generated JSON string:")
-    print(result.audio_info_string)
+    print(result["audio_info_string"])
     
-    parsed = json.loads(result.audio_info_string)
+    parsed = json.loads(result["audio_info_string"])
     print(f"\nParsed configuration:")
     print(json.dumps(parsed, indent=2, ensure_ascii=False))
     print(f"\nNote: This uses seconds 45-65 from the original audio file,")
@@ -148,9 +148,9 @@ def demo_make_audio_info():
     )
     
     result = handler(MockArgs(sfx_input))
-    print(f"\nStatus: {result.message}")
+    print(f"\nStatus: {result["message"]}")
     print(f"Generated JSON string:")
-    print(result.audio_info_string)
+    print(result["audio_info_string"])
     
     # Example 6: Collecting multiple audio configs
     print("\n" + "=" * 70)
@@ -169,7 +169,7 @@ def demo_make_audio_info():
         volume=0.3,
         fade_in=2000
     )))
-    audio_configs.append(result1.audio_info_string)
+    audio_configs.append(result1["audio_info_string"])
     
     # Narration
     result2 = handler(MockArgs(Input(
@@ -178,7 +178,7 @@ def demo_make_audio_info():
         end=55000,
         volume=1.0
     )))
-    audio_configs.append(result2.audio_info_string)
+    audio_configs.append(result2["audio_info_string"])
     
     # Sound effect
     result3 = handler(MockArgs(Input(
@@ -187,7 +187,7 @@ def demo_make_audio_info():
         end=20500,
         volume=0.9
     )))
-    audio_configs.append(result3.audio_info_string)
+    audio_configs.append(result3["audio_info_string"])
     
     print(f"\nCreated {len(audio_configs)} audio configuration strings:")
     for i, config in enumerate(audio_configs, 1):
@@ -215,10 +215,10 @@ def demo_make_audio_info():
     result = handler(MockArgs(minimal_input))
     print(f"\nInput has volume=1.0, fade_in=0, speed=1.0 (all defaults)")
     print(f"Generated JSON string:")
-    print(result.audio_info_string)
+    print(result["audio_info_string"])
     print(f"\nNotice: Only required fields are included!")
     
-    parsed = json.loads(result.audio_info_string)
+    parsed = json.loads(result["audio_info_string"])
     print(f"\nParsed configuration:")
     print(json.dumps(parsed, indent=2, ensure_ascii=False))
     
