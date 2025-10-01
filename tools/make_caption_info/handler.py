@@ -123,55 +123,63 @@ def handler(args: Args[Input]) -> Output:
                 message="end 时间必须大于 start 时间"
             )
         
-        # Validate numeric ranges
-        if not (0.0 <= args.input.position_x <= 1.0):
+        # Validate numeric ranges (handle None values with defaults)
+        position_x = args.input.position_x if args.input.position_x is not None else 0.5
+        position_y = args.input.position_y if args.input.position_y is not None else 0.9
+        opacity = args.input.opacity if args.input.opacity is not None else 1.0
+        background_opacity = args.input.background_opacity if args.input.background_opacity is not None else 0.5
+        
+        if not (0.0 <= position_x <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="position_x 必须在 0.0 到 1.0 之间"
             )
         
-        if not (0.0 <= args.input.position_y <= 1.0):
+        if not (0.0 <= position_y <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="position_y 必须在 0.0 到 1.0 之间"
             )
         
-        if not (0.0 <= args.input.opacity <= 1.0):
+        if not (0.0 <= opacity <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="opacity 必须在 0.0 到 1.0 之间"
             )
         
-        if not (0.0 <= args.input.background_opacity <= 1.0):
+        if not (0.0 <= background_opacity <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="background_opacity 必须在 0.0 到 1.0 之间"
             )
         
-        # Validate text alignment
+        # Validate text alignment (handle None with default)
+        alignment = args.input.alignment if args.input.alignment is not None else "center"
         valid_alignments = ["left", "center", "right"]
-        if args.input.alignment not in valid_alignments:
+        if alignment not in valid_alignments:
             return Output(
                 caption_info_string="",
                 success=False,
                 message=f"alignment 必须是以下值之一: {', '.join(valid_alignments)}"
             )
         
-        # Validate font weight and style
+        # Validate font weight and style (handle None with defaults)
+        font_weight = args.input.font_weight if args.input.font_weight is not None else "normal"
         valid_weights = ["normal", "bold"]
-        if args.input.font_weight not in valid_weights:
+        if font_weight not in valid_weights:
             return Output(
                 caption_info_string="",
                 success=False,
                 message=f"font_weight 必须是以下值之一: {', '.join(valid_weights)}"
             )
         
+        font_style = args.input.font_style if args.input.font_style is not None else "normal"
         valid_styles = ["normal", "italic"]
-        if args.input.font_style not in valid_styles:
+        if font_style not in valid_styles:
             return Output(
                 caption_info_string="",
                 success=False,
@@ -187,62 +195,101 @@ def handler(args: Args[Input]) -> Output:
         
         # Add optional parameters only if they are not default values
         # This keeps the output clean and only includes specified parameters
+        # Use getattr with defaults to handle None values from Coze
         
         # Position and transform (only add if not default values)
-        if args.input.position_x != 0.5:
-            caption_info["position_x"] = args.input.position_x
-        if args.input.position_y != 0.9:
-            caption_info["position_y"] = args.input.position_y
-        if args.input.scale != 1.0:
-            caption_info["scale"] = args.input.scale
-        if args.input.rotation != 0.0:
-            caption_info["rotation"] = args.input.rotation
-        if args.input.opacity != 1.0:
-            caption_info["opacity"] = args.input.opacity
+        position_x_val = args.input.position_x if args.input.position_x is not None else 0.5
+        if position_x_val != 0.5:
+            caption_info["position_x"] = position_x_val
+            
+        position_y_val = args.input.position_y if args.input.position_y is not None else 0.9
+        if position_y_val != 0.9:
+            caption_info["position_y"] = position_y_val
+            
+        scale_val = args.input.scale if args.input.scale is not None else 1.0
+        if scale_val != 1.0:
+            caption_info["scale"] = scale_val
+            
+        rotation_val = args.input.rotation if args.input.rotation is not None else 0.0
+        if rotation_val != 0.0:
+            caption_info["rotation"] = rotation_val
+            
+        opacity_val = args.input.opacity if args.input.opacity is not None else 1.0
+        if opacity_val != 1.0:
+            caption_info["opacity"] = opacity_val
         
         # Text style (only add if not default values)
-        if args.input.font_family != "默认":
-            caption_info["font_family"] = args.input.font_family
-        if args.input.font_size != 48:
-            caption_info["font_size"] = args.input.font_size
-        if args.input.font_weight != "normal":
-            caption_info["font_weight"] = args.input.font_weight
-        if args.input.font_style != "normal":
-            caption_info["font_style"] = args.input.font_style
-        if args.input.color != "#FFFFFF":
-            caption_info["color"] = args.input.color
+        font_family_val = args.input.font_family if args.input.font_family is not None else "默认"
+        if font_family_val != "默认":
+            caption_info["font_family"] = font_family_val
+            
+        font_size_val = args.input.font_size if args.input.font_size is not None else 48
+        if font_size_val != 48:
+            caption_info["font_size"] = font_size_val
+            
+        font_weight_val = args.input.font_weight if args.input.font_weight is not None else "normal"
+        if font_weight_val != "normal":
+            caption_info["font_weight"] = font_weight_val
+            
+        font_style_val = args.input.font_style if args.input.font_style is not None else "normal"
+        if font_style_val != "normal":
+            caption_info["font_style"] = font_style_val
+            
+        color_val = args.input.color if args.input.color is not None else "#FFFFFF"
+        if color_val != "#FFFFFF":
+            caption_info["color"] = color_val
         
         # Stroke/outline
-        if args.input.stroke_enabled:
-            caption_info["stroke_enabled"] = args.input.stroke_enabled
-            if args.input.stroke_color != "#000000":
-                caption_info["stroke_color"] = args.input.stroke_color
-            if args.input.stroke_width != 2:
-                caption_info["stroke_width"] = args.input.stroke_width
+        stroke_enabled_val = args.input.stroke_enabled if args.input.stroke_enabled is not None else False
+        if stroke_enabled_val:
+            caption_info["stroke_enabled"] = stroke_enabled_val
+            
+            stroke_color_val = args.input.stroke_color if args.input.stroke_color is not None else "#000000"
+            if stroke_color_val != "#000000":
+                caption_info["stroke_color"] = stroke_color_val
+                
+            stroke_width_val = args.input.stroke_width if args.input.stroke_width is not None else 2
+            if stroke_width_val != 2:
+                caption_info["stroke_width"] = stroke_width_val
         
         # Shadow
-        if args.input.shadow_enabled:
-            caption_info["shadow_enabled"] = args.input.shadow_enabled
-            if args.input.shadow_color != "#000000":
-                caption_info["shadow_color"] = args.input.shadow_color
-            if args.input.shadow_offset_x != 2:
-                caption_info["shadow_offset_x"] = args.input.shadow_offset_x
-            if args.input.shadow_offset_y != 2:
-                caption_info["shadow_offset_y"] = args.input.shadow_offset_y
-            if args.input.shadow_blur != 4:
-                caption_info["shadow_blur"] = args.input.shadow_blur
+        shadow_enabled_val = args.input.shadow_enabled if args.input.shadow_enabled is not None else False
+        if shadow_enabled_val:
+            caption_info["shadow_enabled"] = shadow_enabled_val
+            
+            shadow_color_val = args.input.shadow_color if args.input.shadow_color is not None else "#000000"
+            if shadow_color_val != "#000000":
+                caption_info["shadow_color"] = shadow_color_val
+                
+            shadow_offset_x_val = args.input.shadow_offset_x if args.input.shadow_offset_x is not None else 2
+            if shadow_offset_x_val != 2:
+                caption_info["shadow_offset_x"] = shadow_offset_x_val
+                
+            shadow_offset_y_val = args.input.shadow_offset_y if args.input.shadow_offset_y is not None else 2
+            if shadow_offset_y_val != 2:
+                caption_info["shadow_offset_y"] = shadow_offset_y_val
+                
+            shadow_blur_val = args.input.shadow_blur if args.input.shadow_blur is not None else 4
+            if shadow_blur_val != 4:
+                caption_info["shadow_blur"] = shadow_blur_val
         
         # Background
-        if args.input.background_enabled:
-            caption_info["background_enabled"] = args.input.background_enabled
-            if args.input.background_color != "#000000":
-                caption_info["background_color"] = args.input.background_color
-            if args.input.background_opacity != 0.5:
-                caption_info["background_opacity"] = args.input.background_opacity
+        background_enabled_val = args.input.background_enabled if args.input.background_enabled is not None else False
+        if background_enabled_val:
+            caption_info["background_enabled"] = background_enabled_val
+            
+            background_color_val = args.input.background_color if args.input.background_color is not None else "#000000"
+            if background_color_val != "#000000":
+                caption_info["background_color"] = background_color_val
+                
+            background_opacity_val = args.input.background_opacity if args.input.background_opacity is not None else 0.5
+            if background_opacity_val != 0.5:
+                caption_info["background_opacity"] = background_opacity_val
         
         # Alignment
-        if args.input.alignment != "center":
-            caption_info["alignment"] = args.input.alignment
+        alignment_val = args.input.alignment if args.input.alignment is not None else "center"
+        if alignment_val != "center":
+            caption_info["alignment"] = alignment_val
         
         # Animations
         if args.input.intro_animation is not None:
