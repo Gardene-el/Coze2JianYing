@@ -58,13 +58,17 @@ class Input(NamedTuple):
 
 ## 输出结果
 
-### Output 类型定义
+### 返回值格式
+
+返回 Dict[str, Any] 格式（确保 Coze 平台正确序列化为 JSON 对象）：
+
 ```python
-class Output(NamedTuple):
-    draft_data: str        # 草稿生成器JSON字符串
-    exported_count: int    # 成功导出的草稿数量
-    success: bool = True   # 操作是否成功
-    message: str = "草稿导出成功"  # 详细状态消息
+{
+    "draft_data": str,        # 草稿生成器JSON字符串
+    "exported_count": int,    # 成功导出的草稿数量
+    "success": bool,          # 操作是否成功
+    "message": str            # 详细状态消息
+}
 ```
 
 ### 输出字段说明
