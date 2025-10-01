@@ -11,7 +11,7 @@ Note: width/height removed as they are non-functional metadata fields.
 """
 
 import json
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, Dict, Any
 from runtime import Args
 
 
@@ -56,14 +56,8 @@ class Input(NamedTuple):
     outro_animation_duration: Optional[int] = 500  # Outro animation duration in ms
 
 
-class Output(NamedTuple):
-    """Output for make_image_info tool"""
-    image_info_string: str                      # JSON string representation of image info
-    success: bool = True                        # Operation success status
-    message: str = "图片信息字符串生成成功"       # Status message
 
-
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     Main handler function for creating image info string
     
@@ -71,7 +65,7 @@ def handler(args: Args[Input]) -> Output:
         args: Input arguments containing all image parameters
         
     Returns:
-        Output containing the JSON string representation of image info
+        Dict containing the JSON string representation of image info
     """
     logger = getattr(args, 'logger', None)
     
@@ -81,40 +75,40 @@ def handler(args: Args[Input]) -> Output:
     try:
         # Validate required parameters
         if not args.input.image_url:
-            return Output(
-                image_info_string="",
-                success=False,
-                message="缺少必需的 image_url 参数"
-            )
+            return {
+                "image_info_string": "",
+                "success": False,
+                "message": "缺少必需的 image_url 参数"
+            }
         
         if args.input.start is None:
-            return Output(
-                image_info_string="",
-                success=False,
-                message="缺少必需的 start 参数"
-            )
+            return {
+                "image_info_string": "",
+                "success": False,
+                "message": "缺少必需的 start 参数"
+            }
         
         if args.input.end is None:
-            return Output(
-                image_info_string="",
-                success=False,
-                message="缺少必需的 end 参数"
-            )
+            return {
+                "image_info_string": "",
+                "success": False,
+                "message": "缺少必需的 end 参数"
+            }
         
         # Validate time range
         if args.input.start < 0:
-            return Output(
-                image_info_string="",
-                success=False,
-                message="start 时间不能为负数"
-            )
+            return {
+                "image_info_string": "",
+                "success": False,
+                "message": "start 时间不能为负数"
+            }
         
         if args.input.end <= args.input.start:
-            return Output(
-                image_info_string="",
-                success=False,
-                message="end 时间必须大于 start 时间"
-            )
+            return {
+                "image_info_string": "",
+                "success": False,
+                "message": "end 时间必须大于 start 时间"
+            }
         
         # Build image info dictionary with all parameters
         image_info = {
@@ -184,19 +178,19 @@ def handler(args: Args[Input]) -> Output:
         if logger:
             logger.info(f"Successfully created image info string: {len(image_info_string)} characters")
         
-        return Output(
-            image_info_string=image_info_string,
-            success=True,
-            message="图片信息字符串生成成功"
-        )
+        return {
+            "image_info_string": image_info_string,
+            "success": True,
+            "message": "图片信息字符串生成成功"
+            }
         
     except Exception as e:
         error_msg = f"生成图片信息字符串时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return Output(
-            image_info_string="",
-            success=False,
-            message=error_msg
-        )
+        return {
+            "image_info_string": "",
+            "success": False,
+            "message": error_msg
+            }
