@@ -23,7 +23,7 @@ sys.modules['runtime'] = runtime_mock
 
 # Now import the handler
 sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
-from tools.make_video_info.handler import handler, Input, Output
+from tools.make_video_info.handler import handler, Input
 
 
 class MockArgs:
@@ -45,12 +45,12 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    parsed = json.loads(result.video_info_string)
+    assert result["success"], f"Should succeed: {result["message"]}"
+    parsed = json.loads(result["video_info_string"])
     assert parsed["video_url"] == "https://example.com/video.mp4"
     assert parsed["start"] == 0
     assert parsed["end"] == 5000
-    print(f"✅ Output: {result.video_info_string}\n")
+    print(f"✅ Output: {result["video_info_string"]}\n")
     
     # Test 2: With optional parameters including video-specific ones
     print("Test 2: With optional parameters including video-specific ones")
@@ -66,14 +66,14 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    parsed = json.loads(result.video_info_string)
+    assert result["success"], f"Should succeed: {result["message"]}"
+    parsed = json.loads(result["video_info_string"])
     assert parsed["material_start"] == 1000
     assert parsed["material_end"] == 6000
     assert parsed["speed"] == 1.5
     assert parsed["filter_type"] == "暖冬"
     assert parsed["scale_x"] == 1.2
-    print(f"✅ Output with optional params: {result.video_info_string[:100]}...\n")
+    print(f"✅ Output with optional params: {result["video_info_string"][:100]}...\n")
     
     # Test 3: Default values should not be included
     print("Test 3: Default values not included")
@@ -88,8 +88,8 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert "scale_x" not in parsed, "Default scale_x should not be included"
     assert "scale_y" not in parsed, "Default scale_y should not be included"
     assert "opacity" not in parsed, "Default opacity should not be included"
@@ -105,9 +105,9 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with empty video_url"
-    assert "video_url" in result.message
-    print(f"✅ Error handling works: {result.message}\n")
+    assert not result["success"], "Should fail with empty video_url"
+    assert "video_url" in result["message"]
+    print(f"✅ Error handling works: {result["message"]}\n")
     
     # Test 5: Error handling - invalid time range
     print("Test 5: Error handling - invalid time range")
@@ -118,9 +118,9 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with invalid time range"
-    assert "end 时间必须大于 start 时间" in result.message
-    print(f"✅ Time range validation works: {result.message}\n")
+    assert not result["success"], "Should fail with invalid time range"
+    assert "end 时间必须大于 start 时间" in result["message"]
+    print(f"✅ Time range validation works: {result["message"]}\n")
     
     # Test 6: Error handling - invalid material range
     print("Test 6: Error handling - invalid material range")
@@ -133,9 +133,9 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with invalid material range"
-    assert "material_end 时间必须大于 material_start 时间" in result.message
-    print(f"✅ Material range validation works: {result.message}\n")
+    assert not result["success"], "Should fail with invalid material range"
+    assert "material_end 时间必须大于 material_start 时间" in result["message"]
+    print(f"✅ Material range validation works: {result["message"]}\n")
     
     # Test 7: Error handling - material_start without material_end
     print("Test 7: Error handling - material_start without material_end")
@@ -148,9 +148,9 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail when only one material parameter is provided"
-    assert "material_start 和 material_end 必须同时提供" in result.message
-    print(f"✅ Material range pairing validation works: {result.message}\n")
+    assert not result["success"], "Should fail when only one material parameter is provided"
+    assert "material_start 和 material_end 必须同时提供" in result["message"]
+    print(f"✅ Material range pairing validation works: {result["message"]}\n")
     
     # Test 8: Error handling - invalid speed
     print("Test 8: Error handling - invalid speed")
@@ -162,9 +162,9 @@ def test_make_video_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with invalid speed"
-    assert "speed 必须在 0.5 到 2.0 之间" in result.message
-    print(f"✅ Speed validation works: {result.message}\n")
+    assert not result["success"], "Should fail with invalid speed"
+    assert "speed 必须在 0.5 到 2.0 之间" in result["message"]
+    print(f"✅ Speed validation works: {result["message"]}\n")
     
     print("✅ All make_video_info basic tests passed!\n")
     return True
@@ -185,13 +185,13 @@ def test_video_specific_features():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert "material_start" in parsed
     assert "material_end" in parsed
     assert parsed["material_start"] == 2000
     assert parsed["material_end"] == 7000
-    print(f"✅ Material range: {result.video_info_string}\n")
+    print(f"✅ Material range: {result["video_info_string"]}\n")
     
     # Test 2: Speed control
     print("Test 2: Speed control")
@@ -203,11 +203,11 @@ def test_video_specific_features():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert "speed" in parsed
     assert parsed["speed"] == 1.5
-    print(f"✅ Speed control: {result.video_info_string}\n")
+    print(f"✅ Speed control: {result["video_info_string"]}\n")
     
     # Test 3: Reverse playback
     print("Test 3: Reverse playback")
@@ -219,11 +219,11 @@ def test_video_specific_features():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert "reverse" in parsed
     assert parsed["reverse"] is True
-    print(f"✅ Reverse playback: {result.video_info_string}\n")
+    print(f"✅ Reverse playback: {result["video_info_string"]}\n")
     
     # Test 4: Combined speed and reverse
     print("Test 4: Combined speed and reverse")
@@ -236,11 +236,11 @@ def test_video_specific_features():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert parsed["speed"] == 0.5
     assert parsed["reverse"] is True
-    print(f"✅ Combined speed and reverse: {result.video_info_string}\n")
+    print(f"✅ Combined speed and reverse: {result["video_info_string"]}\n")
     
     # Test 5: All video-specific parameters
     print("Test 5: All video-specific parameters")
@@ -259,8 +259,8 @@ def test_video_specific_features():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert parsed["material_start"] == 5000
     assert parsed["material_end"] == 15000
     assert parsed["speed"] == 2.0
@@ -269,7 +269,7 @@ def test_video_specific_features():
     assert parsed["scale_x"] == 1.2
     assert parsed["filter_type"] == "暖冬"
     assert parsed["background_blur"] is True
-    print(f"✅ All video-specific parameters: {result.video_info_string}\n")
+    print(f"✅ All video-specific parameters: {result["video_info_string"]}\n")
     
     print("✅ All video-specific feature tests passed!\n")
     return True
@@ -288,16 +288,16 @@ def test_chinese_support():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.video_info_string)
+    assert result["success"]
+    parsed = json.loads(result["video_info_string"])
     assert parsed["filter_type"] == "暖冬"
     assert parsed["transition_type"] == "淡入淡出"
     
     # Verify JSON is properly encoded
-    assert "暖冬" in result.video_info_string
-    assert "淡入淡出" in result.video_info_string
+    assert "暖冬" in result["video_info_string"]
+    assert "淡入淡出" in result["video_info_string"]
     
-    print(f"✅ Chinese characters correctly handled: {result.video_info_string}\n")
+    print(f"✅ Chinese characters correctly handled: {result["video_info_string"]}\n")
     print("✅ Chinese character support test passed!\n")
     return True
 

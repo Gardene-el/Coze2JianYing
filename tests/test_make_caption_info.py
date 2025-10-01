@@ -52,15 +52,15 @@ def test_make_caption_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    assert result.caption_info_string, "Should return a string"
+    assert result["success"], f"Should succeed: {result["message"]}"
+    assert result["caption_info_string"], "Should return a string"
     
     # Parse and verify the output
-    parsed = json.loads(result.caption_info_string)
+    parsed = json.loads(result["caption_info_string"])
     assert parsed["content"] == "这是一句字幕"
     assert parsed["start"] == 0
     assert parsed["end"] == 3000
-    print(f"✅ Output: {result.caption_info_string}")
+    print(f"✅ Output: {result["caption_info_string"]}")
     
     # Test 2: With text style parameters
     print("\nTest 2: With text style parameters")
@@ -78,15 +78,15 @@ def test_make_caption_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    parsed = json.loads(result.caption_info_string)
+    assert result["success"], f"Should succeed: {result["message"]}"
+    parsed = json.loads(result["caption_info_string"])
     assert parsed["font_family"] == "思源黑体"
     assert parsed["font_size"] == 60
     assert parsed["font_weight"] == "bold"
     assert parsed["color"] == "#FFD700"
     assert parsed["stroke_enabled"] == True
     assert parsed["stroke_width"] == 3
-    print(f"✅ Output with text style: {result.caption_info_string[:100]}...")
+    print(f"✅ Output with text style: {result["caption_info_string"][:100]}...")
     
     # Test 3: Default values not included
     print("\nTest 3: Default values not included")
@@ -100,7 +100,7 @@ def test_make_caption_info_basic():
         color="#FFFFFF"  # default value
     )
     result = handler(MockArgs(input_data))
-    parsed = json.loads(result.caption_info_string)
+    parsed = json.loads(result["caption_info_string"])
     
     # Default values should not appear in output
     assert "position_x" not in parsed, "Default position_x should not be in output"
@@ -124,7 +124,7 @@ def test_make_caption_info_basic():
         background_opacity=0.7
     )
     result = handler(MockArgs(input_data))
-    parsed = json.loads(result.caption_info_string)
+    parsed = json.loads(result["caption_info_string"])
     assert parsed["shadow_enabled"] == True
     assert parsed["shadow_offset_x"] == 4
     assert parsed["background_enabled"] == True
@@ -142,7 +142,7 @@ def test_make_caption_info_basic():
         loop_animation="闪烁"
     )
     result = handler(MockArgs(input_data))
-    parsed = json.loads(result.caption_info_string)
+    parsed = json.loads(result["caption_info_string"])
     assert parsed["intro_animation"] == "淡入"
     assert parsed["outro_animation"] == "淡出"
     assert parsed["loop_animation"] == "闪烁"
@@ -156,9 +156,9 @@ def test_make_caption_info_basic():
         end=3000
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with empty content"
-    assert "content" in result.message.lower()
-    print(f"✅ Error handling works: {result.message}")
+    assert not result["success"], "Should fail with empty content"
+    assert "content" in result["message"].lower()
+    print(f"✅ Error handling works: {result["message"]}")
     
     # Test 7: Error handling - invalid time range
     print("\nTest 7: Error handling - invalid time range")
@@ -168,9 +168,9 @@ def test_make_caption_info_basic():
         end=3000  # end < start
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with invalid time range"
-    assert "end" in result.message and "start" in result.message
-    print(f"✅ Time range validation works: {result.message}")
+    assert not result["success"], "Should fail with invalid time range"
+    assert "end" in result["message"] and "start" in result["message"]
+    print(f"✅ Time range validation works: {result["message"]}")
     
     # Test 8: Error handling - invalid position
     print("\nTest 8: Error handling - invalid position")
@@ -181,9 +181,9 @@ def test_make_caption_info_basic():
         position_x=1.5  # > 1.0
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with invalid position"
-    assert "position_x" in result.message
-    print(f"✅ Position validation works: {result.message}")
+    assert not result["success"], "Should fail with invalid position"
+    assert "position_x" in result["message"]
+    print(f"✅ Position validation works: {result["message"]}")
     
     # Test 9: Error handling - invalid alignment
     print("\nTest 9: Error handling - invalid alignment")
@@ -194,9 +194,9 @@ def test_make_caption_info_basic():
         alignment="invalid"
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with invalid alignment"
-    assert "alignment" in result.message
-    print(f"✅ Alignment validation works: {result.message}")
+    assert not result["success"], "Should fail with invalid alignment"
+    assert "alignment" in result["message"]
+    print(f"✅ Alignment validation works: {result["message"]}")
     
     print("\n✅ All make_caption_info basic tests passed!")
     return True
@@ -306,8 +306,8 @@ def test_integration_make_and_add():
         start=0,
         end=3000
     )))
-    assert caption1_result.success
-    print(f"  Caption 1: {caption1_result.caption_info_string}")
+    assert caption1_result["success"]
+    print(f"  Caption 1: {caption1_result["caption_info_string"]}")
     
     caption2_result = make_handler(MockArgs(MakeInput(
         content="精彩内容马上开始",
@@ -317,8 +317,8 @@ def test_integration_make_and_add():
         color="#FFD700",
         stroke_enabled=True
     )))
-    assert caption2_result.success
-    print(f"  Caption 2: {caption2_result.caption_info_string}")
+    assert caption2_result["success"]
+    print(f"  Caption 2: {caption2_result["caption_info_string"]}")
     
     caption3_result = make_handler(MockArgs(MakeInput(
         content="感谢观看",
@@ -327,15 +327,15 @@ def test_integration_make_and_add():
         intro_animation="淡入",
         outro_animation="淡出"
     )))
-    assert caption3_result.success
-    print(f"  Caption 3: {caption3_result.caption_info_string}")
+    assert caption3_result["success"]
+    print(f"  Caption 3: {caption3_result["caption_info_string"]}")
     
     # Step 2: Collect strings into array
     print("\nStep 2: Collect strings into array")
     caption_infos_array = [
-        caption1_result.caption_info_string,
-        caption2_result.caption_info_string,
-        caption3_result.caption_info_string
+        caption1_result["caption_info_string"],
+        caption2_result["caption_info_string"],
+        caption3_result["caption_info_string"]
     ]
     print(f"  Array length: {len(caption_infos_array)}")
     
@@ -417,13 +417,13 @@ def test_chinese_characters():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.caption_info_string)
+    assert result["success"]
+    parsed = json.loads(result["caption_info_string"])
     assert parsed["content"] == "这是一段中文字幕，包含各种字符：！@#￥%"
     assert parsed["font_family"] == "思源黑体"
     assert parsed["intro_animation"] == "淡入"
     print(f"✅ Chinese characters handled correctly")
-    print(f"  Output: {result.caption_info_string[:80]}...")
+    print(f"  Output: {result["caption_info_string"][:80]}...")
     
     print("\n✅ All Chinese character tests passed!")
     return True

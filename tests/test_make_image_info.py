@@ -52,15 +52,15 @@ def test_make_image_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    assert result.image_info_string, "Should return a string"
+    assert result["success"], f"Should succeed: {result["message"]}"
+    assert result["image_info_string"], "Should return a string"
     
     # Parse and verify the output
-    parsed = json.loads(result.image_info_string)
+    parsed = json.loads(result["image_info_string"])
     assert parsed["image_url"] == "https://example.com/image.jpg"
     assert parsed["start"] == 0
     assert parsed["end"] == 3000
-    print(f"✅ Output: {result.image_info_string}")
+    print(f"✅ Output: {result["image_info_string"]}")
     
     # Test 2: With optional parameters
     print("\nTest 2: With optional parameters")
@@ -76,12 +76,12 @@ def test_make_image_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    parsed = json.loads(result.image_info_string)
+    assert result["success"], f"Should succeed: {result["message"]}"
+    parsed = json.loads(result["image_info_string"])
     assert parsed["in_animation"] == "轻微放大"
     assert parsed["filter_type"] == "暖冬"
     assert parsed["scale_x"] == 1.2
-    print(f"✅ Output with optional params: {result.image_info_string[:100]}...")
+    print(f"✅ Output with optional params: {result["image_info_string"][:100]}...")
     
     # Test 3: Default values should not be included
     print("\nTest 3: Default values not included")
@@ -95,8 +95,8 @@ def test_make_image_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.image_info_string)
+    assert result["success"]
+    parsed = json.loads(result["image_info_string"])
     assert "scale_x" not in parsed, "Default scale_x should not be included"
     assert "scale_y" not in parsed, "Default scale_y should not be included"
     assert "opacity" not in parsed, "Default opacity should not be included"
@@ -111,9 +111,9 @@ def test_make_image_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with empty image_url"
-    assert "image_url" in result.message
-    print(f"✅ Error handling works: {result.message}")
+    assert not result["success"], "Should fail with empty image_url"
+    assert "image_url" in result["message"]
+    print(f"✅ Error handling works: {result["message"]}")
     
     # Test 5: Error handling - invalid time range
     print("\nTest 5: Error handling - invalid time range")
@@ -124,8 +124,8 @@ def test_make_image_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with end < start"
-    print(f"✅ Time range validation works: {result.message}")
+    assert not result["success"], "Should fail with end < start"
+    print(f"✅ Time range validation works: {result["message"]}")
     
     print("\n✅ All make_image_info basic tests passed!")
     return True
@@ -255,8 +255,8 @@ def test_integration_make_image_info_to_add_images():
         in_animation="轻微放大",
         scale_x=1.2
     )))
-    assert image1_result.success
-    print(f"  Image 1: {image1_result.image_info_string}")
+    assert image1_result["success"]
+    print(f"  Image 1: {image1_result["image_info_string"]}")
     
     image2_result = make_handler(MockArgs(MakeInput(
         image_url="https://example.com/image2.jpg",
@@ -265,14 +265,14 @@ def test_integration_make_image_info_to_add_images():
         filter_type="暖冬",
         filter_intensity=0.8
     )))
-    assert image2_result.success
-    print(f"  Image 2: {image2_result.image_info_string}")
+    assert image2_result["success"]
+    print(f"  Image 2: {image2_result["image_info_string"]}")
     
     # Step 2: Collect strings into array
     print("\nStep 2: Collect strings into array")
     image_infos_array = [
-        image1_result.image_info_string,
-        image2_result.image_info_string
+        image1_result["image_info_string"],
+        image2_result["image_info_string"]
     ]
     print(f"  Array length: {len(image_infos_array)}")
     
@@ -351,12 +351,12 @@ def test_chinese_characters():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.image_info_string)
+    assert result["success"]
+    parsed = json.loads(result["image_info_string"])
     assert parsed["in_animation"] == "轻微放大"
     assert parsed["filter_type"] == "暖冬"
     
-    print(f"✅ Chinese characters preserved: {result.image_info_string}")
+    print(f"✅ Chinese characters preserved: {result["image_info_string"]}")
     return True
 
 

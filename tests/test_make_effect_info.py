@@ -67,15 +67,15 @@ def test_make_effect_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    assert result.effect_info_string, "Should return a string"
+    assert result["success"], f"Should succeed: {result["message"]}"
+    assert result["effect_info_string"], "Should return a string"
     
     # Parse and verify the output
-    parsed = json.loads(result.effect_info_string)
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["effect_type"] == "模糊"
     assert parsed["start"] == 0
     assert parsed["end"] == 3000
-    print(f"✅ Output: {result.effect_info_string}")
+    print(f"✅ Output: {result["effect_info_string"]}")
     
     # Test 2: With optional parameters
     print("\nTest 2: With optional parameters")
@@ -90,12 +90,12 @@ def test_make_effect_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"], f"Should succeed: {result["message"]}"
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["intensity"] == 0.7
     assert parsed["position_x"] == 0.5
     assert parsed["scale"] == 1.5
-    print(f"✅ Output with optional params: {result.effect_info_string}")
+    print(f"✅ Output with optional params: {result["effect_info_string"]}")
     
     # Test 3: Default values should not be included
     print("\nTest 3: Default values not included")
@@ -108,11 +108,11 @@ def test_make_effect_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert "intensity" not in parsed, "Default intensity should not be included"
     assert "scale" not in parsed, "Default scale should not be included"
-    print(f"✅ Default values excluded: {result.effect_info_string}")
+    print(f"✅ Default values excluded: {result["effect_info_string"]}")
     
     # Test 4: With custom properties
     print("\nTest 4: Custom properties")
@@ -126,12 +126,12 @@ def test_make_effect_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["effect_type"] == "高级模糊"
     assert parsed["properties"]["blur_radius"] == 15
     assert parsed["properties"]["edge_detection"] == True
-    print(f"✅ Custom properties: {result.effect_info_string}")
+    print(f"✅ Custom properties: {result["effect_info_string"]}")
     
     # Test 5: Position parameters
     print("\nTest 5: Position parameters")
@@ -144,11 +144,11 @@ def test_make_effect_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["position_x"] == 100.5
     assert parsed["position_y"] == 200.3
-    print(f"✅ Position parameters: {result.effect_info_string}")
+    print(f"✅ Position parameters: {result["effect_info_string"]}")
     
     print("\n✅ All make_effect_info basic tests passed!")
     return True
@@ -176,9 +176,9 @@ def test_make_effect_info_validation():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with missing effect_type"
-    assert "effect_type" in result.message
-    print(f"✅ Error handling works: {result.message}")
+    assert not result["success"], "Should fail with missing effect_type"
+    assert "effect_type" in result["message"]
+    print(f"✅ Error handling works: {result["message"]}")
     
     # Test 2: Invalid time range
     print("\nTest 2: Error handling - invalid time range")
@@ -189,9 +189,9 @@ def test_make_effect_info_validation():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with invalid time range"
-    assert "时间" in result.message or "start" in result.message or "end" in result.message
-    print(f"✅ Time range validation works: {result.message}")
+    assert not result["success"], "Should fail with invalid time range"
+    assert "时间" in result["message"] or "start" in result["message"] or "end" in result["message"]
+    print(f"✅ Time range validation works: {result["message"]}")
     
     # Test 3: Negative start time
     print("\nTest 3: Error handling - negative start time")
@@ -202,8 +202,8 @@ def test_make_effect_info_validation():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with negative start time"
-    print(f"✅ Negative time validation works: {result.message}")
+    assert not result["success"], "Should fail with negative start time"
+    print(f"✅ Negative time validation works: {result["message"]}")
     
     # Test 4: Invalid properties JSON
     print("\nTest 4: Error handling - invalid properties JSON")
@@ -215,9 +215,9 @@ def test_make_effect_info_validation():
     )
     result = handler(MockArgs(input_data))
     
-    assert not result.success, "Should fail with invalid JSON"
-    assert "JSON" in result.message or "properties" in result.message
-    print(f"✅ JSON validation works: {result.message}")
+    assert not result["success"], "Should fail with invalid JSON"
+    assert "JSON" in result["message"] or "properties" in result["message"]
+    print(f"✅ JSON validation works: {result["message"]}")
     
     print("\n✅ All make_effect_info validation tests passed!")
     return True
@@ -246,10 +246,10 @@ def test_make_effect_info_edge_cases():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["intensity"] == 0.0
-    print(f"✅ Zero intensity: {result.effect_info_string}")
+    print(f"✅ Zero intensity: {result["effect_info_string"]}")
     
     # Test 2: Very long duration
     print("\nTest 2: Very long duration")
@@ -260,10 +260,10 @@ def test_make_effect_info_edge_cases():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["end"] == 3600000
-    print(f"✅ Long duration: {result.effect_info_string}")
+    print(f"✅ Long duration: {result["effect_info_string"]}")
     
     # Test 3: Empty properties dict
     print("\nTest 3: Empty properties dict")
@@ -275,10 +275,10 @@ def test_make_effect_info_edge_cases():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert "properties" not in parsed, "Empty properties should not be included"
-    print(f"✅ Empty properties excluded: {result.effect_info_string}")
+    print(f"✅ Empty properties excluded: {result["effect_info_string"]}")
     
     # Test 4: Negative position values
     print("\nTest 4: Negative position values")
@@ -291,11 +291,11 @@ def test_make_effect_info_edge_cases():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.effect_info_string)
+    assert result["success"]
+    parsed = json.loads(result["effect_info_string"])
     assert parsed["position_x"] == -50.0
     assert parsed["position_y"] == -100.0
-    print(f"✅ Negative positions: {result.effect_info_string}")
+    print(f"✅ Negative positions: {result["effect_info_string"]}")
     
     # Test 5: Chinese effect names
     print("\nTest 5: Chinese effect names")
@@ -307,8 +307,8 @@ def test_make_effect_info_edge_cases():
             end=1000
         )
         result = handler(MockArgs(input_data))
-        assert result.success
-        parsed = json.loads(result.effect_info_string)
+        assert result["success"]
+        parsed = json.loads(result["effect_info_string"])
         assert parsed["effect_type"] == effect
     print(f"✅ Chinese effect names: {len(chinese_effects)} effects tested")
     

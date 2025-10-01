@@ -44,7 +44,7 @@ def demo_basic_usage():
         end=5000
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
     
     # With some optional parameters
     print("2. With optional parameters:")
@@ -57,7 +57,7 @@ def demo_basic_usage():
         filter_type="暖冬"
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
 
 
 def demo_video_specific_features():
@@ -75,7 +75,7 @@ def demo_video_specific_features():
         material_end=15000     # End at 15s in source
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
     
     # Speed control
     print("2. Speed control:")
@@ -87,7 +87,7 @@ def demo_video_specific_features():
         speed=2.0
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
     
     # Slow motion
     print("3. Slow motion:")
@@ -99,7 +99,7 @@ def demo_video_specific_features():
         speed=0.5
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
     
     # Reverse playback
     print("4. Reverse playback:")
@@ -111,7 +111,7 @@ def demo_video_specific_features():
         reverse=True
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
     
     # Combined: slow motion + reverse
     print("5. Combined features: slow motion + reverse:")
@@ -124,7 +124,7 @@ def demo_video_specific_features():
         reverse=True
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Result: {result.video_info_string}\n")
+    print(f"   Result: {result["video_info_string"]}\n")
 
 
 def demo_complete_configuration():
@@ -152,7 +152,7 @@ def demo_complete_configuration():
         background_blur=True
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"Result: {result.video_info_string}\n")
+    print(f"Result: {result["video_info_string"]}\n")
 
 
 def demo_workflow_with_add_videos():
@@ -192,7 +192,7 @@ def demo_workflow_with_add_videos():
         filter_type="暖冬"
     )
     video1_result = make_video_info_handler(MockArgs(video1_input))
-    print(f"   Video 1: {video1_result.video_info_string}")
+    print(f"   Video 1: {video1_result["video_info_string"]}")
     
     # Video 2: Main content with material trimming
     video2_input = MakeVideoInput(
@@ -203,7 +203,7 @@ def demo_workflow_with_add_videos():
         material_end=15000
     )
     video2_result = make_video_info_handler(MockArgs(video2_input))
-    print(f"   Video 2: {video2_result.video_info_string}")
+    print(f"   Video 2: {video2_result["video_info_string"]}")
     
     # Video 3: Slow motion highlight
     video3_input = MakeVideoInput(
@@ -215,14 +215,14 @@ def demo_workflow_with_add_videos():
         scale_y=1.2
     )
     video3_result = make_video_info_handler(MockArgs(video3_input))
-    print(f"   Video 3: {video3_result.video_info_string}\n")
+    print(f"   Video 3: {video3_result["video_info_string"]}\n")
     
     # Step 3: Collect into array
     print("Step 3: Collect video info strings into array")
     video_infos_array = [
-        video1_result.video_info_string,
-        video2_result.video_info_string,
-        video3_result.video_info_string
+        video1_result["video_info_string"],
+        video2_result["video_info_string"],
+        video3_result["video_info_string"]
     ]
     print(f"   Array contains {len(video_infos_array)} video configs\n")
     
@@ -254,8 +254,8 @@ def demo_error_handling():
         end=None  # Missing
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result.success}")
-    print(f"   Message: {result.message}\n")
+    print(f"   Success: {result["success"]}")
+    print(f"   Message: {result["message"]}\n")
     
     # Invalid time range
     print("2. Invalid time range (end <= start):")
@@ -265,8 +265,8 @@ def demo_error_handling():
         end=1000
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result.success}")
-    print(f"   Message: {result.message}\n")
+    print(f"   Success: {result["success"]}")
+    print(f"   Message: {result["message"]}\n")
     
     # Material range without both parameters
     print("3. Material range without both parameters:")
@@ -278,8 +278,8 @@ def demo_error_handling():
         # material_end missing
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result.success}")
-    print(f"   Message: {result.message}\n")
+    print(f"   Success: {result["success"]}")
+    print(f"   Message: {result["message"]}\n")
     
     # Invalid speed
     print("4. Invalid speed (> 2.0):")
@@ -290,8 +290,8 @@ def demo_error_handling():
         speed=3.0
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result.success}")
-    print(f"   Message: {result.message}\n")
+    print(f"   Success: {result["success"]}")
+    print(f"   Message: {result["message"]}\n")
 
 
 def demo_comparison_with_images():

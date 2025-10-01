@@ -50,15 +50,15 @@ def test_make_audio_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    assert result.audio_info_string, "Should return a string"
+    assert result["success"], f"Should succeed: {result["message"]}"
+    assert result["audio_info_string"], "Should return a string"
     
     # Parse and verify the output
-    parsed = json.loads(result.audio_info_string)
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["audio_url"] == "https://example.com/audio.mp3"
     assert parsed["start"] == 0
     assert parsed["end"] == 5000
-    print(f"✅ Output: {result.audio_info_string}")
+    print(f"✅ Output: {result["audio_info_string"]}")
     
     # Test 2: With optional parameters
     print("\nTest 2: With optional parameters")
@@ -73,13 +73,13 @@ def test_make_audio_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success, f"Should succeed: {result.message}"
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"], f"Should succeed: {result["message"]}"
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["volume"] == 0.7
     assert parsed["fade_in"] == 2000
     assert parsed["fade_out"] == 3000
     assert parsed["speed"] == 1.2
-    print(f"✅ Output with optional params: {result.audio_info_string}")
+    print(f"✅ Output with optional params: {result["audio_info_string"]}")
     
     # Test 3: Default values should not be included
     print("\nTest 3: Default values not included")
@@ -92,11 +92,11 @@ def test_make_audio_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert "volume" not in parsed, "Default volume should not be included"
     assert "speed" not in parsed, "Default speed should not be included"
-    print(f"✅ Default values excluded: {result.audio_info_string}")
+    print(f"✅ Default values excluded: {result["audio_info_string"]}")
     
     # Test 4: Audio effects
     print("\nTest 4: Audio effects")
@@ -109,11 +109,11 @@ def test_make_audio_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["effect_type"] == "变声"
     assert parsed["effect_intensity"] == 0.8
-    print(f"✅ Audio effects: {result.audio_info_string}")
+    print(f"✅ Audio effects: {result["audio_info_string"]}")
     
     # Test 5: Material range (trimming)
     print("\nTest 5: Material range")
@@ -126,11 +126,11 @@ def test_make_audio_info_basic():
     )
     result = handler(MockArgs(input_data))
     
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["material_start"] == 10000
     assert parsed["material_end"] == 30000
-    print(f"✅ Material range: {result.audio_info_string}")
+    print(f"✅ Material range: {result["audio_info_string"]}")
     
     print("\n✅ All basic functionality tests passed!")
     return True
@@ -167,9 +167,9 @@ def test_make_audio_info_validation():
         end=5000
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with missing audio_url"
-    assert "audio_url" in result.message
-    print(f"✅ Correctly rejected: {result.message}")
+    assert not result["success"], "Should fail with missing audio_url"
+    assert "audio_url" in result["message"]
+    print(f"✅ Correctly rejected: {result["message"]}")
     
     # Test 2: Invalid time range
     print("\nTest 2: Invalid time range")
@@ -179,8 +179,8 @@ def test_make_audio_info_validation():
         end=3000  # end < start
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with invalid time range"
-    print(f"✅ Correctly rejected: {result.message}")
+    assert not result["success"], "Should fail with invalid time range"
+    print(f"✅ Correctly rejected: {result["message"]}")
     
     # Test 3: Invalid volume
     print("\nTest 3: Invalid volume")
@@ -191,9 +191,9 @@ def test_make_audio_info_validation():
         volume=3.0  # > 2.0
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with invalid volume"
-    assert "volume" in result.message
-    print(f"✅ Correctly rejected: {result.message}")
+    assert not result["success"], "Should fail with invalid volume"
+    assert "volume" in result["message"]
+    print(f"✅ Correctly rejected: {result["message"]}")
     
     # Test 4: Invalid speed
     print("\nTest 4: Invalid speed")
@@ -204,9 +204,9 @@ def test_make_audio_info_validation():
         speed=0.3  # < 0.5
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with invalid speed"
-    assert "speed" in result.message
-    print(f"✅ Correctly rejected: {result.message}")
+    assert not result["success"], "Should fail with invalid speed"
+    assert "speed" in result["message"]
+    print(f"✅ Correctly rejected: {result["message"]}")
     
     # Test 5: Incomplete material range
     print("\nTest 5: Incomplete material range")
@@ -217,9 +217,9 @@ def test_make_audio_info_validation():
         material_start=1000  # missing material_end
     )
     result = handler(MockArgs(input_data))
-    assert not result.success, "Should fail with incomplete material range"
-    assert "material_start" in result.message or "material_end" in result.message
-    print(f"✅ Correctly rejected: {result.message}")
+    assert not result["success"], "Should fail with incomplete material range"
+    assert "material_start" in result["message"] or "material_end" in result["message"]
+    print(f"✅ Correctly rejected: {result["message"]}")
     
     print("\n✅ All validation tests passed!")
     return True
@@ -258,8 +258,8 @@ def test_make_audio_info_edge_cases():
         fade_out=0
     )
     result = handler(MockArgs(input_data))
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert "fade_in" not in parsed  # Default value, should not be included
     assert "fade_out" not in parsed
     print("✅ Zero fade times handled correctly")
@@ -273,8 +273,8 @@ def test_make_audio_info_edge_cases():
         volume=2.0
     )
     result = handler(MockArgs(input_data))
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["volume"] == 2.0
     print("✅ Maximum volume accepted")
     
@@ -287,8 +287,8 @@ def test_make_audio_info_edge_cases():
         speed=0.5
     )
     result = handler(MockArgs(input_data))
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["speed"] == 0.5
     print("✅ Minimum speed accepted")
     
@@ -302,8 +302,8 @@ def test_make_audio_info_edge_cases():
         effect_intensity=1.0  # Default value
     )
     result = handler(MockArgs(input_data))
-    assert result.success
-    parsed = json.loads(result.audio_info_string)
+    assert result["success"]
+    parsed = json.loads(result["audio_info_string"])
     assert parsed["effect_type"] == "混响"
     assert "effect_intensity" not in parsed  # Default value, should not be included
     print("✅ Effect with default intensity handled correctly")
