@@ -117,59 +117,63 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
             "end": args.input.end
         }
         
-        # Add optional parameters only if they are not None
+        # Add optional parameters only if they are not None and not default values
         # This keeps the output clean and only includes specified parameters
         
-        # Transform (only add if not default values)
-        if args.input.position_x != 0.0:
+        # Transform (only add if not None and not default values)
+        if args.input.position_x is not None and args.input.position_x != 0.0:
             image_info["position_x"] = args.input.position_x
-        if args.input.position_y != 0.0:
+        if args.input.position_y is not None and args.input.position_y != 0.0:
             image_info["position_y"] = args.input.position_y
-        if args.input.scale_x != 1.0:
+        if args.input.scale_x is not None and args.input.scale_x != 1.0:
             image_info["scale_x"] = args.input.scale_x
-        if args.input.scale_y != 1.0:
+        if args.input.scale_y is not None and args.input.scale_y != 1.0:
             image_info["scale_y"] = args.input.scale_y
-        if args.input.rotation != 0.0:
+        if args.input.rotation is not None and args.input.rotation != 0.0:
             image_info["rotation"] = args.input.rotation
-        if args.input.opacity != 1.0:
+        if args.input.opacity is not None and args.input.opacity != 1.0:
             image_info["opacity"] = args.input.opacity
         
-        # Crop
-        if args.input.crop_enabled:
+        # Crop (only add if enabled and not None)
+        if args.input.crop_enabled is not None and args.input.crop_enabled:
             image_info["crop_enabled"] = args.input.crop_enabled
-            image_info["crop_left"] = args.input.crop_left
-            image_info["crop_top"] = args.input.crop_top
-            image_info["crop_right"] = args.input.crop_right
-            image_info["crop_bottom"] = args.input.crop_bottom
+            if args.input.crop_left is not None:
+                image_info["crop_left"] = args.input.crop_left
+            if args.input.crop_top is not None:
+                image_info["crop_top"] = args.input.crop_top
+            if args.input.crop_right is not None:
+                image_info["crop_right"] = args.input.crop_right
+            if args.input.crop_bottom is not None:
+                image_info["crop_bottom"] = args.input.crop_bottom
         
         # Effects
         if args.input.filter_type is not None:
             image_info["filter_type"] = args.input.filter_type
-            if args.input.filter_intensity != 1.0:
+            if args.input.filter_intensity is not None and args.input.filter_intensity != 1.0:
                 image_info["filter_intensity"] = args.input.filter_intensity
         
         if args.input.transition_type is not None:
             image_info["transition_type"] = args.input.transition_type
-            if args.input.transition_duration != 500:
+            if args.input.transition_duration is not None and args.input.transition_duration != 500:
                 image_info["transition_duration"] = args.input.transition_duration
         
         # Background
-        if args.input.background_blur:
+        if args.input.background_blur is not None and args.input.background_blur:
             image_info["background_blur"] = args.input.background_blur
         if args.input.background_color is not None:
             image_info["background_color"] = args.input.background_color
-        if args.input.fit_mode != "fit":
+        if args.input.fit_mode is not None and args.input.fit_mode != "fit":
             image_info["fit_mode"] = args.input.fit_mode
         
         # Animations
         if args.input.in_animation is not None:
             image_info["in_animation"] = args.input.in_animation
-            if args.input.in_animation_duration != 500:
+            if args.input.in_animation_duration is not None and args.input.in_animation_duration != 500:
                 image_info["in_animation_duration"] = args.input.in_animation_duration
         
         if args.input.outro_animation is not None:
             image_info["outro_animation"] = args.input.outro_animation
-            if args.input.outro_animation_duration != 500:
+            if args.input.outro_animation_duration is not None and args.input.outro_animation_duration != 500:
                 image_info["outro_animation_duration"] = args.input.outro_animation_duration
         
         # Convert to JSON string without extra whitespace for compact representation

@@ -107,11 +107,15 @@ def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
             image_infos = json.loads(image_infos_input)
         elif isinstance(image_infos_input, list):
             # Direct list - could be list of dicts OR list of strings
-            # Check if first element is a string (array of strings format)
-            if image_infos_input and isinstance(image_infos_input[0], str):
-                # Array of strings - parse each string as JSON
+            # Check if first non-empty element is a string (array of strings format)
+            first_non_empty = next((item for item in image_infos_input if item), None)
+            if first_non_empty and isinstance(first_non_empty, str):
+                # Array of strings - parse each string as JSON, skip empty strings
                 parsed_infos = []
                 for i, info_str in enumerate(image_infos_input):
+                    # Skip empty strings silently
+                    if not info_str or (isinstance(info_str, str) and info_str.strip() == ''):
+                        continue
                     try:
                         parsed_info = json.loads(info_str)
                         parsed_infos.append(parsed_info)
