@@ -173,11 +173,11 @@ def demo_workflow_with_add_videos():
         fps=30
     )
     create_result = create_handler(MockArgs(create_input))
-    if not create_result.success:
-        print(f"   Failed to create draft: {create_result.message}")
+    if not create_result["success"]:
+        print(f"   Failed to create draft: {create_result["message"]}")
         return
     
-    draft_id = create_result.draft_id
+    draft_id = create_result["draft_id"]
     print(f"   Created draft: {draft_id}\n")
     
     # Step 2: Generate video info strings
@@ -254,8 +254,8 @@ def demo_error_handling():
         end=None  # Missing
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result["success"]}")
-    print(f"   Message: {result["message"]}\n")
+    print(f"   Success: {result.success}")
+    print(f"   Message: {result.message}\n")
     
     # Invalid time range
     print("2. Invalid time range (end <= start):")
@@ -265,8 +265,8 @@ def demo_error_handling():
         end=1000
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result["success"]}")
-    print(f"   Message: {result["message"]}\n")
+    print(f"   Success: {result.success}")
+    print(f"   Message: {result.message}\n")
     
     # Material range without both parameters
     print("3. Material range without both parameters:")
@@ -278,8 +278,8 @@ def demo_error_handling():
         # material_end missing
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result["success"]}")
-    print(f"   Message: {result["message"]}\n")
+    print(f"   Success: {result.success}")
+    print(f"   Message: {result.message}\n")
     
     # Invalid speed
     print("4. Invalid speed (> 2.0):")
@@ -290,8 +290,8 @@ def demo_error_handling():
         speed=3.0
     )
     result = make_video_info_handler(MockArgs(input_data))
-    print(f"   Success: {result["success"]}")
-    print(f"   Message: {result["message"]}\n")
+    print(f"   Success: {result.success}")
+    print(f"   Message: {result.message}\n")
 
 
 def demo_comparison_with_images():

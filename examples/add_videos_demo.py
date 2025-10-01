@@ -45,7 +45,7 @@ def create_demo_draft(name):
     )
     result = create_handler(MockArgs(create_input))
     if result.success:
-        return result.draft_id
+        return result["draft_id"]
     else:
         raise Exception(f"Failed to create draft: {result.message}")
 
@@ -349,7 +349,7 @@ def demo_complete_workflow():
         speed=1.5,
         filter_type="暖冬"
     )))
-    print(f"   Video 1: {video1.video_info_string[:80]}...")
+    print(f"   Video 1: {video1["video_info_string"][:80]}...")
     
     video2 = make_video_info_handler(MockArgs(MakeVideoInput(
         video_url="https://example.com/main.mp4",
@@ -358,7 +358,7 @@ def demo_complete_workflow():
         material_start=5000,
         material_end=15000
     )))
-    print(f"   Video 2: {video2.video_info_string[:80]}...")
+    print(f"   Video 2: {video2["video_info_string"][:80]}...")
     
     video3 = make_video_info_handler(MockArgs(MakeVideoInput(
         video_url="https://example.com/outro.mp4",
@@ -367,14 +367,14 @@ def demo_complete_workflow():
         speed=0.5,
         reverse=True
     )))
-    print(f"   Video 3: {video3.video_info_string[:80]}...")
+    print(f"   Video 3: {video3["video_info_string"][:80]}...")
     
     # Step 2: Collect into array
     print("\nStep 2: Collect into array")
     video_infos_array = [
-        video1.video_info_string,
-        video2.video_info_string,
-        video3.video_info_string
+        video1["video_info_string"],
+        video2["video_info_string"],
+        video3["video_info_string"]
     ]
     print(f"   Array contains {len(video_infos_array)} videos")
     

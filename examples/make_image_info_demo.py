@@ -54,11 +54,11 @@ def main():
         fps=30
     )))
     
-    if not draft_result.success:
-        print(f"❌ 创建草稿失败: {draft_result.message}")
+    if not draft_result["success"]:
+        print(f"❌ 创建草稿失败: {draft_result["message"]}")
         return
     
-    draft_id = draft_result.draft_id
+    draft_id = draft_result["draft_id"]
     print(f"✅ 草稿创建成功")
     print(f"   草稿 ID: {draft_id}")
     

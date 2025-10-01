@@ -63,11 +63,11 @@ def example_1_simple_captions():
         fps=30
     )))
     
-    if not create_result.success:
-        print(f"❌ Failed to create draft: {create_result.message}")
+    if not create_result["success"]:
+        print(f"❌ Failed to create draft: {create_result["message"]}")
         return
     
-    draft_id = create_result.draft_id
+    draft_id = create_result["draft_id"]
     print(f"✅ Draft created: {draft_id}")
     
     # Step 2: Add captions using array format
@@ -106,8 +106,8 @@ def example_1_simple_captions():
         draft_ids=draft_id
     )))
     
-    if export_result.success:
-        export_data = json.loads(export_result.draft_data)
+    if export_result["success"]:
+        export_data = json.loads(export_result["draft_data"])
         draft_data = export_data['drafts'][0]  # Get first draft
         print(f"✅ Draft exported successfully")
         print(f"   Tracks: {len(draft_data['tracks'])}")
@@ -132,7 +132,7 @@ def example_2_styled_captions():
         height=1080,
         fps=30
     )))
-    draft_id = create_result.draft_id
+    draft_id = create_result["draft_id"]
     print(f"✅ Draft created: {draft_id}")
     
     # Step 2: Add styled captions
@@ -185,7 +185,7 @@ def example_3_dynamic_captions():
         height=1080,
         fps=30
     )))
-    draft_id = create_result.draft_id
+    draft_id = create_result["draft_id"]
     print(f"✅ Draft created: {draft_id}")
     
     # Step 2: Generate caption strings dynamically
@@ -200,8 +200,8 @@ def example_3_dynamic_captions():
         end=2000,
         intro_animation="淡入"
     )))
-    caption_strings.append(result1.caption_info_string)
-    print(f"   Caption 1: {result1.caption_info_string[:60]}...")
+    caption_strings.append(result1["caption_info_string"])
+    print(f"   Caption 1: {result1["caption_info_string"][:60]}...")
     
     # Title caption
     result2 = make_caption_handler(MockArgs(MakeCaptionInput(
@@ -212,8 +212,8 @@ def example_3_dynamic_captions():
         font_size=72,
         font_weight="bold"
     )))
-    caption_strings.append(result2.caption_info_string)
-    print(f"   Caption 2: {result2.caption_info_string[:60]}...")
+    caption_strings.append(result2["caption_info_string"])
+    print(f"   Caption 2: {result2["caption_info_string"][:60]}...")
     
     # Regular captions
     for i in range(3):
@@ -222,8 +222,8 @@ def example_3_dynamic_captions():
             start=5000 + i * 3000,
             end=8000 + i * 3000
         )))
-        caption_strings.append(result.caption_info_string)
-        print(f"   Caption {i+3}: {result.caption_info_string[:60]}...")
+        caption_strings.append(result["caption_info_string"])
+        print(f"   Caption {i+3}: {result["caption_info_string"][:60]}...")
     
     # Closing caption
     result_end = make_caption_handler(MockArgs(MakeCaptionInput(
@@ -232,8 +232,8 @@ def example_3_dynamic_captions():
         end=16000,
         outro_animation="淡出"
     )))
-    caption_strings.append(result_end.caption_info_string)
-    print(f"   Caption 6: {result_end.caption_info_string[:60]}...")
+    caption_strings.append(result_end["caption_info_string"])
+    print(f"   Caption 6: {result_end["caption_info_string"][:60]}...")
     
     # Step 3: Add all captions at once
     print(f"\nStep 3: Adding {len(caption_strings)} captions to draft...")
@@ -263,7 +263,7 @@ def example_4_multilayer_captions():
         height=1080,
         fps=30
     )))
-    draft_id = create_result.draft_id
+    draft_id = create_result["draft_id"]
     print(f"✅ Draft created: {draft_id}")
     
     # Step 2: Add Chinese captions (bottom)
@@ -313,7 +313,7 @@ def example_4_multilayer_captions():
     # Step 4: Verify
     print("\nStep 4: Verifying draft structure...")
     export_result = export_handler(MockArgs(ExportInput(draft_ids=draft_id)))
-    export_data = json.loads(export_result.draft_data)
+    export_data = json.loads(export_result["draft_data"])
     draft_data = export_data['drafts'][0]  # Get first draft
     print(f"✅ Total tracks: {len(draft_data['tracks'])}")
     print(f"   Track 1 (Chinese): {len(draft_data['tracks'][0]['segments'])} segments")
@@ -338,7 +338,7 @@ def example_5_complete_workflow():
         height=1080,
         fps=30
     )))
-    draft_id = create_result.draft_id
+    draft_id = create_result["draft_id"]
     print(f"✅ Draft created: {draft_id}")
     
     # Step 2: Add opening caption
@@ -354,7 +354,7 @@ def example_5_complete_workflow():
     
     add_captions_handler(MockArgs(AddCaptionsInput(
         draft_id=draft_id,
-        caption_infos=[opening.caption_info_string]
+        caption_infos=[opening["caption_info_string"]]
     )))
     print(f"✅ Added opening caption")
     
@@ -375,7 +375,7 @@ def example_5_complete_workflow():
     
     add_captions_handler(MockArgs(AddCaptionsInput(
         draft_id=draft_id,
-        caption_infos=[title.caption_info_string]
+        caption_infos=[title["caption_info_string"]]
     )))
     print(f"✅ Added title caption")
     
@@ -390,7 +390,7 @@ def example_5_complete_workflow():
             shadow_enabled=True,
             shadow_blur=6
         )))
-        content_captions.append(caption.caption_info_string)
+        content_captions.append(caption["caption_info_string"])
     
     add_captions_handler(MockArgs(AddCaptionsInput(
         draft_id=draft_id,
@@ -414,7 +414,7 @@ def example_5_complete_workflow():
     
     add_captions_handler(MockArgs(AddCaptionsInput(
         draft_id=draft_id,
-        caption_infos=[closing.caption_info_string]
+        caption_infos=[closing["caption_info_string"]]
     )))
     print(f"✅ Added closing caption")
     
@@ -422,8 +422,8 @@ def example_5_complete_workflow():
     print("\nStep 6: Exporting final draft...")
     export_result = export_handler(MockArgs(ExportInput(draft_ids=draft_id)))
     
-    if export_result.success:
-        export_data = json.loads(export_result.draft_data)
+    if export_result["success"]:
+        export_data = json.loads(export_result["draft_data"])
         draft_data = export_data['drafts'][0]  # Get first draft
         print(f"✅ Draft exported successfully")
         print(f"   Total tracks: {len(draft_data['tracks'])}")
