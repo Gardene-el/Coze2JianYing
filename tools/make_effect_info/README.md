@@ -90,10 +90,10 @@ class Input(NamedTuple):
 
 ## 输出结果
 
-### Output 类型定义
+### 返回值格式
 
 ```python
-class Output(NamedTuple):
+# Handler returns a dictionary with these keys:
     effect_info_string: str                     # 特效信息的 JSON 字符串
     success: bool                               # 操作是否成功
     message: str                                # 状态消息

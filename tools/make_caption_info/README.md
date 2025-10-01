@@ -124,10 +124,10 @@ class Input(NamedTuple):
 
 ## 输出结果
 
-### Output 类型定义
+### 返回值格式
 
 ```python
-class Output(NamedTuple):
+# Handler returns a dictionary with these keys:
     caption_info_string: str                    # 字幕信息的JSON字符串
     success: bool = True                        # 操作成功状态
     message: str = "字幕信息字符串生成成功"       # 状态消息
