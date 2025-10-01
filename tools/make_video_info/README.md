@@ -13,9 +13,9 @@
 
 ### 参数数量说明
 
-本工具共有 **27 个参数**：
+本工具共有 **29 个参数**：
 - **3 个必需参数**: `video_url`, `start`, `end`
-- **24 个可选参数**: 包括素材范围、变换、裁剪、效果、速度控制、背景等设置
+- **26 个可选参数**: 包括素材范围、变换、裁剪、效果、速度控制、音频、背景等设置
 
 这些参数基于 `pyJianYingDraft` 库的功能设计，映射了剪映中视频片段的主要可配置属性。
 
@@ -59,6 +59,10 @@ class Input(NamedTuple):
     speed: Optional[float] = 1.0                # 播放速度（0.5-2.0，默认1.0）
     reverse: Optional[bool] = False             # 反向播放（默认False）
     
+    # 可选：音频字段
+    volume: Optional[float] = 1.0               # 音量（0.0-2.0，默认1.0）
+    change_pitch: Optional[bool] = False        # 变速时是否变调（默认False）
+    
     # 可选：背景字段
     background_blur: Optional[bool] = False     # 背景模糊（默认False）
     background_color: Optional[str] = None      # 背景颜色
@@ -67,9 +71,34 @@ class Input(NamedTuple):
 ### 参数说明
 
 #### 必需参数
+
 - `video_url`: 视频的 URL 地址
 - `start`: 视频在时间轴上的开始时间（毫秒）
 - `end`: 视频在时间轴上的结束时间（毫秒）
+
+**重要说明 - start/end 与 material_start/material_end 的区别**：
+
+1. **start/end（时间轴位置）**：
+   - 定义素材在时间轴上**何时播放**
+   - 例如：`start=0, end=5000` 表示从时间轴的0秒到5秒位置播放此视频
+   - 所有素材类型（视频、音频、图片、字幕）都需要
+
+2. **material_start/material_end（素材裁剪）**：
+   - 定义从源素材中**截取哪一段**来播放
+   - 例如：`material_start=10000, material_end=15000` 表示使用源视频的第10-15秒
+   - 只有视频和音频需要（图片和字幕无时长概念）
+
+3. **时长不匹配的行为**：
+   - 当 `(end - start) ≠ (material_end - material_start)` 时，视频会**自动调整播放速度**
+   - 速度计算：`effective_speed = (material_end - material_start) / (end - start)`
+   - 示例：10秒素材放入5秒时间轴 → 2倍速播放（快动作）
+   - 示例：5秒素材放入10秒时间轴 → 0.5倍速播放（慢动作）
+   - **建议**：通常应保持时长一致以正常速度播放
+
+4. **不指定 material_* 时的默认行为**：
+   - 自动使用素材开头的 `(end - start)` 毫秒
+   - 正常速度播放（1x）
+   - 这是最常见的用法
 
 #### 视频特有参数（与图片工具的区别）
 
@@ -79,8 +108,15 @@ class Input(NamedTuple):
 - 必须同时提供两个参数，否则会报错
 
 **速度控制（Speed Control）**:
-- `speed`: 播放速度，范围 0.5-2.0（0.5倍速到2倍速）
+- `speed`: 额外的播放速度调整，范围 0.5-2.0（0.5倍速到2倍速）
 - `reverse`: 是否反向播放，布尔值
+- **注意**：如果时长不匹配，最终速度 = 自动速度 × speed 参数
+
+**音频控制（Audio Control）** ⭐ 新增:
+- `volume`: 视频的音量，范围 0.0-2.0（默认1.0）
+- `change_pitch`: 变速时是否改变音调（默认False）
+  - False: 变速不变调（推荐，听起来自然）
+  - True: 变速变调（快放音调变高，慢放音调变低）
 
 #### 共享参数（与图片工具相同）
 

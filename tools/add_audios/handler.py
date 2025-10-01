@@ -65,6 +65,7 @@ class AudioSegmentConfig:
         
         # Speed control
         self.speed = kwargs.get('speed', 1.0)
+        self.change_pitch = kwargs.get('change_pitch', False)
         
         # Volume keyframes (empty by default)
         self.volume_keyframes = []
