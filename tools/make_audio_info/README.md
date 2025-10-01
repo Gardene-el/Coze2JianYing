@@ -13,9 +13,9 @@
 
 ### 参数数量说明
 
-本工具共有 **10 个参数**：
+本工具共有 **11 个参数**：
 - **3 个必需参数**: `audio_url`, `start`, `end`
-- **7 个可选参数**: `volume`, `fade_in`, `fade_out`, `effect_type`, `effect_intensity`, `speed`, `material_start/material_end`
+- **8 个可选参数**: `volume`, `fade_in`, `fade_out`, `effect_type`, `effect_intensity`, `speed`, `change_pitch`, `material_start/material_end`
 
 这些参数基于 `pyJianYingDraft` 库的 AudioSegmentConfig 设计，映射了剪映中音频片段的主要可配置属性。
 
@@ -41,6 +41,7 @@ class Input(NamedTuple):
     
     # 可选：速度控制
     speed: Optional[float] = 1.0                # 播放速度（0.5-2.0，默认1.0）
+    change_pitch: Optional[bool] = False        # 变速时是否变调（默认False）
     
     # 可选：素材范围（裁剪音频）
     material_start: Optional[int] = None        # 素材开始时间（毫秒）
@@ -50,9 +51,24 @@ class Input(NamedTuple):
 ### 参数说明
 
 #### 必需参数
+
 - `audio_url`: 音频的 URL 地址
 - `start`: 音频在时间轴上的开始时间（毫秒）
 - `end`: 音频在时间轴上的结束时间（毫秒）
+
+**重要说明 - start/end 与 material_start/material_end 的区别**（与视频相同）：
+
+1. **start/end（时间轴位置）**：
+   - 定义素材在时间轴上**何时播放**
+   - 所有素材类型都需要
+
+2. **material_start/material_end（素材裁剪）**：
+   - 定义从源素材中**截取哪一段**来播放
+   - 只有视频和音频需要
+
+3. **时长不匹配的行为**：
+   - 当时长不匹配时，音频会**自动调整播放速度**
+   - 建议：通常应保持时长一致以正常速度播放
 
 #### 可选参数
 
@@ -69,6 +85,9 @@ class Input(NamedTuple):
 - `speed`: 播放速度，范围 0.5-2.0，默认 1.0（原速）
   - 小于 1.0: 慢速播放
   - 大于 1.0: 快速播放
+- `change_pitch`: 变速时是否改变音调，默认 False ⭐ 新增
+  - False: 变速不变调（推荐，语音听起来自然）
+  - True: 变速变调（快放音调变高，慢放音调变低）
 
 **素材范围**（裁剪音频）:
 - `material_start` 和 `material_end`: 用于裁剪音频文件的特定部分
