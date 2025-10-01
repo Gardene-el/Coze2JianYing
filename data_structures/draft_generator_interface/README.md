@@ -1093,6 +1093,6 @@ Draft Generator Interface 当前提供了以下完整的参数支持：
 2. **转场效果的参数** - 当前仅支持类型和时长，某些转场可能有额外参数
 3. **音频淡入淡出** - pyJianYingDraft 中的实现方式需要进一步研究
 4. **文本动画类型** - 需要建立完整的动画类型枚举映射
-5. **变声参数** - `change_pitch` 参数在某些工具中缺失（已在审计报告中指出）
+5. **镜像翻转参数** - `flip_horizontal/vertical` 参数可考虑添加
 
 **结论**: Draft Generator Interface 设计合理、参数完整，能够满足从 Coze 工作流到剪映草稿生成的需求。配合 pyJianYingDraftImporter 项目进行 URL 下载和格式转换，可以实现完整的自动化视频生成流程。
