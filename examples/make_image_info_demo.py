@@ -51,8 +51,6 @@ def main():
     
     draft_result = create_draft(MockArgs(CreateInput(
         draft_name="数组字符串演示",
-        width=1920,
-        height=1080,
         fps=30
     )))
     
@@ -73,8 +71,6 @@ def main():
         image_url="https://s.coze.cn/t/W9CvmtJHJWI/",
         start=0,
         end=3000,
-        width=1920,
-        height=1080
     )))
     
     if image1_result["success"]:
@@ -89,8 +85,6 @@ def main():
         image_url="https://example.com/image2.jpg",
         start=3000,
         end=6000,
-        width=1920,
-        height=1080,
         in_animation="轻微放大",
         in_animation_duration=500,
         filter_type="暖冬",
@@ -109,8 +103,6 @@ def main():
         image_url="https://example.com/image3.jpg",
         start=6000,
         end=9000,
-        width=1920,
-        height=1080,
         position_x=0.1,
         position_y=0.1,
         scale_x=1.2,
@@ -153,11 +145,11 @@ def main():
         image_infos=image_infos_array  # 数组字符串格式！
     )))
     
-    if not add_result["success"]:
-        print(f"❌ 添加图片失败: {add_result["message"]}")
+    if not add_result.success:
+        print(f"❌ 添加图片失败: {add_result.message}")
         return
     
-    print(f"✅ {add_result["message"]}")
+    print(f"✅ {add_result.message}")
     print(f"   生成的片段 ID: {add_result.segment_ids}")
     print(f"   片段信息:")
     for info in add_result.segment_infos:

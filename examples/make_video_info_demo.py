@@ -173,8 +173,8 @@ def demo_workflow_with_add_videos():
         fps=30
     )
     create_result = create_handler(MockArgs(create_input))
-    if not create_result["success"]:
-        print(f"   Failed to create draft: {create_result["message"]}")
+    if not create_result.success:
+        print(f"   Failed to create draft: {create_result.message}")
         return
     
     draft_id = create_result.draft_id
@@ -234,12 +234,12 @@ def demo_workflow_with_add_videos():
     )
     add_result = add_videos_handler(MockArgs(add_input))
     
-    if add_result["success"]:
+    if add_result.success:
         print(f"   ✅ Successfully added {len(add_result.segment_ids)} videos")
         print(f"   Segment IDs: {add_result.segment_ids}")
         print(f"   Total timeline duration: 18 seconds\n")
     else:
-        print(f"   ❌ Failed: {add_result["message"]}\n")
+        print(f"   ❌ Failed: {add_result.message}\n")
 
 
 def demo_error_handling():
