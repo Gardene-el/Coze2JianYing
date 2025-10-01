@@ -147,4 +147,68 @@
 - 音频：10个参数（专注于音量、淡入淡出、效果、速度）
 - 相同点：支持相同的输入格式、相同的工具组合模式（make_*_info + add_*s）
 - 不同点：音频无视觉参数（position, scale, rotation, crop, animations 等）
+
+### 8. 字幕/文本轨道添加功能 - [Issue #29](https://github.com/Gardene-el/CozeJianYingAssistent/issues/29)
+
+**应用背景**: 参考图片和音频工具的完整设计过程，实现字幕/文本轨道添加功能以支持视频字幕、标题、文字说明等需求
+
+**设计参考**:
+- PR #17 和 #25 的 add_images 和 make_image_info 实现过程
+- Issue #16 和 #24 中发现和解决的问题
+- Issue #26 的 add_audios 和 make_audio_info 实现经验
+- TextSegmentConfig 和 TextStyle 数据模型（最复杂，包含完整的文本渲染参数）
+
+**核心需求**:
+- 支持多种文本配置：普通字幕、标题、文字说明、多语言字幕等
+- 实现完整的文本样式参数：字体、颜色、大小、粗细、斜体
+- 实现文本效果参数：描边、阴影、背景
+- 支持文本对齐和位置控制
+- 支持文本动画效果（入场、出场、循环）
+- 保持与图片/音频工具相同的输入格式灵活性
+
+**具体做法**:
+- 实现 `make_caption_info` 工具（`tools/make_caption_info/`）：
+  - 32个参数：4个必需（content, start, end）+ 28个可选
+  - 必需参数：文本内容和时间范围
+  - 位置变换参数（5个）：position_x, position_y, scale, rotation, opacity
+  - 文本样式参数（5个）：font_family, font_size, font_weight, font_style, color
+  - 描边效果参数（3个）：stroke_enabled, stroke_color, stroke_width
+  - 阴影效果参数（5个）：shadow_enabled, shadow_color, shadow_offset_x/y, shadow_blur
+  - 背景效果参数（3个）：background_enabled, background_color, background_opacity
+  - 对齐方式参数（1个）：alignment (left/center/right)
+  - 动画效果参数（3个）：intro_animation, outro_animation, loop_animation
+  - 完整的参数验证：时间范围、位置范围（0.0-1.0）、透明度范围、枚举值验证
+  - 只输出非默认值，保持紧凑输出
+- 实现 `add_captions` 工具（`tools/add_captions/`）：
+  - 支持三种输入格式（与 add_images/add_audios 一致）
+  - 每次调用创建新的文本轨道
+  - 基于 TextSegmentConfig 和 TextStyle 数据结构
+  - 创建完整的文本片段结构：content, time_range, transform, style, alignment, animations, keyframes
+  - 支持文本样式的完整嵌套结构（stroke, shadow, background）
+- 完整的测试体系：
+  - `test_make_caption_info.py`：4个测试套件（基础功能、数组字符串支持、集成测试、中文字符）
+  - 包含9个基础功能测试（最小参数、文本样式、默认值、阴影/背景、动画、错误处理等）
+  - 包含6个数组字符串支持测试（格式兼容性、错误处理）
+  - 包含完整集成测试（make_caption_info → 数组 → add_captions → 验证配置）
+  - 中文字符支持测试
+  - 所有测试通过，覆盖主要功能和错误场景
+- 示例和文档：
+  - `make_caption_info_demo.py`：10个示例场景（基本字幕、标题、样式、阴影、背景、动画、完整样式、对齐、多字幕工作流、错误处理）
+  - `add_captions_demo.py`：5个完整工作流演示（简单字幕、样式字幕、动态字幕、双语字幕、完整功能展示）
+  - 详细的 README 文档，包含参数说明、使用示例、常见场景、技术细节
+
+**与图片/音频工具的对比**:
+- **图片**：25个参数（变换、裁剪、滤镜、背景模糊、动画等视觉效果）
+- **音频**：10个参数（音量、淡入淡出、速度、音效等音频处理）
+- **字幕**：32个参数（文本样式、描边、阴影、背景、对齐、动画等文本渲染）
+- 相同点：支持相同的三种输入格式、相同的工具组合模式（make_*_info + add_*s）
+- 不同点：字幕参数最多最复杂，需要支持完整的文本渲染效果；图片侧重视觉变换；音频侧重声音处理
+
+**字幕工具的独特性**:
+- 参数数量最多（32个），因为文本渲染需要精细控制
+- 支持嵌套的样式配置（TextStyle 包含 stroke, shadow, background）
+- 位置采用归一化坐标（0.0-1.0），便于不同分辨率的适配
+- 支持文本对齐方式，这是图片和音频所没有的
+- 描边、阴影、背景可以独立启用和组合使用，提供灵活的可读性增强方案
+
 - 更新 `.github/copilot-instructions.md`，基于实际项目结构优化开发规范
