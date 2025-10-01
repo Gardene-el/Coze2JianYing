@@ -5,7 +5,7 @@ Creates a JSON string representation of video configuration with all possible pa
 This is a helper tool for add_videos - generates a single video info string that can be
 collected into an array and passed to add_videos.
 
-Total parameters: 27 (3 required + 24 optional)
+Total parameters: 29 (3 required + 26 optional)
 Based on pyJianYingDraft library's VideoSegment, ClipSettings, and CropSettings.
 """
 
@@ -50,6 +50,10 @@ class Input(NamedTuple):
     # Optional speed control fields
     speed: Optional[float] = 1.0                # Playback speed (0.5-2.0, default 1.0)
     reverse: Optional[bool] = False             # Reverse playback (default False)
+    
+    # Optional audio fields
+    volume: Optional[float] = 1.0               # Volume level (0.0-2.0, default 1.0)
+    change_pitch: Optional[bool] = False        # Change pitch when speed changes (default False)
     
     # Optional background fields
     background_blur: Optional[bool] = False     # Background blur (default False)
@@ -200,6 +204,12 @@ def handler(args: Args[Input]) -> Output:
             video_info["speed"] = args.input.speed
         if args.input.reverse:
             video_info["reverse"] = args.input.reverse
+        
+        # Audio
+        if args.input.volume != 1.0:
+            video_info["volume"] = args.input.volume
+        if args.input.change_pitch:
+            video_info["change_pitch"] = args.input.change_pitch
         
         # Background
         if args.input.background_blur:

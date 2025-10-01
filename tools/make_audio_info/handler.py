@@ -5,7 +5,7 @@ Creates a JSON string representation of audio configuration with all possible pa
 This is a helper tool for add_audios - generates a single audio info string that can be
 collected into an array and passed to add_audios.
 
-Total parameters: 10 (3 required + 7 optional)
+Total parameters: 11 (3 required + 8 optional)
 Based on pyJianYingDraft library's AudioSegment and AudioSegmentConfig.
 """
 
@@ -33,6 +33,7 @@ class Input(NamedTuple):
     
     # Optional speed control
     speed: Optional[float] = 1.0                # Playback speed (0.5-2.0, default 1.0)
+    change_pitch: Optional[bool] = False        # Change pitch when speed changes (default False)
     
     # Optional material range (trim audio)
     material_start: Optional[int] = None        # Material start time in milliseconds
@@ -178,6 +179,8 @@ def handler(args: Args[Input]) -> Output:
         # Speed control
         if args.input.speed is not None and args.input.speed != 1.0:
             audio_info["speed"] = args.input.speed
+        if args.input.change_pitch:
+            audio_info["change_pitch"] = args.input.change_pitch
         
         # Material range (trim)
         if args.input.material_start is not None and args.input.material_end is not None:

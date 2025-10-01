@@ -79,6 +79,10 @@ class VideoSegmentConfig:
         self.speed = kwargs.get('speed', 1.0)
         self.reverse = kwargs.get('reverse', False)
         
+        # Audio (for video)
+        self.volume = kwargs.get('volume', 1.0)
+        self.change_pitch = kwargs.get('change_pitch', False)
+        
         # Background
         self.background_blur = kwargs.get('background_blur', False)
         self.background_color = kwargs.get('background_color')
