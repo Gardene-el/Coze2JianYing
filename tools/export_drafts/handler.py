@@ -8,7 +8,7 @@ Supports single draft or batch export, with optional cleanup of temporary files.
 import os
 import json
 import shutil
-from typing import NamedTuple, Union, List
+from typing import NamedTuple, Union, List, Dict, Any
 from runtime import Args
 
 
@@ -20,12 +20,8 @@ class Input(NamedTuple):
     export_all: bool = False          # Whether to export all drafts in the directory
 
 
-class Output(NamedTuple):
-    """Output for export_drafts tool"""
-    draft_data: str        # JSON string for draft generator
-    exported_count: int    # Number of successfully exported drafts
-    success: bool = True   # Operation success status
-    message: str = "草稿导出成功"  # Status message
+# Output is now returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
@@ -179,7 +175,7 @@ def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
         return False, f"删除草稿文件失败: {str(e)}"
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     Main handler function for exporting drafts
     
@@ -187,7 +183,7 @@ def handler(args: Args[Input]) -> Output:
         args: Input arguments containing draft_ids and options
         
     Returns:
-        Output containing draft data and status
+        Dict containing draft_data, exported_count, success status, and message
     """
     logger = getattr(args, 'logger', None)
     
@@ -215,12 +211,12 @@ def handler(args: Args[Input]) -> Output:
             
             if logger:
                 logger.error(message)
-            return Output(
-                draft_data="",
-                exported_count=0,
-                success=False,
-                message=message
-            )
+            return {
+                "draft_data": "",
+                "exported_count": 0,
+                "success": False,
+                "message": message
+            }
         
         # Validate UUID formats (only if not from export_all discovery)
         if not export_all:
@@ -232,12 +228,12 @@ def handler(args: Args[Input]) -> Output:
             if invalid_uuids:
                 if logger:
                     logger.error(f"Invalid UUID formats: {invalid_uuids}")
-                return Output(
-                    draft_data="",
-                    exported_count=0,
-                    success=False,
-                    message=f"无效的UUID格式: {', '.join(invalid_uuids)}"
-                )
+                return {
+                    "draft_data": "",
+                    "exported_count": 0,
+                    "success": False,
+                    "message": f"无效的UUID格式: {', '.join(invalid_uuids)}"
+                }
         
         if logger:
             logger.info(f"Processing {len(draft_ids)} draft(s): {draft_ids}")
@@ -263,12 +259,12 @@ def handler(args: Args[Input]) -> Output:
             error_message = f"无法加载任何草稿配置: {'; '.join(failed_drafts)}"
             if logger:
                 logger.error(error_message)
-            return Output(
-                draft_data="",
-                exported_count=0,
-                success=False,
-                message=error_message
-            )
+            return {
+                "draft_data": "",
+                "exported_count": 0,
+                "success": False,
+                "message": error_message
+            }
         
         # Create draft generator data structure
         try:
@@ -281,12 +277,12 @@ def handler(args: Args[Input]) -> Output:
         except Exception as e:
             if logger:
                 logger.error(f"Failed to create draft generator data: {str(e)}")
-            return Output(
-                draft_data="",
-                exported_count=0,
-                success=False,
-                message=f"创建草稿数据失败: {str(e)}"
-            )
+            return {
+                "draft_data": "",
+                "exported_count": 0,
+                "success": False,
+                "message": f"创建草稿数据失败: {str(e)}"
+            }
         
         # Handle cleanup if requested
         cleanup_failures = []
@@ -325,21 +321,21 @@ def handler(args: Args[Input]) -> Output:
         if logger:
             logger.info(f"Export completed: {success_message}")
         
-        return Output(
-            draft_data=draft_json_string,
-            exported_count=exported_count,
-            success=True,
-            message=success_message
-        )
+        return {
+            "draft_data": draft_json_string,
+            "exported_count": exported_count,
+            "success": True,
+            "message": success_message
+        }
         
     except Exception as e:
         error_msg = f"Unexpected error in export_drafts handler: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return Output(
-            draft_data="",
-            exported_count=0,
-            success=False,
-            message=f"导出草稿时发生意外错误: {str(e)}"
-        )
+        return {
+            "draft_data": "",
+            "exported_count": 0,
+            "success": False,
+            "message": f"导出草稿时发生意外错误: {str(e)}"
+        }

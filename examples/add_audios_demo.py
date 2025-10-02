@@ -61,7 +61,7 @@ def demo_add_audios():
         fps=30
     )))
     
-    draft_id = draft_result.draft_id
+    draft_id = draft_result["draft_id"]
     print(f"✅ Created draft with ID: {draft_id}")
     
     # Step 2: Add background music using array format
@@ -106,10 +106,10 @@ def demo_add_audios():
     )))
     
     print(f"\nGenerated audio info string:")
-    print(f"  {narration_result.audio_info_string}")
+    print(f"  {narration_result["audio_info_string"]}")
     
     # Use array of strings format
-    audio_infos_array = [narration_result.audio_info_string]
+    audio_infos_array = [narration_result["audio_info_string"]]
     
     result = add_audios_handler(MockArgs(AddAudiosInput(
         draft_id=draft_id,
@@ -134,7 +134,7 @@ def demo_add_audios():
         end=10300,
         volume=0.8
     )))
-    sfx_configs.append(sfx1.audio_info_string)
+    sfx_configs.append(sfx1["audio_info_string"])
     
     # Whoosh sound at 15 seconds
     sfx2 = make_audio_info_handler(MockArgs(MakeAudioInfoInput(
@@ -143,7 +143,7 @@ def demo_add_audios():
         end=15800,
         volume=0.9
     )))
-    sfx_configs.append(sfx2.audio_info_string)
+    sfx_configs.append(sfx2["audio_info_string"])
     
     # Notification at 20 seconds
     sfx3 = make_audio_info_handler(MockArgs(MakeAudioInfoInput(
@@ -152,7 +152,7 @@ def demo_add_audios():
         end=20500,
         volume=0.7
     )))
-    sfx_configs.append(sfx3.audio_info_string)
+    sfx_configs.append(sfx3["audio_info_string"])
     
     print(f"Prepared {len(sfx_configs)} sound effect configurations")
     
@@ -182,11 +182,11 @@ def demo_add_audios():
     )))
     
     print(f"Audio info with effects:")
-    print(f"  {effect_audio.audio_info_string}")
+    print(f"  {effect_audio["audio_info_string"]}")
     
     result = add_audios_handler(MockArgs(AddAudiosInput(
         draft_id=draft_id,
-        audio_infos=[effect_audio.audio_info_string]
+        audio_infos=[effect_audio["audio_info_string"]]
     )))
     
     print(f"\n{result.message}")
@@ -209,13 +209,13 @@ def demo_add_audios():
     )))
     
     print(f"Trimmed audio config:")
-    print(f"  {trimmed_audio.audio_info_string}")
+    print(f"  {trimmed_audio["audio_info_string"]}")
     print(f"\nThis uses 2:00-2:15 from the original audio,")
     print(f"but plays at timeline position 40-55 seconds")
     
     result = add_audios_handler(MockArgs(AddAudiosInput(
         draft_id=draft_id,
-        audio_infos=[trimmed_audio.audio_info_string]
+        audio_infos=[trimmed_audio["audio_info_string"]]
     )))
     
     print(f"\n{result.message}")

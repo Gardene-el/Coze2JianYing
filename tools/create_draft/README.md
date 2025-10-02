@@ -78,12 +78,16 @@ class Input(NamedTuple):
 
 ## 输出结果
 
-### Output 类型定义
+### 返回值格式
+
+返回 Dict[str, Any] 格式（确保 Coze 平台正确序列化为 JSON 对象）：
+
 ```python
-class Output(NamedTuple):
-    draft_id: str         # 生成的UUID标识符
-    success: bool = True  # 操作是否成功
-    message: str = "草稿创建成功"  # 状态消息
+{
+    "draft_id": str,      # 生成的UUID标识符
+    "success": bool,      # 操作是否成功
+    "message": str        # 状态消息
+}
 ```
 
 ### 输出字段说明

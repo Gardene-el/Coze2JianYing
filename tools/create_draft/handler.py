@@ -9,7 +9,7 @@ import os
 import json
 import uuid
 import time
-from typing import NamedTuple
+from typing import NamedTuple, Dict, Any
 from runtime import Args
 
 
@@ -25,11 +25,8 @@ class Input(NamedTuple):
     background_color: str = "#000000"
 
 
-class Output(NamedTuple):
-    """Output for create_draft tool"""
-    draft_id: str
-    success: bool = True
-    message: str = "草稿创建成功"
+# Output is now returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
 
 
 # Data models (duplicated here for Coze tool independence)
@@ -170,7 +167,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     Main handler function for creating a draft
     
@@ -178,7 +175,7 @@ def handler(args: Args[Input]) -> Output:
         args: Input arguments containing project settings
         
     Returns:
-        Output containing draft_id and status
+        Dict containing draft_id, success status, and message
     """
     logger = getattr(args, 'logger', None)
     
@@ -198,11 +195,11 @@ def handler(args: Args[Input]) -> Output:
         if not is_valid:
             if logger:
                 logger.error(f"Input validation failed: {error_msg}")
-            return Output(
-                draft_id="",
-                success=False,
-                message=f"参数验证失败: {error_msg}"
-            )
+            return {
+                "draft_id": "",
+                "success": False,
+                "message": f"参数验证失败: {error_msg}"
+            }
         
         # Generate unique draft ID
         draft_id = str(uuid.uuid4())
@@ -218,11 +215,11 @@ def handler(args: Args[Input]) -> Output:
         except Exception as e:
             if logger:
                 logger.error(f"Failed to create draft folder: {str(e)}")
-            return Output(
-                draft_id="",
-                success=False,
-                message=f"创建草稿文件夹失败: {str(e)}"
-            )
+            return {
+                "draft_id": "",
+                "success": False,
+                "message": f"创建草稿文件夹失败: {str(e)}"
+            }
         
         # Create initial draft configuration
         try:
@@ -232,20 +229,20 @@ def handler(args: Args[Input]) -> Output:
         except Exception as e:
             if logger:
                 logger.error(f"Failed to create draft config: {str(e)}")
-            return Output(
-                draft_id="",
-                success=False,
-                message=f"创建草稿配置失败: {str(e)}"
-            )
+            return {
+                "draft_id": "",
+                "success": False,
+                "message": f"创建草稿配置失败: {str(e)}"
+            }
         
         if logger:
             logger.info(f"Draft created successfully with ID: {draft_id}")
         
-        return Output(
-            draft_id=draft_id,
-            success=True,
-            message=f"草稿创建成功，ID: {draft_id}"
-        )
+        return {
+            "draft_id": draft_id,
+            "success": True,
+            "message": f"草稿创建成功，ID: {draft_id}"
+        }
         
     except Exception as e:
         error_msg = f"Unexpected error in create_draft handler: {str(e)}"
@@ -255,8 +252,8 @@ def handler(args: Args[Input]) -> Output:
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
         
-        return Output(
-            draft_id="",
-            success=False,
-            message=f"创建草稿时发生意外错误: {str(e)}"
-        )
+        return {
+            "draft_id": "",
+            "success": False,
+            "message": f"创建草稿时发生意外错误: {str(e)}"
+        }
