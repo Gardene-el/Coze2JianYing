@@ -16,8 +16,6 @@
 
 ### 完整项目配置
 - 支持自定义项目分辨率和帧率
-- 可配置视频和音频质量
-- 支持背景色设置
 - 包含时间戳和状态跟踪
 
 ### 安全的文件管理
@@ -34,9 +32,6 @@ class Input(NamedTuple):
     width: int = 1920                    # 视频宽度(像素)
     height: int = 1080                   # 视频高度(像素)
     fps: int = 30                        # 帧率
-    video_quality: str = "1080p"         # 视频质量
-    audio_quality: str = "320k"          # 音频质量
-    background_color: str = "#000000"    # 背景色(十六进制)
 ```
 
 ### 参数详细说明
@@ -60,21 +55,6 @@ class Input(NamedTuple):
 - **描述**: 视频帧率，单位fps
 - **默认值**: 30
 - **约束**: 1-120之间，常用值：24、25、30、50、60
-
-#### video_quality (string)
-- **描述**: 视频质量设置
-- **默认值**: "1080p"
-- **可选值**: "480p", "720p", "1080p", "1440p", "4k"
-
-#### audio_quality (string)
-- **描述**: 音频质量设置
-- **默认值**: "320k"
-- **可选值**: "128k", "192k", "320k", "lossless"
-
-#### background_color (string)
-- **描述**: 背景颜色，十六进制格式
-- **默认值**: "#000000" (黑色)
-- **约束**: 必须是7位十六进制颜色代码(如#FFFFFF)
 
 ## 输出结果
 
@@ -133,10 +113,7 @@ class Input(NamedTuple):
   "draft_name": "4K超清项目",
   "width": 3840,
   "height": 2160,
-  "fps": 60,
-  "video_quality": "4k",
-  "audio_quality": "lossless",
-  "background_color": "#FFFFFF"
+  "fps": 60
 }
 ```
 
@@ -146,10 +123,7 @@ class Input(NamedTuple):
   "draft_name": "抖音短视频",
   "width": 1080,
   "height": 1920,
-  "fps": 30,
-  "video_quality": "1080p",
-  "audio_quality": "320k",
-  "background_color": "#000000"
+  "fps": 30
 }
 ```
 
@@ -162,9 +136,7 @@ class Input(NamedTuple):
     "draft_name": "{{user_project_name}}",
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "video_quality": "1080p",
-    "audio_quality": "320k"
+    "fps": 30
   },
   "output_variable": "draft_info"
 }
@@ -188,10 +160,7 @@ class Input(NamedTuple):
     "name": "项目名称",
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "video_quality": "1080p",
-    "audio_quality": "320k",
-    "background_color": "#000000"
+    "fps": 30
   },
   "media_resources": [],
   "tracks": [],

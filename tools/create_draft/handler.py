@@ -20,31 +20,10 @@ class Input(NamedTuple):
     width: int = 1920
     height: int = 1080
     fps: int = 30
-    video_quality: str = "1080p"
-    audio_quality: str = "320k"
-    background_color: str = "#000000"
 
 
 # Output is now returned as Dict[str, Any] instead of NamedTuple
 # This ensures proper JSON object serialization in Coze platform
-
-
-# Data models (duplicated here for Coze tool independence)
-class VideoQuality:
-    """Video quality settings"""
-    SD_480P = "480p"
-    HD_720P = "720p"
-    FHD_1080P = "1080p"
-    QHD_1440P = "1440p"
-    UHD_4K = "4k"
-
-
-class AudioQuality:
-    """Audio quality settings"""
-    LOW_128K = "128k"
-    MEDIUM_192K = "192k"
-    HIGH_320K = "320k"
-    LOSSLESS = "lossless"
 
 
 def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
@@ -67,25 +46,6 @@ def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
     fps = getattr(input_data, 'fps', None) or 30
     if fps <= 0 or fps > 120:
         return False, f"Invalid fps: {fps}"
-    
-    # Validate video quality (handle None values)
-    video_quality = getattr(input_data, 'video_quality', None) or "1080p"
-    valid_video_qualities = [VideoQuality.SD_480P, VideoQuality.HD_720P, 
-                           VideoQuality.FHD_1080P, VideoQuality.QHD_1440P, VideoQuality.UHD_4K]
-    if video_quality not in valid_video_qualities:
-        return False, f"Invalid video quality: {video_quality}"
-    
-    # Validate audio quality (handle None values)
-    audio_quality = getattr(input_data, 'audio_quality', None) or "320k"
-    valid_audio_qualities = [AudioQuality.LOW_128K, AudioQuality.MEDIUM_192K, 
-                           AudioQuality.HIGH_320K, AudioQuality.LOSSLESS]
-    if audio_quality not in valid_audio_qualities:
-        return False, f"Invalid audio quality: {audio_quality}"
-    
-    # Validate background color (handle None values)
-    background_color = getattr(input_data, 'background_color', None) or "#000000"
-    if not background_color.startswith('#') or len(background_color) != 7:
-        return False, f"Invalid background color: {background_color}"
     
     return True, ""
 
@@ -134,9 +94,6 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
     width = getattr(input_data, 'width', None) or 1920
     height = getattr(input_data, 'height', None) or 1080
     fps = getattr(input_data, 'fps', None) or 30
-    video_quality = getattr(input_data, 'video_quality', None) or "1080p"
-    audio_quality = getattr(input_data, 'audio_quality', None) or "320k"
-    background_color = getattr(input_data, 'background_color', None) or "#000000"
     
     # Create initial draft configuration
     draft_config = {
@@ -145,10 +102,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
             "name": draft_name,
             "width": width,
             "height": height,
-            "fps": fps,
-            "video_quality": video_quality,
-            "audio_quality": audio_quality,
-            "background_color": background_color
+            "fps": fps
         },
         "media_resources": [],
         "tracks": [],

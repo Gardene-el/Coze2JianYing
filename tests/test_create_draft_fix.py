@@ -44,10 +44,7 @@ def test_with_partial_params():
             'width': 800,
             'height': 600,
             'project_name': None,
-            'fps': None,
-            'video_quality': None,
-            'audio_quality': None,
-            'background_color': None
+            'fps': None
         }
         
         mock_args = MockArgs(input_params)
@@ -72,9 +69,6 @@ def test_with_partial_params():
                 print(f"  Project name: {config['project']['name']}")
                 print(f"  Dimensions: {config['project']['width']}x{config['project']['height']}")
                 print(f"  FPS: {config['project']['fps']}")
-                print(f"  Video quality: {config['project']['video_quality']}")
-                print(f"  Audio quality: {config['project']['audio_quality']}")
-                print(f"  Background color: {config['project']['background_color']}")
                 
                 # Clean up
                 import shutil
@@ -107,10 +101,7 @@ def test_with_all_params():
             'width': 1920,
             'height': 1080,
             'project_name': "Complete Test Project",
-            'fps': 30,
-            'video_quality': "1080p",
-            'audio_quality': "320k",
-            'background_color': "#FFFFFF"
+            'fps': 30
         }
         
         mock_args = MockArgs(input_params)

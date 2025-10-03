@@ -20,10 +20,7 @@ def example_basic_workflow():
             "project_name": "我的第一个Coze项目",
             "width": 1920,
             "height": 1080,
-            "fps": 30,
-            "video_quality": "1080p",
-            "audio_quality": "320k",
-            "background_color": "#000000"
+            "fps": 30
         },
         "output_variable": "new_draft"
     }
@@ -77,10 +74,7 @@ def example_4k_project():
                 "project_name": "4K超清宣传片",
                 "width": 3840,
                 "height": 2160,
-                "fps": 60,
-                "video_quality": "4k",
-                "audio_quality": "lossless",
-                "background_color": "#FFFFFF"
+                "fps": 60
             },
             "output_variable": "hq_draft"
         },
@@ -110,10 +104,7 @@ def example_mobile_video():
             "project_name": "抖音短视频",
             "width": 1080,
             "height": 1920,  # Vertical aspect ratio
-            "fps": 30,
-            "video_quality": "1080p",
-            "audio_quality": "320k",
-            "background_color": "#000000"
+            "fps": 30
         },
         "output_variable": "mobile_draft"
     }
@@ -166,9 +157,7 @@ def example_error_handling():
             "project_name": "错误测试",
             "width": -1,  # Invalid width
             "height": 1080,
-            "fps": 200,   # Invalid fps
-            "video_quality": "8k",  # Invalid quality
-            "background_color": "black"  # Invalid color format
+            "fps": 200   # Invalid fps
         },
         "output_variable": "invalid_draft"
     }
@@ -223,9 +212,7 @@ def example_complete_workflow():
                     "project_name": "{{user_input.project_name}}",
                     "width": "{{user_input.resolution.width}}",
                     "height": "{{user_input.resolution.height}}",
-                    "fps": 30,
-                    "video_quality": "1080p",
-                    "audio_quality": "320k"
+                    "fps": 30
                 },
                 "output_variable": "project_draft"
             },
@@ -300,10 +287,7 @@ def example_data_structure():
                     "name": "示例项目",
                     "width": 1920,
                     "height": 1080,
-                    "fps": 30,
-                    "video_quality": "1080p",
-                    "audio_quality": "320k",
-                    "background_color": "#000000"
+                    "fps": 30
                 },
                 "media_resources": [
                     {
