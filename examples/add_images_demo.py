@@ -28,10 +28,7 @@ def demo_add_images():
             "name": "Coze剪映项目",
             "width": 1920,
             "height": 1080,
-            "fps": 30,
-            "video_quality": "1080p",
-            "audio_quality": "320k",
-            "background_color": "#000000"
+            "fps": 30
         },
         "media_resources": [],
         "tracks": [],

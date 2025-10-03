@@ -22,10 +22,7 @@ def test_draft_name_parameter():
         draft_name="测试草稿名称",
         width=800,
         height=600,
-        fps=None,
-        video_quality=None,
-        audio_quality=None,
-        background_color=None
+        fps=None
     )
     
     # Simulate the config creation logic with new parameter name
@@ -33,19 +30,13 @@ def test_draft_name_parameter():
     width = getattr(input_with_draft_name, 'width', None) or 1920
     height = getattr(input_with_draft_name, 'height', None) or 1080
     fps = getattr(input_with_draft_name, 'fps', None) or 30
-    video_quality = getattr(input_with_draft_name, 'video_quality', None) or "1080p"
-    audio_quality = getattr(input_with_draft_name, 'audio_quality', None) or "320k"
-    background_color = getattr(input_with_draft_name, 'background_color', None) or "#000000"
     
     config = {
         "project": {
             "name": draft_name,
             "width": width,
             "height": height,
-            "fps": fps,
-            "video_quality": video_quality,
-            "audio_quality": audio_quality,
-            "background_color": background_color
+            "fps": fps
         }
     }
     
@@ -101,51 +92,16 @@ def test_resolution_impact():
     print(f"  * 移动端内容: 1080x1920 (9:16)")
     print(f"  * 正方形内容: 1080x1080 (1:1)")
 
-def test_video_quality_impact():
-    """Test video quality setting impact with the resolution"""
-    print("\n=== 视频质量设置影响分析 ===")
-    
-    width, height = 800, 600
-    
-    print(f"当前分辨率: {width}x{height}")
-    print(f"像素总数: {width * height:,} 像素")
-    
-    # Quality settings analysis
-    quality_settings = {
-        "480p": {"width": 854, "height": 480, "total": 854*480},
-        "720p": {"width": 1280, "height": 720, "total": 1280*720},
-        "1080p": {"width": 1920, "height": 1080, "total": 1920*1080},
-        "1440p": {"width": 2560, "height": 1440, "total": 2560*1440},
-        "4k": {"width": 3840, "height": 2160, "total": 3840*2160}
-    }
-    
-    user_total = width * height
-    
-    print(f"\n视频质量设置对照:")
-    for quality, info in quality_settings.items():
-        percentage = (user_total / info["total"]) * 100
-        print(f"  {quality}: {info['width']}x{info['height']} ({info['total']:,} 像素)")
-        print(f"    用户分辨率相当于该质量的 {percentage:.1f}%")
-    
-    print(f"\n推荐设置:")
-    if user_total < quality_settings["720p"]["total"]:
-        print(f"- 建议使用 '480p' 或 '720p' 质量设置")
-        print(f"- 使用更高质量设置不会提升实际输出质量")
-    else:
-        print(f"- 可以使用对应或更高的质量设置")
-    
-    print(f"\n注意事项:")
-    print(f"- video_quality 主要影响编码质量和文件大小")
-    print(f"- 实际输出分辨率由 width 和 height 决定")
-    print(f"- 质量设置过高会增加文件大小但不提升视觉效果")
+
+# Note: test_video_quality_impact function removed as video_quality parameter 
+# is no longer part of the project settings
 
 if __name__ == "__main__":
     test_draft_name_parameter()
     test_resolution_impact()
-    test_video_quality_impact()
     
     print("\n=== 总结 ===")
     print("1. ✅ draft_name 参数已成功替换 project_name")
     print("2. ✅ 800x600 分辨率分析完成，属于 4:3 比例的中低分辨率")
-    print("3. ✅ 建议根据实际用途选择合适的分辨率和质量设置")
+    print("3. ✅ 建议根据实际用途选择合适的分辨率")
     print("4. 当前设置适合测试和快速预览，不适合高质量发布")

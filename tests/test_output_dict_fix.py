@@ -59,10 +59,7 @@ def test_create_draft_returns_dict():
             'draft_name': '测试项目',
             'width': 1920,
             'height': 1080,
-            'fps': 30,
-            'video_quality': '1080p',
-            'audio_quality': '320k',
-            'background_color': '#000000'
+            'fps': 30
         }
         
         mock_args = MockArgs(input_params)

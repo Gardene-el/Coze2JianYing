@@ -33,9 +33,6 @@ def setup_test_environment():
             "width": 1920,
             "height": 1080,
             "fps": 30,
-            "video_quality": "1080p",
-            "audio_quality": "320k",
-            "background_color": "#000000"
         },
         "media_resources": [],
         "tracks": [],
@@ -171,7 +168,6 @@ def test_add_captions_basic():
                 "start": 0,
                 "end": 5000,
                 "background_enabled": True,
-                "background_color": "#000000",
                 "background_opacity": 0.7
             }]
         )

@@ -229,10 +229,7 @@ class Input(NamedTuple):
         "name": "项目名称",
         "width": 1920,
         "height": 1080,
-        "fps": 30,
-        "video_quality": "1080p",
-        "audio_quality": "320k",
-        "background_color": "#000000"
+        "fps": 30
       },
       "media_resources": [
         {

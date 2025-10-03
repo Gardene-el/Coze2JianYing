@@ -26,9 +26,6 @@ def test_add_images_example_from_issue():
             "width": 1920,
             "height": 1080,
             "fps": 30,
-            "video_quality": "1080p",
-            "audio_quality": "320k",
-            "background_color": "#000000"
         },
         "media_resources": [],
         "tracks": [],
