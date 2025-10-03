@@ -5,7 +5,7 @@ Creates a JSON string representation of video configuration with all possible pa
 This is a helper tool for add_videos - generates a single video info string that can be
 collected into an array and passed to add_videos.
 
-Total parameters: 29 (3 required + 26 optional)
+Total parameters: 31 (3 required + 28 optional)
 Based on pyJianYingDraft library's VideoSegment, ClipSettings, and CropSettings.
 """
 
@@ -33,6 +33,8 @@ class Input(NamedTuple):
     scale_y: Optional[float] = 1.0              # Y scale (default 1.0)
     rotation: Optional[float] = 0.0             # Rotation angle (default 0.0)
     opacity: Optional[float] = 1.0              # Opacity (0.0-1.0, default 1.0)
+    flip_horizontal: Optional[bool] = False     # Flip horizontally (default False)
+    flip_vertical: Optional[bool] = False       # Flip vertically (default False)
     
     # Optional crop fields
     crop_enabled: Optional[bool] = False        # Enable cropping (default False)
@@ -172,6 +174,10 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
             video_info["rotation"] = args.input.rotation
         if args.input.opacity != 1.0:
             video_info["opacity"] = args.input.opacity
+        if args.input.flip_horizontal:
+            video_info["flip_horizontal"] = args.input.flip_horizontal
+        if args.input.flip_vertical:
+            video_info["flip_vertical"] = args.input.flip_vertical
         
         # Crop
         if args.input.crop_enabled:

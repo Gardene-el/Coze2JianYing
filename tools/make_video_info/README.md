@@ -13,9 +13,9 @@
 
 ### 参数数量说明
 
-本工具共有 **29 个参数**：
+本工具共有 **31 个参数**：
 - **3 个必需参数**: `video_url`, `start`, `end`
-- **26 个可选参数**: 包括素材范围、变换、裁剪、效果、速度控制、音频、背景等设置
+- **28 个可选参数**: 包括素材范围、变换、裁剪、效果、速度控制、音频、背景等设置
 
 这些参数基于 `pyJianYingDraft` 库的功能设计，映射了剪映中视频片段的主要可配置属性。
 
@@ -41,6 +41,8 @@ class Input(NamedTuple):
     scale_y: Optional[float] = 1.0              # Y缩放（默认1.0）
     rotation: Optional[float] = 0.0             # 旋转角度（默认0.0）
     opacity: Optional[float] = 1.0              # 透明度（0.0-1.0，默认1.0）
+    flip_horizontal: Optional[bool] = False     # 水平翻转（默认False）
+    flip_vertical: Optional[bool] = False       # 垂直翻转（默认False）
     
     # 可选：裁剪字段
     crop_enabled: Optional[bool] = False        # 启用裁剪（默认False）
@@ -120,7 +122,7 @@ class Input(NamedTuple):
 
 #### 共享参数（与图片工具相同）
 
-**变换参数**: `position_x`, `position_y`, `scale_x`, `scale_y`, `rotation`, `opacity`
+**变换参数**: `position_x`, `position_y`, `scale_x`, `scale_y`, `rotation`, `opacity`, `flip_horizontal`, `flip_vertical`
 
 **裁剪参数**: `crop_enabled`, `crop_left`, `crop_top`, `crop_right`, `crop_bottom`
 
@@ -153,6 +155,8 @@ class Input(NamedTuple):
    - `rotation`: 直接对应
    - `scale_x`, `scale_y`: 直接对应
    - `transform_x`, `transform_y`: 映射为 `position_x` 和 `position_y`
+   - `flip_horizontal`: 直接对应（水平翻转）
+   - `flip_vertical`: 直接对应（垂直翻转）
 
 3. **CropSettings 参数**:
    - 简化为 `crop_enabled` 和四个边界参数
