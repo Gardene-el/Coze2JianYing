@@ -14,8 +14,10 @@
 |-----|---------|--------|------|
 | `volume` (video) | make_video_info, add_videos | Priority 1 | ✅ 已在之前完成 |
 | `change_pitch` | make_video_info, make_audio_info, add_videos, add_audios | Priority 1 | ✅ 已在之前完成 |
-| `flip_horizontal` | make_video_info, make_image_info, add_videos, add_images | Priority 3 | ✅ **本次添加** |
-| `flip_vertical` | make_video_info, make_image_info, add_videos, add_images | Priority 3 | ✅ **本次添加** |
+| `flip_horizontal` | make_video_info, add_videos | Priority 3 | ✅ 已添加（仅视频） |
+| `flip_vertical` | make_video_info, add_videos | Priority 3 | ✅ 已添加（仅视频） |
+
+**重要更正**: 根据 `draft_generator_interface` 规范，`flip_horizontal` 和 `flip_vertical` 参数**不适用于静态图片**，已从 `make_image_info` 和 `add_images` 中移除。
 
 ## 完成的工作
 
@@ -32,14 +34,13 @@
 - ✅ 设置默认值为 False，与 make_video_info 保持一致
 
 #### make_image_info (tools/make_image_info/handler.py)
-- ✅ 添加 `flip_horizontal: Optional[bool] = False`
-- ✅ 添加 `flip_vertical: Optional[bool] = False`
-- ✅ 在 handler 中添加条件输出逻辑
-- ✅ 更新参数总数：25 → 27
+- ❌ **已移除** `flip_horizontal` 和 `flip_vertical`
+- ✅ 参数数量更正：27 → 25（移除了不适用于静态图片的 flip 参数）
+- ✅ 符合 draft_generator_interface 规范
 
 #### add_images (tools/add_images/handler.py)
-- ✅ 在 `ImageSegmentConfig.__init__` 中添加 flip 参数支持
-- ✅ 设置默认值为 False，与 make_image_info 保持一致
+- ❌ **已移除** `ImageSegmentConfig.__init__` 中的 flip 参数支持
+- ✅ 符合 draft_generator_interface 规范
 
 ### 2. 文档更新
 
@@ -50,25 +51,24 @@
 - ✅ 在"参数来源与 pyJianYingDraft 的关系"中补充 ClipSettings 映射
 
 #### make_image_info/README.md
-- ✅ 更新参数数量说明
-- ✅ 在 Input 类型定义中添加 flip 参数
-- ✅ 在 ClipSettings 参数映射中补充 flip_horizontal 和 flip_vertical
+- ✅ 更新参数数量说明（25 个参数）
+- ✅ 移除 flip 参数说明
+- ✅ 添加注释说明 flip 参数不适用于静态图片
 
 ### 3. 测试验证
 
 #### 新增测试文件
 - ✅ 创建 `tests/test_flip_parameters.py`
   - 测试 make_video_info 的 flip 参数
-  - 测试 make_image_info 的 flip 参数
   - 测试 add_videos 的 VideoSegmentConfig
-  - 测试 add_images 的 ImageSegmentConfig
+  - ⚠️ **已移除** make_image_info 和 add_images 的 flip 测试（不适用）
   - 验证默认值和条件输出逻辑
 
 #### 现有测试验证
 - ✅ test_make_video_info.py - 全部通过
 - ✅ test_make_image_info.py - 全部通过
 - ✅ test_basic.py - 全部通过
-- ✅ test_flip_parameters.py - 全部通过 (4/4)
+- ✅ test_flip_parameters.py - 全部通过 (2/2 视频测试)
 
 ## pyJianYingDraft 参数完整性验证
 
@@ -89,15 +89,17 @@
 - ✅ volume → volume
 - ✅ change_pitch → change_pitch
 
-### ClipSettings 参数 (8/8 = 100%)
+### ClipSettings 参数 (6/6 = 100% for images, 8/8 = 100% for videos)
 - ✅ alpha → opacity
-- ✅ flip_horizontal → flip_horizontal
-- ✅ flip_vertical → flip_vertical
+- ✅ flip_horizontal → flip_horizontal (仅适用于视频，不适用于静态图片)
+- ✅ flip_vertical → flip_vertical (仅适用于视频，不适用于静态图片)
 - ✅ rotation → rotation
 - ✅ scale_x → scale_x
 - ✅ scale_y → scale_y
 - ✅ transform_x → position_x
 - ✅ transform_y → position_y
+
+**注**: 根据 `draft_generator_interface/models.py` 中 `ImageSegmentConfig` 的定义，静态图片不支持 flip 操作。
 
 ### TextSegment 参数 (8/8 = 100%)
 - ✅ text → content
