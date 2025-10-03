@@ -483,15 +483,75 @@ BaseSegment (基类)
 | `EffectSegmentConfig` | `EffectSegment` | 特效片段（独立轨道）|
 | `FilterSegmentConfig` | `FilterSegment` | 滤镜片段（独立轨道）|
 
+### 轨道和段类型的严格对应关系
+
+**关键原则**: pyJianYingDraft 的 Track 是泛型类 `Track[Seg_type]`，每种轨道类型只接受一种特定的段类型。
+
+#### 轨道-段类型映射表
+
+| 轨道类型 | pyJianYingDraft Track | 接受的段类型 | 本项目配置类 |
+|---------|----------------------|------------|-------------|
+| `video` | `Track[VideoSegment]` | VideoSegment | VideoSegmentConfig, ImageSegmentConfig |
+| `audio` | `Track[AudioSegment]` | AudioSegment | AudioSegmentConfig |
+| `text` | `Track[TextSegment]` | TextSegment | TextSegmentConfig |
+| `sticker` | `Track[StickerSegment]` | StickerSegment | StickerSegmentConfig |
+| `effect` | `Track[EffectSegment]` | EffectSegment | EffectSegmentConfig |
+| `filter` | `Track[FilterSegment]` | FilterSegment | FilterSegmentConfig |
+
+**重要规则**:
+1. ❌ **没有 "image" 轨道类型** - 图片放在 video 轨道上
+2. ✅ video 轨道可以同时包含 VideoSegmentConfig 和 ImageSegmentConfig
+3. ✅ 其他轨道只能包含对应的单一段类型
+4. ✅ TrackConfig 包含运行时验证，确保段类型与轨道类型匹配
+5. ✅ effect 和 filter 轨道是独立轨道
+
+#### 使用示例
+
+```python
+# ✅ 正确: video 轨道包含视频段
+video_track = TrackConfig(
+    track_type="video",
+    segments=[VideoSegmentConfig(...)]
+)
+
+# ✅ 正确: video 轨道包含图片段
+video_track = TrackConfig(
+    track_type="video",  # 注意：不是 "image"
+    segments=[ImageSegmentConfig(...)]
+)
+
+# ✅ 正确: video 轨道混合视频和图片
+video_track = TrackConfig(
+    track_type="video",
+    segments=[VideoSegmentConfig(...), ImageSegmentConfig(...)]
+)
+
+# ❌ 错误: "image" 轨道类型不存在
+image_track = TrackConfig(
+    track_type="image",  # 错误！
+    segments=[ImageSegmentConfig(...)]
+)
+
+# ❌ 错误: audio 轨道不能包含 video 段
+audio_track = TrackConfig(
+    track_type="audio",
+    segments=[VideoSegmentConfig(...)]  # 错误！
+)
+```
+
 ### 常见误解和注意事项
 
-1. **误解**: ImageSegment 是独立的段类型
-   - **实际**: pyJianYingDraft 没有 ImageSegment，图片使用 VideoSegment
-   - **本项目**: `ImageSegmentConfig` 提供简化接口，内部映射到 VideoSegment
+1. **误解**: ImageSegment 是独立的段类型，有独立的轨道
+   - **实际**: pyJianYingDraft 没有 ImageSegment 和 image 轨道，图片使用 VideoSegment 放在 video 轨道上
+   - **本项目**: `ImageSegmentConfig` 提供简化接口，但必须放在 `track_type="video"` 的轨道上
 
 2. **误解**: 所有段类型都可以添加到同一个轨道
-   - **实际**: Effect 和 Filter 必须在独立轨道上
-   - **本项目**: TrackConfig 的 track_type 需正确设置
+   - **实际**: 每种轨道只接受特定的段类型，pyJianYingDraft 在运行时强制验证
+   - **本项目**: TrackConfig 包含 `__post_init__` 验证，会在创建时检查段类型匹配
+
+3. **误解**: tracks 列表必须包含特定数量或类型的轨道
+   - **实际**: tracks 是灵活的列表，可以包含任意数量和类型的轨道
+   - **本项目**: 示例展示多种轨道只是为了演示，实际使用时根据需要添加
 
 ## 开发历程文档规范
 

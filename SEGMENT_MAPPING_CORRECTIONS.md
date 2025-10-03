@@ -2,6 +2,24 @@
 
 This document summarizes the corrections made to the Draft Generator Interface to properly align with pyJianYingDraft's segment type hierarchy.
 
+## Latest Update: Track-Segment Type Validation
+
+**Track-Segment Relationship Fix**: After user feedback, additional issues were identified and fixed:
+
+1. **Removed invalid "image" track_type** - pyJianYingDraft only has 6 track types (video, audio, text, sticker, effect, filter). Images go on video tracks, not separate image tracks.
+
+2. **Added type validation** - TrackConfig now includes `__post_init__` validation to ensure:
+   - Only valid track_types are used
+   - Segments match their track_type (e.g., AudioSegmentConfig only on audio tracks)
+   - VideoSegmentConfig and ImageSegmentConfig can both go on video tracks
+   
+3. **Clarified track usage in documentation**:
+   - Each track type accepts only specific segment types (matches pyJianYingDraft's `Track[Seg_type]` generic design)
+   - Examples now clearly explain that tracks list can contain any number/types of tracks
+   - Added mapping table showing which segments go on which tracks
+
+**Result**: TrackConfig now properly enforces the one-to-one (or one-to-few for video track) relationship between track types and segment types, matching pyJianYingDraft's design.
+
 ## Update (After Initial Correction)
 
 **MediaResource Removal**: After the initial corrections, it was identified that `MediaResource` was redundant and unnecessary:
@@ -19,6 +37,7 @@ This document summarizes the corrections made to the Draft Generator Interface t
 2. Missing segment configuration classes for StickerSegment and FilterSegment
 3. Unclear that ImageSegment doesn't exist in pyJianYingDraft (images use VideoSegment)
 4. Documentation didn't explain the segment hierarchy
+5. Track-segment type relationship was not properly enforced (added later)
 
 ## pyJianYingDraft Segment Hierarchy (Correct Understanding)
 

@@ -384,18 +384,64 @@ class StickerSegmentConfig:
 class TrackConfig:
     """Configuration for a single track
     
-    支持的轨道类型:
-    - "video": 视频轨道 (VideoSegmentConfig, ImageSegmentConfig)
-    - "audio": 音频轨道 (AudioSegmentConfig)
-    - "text": 文本/字幕轨道 (TextSegmentConfig)
-    - "sticker": 贴纸轨道 (StickerSegmentConfig)
-    - "effect": 特效轨道 (EffectSegmentConfig)
-    - "filter": 滤镜轨道 (FilterSegmentConfig)
+    对应 pyJianYingDraft.Track，每种轨道类型只接受特定的段类型。
+    
+    支持的轨道类型及其接受的段类型:
+    - "video": 视频轨道 -> VideoSegmentConfig, ImageSegmentConfig (图片作为静态视频)
+    - "audio": 音频轨道 -> AudioSegmentConfig
+    - "text": 文本/字幕轨道 -> TextSegmentConfig
+    - "sticker": 贴纸轨道 -> StickerSegmentConfig
+    - "effect": 特效轨道 -> EffectSegmentConfig (独立轨道)
+    - "filter": 滤镜轨道 -> FilterSegmentConfig (独立轨道)
+    
+    注意: 
+    - 图片没有独立的轨道类型，应放在 video 轨道上
+    - 每个轨道应只包含其对应类型的 segments
+    - pyJianYingDraft 会在运行时验证 segment 类型与轨道类型匹配
     """
-    track_type: str  # "video", "audio", "image", "text", "sticker", "effect", "filter"
+    track_type: str  # "video", "audio", "text", "sticker", "effect", "filter"
     segments: List[Union[VideoSegmentConfig, AudioSegmentConfig, ImageSegmentConfig, TextSegmentConfig, StickerSegmentConfig, EffectSegmentConfig, FilterSegmentConfig]] = field(default_factory=list)
     muted: bool = False
     volume: float = 1.0  # For audio tracks
+    
+    def __post_init__(self):
+        """验证 track_type 和 segments 的匹配性"""
+        valid_track_types = {"video", "audio", "text", "sticker", "effect", "filter"}
+        if self.track_type not in valid_track_types:
+            raise ValueError(f"Invalid track_type '{self.track_type}'. Must be one of: {valid_track_types}")
+        
+        # 验证 segments 类型与 track_type 匹配
+        for segment in self.segments:
+            if not self._is_valid_segment_for_track(segment):
+                raise ValueError(
+                    f"Segment type {type(segment).__name__} is not compatible with track_type '{self.track_type}'. "
+                    f"Expected: {self._get_expected_segment_types()}"
+                )
+    
+    def _is_valid_segment_for_track(self, segment) -> bool:
+        """检查 segment 类型是否与当前 track_type 兼容"""
+        type_mapping = {
+            "video": (VideoSegmentConfig, ImageSegmentConfig),  # video 轨道接受视频和图片
+            "audio": (AudioSegmentConfig,),
+            "text": (TextSegmentConfig,),
+            "sticker": (StickerSegmentConfig,),
+            "effect": (EffectSegmentConfig,),
+            "filter": (FilterSegmentConfig,)
+        }
+        expected_types = type_mapping.get(self.track_type, ())
+        return isinstance(segment, expected_types)
+    
+    def _get_expected_segment_types(self) -> str:
+        """获取当前 track_type 期望的 segment 类型说明"""
+        type_mapping = {
+            "video": "VideoSegmentConfig or ImageSegmentConfig",
+            "audio": "AudioSegmentConfig",
+            "text": "TextSegmentConfig",
+            "sticker": "StickerSegmentConfig",
+            "effect": "EffectSegmentConfig",
+            "filter": "FilterSegmentConfig"
+        }
+        return type_mapping.get(self.track_type, "Unknown")
 
 
 @dataclass

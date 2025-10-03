@@ -174,6 +174,19 @@ class TimeRange:
 
 ## 使用示例
 
+### 轨道和段类型映射关系
+
+**重要**: 每种轨道类型只接受特定的段类型（对应 pyJianYingDraft 的设计）：
+
+| 轨道类型 | 接受的段类型 | 说明 |
+|---------|------------|------|
+| `video` | VideoSegmentConfig, ImageSegmentConfig | 图片作为静态视频放在 video 轨道上 |
+| `audio` | AudioSegmentConfig | 音频轨道 |
+| `text` | TextSegmentConfig | 文本/字幕轨道 |
+| `sticker` | StickerSegmentConfig | 贴纸轨道 |
+| `effect` | EffectSegmentConfig | 特效轨道（独立轨道） |
+| `filter` | FilterSegmentConfig | 滤镜轨道（独立轨道） |
+
 ### 创建基本草稿配置
 
 ```python
@@ -190,7 +203,7 @@ project = ProjectSettings(
     fps=30
 )
 
-# 创建视频轨道（直接在 segment 中引用 URL）
+# 创建视频轨道（包含视频片段）
 video_segment = VideoSegmentConfig(
     material_url="https://example.com/video1.mp4",
     time_range=TimeRange(start=0, end=30000),
@@ -201,11 +214,11 @@ video_segment = VideoSegmentConfig(
 )
 
 video_track = TrackConfig(
-    track_type="video",
-    segments=[video_segment]
+    track_type="video",  # video 轨道
+    segments=[video_segment]  # 只能包含 VideoSegmentConfig 或 ImageSegmentConfig
 )
 
-# 创建音频轨道
+# 创建音频轨道（包含音频片段）
 audio_segment = AudioSegmentConfig(
     material_url="https://example.com/audio1.mp3",
     time_range=TimeRange(start=0, end=30000),
@@ -213,19 +226,48 @@ audio_segment = AudioSegmentConfig(
 )
 
 audio_track = TrackConfig(
-    track_type="audio",
-    segments=[audio_segment]
+    track_type="audio",  # audio 轨道
+    segments=[audio_segment]  # 只能包含 AudioSegmentConfig
 )
 
 # 创建完整草稿配置
+# 注意: tracks 是一个列表，可以包含任意数量和类型的轨道
+# 这里展示了 video 和 audio 两种轨道，实际使用时可以根据需要添加更多轨道
 draft_config = DraftConfig(
     project=project,
-    tracks=[video_track, audio_track],
+    tracks=[video_track, audio_track],  # 可以添加更多轨道: text_track, sticker_track, etc.
     total_duration_ms=30000
 )
 
 # 转换为JSON字符串
 json_data = json.dumps(draft_config.to_dict(), ensure_ascii=False, indent=2)
+```
+
+### 图片放在视频轨道上
+
+**重要**: pyJianYingDraft 没有独立的 image 轨道，图片作为静态视频放在 video 轨道上。
+
+```python
+from data_structures.draft_generator_interface.models import (
+    ImageSegmentConfig, TimeRange
+)
+
+# 创建图片段（注意：图片段也是放在 video 轨道上的）
+image_segment = ImageSegmentConfig(
+    material_url="https://example.com/logo.png",
+    time_range=TimeRange(start=0, end=5000),
+    position_x=0.5,
+    position_y=0.5,
+    scale_x=0.5,
+    scale_y=0.5,
+    fit_mode="fit"
+)
+
+# 可以在同一个 video 轨道上混合视频和图片段
+mixed_video_track = TrackConfig(
+    track_type="video",  # 注意：track_type 是 "video" 不是 "image"
+    segments=[video_segment, image_segment]  # video 轨道可以包含视频和图片
+)
 ```
 
 ### 添加文本字幕
