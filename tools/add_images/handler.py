@@ -53,6 +53,8 @@ class ImageSegmentConfig:
         self.scale_y = kwargs.get('scale_y', 1.0)
         self.rotation = kwargs.get('rotation', 0.0)
         self.opacity = kwargs.get('opacity', 1.0)
+        self.flip_horizontal = kwargs.get('flip_horizontal', False)
+        self.flip_vertical = kwargs.get('flip_vertical', False)
         
         # Image dimensions
         self.width = kwargs.get('width')
