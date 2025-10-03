@@ -26,9 +26,6 @@ Draft Generator Interface 成功地将 pyJianYingDraft 库的所有核心功能�
 | 项目名称 | `project.name` | `create_draft(draft_name)` | ✅ 完全支持 |
 | 分辨率 | `project.width/height` | `create_draft(width, height)` | ✅ 完全支持 |
 | 帧率 | `project.fps` | `create_draft(fps)` | ✅ 完全支持 |
-| 视频质量 | `project.video_quality` | 草稿内部配置 | ✅ 支持 |
-| 音频质量 | `project.audio_quality` | 草稿内部配置 | ✅ 支持 |
-| 背景色 | `project.background_color` | 草稿内部配置 | ✅ 支持 |
 
 **评估**: ✅ 项目配置参数完整，覆盖了 pyJianYingDraft 的所有基础配置需求。
 
