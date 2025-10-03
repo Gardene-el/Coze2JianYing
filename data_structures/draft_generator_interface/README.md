@@ -36,7 +36,7 @@ Draft Generator Interface 是 **CozeJianYingAssistent** 项目和 **pyJianYingDr
 ### 基础配置类
 
 #### ProjectSettings
-项目基本配置，包含分辨率、帧率、质量设置等。
+项目基本配置，包含分辨率、帧率等。
 
 ```python
 @dataclass
@@ -45,9 +45,6 @@ class ProjectSettings:
     width: int = 1920
     height: int = 1080
     fps: int = 30
-    video_quality: VideoQuality = VideoQuality.FHD_1080P
-    audio_quality: AudioQuality = AudioQuality.HIGH_320K
-    background_color: str = "#000000"
 ```
 
 #### MediaResource
@@ -326,10 +323,7 @@ Draft Generator Interface → pyJianYingDraft
     "name": "Coze剪映项目",
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "video_quality": "1080p",
-    "audio_quality": "320k",
-    "background_color": "#000000"
+    "fps": 30
   }
 }
 
@@ -343,8 +337,6 @@ script_file = draft_folder.create_draft(
     height=project["height"],
     fps=project["fps"]
 )
-# 注意: video_quality, audio_quality, background_color 在 pyJianYingDraft 中
-# 是通过草稿内部配置处理的，create_draft 不直接接受这些参数
 ```
 
 #### 2. 媒体资源映射
@@ -1049,8 +1041,6 @@ Draft Generator Interface 当前提供了以下完整的参数支持：
 ✅ **项目配置**
 - 分辨率 (width, height)
 - 帧率 (fps)
-- 质量设置 (video_quality, audio_quality)
-- 背景色 (background_color)
 
 ✅ **视频段参数**
 - 基础: material, time_range, material_range

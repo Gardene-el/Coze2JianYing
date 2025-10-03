@@ -12,23 +12,6 @@ from enum import Enum
 import uuid
 
 
-class VideoQuality(Enum):
-    """Video quality settings"""
-    SD_480P = "480p"
-    HD_720P = "720p"
-    FHD_1080P = "1080p"
-    QHD_1440P = "1440p"
-    UHD_4K = "4k"
-
-
-class AudioQuality(Enum):
-    """Audio quality settings"""
-    LOW_128K = "128k"
-    MEDIUM_192K = "192k"
-    HIGH_320K = "320k"
-    LOSSLESS = "lossless"
-
-
 @dataclass
 class ProjectSettings:
     """Basic project configuration"""
@@ -36,9 +19,6 @@ class ProjectSettings:
     width: int = 1920
     height: int = 1080
     fps: int = 30
-    video_quality: VideoQuality = VideoQuality.FHD_1080P
-    audio_quality: AudioQuality = AudioQuality.HIGH_320K
-    background_color: str = "#000000"
 
 
 @dataclass
@@ -305,10 +285,7 @@ class DraftConfig:
                 "name": self.project.name,
                 "width": self.project.width,
                 "height": self.project.height,
-                "fps": self.project.fps,
-                "video_quality": self.project.video_quality.value,
-                "audio_quality": self.project.audio_quality.value,
-                "background_color": self.project.background_color
+                "fps": self.project.fps
             },
             "media_resources": [
                 {
@@ -547,9 +524,6 @@ class CreateDraftInput:
     width: int = 1920
     height: int = 1080
     fps: int = 30
-    video_quality: str = "1080p"
-    audio_quality: str = "320k"
-    background_color: str = "#000000"
 
 
 @dataclass

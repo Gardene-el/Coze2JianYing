@@ -30,9 +30,7 @@
     "draft_name": "我的项目",
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "video_quality": "1080p",
-    "audio_quality": "320k"
+    "fps": 30
   },
   "output_variable": "my_draft"
 }
@@ -98,9 +96,6 @@
 | `width` | integer | 1920 | 视频宽度(像素) |
 | `height` | integer | 1080 | 视频高度(像素) |
 | `fps` | integer | 30 | 帧率 |
-| `video_quality` | string | "1080p" | 视频质量 |
-| `audio_quality` | string | "320k" | 音频质量 |
-| `background_color` | string | "#000000" | 背景色 |
 
 #### 常用配置
 
@@ -110,9 +105,7 @@
   "draft_name": "4K宣传片",
   "width": 3840,
   "height": 2160,
-  "fps": 60,
-  "video_quality": "4k",
-  "audio_quality": "lossless"
+  "fps": 60
 }
 ```
 
@@ -132,8 +125,7 @@
   "draft_name": "操作教程",
   "width": 1920,
   "height": 1080,
-  "fps": 24,
-  "audio_quality": "192k"
+  "fps": 24
 }
 ```
 
