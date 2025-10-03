@@ -296,8 +296,11 @@ def test_integration_make_image_info_to_add_images():
         updated_config = json.load(f)
     
     assert len(updated_config["tracks"]) == 1, "Should have 1 track"
-    assert updated_config["tracks"][0]["track_type"] == "image"
+    # Images are placed on video tracks (no separate image track type)
+    assert updated_config["tracks"][0]["track_type"] == "video"
     assert len(updated_config["tracks"][0]["segments"]) == 2, "Should have 2 segments"
+    # Images don't have volume parameter (static content has no audio)
+    assert "volume" not in updated_config["tracks"][0], "Images should not have volume parameter"
     
     # Verify segment details
     segment1 = updated_config["tracks"][0]["segments"][0]

@@ -13,13 +13,15 @@
 
 ### 参数数量说明
 
-本工具共有 **27 个参数**：
+本工具共有 **25 个参数**：
 - **3 个必需参数**: `image_url`, `start`, `end`
-- **24 个可选参数**: 包括变换、裁剪、效果、背景、动画等设置
+- **22 个可选参数**: 包括变换、裁剪、效果、背景、动画等设置
 
 这些参数基于 `pyJianYingDraft` 库的功能设计，映射了剪映中图片/视频片段的主要可配置属性。
 
-**注意**: 移除了 `width` 和 `height` 参数，因为它们是不影响实际显示的元数据字段，容易引起误解。图片尺寸由剪映自动处理，显示效果通过 `scale_x/scale_y` 和 `fit_mode` 控制。
+**注意**: 
+- 移除了 `width` 和 `height` 参数，因为它们是不影响实际显示的元数据字段，容易引起误解。图片尺寸由剪映自动处理，显示效果通过 `scale_x/scale_y` 和 `fit_mode` 控制。
+- 移除了 `flip_horizontal` 和 `flip_vertical` 参数，因为根据 `draft_generator_interface` 规范，这些参数不适用于静态图片（仅适用于贴纸等其他视觉元素）。
 
 ## 输入参数
 
@@ -39,8 +41,6 @@ class Input(NamedTuple):
     scale_y: Optional[float] = 1.0              # Y缩放（默认1.0）
     rotation: Optional[float] = 0.0             # 旋转角度（默认0.0）
     opacity: Optional[float] = 1.0              # 透明度（0.0-1.0，默认1.0）
-    flip_horizontal: Optional[bool] = False     # 水平翻转（默认False）
-    flip_vertical: Optional[bool] = False       # 垂直翻转（默认False）
     
     # 可选：裁剪字段
     crop_enabled: Optional[bool] = False        # 启用裁剪（默认False）
@@ -92,9 +92,10 @@ class Input(NamedTuple):
    - `material`, `target_timerange`, `source_timerange`, `speed`, `volume`, `change_pitch`, `clip_settings`
    - 在本工具中映射为: `image_url`(material), `start/end`(target_timerange)
 
-2. **ClipSettings 参数** (8个):
-   - `alpha`, `rotation`, `scale_x`, `scale_y`, `transform_x`, `transform_y`, `flip_horizontal`, `flip_vertical`
-   - 在本工具中映射为: `opacity`(alpha), `rotation`, `scale_x`, `scale_y`, `position_x`(transform_x), `position_y`(transform_y), `flip_horizontal`, `flip_vertical`
+2. **ClipSettings 参数** (6个):
+   - `alpha`, `rotation`, `scale_x`, `scale_y`, `transform_x`, `transform_y`
+   - 在本工具中映射为: `opacity`(alpha), `rotation`, `scale_x`, `scale_y`, `position_x`(transform_x), `position_y`(transform_y)
+   - **注意**: `flip_horizontal` 和 `flip_vertical` 不适用于静态图片，已从本工具中移除
 
 3. **CropSettings 参数** (8个):
    - 裁剪四个角点的坐标

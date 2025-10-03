@@ -183,7 +183,7 @@ class ImageSegmentConfig:
     - change_pitch: False
     - clip_settings: ClipSettings (控制位置、缩放、旋转、透明度等)
     
-    本配置类移除了不适用于静态图片的参数（material_range, speed, reverse），
+    本配置类移除了不适用于静态图片的参数（material_range, speed, reverse, volume），
     但添加了图片特有的参数（fit_mode, intro_animation, outro_animation）。
     """
     material_url: str

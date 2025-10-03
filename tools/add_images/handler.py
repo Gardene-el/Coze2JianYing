@@ -53,8 +53,6 @@ class ImageSegmentConfig:
         self.scale_y = kwargs.get('scale_y', 1.0)
         self.rotation = kwargs.get('rotation', 0.0)
         self.opacity = kwargs.get('opacity', 1.0)
-        self.flip_horizontal = kwargs.get('flip_horizontal', False)
-        self.flip_vertical = kwargs.get('flip_vertical', False)
         
         # Image dimensions
         self.width = kwargs.get('width')
@@ -296,10 +294,11 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         segments.append(segment)
     
     # Create track following the proper TrackConfig format
+    # Note: Images are placed on video tracks (no separate image track type)
+    # Images don't have volume parameter (static content has no audio)
     track = {
-        "track_type": "image",
+        "track_type": "video",
         "muted": False,
-        "volume": 1.0,
         "segments": segments
     }
     

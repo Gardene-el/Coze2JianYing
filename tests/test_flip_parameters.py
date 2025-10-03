@@ -2,11 +2,12 @@
 """
 Test flip_horizontal and flip_vertical parameters
 
-This test validates that the newly added flip parameters work correctly in:
-- make_video_info
-- make_image_info
-- add_videos
-- add_images
+This test validates that the flip parameters work correctly in:
+- make_video_info (flip parameters applicable to videos)
+- add_videos (flip parameters applicable to videos)
+
+Note: flip parameters are NOT applicable to images per draft_generator_interface specification.
+Images are processed as static VideoSegments and do not support flip operations.
 """
 
 # Mock runtime module
@@ -33,7 +34,6 @@ import json
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from tools.make_video_info.handler import handler as make_video_handler, Input as VideoInput
-from tools.make_image_info.handler import handler as make_image_handler, Input as ImageInput
 
 
 def test_make_video_info_flip_parameters():
@@ -112,67 +112,6 @@ def test_make_video_info_flip_parameters():
     return True
 
 
-def test_make_image_info_flip_parameters():
-    """Test flip parameters in make_image_info"""
-    print("\n=== Testing make_image_info flip parameters ===")
-    
-    # Test 1: flip_horizontal only
-    print("\nTest 1: flip_horizontal only")
-    input_data = ImageInput(
-        image_url="https://example.com/image.jpg",
-        start=0,
-        end=5000,
-        flip_horizontal=True
-    )
-    result = make_image_handler(Args(input_data))
-    
-    assert result["success"] == True, "Should succeed"
-    image_info = json.loads(result["image_info_string"])
-    assert "flip_horizontal" in image_info, "Should include flip_horizontal"
-    assert image_info["flip_horizontal"] == True, "flip_horizontal should be True"
-    print(f"✅ flip_horizontal only: {result['image_info_string']}")
-    
-    # Test 2: flip_vertical only
-    print("\nTest 2: flip_vertical only")
-    input_data = ImageInput(
-        image_url="https://example.com/image.jpg",
-        start=0,
-        end=5000,
-        flip_vertical=True
-    )
-    result = make_image_handler(Args(input_data))
-    
-    assert result["success"] == True, "Should succeed"
-    image_info = json.loads(result["image_info_string"])
-    assert "flip_vertical" in image_info, "Should include flip_vertical"
-    assert image_info["flip_vertical"] == True, "flip_vertical should be True"
-    print(f"✅ flip_vertical only: {result['image_info_string']}")
-    
-    # Test 3: both flip parameters with other transforms
-    print("\nTest 3: both flip parameters with transforms")
-    input_data = ImageInput(
-        image_url="https://example.com/image.jpg",
-        start=0,
-        end=5000,
-        scale_x=1.5,
-        rotation=45.0,
-        flip_horizontal=True,
-        flip_vertical=True
-    )
-    result = make_image_handler(Args(input_data))
-    
-    assert result["success"] == True, "Should succeed"
-    image_info = json.loads(result["image_info_string"])
-    assert "flip_horizontal" in image_info, "Should include flip_horizontal"
-    assert "flip_vertical" in image_info, "Should include flip_vertical"
-    assert "scale_x" in image_info, "Should include scale_x"
-    assert "rotation" in image_info, "Should include rotation"
-    print(f"✅ Both flip parameters with transforms: {result['image_info_string']}")
-    
-    print("\n✅ All make_image_info flip parameter tests passed!")
-    return True
-
-
 def test_add_videos_flip_parameters():
     """Test that add_videos correctly handles flip parameters"""
     print("\n=== Testing add_videos with flip parameters ===")
@@ -211,54 +150,15 @@ def test_add_videos_flip_parameters():
     return True
 
 
-def test_add_images_flip_parameters():
-    """Test that add_images correctly handles flip parameters"""
-    print("\n=== Testing add_images with flip parameters ===")
-    
-    from tools.add_images.handler import ImageSegmentConfig, TimeRange
-    
-    # Test creating ImageSegmentConfig with flip parameters
-    print("\nTest: Create ImageSegmentConfig with flip parameters")
-    
-    time_range = TimeRange(0, 5000)
-    config = ImageSegmentConfig(
-        material_url="https://example.com/image.jpg",
-        time_range=time_range,
-        flip_horizontal=True,
-        flip_vertical=False
-    )
-    
-    assert hasattr(config, 'flip_horizontal'), "Config should have flip_horizontal attribute"
-    assert hasattr(config, 'flip_vertical'), "Config should have flip_vertical attribute"
-    assert config.flip_horizontal == True, "flip_horizontal should be True"
-    assert config.flip_vertical == False, "flip_vertical should be False"
-    print("✅ ImageSegmentConfig correctly stores flip parameters")
-    
-    # Test default values
-    print("\nTest: Default flip values")
-    config_default = ImageSegmentConfig(
-        material_url="https://example.com/image.jpg",
-        time_range=time_range
-    )
-    
-    assert config_default.flip_horizontal == False, "Default flip_horizontal should be False"
-    assert config_default.flip_vertical == False, "Default flip_vertical should be False"
-    print("✅ Default flip values are correct (False)")
-    
-    print("\n✅ All add_images flip parameter tests passed!")
-    return True
-
-
 if __name__ == "__main__":
     print("=" * 70)
     print("Testing Flip Parameters (flip_horizontal and flip_vertical)")
+    print("Note: Flip parameters only apply to videos, not to static images")
     print("=" * 70)
     
     results = []
     results.append(test_make_video_info_flip_parameters())
-    results.append(test_make_image_info_flip_parameters())
     results.append(test_add_videos_flip_parameters())
-    results.append(test_add_images_flip_parameters())
     
     print("\n" + "=" * 70)
     print(f"Test Summary: {sum(results)}/{len(results)} test suites passed")
