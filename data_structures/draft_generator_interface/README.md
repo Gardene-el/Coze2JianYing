@@ -2,6 +2,46 @@
 
 草稿生成器接口数据模型，定义了传递给草稿生成器的完整数据结构。
 
+## ⚠️ 重要：pyJianYingDraft 段类型映射关系
+
+### pyJianYingDraft 类层次结构
+
+```
+BaseSegment (基类)
+├── MediaSegment (媒体片段基类 - 不是直接使用的段类型)
+│   ├── AudioSegment (音频片段) ✅
+│   └── VisualSegment (视觉片段基类 - 不是直接使用的段类型)
+│       ├── VideoSegment (视频片段 - 也用于图片!) ✅
+│       ├── TextSegment (文本/字幕片段) ✅
+│       └── StickerSegment (贴纸片段) ✅
+├── EffectSegment (特效片段) ✅
+└── FilterSegment (滤镜片段) ✅
+```
+
+### 本模块的配置类映射
+
+| 本模块配置类 | pyJianYingDraft 类 | 说明 |
+|------------|-------------------|------|
+| `VideoSegmentConfig` | `VideoSegment` | 视频片段 |
+| `AudioSegmentConfig` | `AudioSegment` | 音频片段 |
+| `ImageSegmentConfig` | `VideoSegment` | ⚠️ 图片在剪映中作为静态视频处理! |
+| `TextSegmentConfig` | `TextSegment` | 文本/字幕片段 |
+| `StickerSegmentConfig` | `StickerSegment` | 贴纸片段 |
+| `EffectSegmentConfig` | `EffectSegment` | 特效片段（独立轨道）|
+| `FilterSegmentConfig` | `FilterSegment` | 滤镜片段（独立轨道）|
+
+### 媒体资源引用方式
+
+各段配置类通过 `material_url` 字段直接引用网络资源URL。资源类型从段类型推断：
+- `VideoSegmentConfig.material_url` → 视频文件URL
+- `AudioSegmentConfig.material_url` → 音频文件URL
+- `ImageSegmentConfig.material_url` → 图片文件URL（在 pyJianYingDraft 中作为 VideoMaterial 处理）
+- `StickerSegmentConfig.resource_id` → 贴纸资源ID
+
+在草稿生成器（pyJianYingDraftImporter）中，这些 URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类：
+- `VideoMaterial(path)` - 用于视频和图片
+- `AudioMaterial(path)` - 用于音频
+
 ## 功能描述
 
 本模块定义了用于在Coze插件和草稿生成器之间传递数据的标准化数据结构。这些模型包含了pyJianYingDraft支持的所有参数配置选项，但使用URL而不是本地文件路径来引用媒体资源。
@@ -17,13 +57,13 @@ Draft Generator Interface 是 **CozeJianYingAssistent** 项目和 **pyJianYingDr
 ## 核心设计原则
 
 ### 1. URL-based资源管理
-- 所有媒体资源（视频、音频、图片）使用URL形式
+- 所有媒体资源（视频、音频、图片、贴纸）使用URL形式
 - 适配Coze平台的网络资源传递模式
 - 支持各种网络媒体格式和来源
 
 ### 2. 完整参数覆盖
 - 包含pyJianYingDraft的所有可配置参数
-- 支持视频、音频、文本、特效等所有轨道类型
+- 支持视频、音频、图片、文本、贴纸、特效、滤镜等所有段类型
 - 涵盖变换、滤镜、转场、动画等所有效果
 
 ### 3. UUID草稿管理
@@ -47,44 +87,57 @@ class ProjectSettings:
     fps: int = 30
 ```
 
-#### MediaResource
-媒体资源描述，包含URL和元数据信息。
+#### TimeRange
+时间范围定义，以毫秒为单位。
 
 ```python
 @dataclass
-class MediaResource:
-    url: str
-    resource_type: str  # "video", "audio", "image"
-    duration_ms: Optional[int] = None
-    file_size: Optional[int] = None
-    format: Optional[str] = None
-    width: Optional[int] = None
-    height: Optional[int] = None
-    filename: Optional[str] = None
+class TimeRange:
+    start: int = 0
+    end: int = 0
+    
+    @property
+    def duration(self) -> int:
+        return self.end - self.start
 ```
 
 ### 轨道段配置类
 
+**媒体资源引用方式**: 所有段配置类通过 `material_url` 字段直接引用网络资源URL。资源类型从段类型推断（VideoSegment → 视频，AudioSegment → 音频，等）。
+
 #### VideoSegmentConfig
-视频段配置，包含所有视频相关的参数：
+视频段配置，对应 `pyJianYingDraft.VideoSegment`：
 
 - **变换属性**: 位置、缩放、旋转、透明度
 - **裁剪设置**: 裁剪区域定义
 - **效果滤镜**: 滤镜类型、强度、转场效果
-- **速度控制**: 播放速度、倒放
+- **速度控制**: 播放速度、倒放、变调控制
+- **音频控制**: 音量、变调控制
 - **背景填充**: 模糊背景、纯色背景
 - **关键帧动画**: 位置、缩放、旋转、透明度动画
 
 #### AudioSegmentConfig
-音频段配置，包含音频相关参数：
+音频段配置，对应 `pyJianYingDraft.AudioSegment`：
 
 - **音频属性**: 音量、淡入淡出
 - **音频效果**: 效果类型、强度
-- **速度控制**: 播放速度
+- **速度控制**: 播放速度、变调控制
 - **音量动画**: 音量关键帧
 
+#### ImageSegmentConfig
+图片段配置，⚠️ **对应 `pyJianYingDraft.VideoSegment`**（图片作为静态视频处理）：
+
+- **变换属性**: 位置、缩放、旋转、透明度
+- **裁剪设置**: 裁剪区域定义
+- **效果滤镜**: 滤镜类型、强度、转场效果
+- **背景填充**: 模糊背景、纯色背景、适应模式
+- **动画效果**: 入场、出场动画
+- **关键帧动画**: 位置、缩放、旋转、透明度动画
+
+注意：移除了不适用于静态图片的参数（material_range, speed, reverse, volume）
+
 #### TextSegmentConfig
-文本段配置，包含字幕和文本相关参数：
+文本段配置，对应 `pyJianYingDraft.TextSegment`：
 
 - **位置变换**: 位置、缩放、旋转、透明度
 - **文本样式**: 字体、颜色、描边、阴影、背景
@@ -92,21 +145,54 @@ class MediaResource:
 - **动画效果**: 入场、出场、循环动画
 - **关键帧动画**: 完整的动画支持
 
+#### StickerSegmentConfig
+贴纸段配置，对应 `pyJianYingDraft.StickerSegment`：
+
+- **变换属性**: 位置、缩放、旋转、透明度
+- **翻转选项**: 水平翻转、垂直翻转
+- **资源引用**: resource_id（从模板中获取）
+- **关键帧动画**: 位置、缩放、旋转、透明度动画
+
+注意：贴纸没有 source_timerange（素材裁剪范围）
+
 #### EffectSegmentConfig
-特效段配置，支持各种视觉特效：
+特效段配置，对应 `pyJianYingDraft.EffectSegment`（独立特效轨道）：
 
 - **特效类型**: 特效名称和参数
 - **特效属性**: 强度、位置、缩放
 - **自定义属性**: 灵活的特效参数支持
 
+注意：EffectSegment 放置在独立轨道上，作用域为全局
+
+#### FilterSegmentConfig
+滤镜段配置，对应 `pyJianYingDraft.FilterSegment`（独立滤镜轨道）：
+
+- **滤镜类型**: 滤镜名称
+- **强度控制**: 0-1 范围（对应剪映中的 0-100）
+
+注意：FilterSegment 放置在独立滤镜轨道上
+
 ## 使用示例
+
+### 轨道和段类型映射关系
+
+**重要**: 每种轨道类型只接受特定的段类型（对应 pyJianYingDraft 的设计）：
+
+| 轨道类型 | 接受的段类型 | 说明 |
+|---------|------------|------|
+| `video` | VideoSegmentConfig, ImageSegmentConfig | 图片作为静态视频放在 video 轨道上 |
+| `audio` | AudioSegmentConfig | 音频轨道 |
+| `text` | TextSegmentConfig | 文本/字幕轨道 |
+| `sticker` | StickerSegmentConfig | 贴纸轨道 |
+| `effect` | EffectSegmentConfig | 特效轨道（独立轨道） |
+| `filter` | FilterSegmentConfig | 滤镜轨道（独立轨道） |
 
 ### 创建基本草稿配置
 
 ```python
 from data_structures.draft_generator_interface.models import (
-    DraftConfig, ProjectSettings, MediaResource, TrackConfig,
-    VideoSegmentConfig, TimeRange
+    DraftConfig, ProjectSettings, TrackConfig,
+    VideoSegmentConfig, AudioSegmentConfig, TimeRange
 )
 
 # 创建项目设置
@@ -117,21 +203,7 @@ project = ProjectSettings(
     fps=30
 )
 
-# 添加媒体资源
-media_resources = [
-    MediaResource(
-        url="https://example.com/video1.mp4",
-        resource_type="video",
-        duration_ms=30000
-    ),
-    MediaResource(
-        url="https://example.com/audio1.mp3",
-        resource_type="audio",
-        duration_ms=45000
-    )
-]
-
-# 创建视频轨道
+# 创建视频轨道（包含视频片段）
 video_segment = VideoSegmentConfig(
     material_url="https://example.com/video1.mp4",
     time_range=TimeRange(start=0, end=30000),
@@ -142,20 +214,60 @@ video_segment = VideoSegmentConfig(
 )
 
 video_track = TrackConfig(
-    track_type="video",
-    segments=[video_segment]
+    track_type="video",  # video 轨道
+    segments=[video_segment]  # 只能包含 VideoSegmentConfig 或 ImageSegmentConfig
+)
+
+# 创建音频轨道（包含音频片段）
+audio_segment = AudioSegmentConfig(
+    material_url="https://example.com/audio1.mp3",
+    time_range=TimeRange(start=0, end=30000),
+    volume=0.8
+)
+
+audio_track = TrackConfig(
+    track_type="audio",  # audio 轨道
+    segments=[audio_segment]  # 只能包含 AudioSegmentConfig
 )
 
 # 创建完整草稿配置
+# 注意: tracks 是一个列表，可以包含任意数量和类型的轨道
+# 这里展示了 video 和 audio 两种轨道，实际使用时可以根据需要添加更多轨道
 draft_config = DraftConfig(
     project=project,
-    media_resources=media_resources,
-    tracks=[video_track],
+    tracks=[video_track, audio_track],  # 可以添加更多轨道: text_track, sticker_track, etc.
     total_duration_ms=30000
 )
 
 # 转换为JSON字符串
 json_data = json.dumps(draft_config.to_dict(), ensure_ascii=False, indent=2)
+```
+
+### 图片放在视频轨道上
+
+**重要**: pyJianYingDraft 没有独立的 image 轨道，图片作为静态视频放在 video 轨道上。
+
+```python
+from data_structures.draft_generator_interface.models import (
+    ImageSegmentConfig, TimeRange
+)
+
+# 创建图片段（注意：图片段也是放在 video 轨道上的）
+image_segment = ImageSegmentConfig(
+    material_url="https://example.com/logo.png",
+    time_range=TimeRange(start=0, end=5000),
+    position_x=0.5,
+    position_y=0.5,
+    scale_x=0.5,
+    scale_y=0.5,
+    fit_mode="fit"
+)
+
+# 可以在同一个 video 轨道上混合视频和图片段
+mixed_video_track = TrackConfig(
+    track_type="video",  # 注意：track_type 是 "video" 不是 "image"
+    segments=[video_segment, image_segment]  # video 轨道可以包含视频和图片
+)
 ```
 
 ### 添加文本字幕

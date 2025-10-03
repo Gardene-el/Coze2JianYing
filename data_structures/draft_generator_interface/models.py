@@ -4,6 +4,33 @@ Draft Generator Interface Data Models
 Data structures for passing complete draft configuration to the draft generator.
 These models contain all parameters that pyJianYingDraft supports, but with URLs
 instead of local file paths for media resources.
+
+IMPORTANT: Segment Type Mapping to pyJianYingDraft
+===================================================
+This module defines segment configuration classes that correspond to pyJianYingDraft's actual segment types:
+
+pyJianYingDraft Hierarchy:
+- BaseSegment (基类)
+  - MediaSegment (媒体片段基类 - 不是直接使用的段类型)
+    - AudioSegment (音频片段)
+    - VisualSegment (视觉片段基类 - 不是直接使用的段类型)
+      - VideoSegment (视频片段 - 也用于图片!)
+      - TextSegment (文本/字幕片段)
+      - StickerSegment (贴纸片段)
+  - EffectSegment (特效片段)
+  - FilterSegment (滤镜片段)
+
+本模块的配置类映射:
+- VideoSegmentConfig -> pyJianYingDraft.VideoSegment
+- AudioSegmentConfig -> pyJianYingDraft.AudioSegment
+- ImageSegmentConfig -> pyJianYingDraft.VideoSegment (图片在剪映中作为静态视频处理!)
+- TextSegmentConfig -> pyJianYingDraft.TextSegment
+- StickerSegmentConfig -> pyJianYingDraft.StickerSegment
+- EffectSegmentConfig -> pyJianYingDraft.EffectSegment
+- FilterSegmentConfig -> pyJianYingDraft.FilterSegment
+
+注意: 媒体资源通过各个 segment 的 material_url 字段直接引用。
+在草稿生成器中，这些 URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类。
 """
 
 from typing import List, Dict, Optional, Any, Union
@@ -14,24 +41,14 @@ import uuid
 
 @dataclass
 class ProjectSettings:
-    """Basic project configuration"""
+    """Basic project configuration
+    
+    对应 pyJianYingDraft 的项目设置参数
+    """
     name: str = "Coze剪映项目"
     width: int = 1920
     height: int = 1080
     fps: int = 30
-
-
-@dataclass
-class MediaResource:
-    """Represents a media resource with URL and metadata"""
-    url: str
-    resource_type: str  # "video", "audio", "image"
-    duration_ms: Optional[int] = None
-    file_size: Optional[int] = None
-    format: Optional[str] = None
-    width: Optional[int] = None
-    height: Optional[int] = None
-    filename: Optional[str] = None
 
 
 @dataclass
@@ -56,7 +73,19 @@ class KeyframeProperty:
 
 @dataclass
 class VideoSegmentConfig:
-    """Configuration for a video segment"""
+    """Configuration for a video segment
+    
+    对应 pyJianYingDraft.VideoSegment (继承自 VisualSegment -> MediaSegment -> BaseSegment)
+    
+    pyJianYingDraft 参数映射:
+    - material: VideoMaterial(本地路径) <- material_url 需下载
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - source_timerange: Timerange(start, duration) <- material_range (start, end)
+    - speed: float
+    - volume: float
+    - change_pitch: bool
+    - clip_settings: ClipSettings (alpha, flip_horizontal, flip_vertical, rotation, scale_x, scale_y, transform_x, transform_y)
+    """
     material_url: str
     time_range: TimeRange
     material_range: Optional[TimeRange] = None
@@ -103,7 +132,20 @@ class VideoSegmentConfig:
 
 @dataclass
 class AudioSegmentConfig:
-    """Configuration for an audio segment"""
+    """Configuration for an audio segment
+    
+    对应 pyJianYingDraft.AudioSegment (继承自 MediaSegment -> BaseSegment)
+    
+    pyJianYingDraft 参数映射:
+    - material: AudioMaterial(本地路径) <- material_url 需下载
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - source_timerange: Timerange(start, duration) <- material_range (start, end)
+    - speed: float
+    - volume: float
+    - change_pitch: bool
+    - fade: AudioFade (in_duration, out_duration) <- fade_in, fade_out
+    - effects: List[AudioEffect]
+    """
     material_url: str
     time_range: TimeRange
     material_range: Optional[TimeRange] = None
@@ -127,7 +169,23 @@ class AudioSegmentConfig:
 
 @dataclass
 class ImageSegmentConfig:
-    """Configuration for an image segment"""
+    """Configuration for an image segment
+    
+    ⚠️ 重要: 图片在 pyJianYingDraft 中没有独立的 ImageSegment 类!
+    图片实际上是作为 VideoSegment 处理的（静态视频）。
+    
+    对应 pyJianYingDraft.VideoSegment:
+    - material: VideoMaterial(图片本地路径) <- material_url 需下载
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - source_timerange: None (图片没有素材裁剪范围)
+    - speed: 1.0 (图片不支持速度控制)
+    - volume: 1.0 (图片没有音频)
+    - change_pitch: False
+    - clip_settings: ClipSettings (控制位置、缩放、旋转、透明度等)
+    
+    本配置类移除了不适用于静态图片的参数（material_range, speed, reverse），
+    但添加了图片特有的参数（fit_mode, intro_animation, outro_animation）。
+    """
     material_url: str
     time_range: TimeRange
     
@@ -201,7 +259,20 @@ class TextStyle:
 
 @dataclass
 class TextSegmentConfig:
-    """Configuration for a text/subtitle segment"""
+    """Configuration for a text/subtitle segment
+    
+    对应 pyJianYingDraft.TextSegment (继承自 VisualSegment -> MediaSegment -> BaseSegment)
+    
+    pyJianYingDraft 参数映射:
+    - text: str <- content
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - style: TextStyle (size, bold, italic, underline, color, alpha, align, vertical, letter_spacing, line_spacing, auto_wrapping, max_line_width)
+    - clip_settings: ClipSettings (控制位置、缩放、旋转、透明度)
+    - border: TextBorder (alpha, color, width)
+    - shadow: TextShadow
+    - background: TextBackground
+    - animations_instance: SegmentAnimations (intro, outro, loop)
+    """
     content: str
     time_range: TimeRange
     
@@ -232,7 +303,17 @@ class TextSegmentConfig:
 
 @dataclass
 class EffectSegmentConfig:
-    """Configuration for effect segments"""
+    """Configuration for effect segments
+    
+    对应 pyJianYingDraft.EffectSegment (继承自 BaseSegment)
+    
+    pyJianYingDraft 参数映射:
+    - effect_inst: VideoEffect (VideoSceneEffectType 或 VideoCharacterEffectType)
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - params: List[Optional[float]] (0-100 范围的参数值)
+    
+    注意: EffectSegment 在 pyJianYingDraft 中放置在独立的特效轨道上，作用域为全局(apply_target_type=2)
+    """
     effect_type: str
     time_range: TimeRange
     
@@ -247,12 +328,120 @@ class EffectSegmentConfig:
 
 
 @dataclass
+class FilterSegmentConfig:
+    """Configuration for filter segments
+    
+    对应 pyJianYingDraft.FilterSegment (继承自 BaseSegment)
+    
+    pyJianYingDraft 参数映射:
+    - material: Filter (FilterType, intensity)
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - intensity: float (0-1 范围，对应剪映中的 0-100)
+    
+    注意: FilterSegment 在 pyJianYingDraft 中放置在独立的滤镜轨道上
+    """
+    filter_type: str
+    time_range: TimeRange
+    intensity: float = 1.0  # 0-1 range
+
+
+@dataclass
+class StickerSegmentConfig:
+    """Configuration for sticker segments
+    
+    对应 pyJianYingDraft.StickerSegment (继承自 VisualSegment -> MediaSegment -> BaseSegment)
+    
+    pyJianYingDraft 参数映射:
+    - resource_id: str (贴纸的resource_id，可通过ScriptFile.inspect_material从模板中获取)
+    - target_timerange: Timerange(start, duration) <- time_range (start, end)
+    - clip_settings: ClipSettings (控制位置、缩放、旋转、透明度)
+    
+    注意: 贴纸没有 source_timerange (素材裁剪范围不适用于贴纸)
+    """
+    resource_id: str
+    time_range: TimeRange
+    
+    # Transform properties (via ClipSettings)
+    position_x: float = 0.0
+    position_y: float = 0.0
+    scale_x: float = 1.0
+    scale_y: float = 1.0
+    rotation: float = 0.0
+    opacity: float = 1.0
+    
+    # Flip options
+    flip_horizontal: bool = False
+    flip_vertical: bool = False
+    
+    # Keyframes for animations
+    position_keyframes: List[KeyframeProperty] = field(default_factory=list)
+    scale_keyframes: List[KeyframeProperty] = field(default_factory=list)
+    rotation_keyframes: List[KeyframeProperty] = field(default_factory=list)
+    opacity_keyframes: List[KeyframeProperty] = field(default_factory=list)
+
+
+@dataclass
 class TrackConfig:
-    """Configuration for a single track"""
-    track_type: str  # "video", "audio", "image", "text", "effect"
-    segments: List[Union[VideoSegmentConfig, AudioSegmentConfig, ImageSegmentConfig, TextSegmentConfig, EffectSegmentConfig]] = field(default_factory=list)
+    """Configuration for a single track
+    
+    对应 pyJianYingDraft.Track，每种轨道类型只接受特定的段类型。
+    
+    支持的轨道类型及其接受的段类型:
+    - "video": 视频轨道 -> VideoSegmentConfig, ImageSegmentConfig (图片作为静态视频)
+    - "audio": 音频轨道 -> AudioSegmentConfig
+    - "text": 文本/字幕轨道 -> TextSegmentConfig
+    - "sticker": 贴纸轨道 -> StickerSegmentConfig
+    - "effect": 特效轨道 -> EffectSegmentConfig (独立轨道)
+    - "filter": 滤镜轨道 -> FilterSegmentConfig (独立轨道)
+    
+    注意: 
+    - 图片没有独立的轨道类型，应放在 video 轨道上
+    - 每个轨道应只包含其对应类型的 segments
+    - pyJianYingDraft 会在运行时验证 segment 类型与轨道类型匹配
+    """
+    track_type: str  # "video", "audio", "text", "sticker", "effect", "filter"
+    segments: List[Union[VideoSegmentConfig, AudioSegmentConfig, ImageSegmentConfig, TextSegmentConfig, StickerSegmentConfig, EffectSegmentConfig, FilterSegmentConfig]] = field(default_factory=list)
     muted: bool = False
     volume: float = 1.0  # For audio tracks
+    
+    def __post_init__(self):
+        """验证 track_type 和 segments 的匹配性"""
+        valid_track_types = {"video", "audio", "text", "sticker", "effect", "filter"}
+        if self.track_type not in valid_track_types:
+            raise ValueError(f"Invalid track_type '{self.track_type}'. Must be one of: {valid_track_types}")
+        
+        # 验证 segments 类型与 track_type 匹配
+        for segment in self.segments:
+            if not self._is_valid_segment_for_track(segment):
+                raise ValueError(
+                    f"Segment type {type(segment).__name__} is not compatible with track_type '{self.track_type}'. "
+                    f"Expected: {self._get_expected_segment_types()}"
+                )
+    
+    def _is_valid_segment_for_track(self, segment) -> bool:
+        """检查 segment 类型是否与当前 track_type 兼容"""
+        type_mapping = {
+            "video": (VideoSegmentConfig, ImageSegmentConfig),  # video 轨道接受视频和图片
+            "audio": (AudioSegmentConfig,),
+            "text": (TextSegmentConfig,),
+            "sticker": (StickerSegmentConfig,),
+            "effect": (EffectSegmentConfig,),
+            "filter": (FilterSegmentConfig,)
+        }
+        expected_types = type_mapping.get(self.track_type, ())
+        return isinstance(segment, expected_types)
+    
+    def _get_expected_segment_types(self) -> str:
+        """获取当前 track_type 期望的 segment 类型说明"""
+        type_mapping = {
+            "video": "VideoSegmentConfig or ImageSegmentConfig",
+            "audio": "AudioSegmentConfig",
+            "text": "TextSegmentConfig",
+            "sticker": "StickerSegmentConfig",
+            "effect": "EffectSegmentConfig",
+            "filter": "FilterSegmentConfig"
+        }
+        return type_mapping.get(self.track_type, "Unknown")
 
 
 @dataclass
@@ -263,9 +452,6 @@ class DraftConfig:
     
     # Project settings
     project: ProjectSettings = field(default_factory=ProjectSettings)
-    
-    # Media resources (all URLs)
-    media_resources: List[MediaResource] = field(default_factory=list)
     
     # Track configurations
     tracks: List[TrackConfig] = field(default_factory=list)
@@ -287,19 +473,6 @@ class DraftConfig:
                 "height": self.project.height,
                 "fps": self.project.fps
             },
-            "media_resources": [
-                {
-                    "url": res.url,
-                    "resource_type": res.resource_type,
-                    "duration_ms": res.duration_ms,
-                    "file_size": res.file_size,
-                    "format": res.format,
-                    "width": res.width,
-                    "height": res.height,
-                    "filename": res.filename
-                }
-                for res in self.media_resources
-            ],
             "tracks": [
                 {
                     "track_type": track.track_type,
@@ -326,8 +499,12 @@ class DraftConfig:
                 result.append(self._serialize_image_segment(segment))
             elif isinstance(segment, TextSegmentConfig):
                 result.append(self._serialize_text_segment(segment))
+            elif isinstance(segment, StickerSegmentConfig):
+                result.append(self._serialize_sticker_segment(segment))
             elif isinstance(segment, EffectSegmentConfig):
                 result.append(self._serialize_effect_segment(segment))
+            elif isinstance(segment, FilterSegmentConfig):
+                result.append(self._serialize_filter_segment(segment))
         return result
     
     def _serialize_video_segment(self, segment: VideoSegmentConfig) -> Dict[str, Any]:
@@ -512,6 +689,41 @@ class DraftConfig:
                 "position_y": segment.position_y,
                 "scale": segment.scale,
                 **segment.properties
+            }
+        }
+    
+    def _serialize_filter_segment(self, segment: FilterSegmentConfig) -> Dict[str, Any]:
+        """Serialize filter segment configuration"""
+        return {
+            "type": "filter",
+            "filter_type": segment.filter_type,
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
+            "intensity": segment.intensity
+        }
+    
+    def _serialize_sticker_segment(self, segment: StickerSegmentConfig) -> Dict[str, Any]:
+        """Serialize sticker segment configuration"""
+        return {
+            "type": "sticker",
+            "resource_id": segment.resource_id,
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
+            "transform": {
+                "position_x": segment.position_x,
+                "position_y": segment.position_y,
+                "scale_x": segment.scale_x,
+                "scale_y": segment.scale_y,
+                "rotation": segment.rotation,
+                "opacity": segment.opacity
+            },
+            "flip": {
+                "horizontal": segment.flip_horizontal,
+                "vertical": segment.flip_vertical
+            },
+            "keyframes": {
+                "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
+                "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
+                "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
+                "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
             }
         }
 
