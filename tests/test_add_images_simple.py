@@ -196,10 +196,10 @@ def test_draft_config_integration():
         }
     ]
     
+    # Images use video track type, no volume parameter
     image_track = {
-        "track_type": "image",
+        "track_type": "video",
         "muted": False,
-        "volume": 1.0,
         "segments": image_segments
     }
     
@@ -208,7 +208,8 @@ def test_draft_config_integration():
     
     # Verify integration
     assert len(test_config["tracks"]) == 1, "Should have 1 track"
-    assert test_config["tracks"][0]["track_type"] == "image", "Track should be image type"
+    # Images are placed on video tracks (no separate image track type)
+    assert test_config["tracks"][0]["track_type"] == "video", "Track should be video type (images use video tracks)"
     assert len(test_config["tracks"][0]["segments"]) == 2, "Track should have 2 segments"
     
     # Verify segments

@@ -88,11 +88,10 @@ def test_add_images_example_from_issue():
                 "end": info["end"]
             })
         
-        # Create image track
+        # Create image track (images use video track type, no volume parameter)
         image_track = {
-            "track_type": "image",
+            "track_type": "video",
             "muted": False,
-            "volume": 1.0,
             "segments": segments
         }
         
@@ -150,7 +149,8 @@ def test_add_images_example_from_issue():
         updated_config = json.load(f)
     
     assert len(updated_config["tracks"]) == 1, f"Expected 1 track, got {len(updated_config['tracks'])}"
-    assert updated_config["tracks"][0]["track_type"] == "image", "Track should be image type"
+    # Images are placed on video tracks (no separate image track type)
+    assert updated_config["tracks"][0]["track_type"] == "video", "Track should be video type (images use video tracks)"
     assert len(updated_config["tracks"][0]["segments"]) == 11, f"Expected 11 segments in track, got {len(updated_config['tracks'][0]['segments'])}"
     
     print("✅ Draft config updated correctly")

@@ -115,7 +115,8 @@ def test_add_images_basic():
     assert len(updated_config["tracks"]) == 1, f"Expected 1 track, got {len(updated_config['tracks'])}"
     
     image_track = updated_config["tracks"][0]
-    assert image_track["track_type"] == "image", f"Expected image track, got {image_track['track_type']}"
+    # Images are placed on video tracks (no separate image track type)
+    assert image_track["track_type"] == "video", f"Expected video track (images use video tracks), got {image_track['track_type']}"
     assert len(image_track["segments"]) == 2, f"Expected 2 segments in track, got {len(image_track['segments'])}"
     
     print("✅ Draft configuration updated correctly")
@@ -314,8 +315,9 @@ def test_add_images_multiple_calls():
         config = json.load(f)
     
     assert len(config["tracks"]) == 2, f"Expected 2 tracks, got {len(config['tracks'])}"
-    assert config["tracks"][0]["track_type"] == "image", "First track should be image type"
-    assert config["tracks"][1]["track_type"] == "image", "Second track should be image type"
+    # Images are placed on video tracks (no separate image track type)
+    assert config["tracks"][0]["track_type"] == "video", "First track should be video type (images use video tracks)"
+    assert config["tracks"][1]["track_type"] == "video", "Second track should be video type (images use video tracks)"
     assert len(config["tracks"][0]["segments"]) == 2, "First track should have 2 segments"
     assert len(config["tracks"][1]["segments"]) == 1, "Second track should have 1 segment"
     
