@@ -443,15 +443,12 @@ cd tests && python test_*.py
 
 ## 重要架构说明：pyJianYingDraft 段类型映射
 
-### MediaResource 的定位
+### 媒体资源引用方式
 
-**重要**: `MediaResource` 不是 pyJianYingDraft 的类！这是早期设计中容易产生误解的地方。
-
-`MediaResource` 是本项目为适配 Coze 平台的 URL-based 资源管理而创建的**抽象类**。它的作用是：
-- 在 Coze 工作流中管理网络资源链接
-- 携带媒体元数据（时长、格式、尺寸等）
-- 在传递给草稿生成器后，由草稿生成器下载为本地文件
-- 本地文件路径传递给 pyJianYingDraft 的 Material 类（`VideoMaterial(path)` 或 `AudioMaterial(path)`）
+本项目通过各段配置类的 `material_url` 字段直接引用网络资源URL，无需单独的 MediaResource 类：
+- 在 Coze 工作流中，各 segment 直接使用 URL 引用媒体资源
+- 资源类型从 segment 类型自动推断（VideoSegment → 视频，AudioSegment → 音频，等）
+- 在草稿生成器中，URL 被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类（`VideoMaterial(path)` 或 `AudioMaterial(path)`）
 
 ### pyJianYingDraft 段类型层次结构
 
@@ -492,11 +489,7 @@ BaseSegment (基类)
    - **实际**: pyJianYingDraft 没有 ImageSegment，图片使用 VideoSegment
    - **本项目**: `ImageSegmentConfig` 提供简化接口，内部映射到 VideoSegment
 
-2. **误解**: MediaResource 对应 pyJianYingDraft 的某个类
-   - **实际**: MediaResource 是本项目的抽象类，用于 URL 管理
-   - **本项目**: 在草稿生成器中转换为 VideoMaterial 或 AudioMaterial
-
-3. **误解**: 所有段类型都可以添加到同一个轨道
+2. **误解**: 所有段类型都可以添加到同一个轨道
    - **实际**: Effect 和 Filter 必须在独立轨道上
    - **本项目**: TrackConfig 的 track_type 需正确设置
 

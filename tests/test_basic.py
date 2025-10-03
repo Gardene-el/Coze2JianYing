@@ -16,7 +16,7 @@ def test_data_structures():
     
     sys.path.insert(0, '.')
     from data_structures.draft_generator_interface.models import (
-        DraftConfig, ProjectSettings, MediaResource, TrackConfig,
+        DraftConfig, ProjectSettings, TrackConfig,
         VideoSegmentConfig, TimeRange, TextSegmentConfig, TextStyle
     )
     
@@ -28,23 +28,7 @@ def test_data_structures():
         fps=30
     )
     
-    # Create media resources
-    media_resources = [
-        MediaResource(
-            url="https://example.com/video1.mp4",
-            resource_type="video",
-            duration_ms=30000,
-            format="mp4"
-        ),
-        MediaResource(
-            url="https://example.com/audio1.mp3",
-            resource_type="audio",
-            duration_ms=45000,
-            format="mp3"
-        )
-    ]
-    
-    # Create video segment
+    # Create video segment (URL is directly in the segment)
     video_segment = VideoSegmentConfig(
         material_url="https://example.com/video1.mp4",
         time_range=TimeRange(start=0, end=30000),
@@ -79,7 +63,6 @@ def test_data_structures():
     # Create complete draft config
     draft_config = DraftConfig(
         project=project,
-        media_resources=media_resources,
         tracks=[video_track, text_track],
         total_duration_ms=30000,
         created_timestamp=time.time(),

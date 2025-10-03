@@ -29,7 +29,8 @@ pyJianYingDraft Hierarchy:
 - EffectSegmentConfig -> pyJianYingDraft.EffectSegment
 - FilterSegmentConfig -> pyJianYingDraft.FilterSegment
 
-注意: MediaResource 不是 pyJianYingDraft 的类，而是本项目为 URL-based 资源管理创建的抽象类。
+注意: 媒体资源通过各个 segment 的 material_url 字段直接引用。
+在草稿生成器中，这些 URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类。
 """
 
 from typing import List, Dict, Optional, Any, Union
@@ -48,27 +49,6 @@ class ProjectSettings:
     width: int = 1920
     height: int = 1080
     fps: int = 30
-
-
-@dataclass
-class MediaResource:
-    """Represents a media resource with URL and metadata
-    
-    注意: 这不是 pyJianYingDraft 的类! 
-    这是本项目为适配 Coze 平台的 URL-based 资源管理而创建的抽象类。
-    在草稿生成器中，URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类:
-    - VideoMaterial(path)
-    - AudioMaterial(path)
-    - 图片作为 VideoMaterial(path) 处理
-    """
-    url: str
-    resource_type: str  # "video", "audio", "image", "sticker"
-    duration_ms: Optional[int] = None
-    file_size: Optional[int] = None
-    format: Optional[str] = None
-    width: Optional[int] = None
-    height: Optional[int] = None
-    filename: Optional[str] = None
 
 
 @dataclass
@@ -427,9 +407,6 @@ class DraftConfig:
     # Project settings
     project: ProjectSettings = field(default_factory=ProjectSettings)
     
-    # Media resources (all URLs)
-    media_resources: List[MediaResource] = field(default_factory=list)
-    
     # Track configurations
     tracks: List[TrackConfig] = field(default_factory=list)
     
@@ -450,19 +427,6 @@ class DraftConfig:
                 "height": self.project.height,
                 "fps": self.project.fps
             },
-            "media_resources": [
-                {
-                    "url": res.url,
-                    "resource_type": res.resource_type,
-                    "duration_ms": res.duration_ms,
-                    "file_size": res.file_size,
-                    "format": res.format,
-                    "width": res.width,
-                    "height": res.height,
-                    "filename": res.filename
-                }
-                for res in self.media_resources
-            ],
             "tracks": [
                 {
                     "track_type": track.track_type,

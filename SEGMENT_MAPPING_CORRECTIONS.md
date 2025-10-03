@@ -2,10 +2,20 @@
 
 This document summarizes the corrections made to the Draft Generator Interface to properly align with pyJianYingDraft's segment type hierarchy.
 
-## Issue Summary
+## Update (After Initial Correction)
+
+**MediaResource Removal**: After the initial corrections, it was identified that `MediaResource` was redundant and unnecessary:
+- Material URLs are already stored directly in segment configurations (`material_url` field)
+- Resource types can be inferred from segment types (VideoSegment → video, AudioSegment → audio, etc.)
+- Metadata (duration, format, etc.) was never actually used in the implementation
+- This created data duplication (same URL stored twice)
+
+**Result**: `MediaResource` class and `DraftConfig.media_resources` field have been completely removed. Segments now directly reference media URLs without intermediate abstraction.
+
+## Original Issue Summary
 
 **Problem**: The Draft Generator Interface had misconceptions about segment types in pyJianYingDraft:
-1. MediaResource was incorrectly assumed to be a pyJianYingDraft class
+1. MediaResource was incorrectly assumed to be a pyJianYingDraft class (later determined to be unnecessary altogether)
 2. Missing segment configuration classes for StickerSegment and FilterSegment
 3. Unclear that ImageSegment doesn't exist in pyJianYingDraft (images use VideoSegment)
 4. Documentation didn't explain the segment hierarchy

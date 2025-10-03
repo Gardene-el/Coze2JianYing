@@ -30,11 +30,15 @@ BaseSegment (基类)
 | `EffectSegmentConfig` | `EffectSegment` | 特效片段（独立轨道）|
 | `FilterSegmentConfig` | `FilterSegment` | 滤镜片段（独立轨道）|
 
-### 关于 MediaResource
+### 媒体资源引用方式
 
-**重要说明**: `MediaResource` **不是** pyJianYingDraft 的类！
+各段配置类通过 `material_url` 字段直接引用网络资源URL。资源类型从段类型推断：
+- `VideoSegmentConfig.material_url` → 视频文件URL
+- `AudioSegmentConfig.material_url` → 音频文件URL
+- `ImageSegmentConfig.material_url` → 图片文件URL（在 pyJianYingDraft 中作为 VideoMaterial 处理）
+- `StickerSegmentConfig.resource_id` → 贴纸资源ID
 
-`MediaResource` 是本项目为适配 Coze 平台的 URL-based 资源管理而创建的抽象类。在草稿生成器（pyJianYingDraftImporter）中，URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类：
+在草稿生成器（pyJianYingDraftImporter）中，这些 URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类：
 - `VideoMaterial(path)` - 用于视频和图片
 - `AudioMaterial(path)` - 用于音频
 
@@ -83,25 +87,23 @@ class ProjectSettings:
     fps: int = 30
 ```
 
-#### MediaResource
-媒体资源描述，包含URL和元数据信息。
-
-⚠️ **注意**: 这不是 pyJianYingDraft 的类，而是本项目的抽象类。
+#### TimeRange
+时间范围定义，以毫秒为单位。
 
 ```python
 @dataclass
-class MediaResource:
-    url: str
-    resource_type: str  # "video", "audio", "image", "sticker"
-    duration_ms: Optional[int] = None
-    file_size: Optional[int] = None
-    format: Optional[str] = None
-    width: Optional[int] = None
-    height: Optional[int] = None
-    filename: Optional[str] = None
+class TimeRange:
+    start: int = 0
+    end: int = 0
+    
+    @property
+    def duration(self) -> int:
+        return self.end - self.start
 ```
 
 ### 轨道段配置类
+
+**媒体资源引用方式**: 所有段配置类通过 `material_url` 字段直接引用网络资源URL。资源类型从段类型推断（VideoSegment → 视频，AudioSegment → 音频，等）。
 
 #### VideoSegmentConfig
 视频段配置，对应 `pyJianYingDraft.VideoSegment`：
@@ -176,8 +178,8 @@ class MediaResource:
 
 ```python
 from data_structures.draft_generator_interface.models import (
-    DraftConfig, ProjectSettings, MediaResource, TrackConfig,
-    VideoSegmentConfig, TimeRange
+    DraftConfig, ProjectSettings, TrackConfig,
+    VideoSegmentConfig, AudioSegmentConfig, TimeRange
 )
 
 # 创建项目设置
@@ -188,21 +190,7 @@ project = ProjectSettings(
     fps=30
 )
 
-# 添加媒体资源
-media_resources = [
-    MediaResource(
-        url="https://example.com/video1.mp4",
-        resource_type="video",
-        duration_ms=30000
-    ),
-    MediaResource(
-        url="https://example.com/audio1.mp3",
-        resource_type="audio",
-        duration_ms=45000
-    )
-]
-
-# 创建视频轨道
+# 创建视频轨道（直接在 segment 中引用 URL）
 video_segment = VideoSegmentConfig(
     material_url="https://example.com/video1.mp4",
     time_range=TimeRange(start=0, end=30000),
@@ -217,11 +205,22 @@ video_track = TrackConfig(
     segments=[video_segment]
 )
 
+# 创建音频轨道
+audio_segment = AudioSegmentConfig(
+    material_url="https://example.com/audio1.mp3",
+    time_range=TimeRange(start=0, end=30000),
+    volume=0.8
+)
+
+audio_track = TrackConfig(
+    track_type="audio",
+    segments=[audio_segment]
+)
+
 # 创建完整草稿配置
 draft_config = DraftConfig(
     project=project,
-    media_resources=media_resources,
-    tracks=[video_track],
+    tracks=[video_track, audio_track],
     total_duration_ms=30000
 )
 
