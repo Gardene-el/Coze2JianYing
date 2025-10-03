@@ -441,6 +441,65 @@ cd tests && python test_*.py
 
 *注：具体接口规范将在草稿生成器项目建立后进行详细补充和完善*
 
+## 重要架构说明：pyJianYingDraft 段类型映射
+
+### MediaResource 的定位
+
+**重要**: `MediaResource` 不是 pyJianYingDraft 的类！这是早期设计中容易产生误解的地方。
+
+`MediaResource` 是本项目为适配 Coze 平台的 URL-based 资源管理而创建的**抽象类**。它的作用是：
+- 在 Coze 工作流中管理网络资源链接
+- 携带媒体元数据（时长、格式、尺寸等）
+- 在传递给草稿生成器后，由草稿生成器下载为本地文件
+- 本地文件路径传递给 pyJianYingDraft 的 Material 类（`VideoMaterial(path)` 或 `AudioMaterial(path)`）
+
+### pyJianYingDraft 段类型层次结构
+
+理解 pyJianYingDraft 的段类型层次结构对于正确使用 Draft Generator Interface 至关重要：
+
+```
+BaseSegment (基类)
+├── MediaSegment (媒体片段基类 - 不是直接使用的段类型)
+│   ├── AudioSegment (音频片段) ✅
+│   └── VisualSegment (视觉片段基类 - 不是直接使用的段类型)
+│       ├── VideoSegment (视频片段 - 也用于图片!) ✅
+│       ├── TextSegment (文本/字幕片段) ✅
+│       └── StickerSegment (贴纸片段) ✅
+├── EffectSegment (特效片段 - 独立轨道) ✅
+└── FilterSegment (滤镜片段 - 独立轨道) ✅
+```
+
+**关键点**:
+1. `MediaSegment` 和 `VisualSegment` 是基类，不直接实例化
+2. **图片在 pyJianYingDraft 中作为 `VideoSegment` 处理**（静态视频）
+3. `EffectSegment` 和 `FilterSegment` 放置在独立轨道上
+
+### Draft Generator Interface 段配置类映射
+
+| 配置类 | pyJianYingDraft 类 | 说明 |
+|--------|-------------------|------|
+| `VideoSegmentConfig` | `VideoSegment` | 视频片段 |
+| `AudioSegmentConfig` | `AudioSegment` | 音频片段 |
+| `ImageSegmentConfig` | `VideoSegment` | ⚠️ 图片作为静态视频处理 |
+| `TextSegmentConfig` | `TextSegment` | 文本/字幕片段 |
+| `StickerSegmentConfig` | `StickerSegment` | 贴纸片段 |
+| `EffectSegmentConfig` | `EffectSegment` | 特效片段（独立轨道）|
+| `FilterSegmentConfig` | `FilterSegment` | 滤镜片段（独立轨道）|
+
+### 常见误解和注意事项
+
+1. **误解**: ImageSegment 是独立的段类型
+   - **实际**: pyJianYingDraft 没有 ImageSegment，图片使用 VideoSegment
+   - **本项目**: `ImageSegmentConfig` 提供简化接口，内部映射到 VideoSegment
+
+2. **误解**: MediaResource 对应 pyJianYingDraft 的某个类
+   - **实际**: MediaResource 是本项目的抽象类，用于 URL 管理
+   - **本项目**: 在草稿生成器中转换为 VideoMaterial 或 AudioMaterial
+
+3. **误解**: 所有段类型都可以添加到同一个轨道
+   - **实际**: Effect 和 Filter 必须在独立轨道上
+   - **本项目**: TrackConfig 的 track_type 需正确设置
+
 ## 开发历程文档规范
 
 ### DEVELOPMENT_ROADMAP.md 编写规范

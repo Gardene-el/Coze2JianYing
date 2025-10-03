@@ -2,6 +2,42 @@
 
 草稿生成器接口数据模型，定义了传递给草稿生成器的完整数据结构。
 
+## ⚠️ 重要：pyJianYingDraft 段类型映射关系
+
+### pyJianYingDraft 类层次结构
+
+```
+BaseSegment (基类)
+├── MediaSegment (媒体片段基类 - 不是直接使用的段类型)
+│   ├── AudioSegment (音频片段) ✅
+│   └── VisualSegment (视觉片段基类 - 不是直接使用的段类型)
+│       ├── VideoSegment (视频片段 - 也用于图片!) ✅
+│       ├── TextSegment (文本/字幕片段) ✅
+│       └── StickerSegment (贴纸片段) ✅
+├── EffectSegment (特效片段) ✅
+└── FilterSegment (滤镜片段) ✅
+```
+
+### 本模块的配置类映射
+
+| 本模块配置类 | pyJianYingDraft 类 | 说明 |
+|------------|-------------------|------|
+| `VideoSegmentConfig` | `VideoSegment` | 视频片段 |
+| `AudioSegmentConfig` | `AudioSegment` | 音频片段 |
+| `ImageSegmentConfig` | `VideoSegment` | ⚠️ 图片在剪映中作为静态视频处理! |
+| `TextSegmentConfig` | `TextSegment` | 文本/字幕片段 |
+| `StickerSegmentConfig` | `StickerSegment` | 贴纸片段 |
+| `EffectSegmentConfig` | `EffectSegment` | 特效片段（独立轨道）|
+| `FilterSegmentConfig` | `FilterSegment` | 滤镜片段（独立轨道）|
+
+### 关于 MediaResource
+
+**重要说明**: `MediaResource` **不是** pyJianYingDraft 的类！
+
+`MediaResource` 是本项目为适配 Coze 平台的 URL-based 资源管理而创建的抽象类。在草稿生成器（pyJianYingDraftImporter）中，URL 会被下载为本地文件，然后传递给 pyJianYingDraft 的 Material 类：
+- `VideoMaterial(path)` - 用于视频和图片
+- `AudioMaterial(path)` - 用于音频
+
 ## 功能描述
 
 本模块定义了用于在Coze插件和草稿生成器之间传递数据的标准化数据结构。这些模型包含了pyJianYingDraft支持的所有参数配置选项，但使用URL而不是本地文件路径来引用媒体资源。
@@ -17,13 +53,13 @@ Draft Generator Interface 是 **CozeJianYingAssistent** 项目和 **pyJianYingDr
 ## 核心设计原则
 
 ### 1. URL-based资源管理
-- 所有媒体资源（视频、音频、图片）使用URL形式
+- 所有媒体资源（视频、音频、图片、贴纸）使用URL形式
 - 适配Coze平台的网络资源传递模式
 - 支持各种网络媒体格式和来源
 
 ### 2. 完整参数覆盖
 - 包含pyJianYingDraft的所有可配置参数
-- 支持视频、音频、文本、特效等所有轨道类型
+- 支持视频、音频、图片、文本、贴纸、特效、滤镜等所有段类型
 - 涵盖变换、滤镜、转场、动画等所有效果
 
 ### 3. UUID草稿管理
@@ -50,11 +86,13 @@ class ProjectSettings:
 #### MediaResource
 媒体资源描述，包含URL和元数据信息。
 
+⚠️ **注意**: 这不是 pyJianYingDraft 的类，而是本项目的抽象类。
+
 ```python
 @dataclass
 class MediaResource:
     url: str
-    resource_type: str  # "video", "audio", "image"
+    resource_type: str  # "video", "audio", "image", "sticker"
     duration_ms: Optional[int] = None
     file_size: Optional[int] = None
     format: Optional[str] = None
@@ -66,25 +104,38 @@ class MediaResource:
 ### 轨道段配置类
 
 #### VideoSegmentConfig
-视频段配置，包含所有视频相关的参数：
+视频段配置，对应 `pyJianYingDraft.VideoSegment`：
 
 - **变换属性**: 位置、缩放、旋转、透明度
 - **裁剪设置**: 裁剪区域定义
 - **效果滤镜**: 滤镜类型、强度、转场效果
-- **速度控制**: 播放速度、倒放
+- **速度控制**: 播放速度、倒放、变调控制
+- **音频控制**: 音量、变调控制
 - **背景填充**: 模糊背景、纯色背景
 - **关键帧动画**: 位置、缩放、旋转、透明度动画
 
 #### AudioSegmentConfig
-音频段配置，包含音频相关参数：
+音频段配置，对应 `pyJianYingDraft.AudioSegment`：
 
 - **音频属性**: 音量、淡入淡出
 - **音频效果**: 效果类型、强度
-- **速度控制**: 播放速度
+- **速度控制**: 播放速度、变调控制
 - **音量动画**: 音量关键帧
 
+#### ImageSegmentConfig
+图片段配置，⚠️ **对应 `pyJianYingDraft.VideoSegment`**（图片作为静态视频处理）：
+
+- **变换属性**: 位置、缩放、旋转、透明度
+- **裁剪设置**: 裁剪区域定义
+- **效果滤镜**: 滤镜类型、强度、转场效果
+- **背景填充**: 模糊背景、纯色背景、适应模式
+- **动画效果**: 入场、出场动画
+- **关键帧动画**: 位置、缩放、旋转、透明度动画
+
+注意：移除了不适用于静态图片的参数（material_range, speed, reverse, volume）
+
 #### TextSegmentConfig
-文本段配置，包含字幕和文本相关参数：
+文本段配置，对应 `pyJianYingDraft.TextSegment`：
 
 - **位置变换**: 位置、缩放、旋转、透明度
 - **文本样式**: 字体、颜色、描边、阴影、背景
@@ -92,12 +143,32 @@ class MediaResource:
 - **动画效果**: 入场、出场、循环动画
 - **关键帧动画**: 完整的动画支持
 
+#### StickerSegmentConfig
+贴纸段配置，对应 `pyJianYingDraft.StickerSegment`：
+
+- **变换属性**: 位置、缩放、旋转、透明度
+- **翻转选项**: 水平翻转、垂直翻转
+- **资源引用**: resource_id（从模板中获取）
+- **关键帧动画**: 位置、缩放、旋转、透明度动画
+
+注意：贴纸没有 source_timerange（素材裁剪范围）
+
 #### EffectSegmentConfig
-特效段配置，支持各种视觉特效：
+特效段配置，对应 `pyJianYingDraft.EffectSegment`（独立特效轨道）：
 
 - **特效类型**: 特效名称和参数
 - **特效属性**: 强度、位置、缩放
 - **自定义属性**: 灵活的特效参数支持
+
+注意：EffectSegment 放置在独立轨道上，作用域为全局
+
+#### FilterSegmentConfig
+滤镜段配置，对应 `pyJianYingDraft.FilterSegment`（独立滤镜轨道）：
+
+- **滤镜类型**: 滤镜名称
+- **强度控制**: 0-1 范围（对应剪映中的 0-100）
+
+注意：FilterSegment 放置在独立滤镜轨道上
 
 ## 使用示例
 
