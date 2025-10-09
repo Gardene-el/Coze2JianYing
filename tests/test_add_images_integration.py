@@ -29,7 +29,6 @@ def test_add_images_example_from_issue():
         },
         "media_resources": [],
         "tracks": [],
-        "total_duration_ms": 0,
         "created_timestamp": 1234567890.0,
         "last_modified": 1234567890.0,
         "status": "created"

@@ -164,7 +164,6 @@
       "project": { /* 项目设置 */ },
       "media_resources": [ /* 媒体资源列表 */ ],
       "tracks": [ /* 轨道配置 */ ],
-      "total_duration_ms": 30000,
       "created_timestamp": 1703123456.789,
       "status": "created"
     }

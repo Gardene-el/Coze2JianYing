@@ -235,8 +235,7 @@ audio_track = TrackConfig(
 # 这里展示了 video 和 audio 两种轨道，实际使用时可以根据需要添加更多轨道
 draft_config = DraftConfig(
     project=project,
-    tracks=[video_track, audio_track],  # 可以添加更多轨道: text_track, sticker_track, etc.
-    total_duration_ms=30000
+    tracks=[video_track, audio_track]  # 可以添加更多轨道: text_track, sticker_track, etc.
 )
 
 # 转换为JSON字符串

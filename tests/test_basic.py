@@ -64,7 +64,6 @@ def test_data_structures():
     draft_config = DraftConfig(
         project=project,
         tracks=[video_track, text_track],
-        total_duration_ms=30000,
         created_timestamp=time.time(),
         last_modified=time.time()
     )
@@ -104,7 +103,6 @@ def test_file_operations():
             },
             "media_resources": [],
             "tracks": [],
-            "total_duration_ms": 0,
             "created_timestamp": time.time(),
             "last_modified": time.time(),
             "status": "created"

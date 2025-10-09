@@ -106,7 +106,6 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
         },
         "media_resources": [],
         "tracks": [],
-        "total_duration_ms": 0,
         "created_timestamp": timestamp,
         "last_modified": timestamp,
         "status": "created"

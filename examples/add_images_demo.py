@@ -32,7 +32,6 @@ def demo_add_images():
         },
         "media_resources": [],
         "tracks": [],
-        "total_duration_ms": 0,
         "created_timestamp": 1234567890.0,
         "last_modified": 1234567890.0,
         "status": "created"
