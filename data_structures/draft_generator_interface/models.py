@@ -456,9 +456,6 @@ class DraftConfig:
     # Track configurations
     tracks: List[TrackConfig] = field(default_factory=list)
     
-    # Global settings
-    total_duration_ms: int = 0
-    
     # Metadata
     created_timestamp: float = 0.0
     last_modified: float = 0.0
@@ -482,7 +479,6 @@ class DraftConfig:
                 }
                 for track in self.tracks
             ],
-            "total_duration_ms": self.total_duration_ms,
             "created_timestamp": self.created_timestamp,
             "last_modified": self.last_modified
         }

@@ -175,7 +175,6 @@ def test_draft_config_integration():
         },
         "media_resources": [],
         "tracks": [],
-        "total_duration_ms": 0,
         "created_timestamp": 1234567890.0,
         "last_modified": 1234567890.0
     }

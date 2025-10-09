@@ -164,7 +164,6 @@ class Input(NamedTuple):
   },
   "media_resources": [],
   "tracks": [],
-  "total_duration_ms": 0,
   "created_timestamp": 1703123456.789,
   "last_modified": 1703123456.789,
   "status": "created"
