@@ -160,7 +160,14 @@ CozeJianYingAssistent/
 │   └── json_output_samples/
 │       ├── batch_draft_export.json
 │       └── complete_draft_export.json
-├── tests/                     # ✅ 测试文件目录 (新增)
+├── docs/                      # ✅ 项目文档目录
+│   ├── guides/                # 开发与使用指南
+│   │   ├── DEVELOPMENT_ROADMAP.md
+│   │   └── DRAFT_MANAGEMENT_GUIDE.md
+│   ├── updates/               # 功能更新记录
+│   ├── analysis/              # 技术分析报告
+│   └── reference/             # API 参考文档
+├── tests/                     # ✅ 测试文件目录
 │   ├── __init__.py
 │   ├── README.md             # 测试指南
 │   ├── test_basic.py         # 基础功能测试
@@ -168,8 +175,6 @@ CozeJianYingAssistent/
 │   └── [其他测试文件...]
 ├── requirements.txt           # ✅ 项目依赖
 ├── setup.py                  # ✅ 安装配置
-├── DRAFT_MANAGEMENT_GUIDE.md # ✅ 草稿管理指南
-├── DEVELOPMENT_ROADMAP.md    # ✅ 项目发展路线图 (新增)
 └── README.md                 # ✅ 项目说明 (已更新)
 ```
 
@@ -557,7 +562,7 @@ audio_track = TrackConfig(
 
 ### DEVELOPMENT_ROADMAP.md 编写规范
 
-当添加新功能或进行重要更新时，必须在 `DEVELOPMENT_ROADMAP.md` 中记录开发过程。遵循以下规范：
+当添加新功能或进行重要更新时，必须在 `docs/guides/DEVELOPMENT_ROADMAP.md` 中记录开发过程。遵循以下规范：
 
 #### 文档目标
 - 帮助开发者和学习者快速理解项目架构
