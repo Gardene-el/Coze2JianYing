@@ -1,8 +1,12 @@
 # 项目重构报告：coze_plugin 子项目创建
 
+> **📝 最新更新 (2025-10-25)**: 进一步简化了 coze_plugin 结构，将 `coze_jianying_assistant/` 目录的内容直接提升到 `coze_plugin/main.py`，减少不必要的嵌套层级。
+
 ## 概述
 
 本报告详细说明了将 `tools/` 和 `coze_jianying_assistant/` 目录重构为 `coze_plugin/` 子项目后，整体项目框架的变化以及需要注意的修改点。
+
+**最新变更**: `coze_plugin/coze_jianying_assistant/` 已被简化为 `coze_plugin/main.py`，使结构更加扁平化和清晰。
 
 ## 重构目标
 
@@ -32,15 +36,13 @@ CozeJianYingAssistent/
 └── setup.py
 ```
 
-### 变更后的结构
+### 变更后的结构（最新版本）
 ```
 CozeJianYingAssistent/
 ├── coze_plugin/                # 🔌 新建的 Coze 插件子项目
 │   ├── __init__.py             # 子项目初始化
 │   ├── README.md               # 子项目说明文档
-│   ├── coze_jianying_assistant/  # 核心助手模块（已移入）
-│   │   ├── __init__.py
-│   │   └── main.py
+│   ├── main.py                 # 核心助手类和主程序入口（简化后）
 │   └── tools/                  # Coze 工具函数（已移入）
 │       ├── create_draft/
 │       ├── export_drafts/
@@ -71,8 +73,12 @@ CozeJianYingAssistent/
 - **作用**: 子项目包初始化文件
 - **内容**: 
   - 定义子项目版本号
-  - 从 coze_jianying_assistant 导入核心类，保持向后兼容
+  - 从 main.py 导入核心类，提供便捷访问
   - 导出 `CozeJianYingAssistant` 和 `main` 供外部使用
+
+#### coze_plugin/main.py
+- **作用**: 核心助手类和主程序入口
+- **内容**: 包含 `CozeJianYingAssistant` 类和 `main()` 函数
 
 #### coze_plugin/README.md
 - **作用**: 子项目说明文档
@@ -82,12 +88,12 @@ CozeJianYingAssistent/
   - 使用方式和示例
   - 开发指南
 
-### 2. 移动的目录
+### 2. 移动和简化的模块
 
 | 原路径 | 新路径 | 说明 |
 |--------|--------|------|
 | `tools/` | `coze_plugin/tools/` | 包含所有 13 个 Coze 工具函数 |
-| `coze_jianying_assistant/` | `coze_plugin/coze_jianying_assistant/` | 核心助手模块 |
+| `coze_jianying_assistant/` | `coze_plugin/main.py` | 核心助手模块（简化为单文件）|
 
 ### 3. 更新的导入路径
 
@@ -118,7 +124,7 @@ CozeJianYingAssistent/
 - `tests/test_make_*_info.py` 系列
 
 #### 主入口文件
-- **example.py**: `from coze_jianying_assistant` → `from coze_plugin.coze_jianying_assistant`
+- **example.py**: `from coze_jianying_assistant` → `from coze_plugin` (简化后)
 
 ### 4. 配置文件更新
 
@@ -128,9 +134,9 @@ CozeJianYingAssistent/
   ```python
   "coze-jianying=coze_jianying_assistant.main:main"
   ```
-- **变更后**: 
+- **变更后（简化版）**: 
   ```python
-  "coze-jianying=coze_plugin.coze_jianying_assistant.main:main"
+  "coze-jianying=coze_plugin.main:main"
   ```
 
 ### 5. 文档更新

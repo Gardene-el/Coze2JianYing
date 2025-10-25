@@ -30,7 +30,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "coze-jianying=coze_plugin.coze_jianying_assistant.main:main",
+            "coze-jianying=coze_plugin.main:main",
         ],
     },
 )

@@ -8,9 +8,7 @@
 coze_plugin/
 ├── __init__.py                 # 子项目初始化文件
 ├── README.md                   # 本文档
-├── coze_jianying_assistant/    # 核心助手模块
-│   ├── __init__.py            # 助手包初始化
-│   └── main.py                # 主程序入口
+├── main.py                     # 核心助手类和主程序入口
 └── tools/                     # Coze 工具函数集合
     ├── create_draft/          # 创建草稿工具
     ├── export_drafts/         # 导出草稿工具
@@ -29,8 +27,8 @@ coze_plugin/
 
 ## 模块说明
 
-### coze_jianying_assistant/
-核心助手模块，提供剪映草稿的基础类和工具函数。
+### main.py
+核心助手模块，提供 `CozeJianYingAssistant` 类和 `main()` 入口函数，封装剪映草稿的基础操作。
 
 ### tools/
 包含所有 Coze 平台可调用的工具函数。每个工具都是独立的模块，包含：
@@ -48,8 +46,7 @@ coze_plugin/
 
 ### 作为子项目导入
 ```python
-from coze_plugin import CozeJianYingAssistant
-from coze_plugin.coze_jianying_assistant import main
+from coze_plugin import CozeJianYingAssistant, main
 ```
 
 ### 单独使用工具
