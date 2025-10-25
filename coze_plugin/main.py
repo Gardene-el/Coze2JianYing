@@ -15,7 +15,7 @@ except ImportError:
     sys.exit(1)
 
 
-class CozeJianYingAssistant:
+class Coze2JianYing:
     """Coze剪映小助手核心类"""
     
     def __init__(self):
@@ -86,7 +86,7 @@ def main():
     print("欢迎使用Coze剪映小助手！")
     print("基于pyJianYingDraft构建")
     
-    assistant = CozeJianYingAssistant()
+    assistant = Coze2JianYing()
     
     # 示例用法
     draft = assistant.create_draft("测试项目")
