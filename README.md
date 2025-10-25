@@ -23,6 +23,9 @@
 - 📊 **数据结构完备** - 覆盖 pyJianYingDraft 的所有可配置参数
 - 🛠️ **Coze 平台优化** - 遵循 Coze 平台的约束和开发规范
 - 🐍 **纯 Python 实现** - 易于扩展和自定义
+- 🔌 **模块化设计** - Coze 插件功能独立为 `coze_plugin` 子项目
+
+> 📢 **项目结构更新**: 最近将 Coze 插件相关代码重构为独立的 `coze_plugin/` 子项目，详见 [项目重构报告](./docs/guides/PROJECT_REFACTORING_REPORT.md)。
 
 ## 安装
 

@@ -9,6 +9,7 @@
 
 - **[DEVELOPMENT_ROADMAP.md](./guides/DEVELOPMENT_ROADMAP.md)** - 项目功能开发历程，记录各功能的实现背景和方法
 - **[DRAFT_MANAGEMENT_GUIDE.md](./guides/DRAFT_MANAGEMENT_GUIDE.md)** - 草稿管理系统使用指南
+- **[PROJECT_REFACTORING_REPORT.md](./guides/PROJECT_REFACTORING_REPORT.md)** - 🆕 项目重构报告：coze_plugin 子项目创建
 
 ### 🔄 [updates/](./updates/) - 功能更新记录
 记录各个功能模块的实现过程和技术细节。
