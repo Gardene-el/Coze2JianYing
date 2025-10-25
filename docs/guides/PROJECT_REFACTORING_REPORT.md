@@ -1,12 +1,12 @@
 # 项目重构报告：coze_plugin 子项目创建
 
-> **📝 最新更新 (2025-10-25)**: 进一步简化了 coze_plugin 结构，将 `coze_jianying_assistant/` 目录的内容直接提升到 `coze_plugin/main.py`，减少不必要的嵌套层级。
+> **📝 最新更新 (2025-10-25)**: 进一步简化了 coze_plugin 结构，将 `coze_2_jianying/` 目录的内容直接提升到 `coze_plugin/main.py`，减少不必要的嵌套层级。
 
 ## 概述
 
-本报告详细说明了将 `tools/` 和 `coze_jianying_assistant/` 目录重构为 `coze_plugin/` 子项目后，整体项目框架的变化以及需要注意的修改点。
+本报告详细说明了将 `tools/` 和 `coze_2_jianying/` 目录重构为 `coze_plugin/` 子项目后，整体项目框架的变化以及需要注意的修改点。
 
-**最新变更**: `coze_plugin/coze_jianying_assistant/` 已被简化为 `coze_plugin/main.py`，使结构更加扁平化和清晰。
+**最新变更**: `coze_plugin/coze_2_jianying/` 已被简化为 `coze_plugin/main.py`，使结构更加扁平化和清晰。
 
 ## 重构目标
 
@@ -20,8 +20,8 @@
 
 ### 变更前的结构
 ```
-CozeJianYingAssistent/
-├── coze_jianying_assistant/    # 核心助手模块
+Coze2JianYing/
+├── coze_2_jianying/    # 核心助手模块
 │   ├── __init__.py
 │   └── main.py
 ├── tools/                      # Coze 工具函数
@@ -38,7 +38,7 @@ CozeJianYingAssistent/
 
 ### 变更后的结构（最新版本）
 ```
-CozeJianYingAssistent/
+Coze2JianYing/
 ├── coze_plugin/                # 🔌 新建的 Coze 插件子项目
 │   ├── __init__.py             # 子项目初始化
 │   ├── README.md               # 子项目说明文档
@@ -74,11 +74,11 @@ CozeJianYingAssistent/
 - **内容**: 
   - 定义子项目版本号
   - 从 main.py 导入核心类，提供便捷访问
-  - 导出 `CozeJianYingAssistant` 和 `main` 供外部使用
+  - 导出 `Coze2JianYing` 和 `main` 供外部使用
 
 #### coze_plugin/main.py
 - **作用**: 核心助手类和主程序入口
-- **内容**: 包含 `CozeJianYingAssistant` 类和 `main()` 函数
+- **内容**: 包含 `Coze2JianYing` 类和 `main()` 函数
 
 #### coze_plugin/README.md
 - **作用**: 子项目说明文档
@@ -93,11 +93,11 @@ CozeJianYingAssistent/
 | 原路径 | 新路径 | 说明 |
 |--------|--------|------|
 | `tools/` | `coze_plugin/tools/` | 包含所有 13 个 Coze 工具函数 |
-| `coze_jianying_assistant/` | `coze_plugin/main.py` | 核心助手模块（简化为单文件）|
+| `coze_2_jianying/` | `coze_plugin/main.py` | 核心助手模块（简化为单文件）|
 
 ### 3. 更新的导入路径
 
-所有引用 `tools/` 或 `coze_jianying_assistant/` 的文件都需要更新导入路径：
+所有引用 `tools/` 或 `coze_2_jianying/` 的文件都需要更新导入路径：
 
 #### 示例代码 (examples/)
 - **变更前**: `from tools.create_draft.handler import handler`
@@ -124,7 +124,7 @@ CozeJianYingAssistent/
 - `tests/test_make_*_info.py` 系列
 
 #### 主入口文件
-- **example.py**: `from coze_jianying_assistant` → `from coze_plugin` (简化后)
+- **example.py**: `from coze_2_jianying` → `from coze_plugin` (简化后)
 
 ### 4. 配置文件更新
 
@@ -132,7 +132,7 @@ CozeJianYingAssistent/
 - **变更内容**: 入口点配置
 - **变更前**: 
   ```python
-  "coze-jianying=coze_jianying_assistant.main:main"
+  "coze-jianying=coze_2_jianying.main:main"
   ```
 - **变更后（简化版）**: 
   ```python
@@ -170,25 +170,25 @@ CozeJianYingAssistent/
 ### 1. 导入路径适配
 
 #### 对现有代码的影响
-所有直接导入 `tools` 或 `coze_jianying_assistant` 的代码都需要更新：
+所有直接导入 `tools` 或 `coze_2_jianying` 的代码都需要更新：
 
 ```python
 # 旧的导入方式
 from tools.create_draft.handler import handler
-from coze_jianying_assistant import CozeJianYingAssistant
+from coze_2_jianying import Coze2JianYing
 
 # 新的导入方式
 from coze_plugin.tools.create_draft.handler import handler
-from coze_plugin.coze_jianying_assistant import CozeJianYingAssistant
+from coze_plugin.coze_2_jianying import Coze2JianYing
 
 # 或者直接从 coze_plugin 导入（推荐）
-from coze_plugin import CozeJianYingAssistant
+from coze_plugin import Coze2JianYing
 ```
 
 #### 向后兼容性
 通过 `coze_plugin/__init__.py` 提供的导出，可以直接从 `coze_plugin` 导入核心类：
 ```python
-from coze_plugin import CozeJianYingAssistant, main
+from coze_plugin import Coze2JianYing, main
 ```
 
 ### 2. 文件路径引用
@@ -207,7 +207,7 @@ spec = importlib.util.spec_from_file_location("handler", "./coze_plugin/tools/cr
 
 所有文档中提到工具函数路径的地方都需要更新：
 - 从 `tools/xxx/` 改为 `coze_plugin/tools/xxx/`
-- 从 `coze_jianying_assistant/` 改为 `coze_plugin/coze_jianying_assistant/`
+- 从 `coze_2_jianying/` 改为 `coze_plugin/coze_2_jianying/`
 
 ### 4. 开发工作流变化
 
@@ -216,7 +216,7 @@ spec = importlib.util.spec_from_file_location("handler", "./coze_plugin/tools/cr
 - **文档**: 同时更新 `coze_plugin/README.md`
 
 #### 修改核心助手功能
-- **位置**: 在 `coze_plugin/coze_jianying_assistant/` 目录下修改
+- **位置**: 在 `coze_plugin/coze_2_jianying/` 目录下修改
 - **导出**: 确保在 `coze_plugin/__init__.py` 中正确导出
 
 ### 5. CI/CD 配置（如果有）
@@ -299,7 +299,7 @@ spec = importlib.util.spec_from_file_location("handler", "./coze_plugin/tools/cr
 1. 拉取最新代码: `git pull origin main`
 2. 检查你的代码中的导入路径
 3. 将 `from tools.` 替换为 `from coze_plugin.tools.`
-4. 将 `from coze_jianying_assistant` 替换为 `from coze_plugin.coze_jianying_assistant`
+4. 将 `from coze_2_jianying` 替换为 `from coze_plugin.coze_2_jianying`
 5. 运行测试确保一切正常
 
 ### 对于外部依赖者

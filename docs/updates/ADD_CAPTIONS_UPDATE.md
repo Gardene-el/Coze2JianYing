@@ -329,13 +329,13 @@ add_captions(
    - `tools/add_audios/handler.py` 和 `tools/make_audio_info/handler.py`
 
 2. **问题和纠错过程**:
-   - [PR #17](https://github.com/Gardene-el/CozeJianYingAssistent/pull/17) - add_images 初始实现
-   - [PR #25](https://github.com/Gardene-el/CozeJianYingAssistent/pull/25) - 数组字符串支持
+   - [PR #17](https://github.com/Gardene-el/Coze2JianYing/pull/17) - add_images 初始实现
+   - [PR #25](https://github.com/Gardene-el/Coze2JianYing/pull/25) - 数组字符串支持
 
 3. **问题讨论**:
-   - [Issue #16](https://github.com/Gardene-el/CozeJianYingAssistent/issues/16) - add_images 需求
-   - [Issue #24](https://github.com/Gardene-el/CozeJianYingAssistent/issues/24) - make_image_info 需求
-   - [Issue #26](https://github.com/Gardene-el/CozeJianYingAssistent/issues/26) - add_audios 需求
+   - [Issue #16](https://github.com/Gardene-el/Coze2JianYing/issues/16) - add_images 需求
+   - [Issue #24](https://github.com/Gardene-el/Coze2JianYing/issues/24) - make_image_info 需求
+   - [Issue #26](https://github.com/Gardene-el/Coze2JianYing/issues/26) - add_audios 需求
 
 4. **数据结构**:
    - `data_structures/draft_generator_interface/models.py` 中的 `TextSegmentConfig` 和 `TextStyle`

@@ -376,10 +376,10 @@ export_drafts(draft_ids=[draft.draft_id])
 ## 参考资料
 
 ### 设计参考
-- PR #17: https://github.com/Gardene-el/CozeJianYingAssistent/pull/17
-- PR #25: https://github.com/Gardene-el/CozeJianYingAssistent/pull/25
-- Issue #16: https://github.com/Gardene-el/CozeJianYingAssistent/issues/16
-- Issue #24: https://github.com/Gardene-el/CozeJianYingAssistent/issues/24
+- PR #17: https://github.com/Gardene-el/Coze2JianYing/pull/17
+- PR #25: https://github.com/Gardene-el/Coze2JianYing/pull/25
+- Issue #16: https://github.com/Gardene-el/Coze2JianYing/issues/16
+- Issue #24: https://github.com/Gardene-el/Coze2JianYing/issues/24
 
 ### 技术文档
 - `data_structures/draft_generator_interface/models.py` - VideoSegmentConfig 定义

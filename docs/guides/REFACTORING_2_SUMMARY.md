@@ -39,7 +39,7 @@
 
 ### 2. `example.py`
 **状态**: 过时的阶段性测试文件
-- 功能：尝试导入并演示 `CozeJianYingAssistant` 类
+- 功能：尝试导入并演示 `Coze2JianYing` 类
 - 问题：
   - 功能过于简单，已被更完善的示例替代
   - 引用的类在 `coze_plugin/main.py` 中定义
@@ -88,7 +88,7 @@
 #### 功能分析
 ```python
 setup(
-    name="coze-jianying-assistant",
+    name="coze-2-jianying",
     packages=find_packages(),  # 查找所有 Python 包
     install_requires=requirements,  # 安装依赖
     entry_points={
@@ -140,7 +140,7 @@ mv examples/ coze_plugin/examples/
 
 #### 重构前
 ```
-CozeJianYingAssistent/
+Coze2JianYing/
 ├── coze_plugin/          # Coze 插件子项目
 │   ├── main.py
 │   └── tools/
@@ -156,7 +156,7 @@ CozeJianYingAssistent/
 
 #### 重构后
 ```
-CozeJianYingAssistent/
+Coze2JianYing/
 ├── coze_plugin/               # 🔌 独立完整的 Coze 插件子项目
 │   ├── main.py                # 核心代码
 │   ├── tools/                 # 工具函数

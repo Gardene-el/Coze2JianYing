@@ -1,6 +1,6 @@
 # 项目文档目录
 
-本目录包含 CozeJianYingAssistent 项目的所有详细文档，按类别组织。
+本目录包含 Coze2JianYing 项目的所有详细文档，按类别组织。
 
 ## 📂 文档结构
 
