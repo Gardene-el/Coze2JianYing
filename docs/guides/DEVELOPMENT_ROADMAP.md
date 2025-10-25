@@ -122,13 +122,13 @@
 - 保持与图片工具相同的输入格式灵活性
 
 **具体做法**:
-- 实现 `make_audio_info` 工具（`tools/make_audio_info/`）：
+- 实现 `make_audio_info` 工具（`coze_plugin/tools/make_audio_info/`）：
   - 10个参数：3个必需（audio_url, start, end）+ 7个可选
   - 可选参数：volume, fade_in, fade_out, effect_type, effect_intensity, speed, material_start/end
   - 参数验证：volume (0.0-2.0), speed (0.5-2.0), fade 时间 >= 0
   - material_range 验证：start 和 end 必须同时提供
   - 只输出非默认值，保持紧凑输出
-- 实现 `add_audios` 工具（`tools/add_audios/`）：
+- 实现 `add_audios` 工具（`coze_plugin/tools/add_audios/`）：
   - 支持三种输入格式（与 add_images 一致）
   - 每次调用创建新的音频轨道
   - 基于 AudioSegmentConfig 数据结构
@@ -167,7 +167,7 @@
 - 保持与图片/音频工具相同的输入格式灵活性
 
 **具体做法**:
-- 实现 `make_caption_info` 工具（`tools/make_caption_info/`）：
+- 实现 `make_caption_info` 工具（`coze_plugin/tools/make_caption_info/`）：
   - 32个参数：4个必需（content, start, end）+ 28个可选
   - 必需参数：文本内容和时间范围
   - 位置变换参数（5个）：position_x, position_y, scale, rotation, opacity
@@ -179,7 +179,7 @@
   - 动画效果参数（3个）：intro_animation, outro_animation, loop_animation
   - 完整的参数验证：时间范围、位置范围（0.0-1.0）、透明度范围、枚举值验证
   - 只输出非默认值，保持紧凑输出
-- 实现 `add_captions` 工具（`tools/add_captions/`）：
+- 实现 `add_captions` 工具（`coze_plugin/tools/add_captions/`）：
   - 支持三种输入格式（与 add_images/add_audios 一致）
   - 每次调用创建新的文本轨道
   - 基于 TextSegmentConfig 和 TextStyle 数据结构

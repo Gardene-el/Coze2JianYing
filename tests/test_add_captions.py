@@ -71,7 +71,7 @@ def test_add_captions_basic():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_captions.handler import handler, Input
+    from coze_plugin.tools.add_captions.handler import handler, Input
     
     # Mock Args class
     class MockArgs:
@@ -198,9 +198,9 @@ def test_add_captions_array_string_format():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_captions.handler import handler, Input
-    from tools.make_caption_info.handler import handler as make_handler
-    from tools.make_caption_info.handler import Input as MakeInput
+    from coze_plugin.tools.add_captions.handler import handler, Input
+    from coze_plugin.tools.make_caption_info.handler import handler as make_handler
+    from coze_plugin.tools.make_caption_info.handler import Input as MakeInput
     
     class MockArgs:
         def __init__(self, input_data):
@@ -282,7 +282,7 @@ def test_add_captions_validation():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_captions.handler import handler, Input
+    from coze_plugin.tools.add_captions.handler import handler, Input
     
     class MockArgs:
         def __init__(self, input_data):

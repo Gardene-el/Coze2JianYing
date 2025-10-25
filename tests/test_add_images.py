@@ -34,8 +34,8 @@ def test_add_images_basic():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_images.handler import handler, Input, parse_image_infos
-    from tools.create_draft.handler import handler as create_handler, Input as CreateInput
+    from coze_plugin.tools.add_images.handler import handler, Input, parse_image_infos
+    from coze_plugin.tools.create_draft.handler import handler as create_handler, Input as CreateInput
     
     # Create a mock Args class
     class MockArgs:
@@ -149,7 +149,7 @@ def test_add_images_validation():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_images.handler import handler, Input, validate_uuid_format, parse_image_infos
+    from coze_plugin.tools.add_images.handler import handler, Input, validate_uuid_format, parse_image_infos
     
     class MockArgs:
         def __init__(self, input_data):
@@ -215,7 +215,7 @@ def test_parse_image_infos():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_images.handler import parse_image_infos
+    from coze_plugin.tools.add_images.handler import parse_image_infos
     
     # Test 1: Valid input
     valid_json = '[{"image_url": "https://test.com/img.jpg", "start": 0, "end": 1000}]'
@@ -274,8 +274,8 @@ def test_add_images_multiple_calls():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_images.handler import handler, Input
-    from tools.create_draft.handler import handler as create_handler, Input as CreateInput
+    from coze_plugin.tools.add_images.handler import handler, Input
+    from coze_plugin.tools.create_draft.handler import handler as create_handler, Input as CreateInput
     
     class MockArgs:
         def __init__(self, input_data):

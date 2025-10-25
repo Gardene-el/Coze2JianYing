@@ -9,6 +9,7 @@
 
 - **[DEVELOPMENT_ROADMAP.md](./guides/DEVELOPMENT_ROADMAP.md)** - 项目功能开发历程，记录各功能的实现背景和方法
 - **[DRAFT_MANAGEMENT_GUIDE.md](./guides/DRAFT_MANAGEMENT_GUIDE.md)** - 草稿管理系统使用指南
+- **[PROJECT_REFACTORING_REPORT.md](./guides/PROJECT_REFACTORING_REPORT.md)** - 🆕 项目重构报告：coze_plugin 子项目创建
 
 ### 🔄 [updates/](./updates/) - 功能更新记录
 记录各个功能模块的实现过程和技术细节。
@@ -39,7 +40,8 @@ API 参考文档、参数列表和快速查询指南。
 
 - **[主 README](../README.md)** - 项目主页和快速入门
 - **[Copilot 开发指南](../.github/copilot-instructions.md)** - GitHub Copilot 开发规范
-- **[工具函数文档](../tools/)** - 各个 Coze 工具函数的详细说明
+- **[Coze 插件文档](../coze_plugin/README.md)** - Coze 插件子项目说明
+- **[工具函数文档](../coze_plugin/tools/)** - 各个 Coze 工具函数的详细说明
 - **[数据结构文档](../data_structures/)** - 数据模型和接口定义
 - **[测试文档](../tests/README.md)** - 测试指南和规范
 

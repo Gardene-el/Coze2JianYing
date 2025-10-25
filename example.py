@@ -13,7 +13,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from coze_jianying_assistant import CozeJianYingAssistant
+    from coze_plugin import CozeJianYingAssistant
     
     def example_usage():
         """示例使用方法"""

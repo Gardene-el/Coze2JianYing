@@ -195,7 +195,7 @@
 **原因**: 该参数不应出现在草稿配置中。时长信息应该从各个段的 `time_range` 计算得出，而不是作为独立参数存储。
 
 **移除位置**:
-- `tools/create_draft/handler.py` - 初始草稿配置
+- `coze_plugin/tools/create_draft/handler.py` - 初始草稿配置
 - `data_structures/draft_generator_interface/models.py` - DraftConfig 类
 - 所有测试文件和示例
 - 相关文档

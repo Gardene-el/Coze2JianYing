@@ -35,7 +35,7 @@ def test_make_image_info_basic():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_image_info.handler import handler, Input
+    from coze_plugin.tools.make_image_info.handler import handler, Input
     
     # Mock Args class
     class MockArgs:
@@ -148,7 +148,7 @@ def test_add_images_array_of_strings():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.add_images.handler import parse_image_infos
+    from coze_plugin.tools.add_images.handler import parse_image_infos
     
     # Test 1: Array of JSON strings
     print("\nTest 1: Array of JSON strings")
@@ -216,8 +216,8 @@ def test_integration_make_image_info_to_add_images():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_image_info.handler import handler as make_handler, Input as MakeInput
-    from tools.add_images.handler import handler as add_handler, Input as AddInput
+    from coze_plugin.tools.make_image_info.handler import handler as make_handler, Input as MakeInput
+    from coze_plugin.tools.add_images.handler import handler as add_handler, Input as AddInput
     
     # Mock Args class
     class MockArgs:
@@ -337,7 +337,7 @@ def test_chinese_characters():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_image_info.handler import handler, Input
+    from coze_plugin.tools.make_image_info.handler import handler, Input
     
     class MockArgs:
         def __init__(self, input_data):

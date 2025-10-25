@@ -35,7 +35,7 @@ def test_make_caption_info_basic():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_caption_info.handler import handler, Input
+    from coze_plugin.tools.make_caption_info.handler import handler, Input
     
     # Mock Args class
     class MockArgs:
@@ -206,7 +206,7 @@ def test_add_captions_array_strings():
     """Test add_captions with array of strings"""
     print("\n=== Testing add_captions with array of strings ===")
     
-    from tools.add_captions.handler import parse_caption_infos
+    from coze_plugin.tools.add_captions.handler import parse_caption_infos
     
     # Test 1: Array of JSON strings
     print("\nTest 1: Array of JSON strings")
@@ -274,12 +274,12 @@ def test_integration_make_and_add():
     """Test integration: make_caption_info → add_captions"""
     print("\n=== Testing integration: make_caption_info → add_captions ===")
     
-    from tools.create_draft.handler import handler as create_handler
-    from tools.create_draft.handler import Input as CreateInput
-    from tools.make_caption_info.handler import handler as make_handler
-    from tools.make_caption_info.handler import Input as MakeInput
-    from tools.add_captions.handler import handler as add_handler
-    from tools.add_captions.handler import Input as AddInput
+    from coze_plugin.tools.create_draft.handler import handler as create_handler
+    from coze_plugin.tools.create_draft.handler import Input as CreateInput
+    from coze_plugin.tools.make_caption_info.handler import handler as make_handler
+    from coze_plugin.tools.make_caption_info.handler import Input as MakeInput
+    from coze_plugin.tools.add_captions.handler import handler as add_handler
+    from coze_plugin.tools.add_captions.handler import Input as AddInput
     
     class MockArgs:
         def __init__(self, input_data):
@@ -399,7 +399,7 @@ def test_chinese_characters():
     """Test Chinese character support"""
     print("\n=== Testing Chinese character support ===")
     
-    from tools.make_caption_info.handler import handler, Input
+    from coze_plugin.tools.make_caption_info.handler import handler, Input
     
     class MockArgs:
         def __init__(self, input_data):

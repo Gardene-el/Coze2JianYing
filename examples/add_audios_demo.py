@@ -36,12 +36,12 @@ def demo_add_audios():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.create_draft.handler import handler as create_draft_handler
-    from tools.create_draft.handler import Input as CreateDraftInput
-    from tools.add_audios.handler import handler as add_audios_handler
-    from tools.add_audios.handler import Input as AddAudiosInput
-    from tools.make_audio_info.handler import handler as make_audio_info_handler
-    from tools.make_audio_info.handler import Input as MakeAudioInfoInput
+    from coze_plugin.tools.create_draft.handler import handler as create_draft_handler
+    from coze_plugin.tools.create_draft.handler import Input as CreateDraftInput
+    from coze_plugin.tools.add_audios.handler import handler as add_audios_handler
+    from coze_plugin.tools.add_audios.handler import Input as AddAudiosInput
+    from coze_plugin.tools.make_audio_info.handler import handler as make_audio_info_handler
+    from coze_plugin.tools.make_audio_info.handler import Input as MakeAudioInfoInput
     
     # Mock Args class
     class MockArgs:

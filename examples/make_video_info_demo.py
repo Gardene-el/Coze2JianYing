@@ -22,8 +22,8 @@ sys.modules['runtime'] = runtime_mock
 
 # Now import the handlers
 sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
-from tools.make_video_info.handler import handler as make_video_info_handler
-from tools.make_video_info.handler import Input as MakeVideoInput
+from coze_plugin.tools.make_video_info.handler import handler as make_video_info_handler
+from coze_plugin.tools.make_video_info.handler import Input as MakeVideoInput
 
 
 class MockArgs:
@@ -159,10 +159,10 @@ def demo_workflow_with_add_videos():
     """Demonstrate complete workflow with add_videos"""
     print("=== Demo 4: Complete Workflow (make_video_info → add_videos) ===\n")
     
-    from tools.create_draft.handler import handler as create_handler
-    from tools.create_draft.handler import Input as CreateInput
-    from tools.add_videos.handler import handler as add_videos_handler
-    from tools.add_videos.handler import Input as AddVideosInput
+    from coze_plugin.tools.create_draft.handler import handler as create_handler
+    from coze_plugin.tools.create_draft.handler import Input as CreateInput
+    from coze_plugin.tools.add_videos.handler import handler as add_videos_handler
+    from coze_plugin.tools.add_videos.handler import Input as AddVideosInput
     
     # Step 1: Create a draft
     print("Step 1: Create a draft")

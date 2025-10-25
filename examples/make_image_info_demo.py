@@ -28,9 +28,9 @@ runtime_mock.Args = MockArgsType
 sys.modules['runtime'] = runtime_mock
 
 # Now import the tools
-from tools.make_image_info.handler import handler as make_image_info, Input as MakeInput
-from tools.add_images.handler import handler as add_images, Input as AddInput
-from tools.create_draft.handler import handler as create_draft, Input as CreateInput
+from coze_plugin.tools.make_image_info.handler import handler as make_image_info, Input as MakeInput
+from coze_plugin.tools.add_images.handler import handler as add_images, Input as AddInput
+from coze_plugin.tools.create_draft.handler import handler as create_draft, Input as CreateInput
 
 
 class MockArgs:
