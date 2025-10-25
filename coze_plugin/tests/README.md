@@ -1,6 +1,6 @@
 # 测试文件夹 (Tests Directory)
 
-本目录包含 CozeJianYingAssistent 项目的所有测试文件，用于验证项目各个组件的功能。
+本目录包含 Coze2JianYing 项目的所有测试文件，用于验证项目各个组件的功能。
 
 ## 测试文件说明
 

@@ -26,7 +26,7 @@ runtime_mock.Args = MockArgsType
 sys.modules['runtime'] = runtime_mock
 
 # Now import the handlers
-sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
 from coze_plugin.tools.add_videos.handler import handler, Input, parse_video_infos
 from coze_plugin.tools.create_draft.handler import handler as create_handler, Input as CreateInput
 

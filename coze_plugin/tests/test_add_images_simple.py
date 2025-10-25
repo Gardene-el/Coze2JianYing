@@ -12,7 +12,7 @@ import shutil
 import sys
 
 # Add project path
-sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
 
 def test_parse_image_infos_direct():
     """Test parse_image_infos function directly"""

@@ -13,7 +13,7 @@ import uuid
 import shutil
 
 # Add project path
-sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
 
 
 def demo_add_audios():

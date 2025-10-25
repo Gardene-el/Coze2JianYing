@@ -48,7 +48,7 @@ BaseSegment (基类)
 
 ### 本接口的作用
 
-Draft Generator Interface 是 **CozeJianYingAssistent** 项目和 **pyJianYingDraftImporter** 项目之间的数据交换协议。它的设计目标是：
+Draft Generator Interface 是 **Coze2JianYing** 项目和 **pyJianYingDraftImporter** 项目之间的数据交换协议。它的设计目标是：
 
 1. **在 Coze 工作流中收集和组织所有草稿参数** - 包括媒体资源URL、时间轴配置、效果参数等
 2. **提供标准化的 JSON 格式** - 便于序列化传输和存储
