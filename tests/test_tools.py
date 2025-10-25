@@ -6,12 +6,22 @@ Test script for create_draft and export_drafts tools
 import sys
 import os
 import json
-from typing import NamedTuple
+import types
+from typing import NamedTuple, Generic, TypeVar
 
 # Add current directory to path
 sys.path.insert(0, '.')
 
 # Mock the runtime module for testing
+T = TypeVar('T')
+
+class MockArgsType(Generic[T]):
+    pass
+
+runtime_mock = types.ModuleType('runtime')
+runtime_mock.Args = MockArgsType
+sys.modules['runtime'] = runtime_mock
+
 class MockArgs:
     def __init__(self, input_data):
         self.input = input_data
@@ -31,7 +41,7 @@ def test_create_draft():
     
     # Import create_draft components directly
     import importlib.util
-    spec = importlib.util.spec_from_file_location("create_draft_handler", "./tools/create_draft/handler.py")
+    spec = importlib.util.spec_from_file_location("create_draft_handler", "./coze_plugin/tools/create_draft/handler.py")
     create_draft_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(create_draft_module)
     
@@ -40,7 +50,7 @@ def test_create_draft():
     
     # Test with default parameters
     mock_args = MockArgs(CreateInput(
-        project_name="测试项目",
+        draft_name="测试项目",
         width=1920,
         height=1080,
         fps=30
@@ -49,9 +59,10 @@ def test_create_draft():
     result = create_handler(mock_args)
     print(f"Create draft result: {result}")
     
-    if result.success:
+    if result['success']:
         # Check if files were created
-        draft_folder = f'/tmp/{result.draft_id}'
+        draft_id = result['draft_id']
+        draft_folder = f'/tmp/jianying_assistant/drafts/{draft_id}'
         config_file = f'{draft_folder}/draft_config.json'
         
         print(f"Draft folder exists: {os.path.exists(draft_folder)}")
@@ -62,7 +73,7 @@ def test_create_draft():
                 config = json.load(f)
             print(f"Config preview:\n{json.dumps(config, indent=2, ensure_ascii=False)}")
         
-        return result.draft_id
+        return draft_id
     else:
         print("Failed to create draft")
         return None
@@ -77,7 +88,7 @@ def test_export_drafts(draft_id):
     
     # Import export_drafts components directly
     import importlib.util
-    spec = importlib.util.spec_from_file_location("export_drafts_handler", "./tools/export_drafts/handler.py")
+    spec = importlib.util.spec_from_file_location("export_drafts_handler", "./coze_plugin/tools/export_drafts/handler.py")
     export_drafts_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(export_drafts_module)
     
@@ -91,14 +102,14 @@ def test_export_drafts(draft_id):
     ))
     
     result = export_handler(mock_args)
-    print(f"Export draft result success: {result.success}")
-    print(f"Exported count: {result.exported_count}")
-    print(f"Message: {result.message}")
+    print(f"Export draft result success: {result['success']}")
+    print(f"Exported count: {result['exported_count']}")
+    print(f"Message: {result['message']}")
     
-    if result.success:
+    if result['success']:
         # Parse and display draft data preview
         try:
-            draft_data = json.loads(result.draft_data)
+            draft_data = json.loads(result['draft_data'])
             print(f"Draft data preview:\n{json.dumps(draft_data, indent=2, ensure_ascii=False)[:500]}...")
         except json.JSONDecodeError as e:
             print(f"Failed to parse draft data: {e}")
@@ -111,11 +122,11 @@ def test_export_drafts(draft_id):
     ))
     
     result_cleanup = export_handler(mock_args_cleanup)
-    print(f"Export with cleanup result: {result_cleanup.success}")
-    print(f"Message: {result_cleanup.message}")
+    print(f"Export with cleanup result: {result_cleanup['success']}")
+    print(f"Message: {result_cleanup['message']}")
     
     # Check if files were cleaned up
-    draft_folder = f'/tmp/{draft_id}'
+    draft_folder = f'/tmp/jianying_assistant/drafts/{draft_id}'
     print(f"Draft folder still exists: {os.path.exists(draft_folder)}")
 
 def test_error_cases():
@@ -125,11 +136,11 @@ def test_error_cases():
     # Import handlers directly
     import importlib.util
     
-    spec1 = importlib.util.spec_from_file_location("create_draft_handler", "./tools/create_draft/handler.py")
+    spec1 = importlib.util.spec_from_file_location("create_draft_handler", "./coze_plugin/tools/create_draft/handler.py")
     create_draft_module = importlib.util.module_from_spec(spec1)
     spec1.loader.exec_module(create_draft_module)
     
-    spec2 = importlib.util.spec_from_file_location("export_drafts_handler", "./tools/export_drafts/handler.py")
+    spec2 = importlib.util.spec_from_file_location("export_drafts_handler", "./coze_plugin/tools/export_drafts/handler.py")
     export_drafts_module = importlib.util.module_from_spec(spec2)
     spec2.loader.exec_module(export_drafts_module)
     
@@ -141,7 +152,7 @@ def test_error_cases():
     # Test invalid create_draft parameters
     print("--- Testing invalid create_draft parameters ---")
     mock_args = MockArgs(CreateInput(
-        project_name="错误测试",
+        draft_name="错误测试",
         width=-1,  # Invalid width
         height=1080,
         fps=30

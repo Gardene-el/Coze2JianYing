@@ -300,7 +300,7 @@ def test_add_images_multiple_calls():
 
 ### 5.2 文档中的说明
 
-从 `tools/add_effects/README.md`:
+从 `coze_plugin/tools/add_effects/README.md`:
 
 ```markdown
 ### 轨道管理
@@ -309,7 +309,7 @@ def test_add_images_multiple_calls():
 - 不同轨道的特效可以叠加
 ```
 
-从 `tools/add_images/README.md`:
+从 `coze_plugin/tools/add_images/README.md`:
 
 ```markdown
 向现有草稿添加图片轨道和图片片段。**每次调用会创建一个新的图片轨道**，
@@ -437,11 +437,11 @@ draft_config["tracks"].append(track)  # 添加新轨道
 
 ### B. 相关代码位置
 
-- **add_images**: `tools/add_images/handler.py`, line 218-305
-- **add_videos**: `tools/add_videos/handler.py`, line 225-312
-- **add_audios**: `tools/add_audios/handler.py`, line 202-270
-- **add_captions**: `tools/add_captions/handler.py`, 类似模式
-- **add_effects**: `tools/add_effects/handler.py`, line 180-236
+- **add_images**: `coze_plugin/tools/add_images/handler.py`, line 218-305
+- **add_videos**: `coze_plugin/tools/add_videos/handler.py`, line 225-312
+- **add_audios**: `coze_plugin/tools/add_audios/handler.py`, line 202-270
+- **add_captions**: `coze_plugin/tools/add_captions/handler.py`, 类似模式
+- **add_effects**: `coze_plugin/tools/add_effects/handler.py`, line 180-236
 
 ### C. 相关文档
 

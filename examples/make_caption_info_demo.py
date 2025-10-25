@@ -25,7 +25,7 @@ sys.modules['runtime'] = runtime_mock
 
 # Now we can import the handler
 sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
-from tools.make_caption_info.handler import handler, Input
+from coze_plugin.tools.make_caption_info.handler import handler, Input
 
 
 class MockArgs:

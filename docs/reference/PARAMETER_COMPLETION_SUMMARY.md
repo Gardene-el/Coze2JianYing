@@ -23,22 +23,22 @@
 
 ### 1. 代码更改
 
-#### make_video_info (tools/make_video_info/handler.py)
+#### make_video_info (coze_plugin/tools/make_video_info/handler.py)
 - ✅ 添加 `flip_horizontal: Optional[bool] = False`
 - ✅ 添加 `flip_vertical: Optional[bool] = False`
 - ✅ 在 handler 中添加条件输出逻辑
 - ✅ 更新参数总数：29 → 31
 
-#### add_videos (tools/add_videos/handler.py)
+#### add_videos (coze_plugin/tools/add_videos/handler.py)
 - ✅ 在 `VideoSegmentConfig.__init__` 中添加 flip 参数支持
 - ✅ 设置默认值为 False，与 make_video_info 保持一致
 
-#### make_image_info (tools/make_image_info/handler.py)
+#### make_image_info (coze_plugin/tools/make_image_info/handler.py)
 - ❌ **已移除** `flip_horizontal` 和 `flip_vertical`
 - ✅ 参数数量更正：27 → 25（移除了不适用于静态图片的 flip 参数）
 - ✅ 符合 draft_generator_interface 规范
 
-#### add_images (tools/add_images/handler.py)
+#### add_images (coze_plugin/tools/add_images/handler.py)
 - ❌ **已移除** `ImageSegmentConfig.__init__` 中的 flip 参数支持
 - ✅ 符合 draft_generator_interface 规范
 

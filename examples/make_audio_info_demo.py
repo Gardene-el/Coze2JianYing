@@ -34,7 +34,7 @@ def demo_make_audio_info():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_audio_info.handler import handler, Input
+    from coze_plugin.tools.make_audio_info.handler import handler, Input
     
     # Mock Args class
     class MockArgs:

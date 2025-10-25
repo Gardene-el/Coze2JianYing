@@ -33,7 +33,7 @@ def test_make_audio_info_basic():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_audio_info.handler import handler, Input
+    from coze_plugin.tools.make_audio_info.handler import handler, Input
     
     # Mock Args class
     class MockArgs:
@@ -152,7 +152,7 @@ def test_make_audio_info_validation():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_audio_info.handler import handler, Input
+    from coze_plugin.tools.make_audio_info.handler import handler, Input
     
     class MockArgs:
         def __init__(self, input_data):
@@ -241,7 +241,7 @@ def test_make_audio_info_edge_cases():
     runtime_mock.Args = MockArgsType
     sys.modules['runtime'] = runtime_mock
     
-    from tools.make_audio_info.handler import handler, Input
+    from coze_plugin.tools.make_audio_info.handler import handler, Input
     
     class MockArgs:
         def __init__(self, input_data):

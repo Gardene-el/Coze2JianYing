@@ -33,7 +33,7 @@ import os
 import json
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from tools.make_video_info.handler import handler as make_video_handler, Input as VideoInput
+from coze_plugin.tools.make_video_info.handler import handler as make_video_handler, Input as VideoInput
 
 
 def test_make_video_info_flip_parameters():
@@ -116,7 +116,7 @@ def test_add_videos_flip_parameters():
     """Test that add_videos correctly handles flip parameters"""
     print("\n=== Testing add_videos with flip parameters ===")
     
-    from tools.add_videos.handler import VideoSegmentConfig, TimeRange
+    from coze_plugin.tools.add_videos.handler import VideoSegmentConfig, TimeRange
     
     # Test creating VideoSegmentConfig with flip parameters
     print("\nTest: Create VideoSegmentConfig with flip parameters")
