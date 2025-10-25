@@ -193,4 +193,4 @@ Download timeout for [URL]. The file may be too large or the server is slow to r
 - 服务器响应慢，可以重试
 
 ## 扩展说明
-此工具是 CozeJianYingAssistent 项目的一部分，专门为 Coze 平台的剪映草稿生成工作流设计。时长信息将用于后续的视频编辑和时间轴规划。
+此工具是 Coze2JianYing 项目的一部分，专门为 Coze 平台的剪映草稿生成工作流设计。时长信息将用于后续的视频编辑和时间轴规划。

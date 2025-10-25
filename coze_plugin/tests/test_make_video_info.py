@@ -22,7 +22,7 @@ runtime_mock.Args = MockArgsType
 sys.modules['runtime'] = runtime_mock
 
 # Now import the handler
-sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
 from coze_plugin.tools.make_video_info.handler import handler, Input
 
 

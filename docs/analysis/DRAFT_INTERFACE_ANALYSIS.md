@@ -7,7 +7,7 @@
 
 ## 执行摘要
 
-本文档对 Draft Generator Interface 进行了全面的完整性和合理性分析，重点评估其作为 CozeJianYingAssistent 和 pyJianYingDraftImporter 之间数据交换协议的适用性。
+本文档对 Draft Generator Interface 进行了全面的完整性和合理性分析，重点评估其作为 Coze2JianYing 和 pyJianYingDraftImporter 之间数据交换协议的适用性。
 
 ### 主要结论
 

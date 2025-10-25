@@ -1,4 +1,4 @@
-# Copilot Instructions for CozeJianYingAssistent
+# Copilot Instructions for Coze2JianYing
 
 ## 项目概述
 
@@ -139,7 +139,7 @@ def handler(args: Args[Input])->Output:
 
 ### 实际项目结构 (当前状态)
 ```
-CozeJianYingAssistent/
+Coze2JianYing/
 ├── coze_plugin/                # 🔌 Coze 插件子项目
 │   ├── __init__.py            # 子项目初始化
 │   ├── README.md              # 子项目说明文档

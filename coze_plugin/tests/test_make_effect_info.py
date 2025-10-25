@@ -14,7 +14,7 @@ import sys
 import importlib.util
 
 # Add project path at the beginning to avoid conflicts
-sys.path.insert(0, '/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+sys.path.insert(0, '/home/runner/work/Coze2JianYing/Coze2JianYing')
 
 
 def load_handler_module():
@@ -35,7 +35,7 @@ def load_handler_module():
     # Load the handler module directly
     spec = importlib.util.spec_from_file_location(
         "make_effect_info_handler",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/make_effect_info/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/make_effect_info/handler.py"
     )
     module = importlib.util.module_from_spec(spec)
     sys.modules['make_effect_info_handler'] = module

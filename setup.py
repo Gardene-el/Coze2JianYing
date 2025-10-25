@@ -7,13 +7,13 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
-    name="coze-jianying-assistant",
+    name="coze-2-jianying",
     version="0.1.0",
     author="Gardene-el",
     description="开源的Coze剪映小助手",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Gardene-el/CozeJianYingAssistent",
+    url="https://github.com/Gardene-el/Coze2JianYing",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -30,7 +30,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "coze-jianying=coze_plugin.main:main",
+            "coze-2-jianying=coze_plugin.main:main",
         ],
     },
 )

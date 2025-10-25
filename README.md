@@ -33,8 +33,8 @@
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/Gardene-el/CozeJianYingAssistent.git
-cd CozeJianYingAssistent
+git clone https://github.com/Gardene-el/Coze2JianYing.git
+cd Coze2JianYing
 ```
 
 2. 安装依赖：
@@ -134,7 +134,7 @@ python coze_plugin/tests/test_basic.py
 ## 项目结构
 
 ```
-CozeJianYingAssistent/
+Coze2JianYing/
 ├── coze_plugin/               # 🔌 Coze 插件子项目
 │   ├── __init__.py            # 子项目初始化
 │   ├── README.md              # 子项目说明文档

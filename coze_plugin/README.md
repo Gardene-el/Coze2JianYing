@@ -41,7 +41,7 @@ coze_plugin/
 ## 模块说明
 
 ### main.py
-核心助手模块，提供 `CozeJianYingAssistant` 类和 `main()` 入口函数，封装剪映草稿的基础操作。
+核心助手模块，提供 `Coze2JianYing` 类和 `main()` 入口函数，封装剪映草稿的基础操作。
 
 ### tools/
 包含所有 Coze 平台可调用的工具函数。每个工具都是独立的模块，包含：
@@ -74,7 +74,7 @@ coze_plugin/
 
 ### 作为子项目导入
 ```python
-from coze_plugin import CozeJianYingAssistant, main
+from coze_plugin import Coze2JianYing, main
 ```
 
 ### 单独使用工具

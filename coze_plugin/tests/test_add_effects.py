@@ -17,7 +17,7 @@ import sys
 import importlib.util
 
 # Add project path at the beginning to avoid conflicts
-sys.path.insert(0, '/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+sys.path.insert(0, '/home/runner/work/Coze2JianYing/Coze2JianYing')
 
 
 def load_module(name, path):
@@ -49,7 +49,7 @@ def setup_test_draft():
     """Create a test draft for testing"""
     create_draft_module = load_module(
         "create_draft_handler",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/create_draft/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/create_draft/handler.py"
     )
     
     class MockArgs:
@@ -73,7 +73,7 @@ def test_add_effects_basic():
     
     add_effects_module = load_module(
         "add_effects_handler",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/add_effects/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/add_effects/handler.py"
     )
     handler = add_effects_module.handler
     Input = add_effects_module.Input
@@ -158,7 +158,7 @@ def test_add_effects_array_strings():
     
     add_effects_module = load_module(
         "add_effects_handler2",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/add_effects/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/add_effects/handler.py"
     )
     handler = add_effects_module.handler
     Input = add_effects_module.Input
@@ -199,11 +199,11 @@ def test_add_effects_integration():
     
     make_effect_module = load_module(
         "make_effect_info_handler2",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/make_effect_info/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/make_effect_info/handler.py"
     )
     add_effects_module = load_module(
         "add_effects_handler3",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/add_effects/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/add_effects/handler.py"
     )
     
     class MockArgs:
@@ -293,7 +293,7 @@ def test_add_effects_error_handling():
     
     add_effects_module = load_module(
         "add_effects_handler4",
-        "/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent/tools/add_effects/handler.py"
+        "/home/runner/work/Coze2JianYing/Coze2JianYing/tools/add_effects/handler.py"
     )
     handler = add_effects_module.handler
     Input = add_effects_module.Input

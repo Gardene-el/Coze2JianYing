@@ -124,7 +124,7 @@
 ## 🔗 相关资源
 
 ### 项目文档
-- [项目主 README](./README.md) - CozeJianYingAssistent 项目总览
+- [项目主 README](./README.md) - Coze2JianYing 项目总览
 - [AUDIT_REPORT.md](./AUDIT_REPORT.md) - 参数完整性审计报告
 - [DEVELOPMENT_ROADMAP.md](./DEVELOPMENT_ROADMAP.md) - 项目发展路线图
 
@@ -247,7 +247,7 @@ Timerange(start=0, duration=30000)
 
 ### 贡献指南
 如果在使用 Draft Generator Interface 的过程中发现问题或有改进建议，请：
-1. 在 CozeJianYingAssistent 项目中创建 Issue
+1. 在 Coze2JianYing 项目中创建 Issue
 2. 说明具体的使用场景和遇到的问题
 3. 如有可能，提供代码示例
 

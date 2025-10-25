@@ -19,7 +19,7 @@ def test_add_images_basic():
     
     # Import the add_images handler with mock runtime
     import sys
-    sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+    sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
     
     # Mock the runtime module
     import types
@@ -134,7 +134,7 @@ def test_add_images_validation():
     print("=== Testing add_images input validation ===")
     
     import sys
-    sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+    sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
     
     # Mock the runtime module
     import types
@@ -200,7 +200,7 @@ def test_parse_image_infos():
     print("=== Testing parse_image_infos function ===")
     
     import sys
-    sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+    sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
     
     # Mock the runtime module
     import types
@@ -259,7 +259,7 @@ def test_add_images_multiple_calls():
     print("=== Testing multiple add_images calls ===")
     
     import sys
-    sys.path.append('/home/runner/work/CozeJianYingAssistent/CozeJianYingAssistent')
+    sys.path.append('/home/runner/work/Coze2JianYing/Coze2JianYing')
     
     # Mock the runtime module
     import types

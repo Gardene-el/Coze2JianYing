@@ -11,8 +11,8 @@ __version__ = "0.1.0"
 
 # Import core functionality
 try:
-    from .main import CozeJianYingAssistant, main
-    __all__ = ["CozeJianYingAssistant", "main"]
+    from .main import Coze2JianYing, main
+    __all__ = ["Coze2JianYing", "main"]
 except ImportError:
     # If dependencies are not available, just pass
     __all__ = []

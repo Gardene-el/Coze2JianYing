@@ -277,8 +277,8 @@ input_data = Input(
 
 本工具的设计严格遵循以下参考资料:
 1. **源码参考**: `tools/add_images/handler.py`, `tools/add_audios/handler.py`
-2. **PR参考**: [PR #17](https://github.com/Gardene-el/CozeJianYingAssistent/pull/17), [PR #25](https://github.com/Gardene-el/CozeJianYingAssistent/pull/25)
-3. **Issue参考**: [Issue #16](https://github.com/Gardene-el/CozeJianYingAssistent/issues/16), [Issue #24](https://github.com/Gardene-el/CozeJianYingAssistent/issues/24)
+2. **PR参考**: [PR #17](https://github.com/Gardene-el/Coze2JianYing/pull/17), [PR #25](https://github.com/Gardene-el/Coze2JianYing/pull/25)
+3. **Issue参考**: [Issue #16](https://github.com/Gardene-el/Coze2JianYing/issues/16), [Issue #24](https://github.com/Gardene-el/Coze2JianYing/issues/24)
 4. **数据结构**: `EffectSegmentConfig` in `data_structures/draft_generator_interface/models.py`
 
 ## 完整工作流示例

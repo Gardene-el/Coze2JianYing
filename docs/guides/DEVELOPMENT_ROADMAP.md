@@ -4,7 +4,7 @@
 
 ## 开发顺序
 
-### 1. 项目基础结构 - [Issue #2](https://github.com/Gardene-el/CozeJianYingAssistent/issues/2), [PR #3](https://github.com/Gardene-el/CozeJianYingAssistent/pull/3)
+### 1. 项目基础结构 - [Issue #2](https://github.com/Gardene-el/Coze2JianYing/issues/2), [PR #3](https://github.com/Gardene-el/Coze2JianYing/pull/3)
 
 **应用背景**: 项目从空白仓库开始，需要建立标准的 Python 项目结构以支持后续 Coze 插件开发
 
@@ -13,12 +13,12 @@
 - 建立标准的 Python 包管理结构
 
 **具体做法**:
-- 采用标准 Python 包结构 (`coze_jianying_assistant/` 主包目录)
+- 采用标准 Python 包结构 (`coze_2_jianying/` 主包目录)
 - 选择 `pyJianYingDraft>=0.2.5` 作为核心依赖，通过 GitHub Advisory Database 验证安全性
 - 建立 `requirements.txt`、`setup.py` 等标准配置文件
 - 设置 GPL-3.0 开源协议
 
-### 2. Coze 平台开发规范 - [Issue #6](https://github.com/Gardene-el/CozeJianYingAssistent/issues/6), [PR #7](https://github.com/Gardene-el/CozeJianYingAssistent/pull/7)
+### 2. Coze 平台开发规范 - [Issue #6](https://github.com/Gardene-el/Coze2JianYing/issues/6), [PR #7](https://github.com/Gardene-el/Coze2JianYing/pull/7)
 
 **应用背景**: Coze 平台有独特的运行环境限制，需要建立专门的开发规范来适配这些约束
 
@@ -34,7 +34,7 @@
 - 制定标准的 Coze 工具函数模板，包含 `Args[Input] -> Output` 结构
 - 建立完整的开发规范文档 (`.github/copilot-instructions.md`)
 
-### 3. 媒体时长分析工具 - [Issue #8](https://github.com/Gardene-el/CozeJianYingAssistent/issues/8), [PR #9](https://github.com/Gardene-el/CozeJianYingAssistent/pull/9)
+### 3. 媒体时长分析工具 - [Issue #8](https://github.com/Gardene-el/Coze2JianYing/issues/8), [PR #9](https://github.com/Gardene-el/Coze2JianYing/pull/9)
 
 **应用背景**: Coze 工作流需要准确的媒体时长信息来进行时间轴计算，但传入的都是网络链接而非本地文件
 
@@ -50,7 +50,7 @@
 - 针对 Volcano Engine TTS 添加专门的 URL 过期检查和错误处理
 - 建立网络资源处理的标准模式
 
-### 4. UUID 草稿管理系统 - [Issue #10](https://github.com/Gardene-el/CozeJianYingAssistent/issues/10), [PR #11](https://github.com/Gardene-el/CozeJianYingAssistent/pull/11)
+### 4. UUID 草稿管理系统 - [Issue #10](https://github.com/Gardene-el/Coze2JianYing/issues/10), [PR #11](https://github.com/Gardene-el/Coze2JianYing/pull/11)
 
 **应用背景**: Coze 平台的变量索引模式会在工作流中产生大量中间数据索引，对用户造成干扰
 
@@ -68,7 +68,7 @@
 - 建立完整的参数映射，覆盖 pyJianYingDraft 的所有配置选项
 - 处理 NoneType 参数错误，添加默认值处理逻辑
 
-### 5. 项目架构整理 - [Issue #12](https://github.com/Gardene-el/CozeJianYingAssistent/issues/12), [PR #13](https://github.com/Gardene-el/CozeJianYingAssistent/pull/13)
+### 5. 项目架构整理 - [Issue #12](https://github.com/Gardene-el/Coze2JianYing/issues/12), [PR #13](https://github.com/Gardene-el/Coze2JianYing/pull/13)
 
 **应用背景**: 项目已具备完整功能，但缺乏系统性的架构组织和文档体系
 
@@ -83,7 +83,7 @@
 - 更新 README.md，准确描述四阶段工作流架构和已实现功能
 - 创建本文档，记录功能开发的背景和实现方法
 
-### 6. 图片轨道添加功能 - [Issue #16](https://github.com/Gardene-el/CozeJianYingAssistent/issues/16), [PR #17](https://github.com/Gardene-el/CozeJianYingAssistent/pull/17), [PR #25](https://github.com/Gardene-el/CozeJianYingAssistent/pull/25)
+### 6. 图片轨道添加功能 - [Issue #16](https://github.com/Gardene-el/Coze2JianYing/issues/16), [PR #17](https://github.com/Gardene-el/Coze2JianYing/pull/17), [PR #25](https://github.com/Gardene-el/Coze2JianYing/pull/25)
 
 **应用背景**: 需要向草稿添加图片内容，支持 Coze 工作流中的动态图片配置需求
 
@@ -106,7 +106,7 @@
 - PR #25 添加数组字符串格式支持，解决 Coze 工作流中动态配置的传递问题
 - 移除 width/height 元数据字段，避免用户误解（实际尺寸由 scale_x/y 和 fit_mode 控制）
 
-### 7. 音频轨道添加功能 - [Issue #26](https://github.com/Gardene-el/CozeJianYingAssistent/issues/26)
+### 7. 音频轨道添加功能 - [Issue #26](https://github.com/Gardene-el/Coze2JianYing/issues/26)
 
 **应用背景**: 参考图片工具的完整设计过程，实现音频轨道添加功能以支持背景音乐、旁白、音效等需求
 
@@ -148,7 +148,7 @@
 - 相同点：支持相同的输入格式、相同的工具组合模式（make_*_info + add_*s）
 - 不同点：音频无视觉参数（position, scale, rotation, crop, animations 等）
 
-### 8. 字幕/文本轨道添加功能 - [Issue #29](https://github.com/Gardene-el/CozeJianYingAssistent/issues/29)
+### 8. 字幕/文本轨道添加功能 - [Issue #29](https://github.com/Gardene-el/Coze2JianYing/issues/29)
 
 **应用背景**: 参考图片和音频工具的完整设计过程，实现字幕/文本轨道添加功能以支持视频字幕、标题、文字说明等需求
 
