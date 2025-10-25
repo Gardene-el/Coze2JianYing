@@ -43,7 +43,7 @@ API 参考文档、参数列表和快速查询指南。
 - **[Coze 插件文档](../coze_plugin/README.md)** - Coze 插件子项目说明
 - **[工具函数文档](../coze_plugin/tools/)** - 各个 Coze 工具函数的详细说明
 - **[数据结构文档](../data_structures/)** - 数据模型和接口定义
-- **[测试文档](../tests/README.md)** - 测试指南和规范
+- **[测试文档](../coze_plugin/tests/README.md)** - 测试指南和规范
 
 ## 📝 文档维护规范
 

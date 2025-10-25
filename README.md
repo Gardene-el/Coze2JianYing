@@ -92,7 +92,7 @@ pip install -e .
 from data_structures.draft_generator_interface.models import DraftConfig
 
 # 运行测试
-python tests/test_basic.py
+python coze_plugin/tests/test_basic.py
 ```
 
 ## 依赖项目
@@ -106,10 +106,10 @@ python tests/test_basic.py
 ### 运行测试
 ```bash
 # 运行所有测试
-python -m pytest tests/
+python -m pytest coze_plugin/tests/
 
 # 运行特定测试
-python tests/test_basic.py
+python coze_plugin/tests/test_basic.py
 ```
 
 ### 贡献指南
@@ -139,13 +139,17 @@ CozeJianYingAssistent/
 │   ├── __init__.py            # 子项目初始化
 │   ├── README.md              # 子项目说明文档
 │   ├── main.py                # 核心助手类和主程序入口
-│   └── tools/                 # Coze 工具函数脚本
-│       ├── create_draft/      # 创建草稿工具
-│       ├── export_drafts/     # 导出草稿工具
-│       ├── add_videos/        # 添加视频工具
-│       ├── add_audios/        # 添加音频工具
-│       ├── add_images/        # 添加图片工具
-│       └── [更多工具...]
+│   ├── tools/                 # Coze 工具函数脚本
+│   │   ├── create_draft/      # 创建草稿工具
+│   │   ├── export_drafts/     # 导出草稿工具
+│   │   ├── add_videos/        # 添加视频工具
+│   │   ├── add_audios/        # 添加音频工具
+│   │   ├── add_images/        # 添加图片工具
+│   │   └── [更多工具...]
+│   ├── examples/              # 工具使用示例和工作流演示
+│   │   ├── coze_workflow_examples/
+│   │   └── json_output_samples/
+│   └── tests/                 # 测试文件目录
 ├── data_structures/           # 数据结构定义
 │   ├── draft_generator_interface/  # 草稿生成器接口
 │   └── media_models/          # 媒体文件模型
@@ -154,10 +158,6 @@ CozeJianYingAssistent/
 │   ├── updates/               # 功能更新记录
 │   ├── analysis/              # 技术分析报告
 │   └── reference/             # API 参考文档
-├── examples/                  # 使用示例
-│   ├── coze_workflow_examples/
-│   └── json_output_samples/
-├── tests/                     # 测试文件目录
 ├── requirements.txt           # 项目依赖
 └── setup.py                  # 安装配置
 ```
