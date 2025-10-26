@@ -277,8 +277,11 @@ class TextSegmentConfig:
     time_range: TimeRange
     
     # Position and transform
-    position_x: float = 0.5  # Normalized (0-1)
-    position_y: float = 0.9  # Normalized (0-1)
+    # Note: position_x/position_y map to transform_x/transform_y in pyJianYingDraft's ClipSettings
+    # Values are in units of half canvas size: 0.0 = center, positive = up/right, negative = down/left
+    # Range: -1.0 to 1.0
+    position_x: float = 0.5  # Default: 0.5 (center-right)
+    position_y: float = -0.9  # Default: -0.9 (near bottom)
     scale: float = 1.0
     rotation: float = 0.0
     opacity: float = 1.0

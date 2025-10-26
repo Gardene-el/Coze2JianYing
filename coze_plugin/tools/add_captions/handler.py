@@ -73,7 +73,7 @@ class TextSegmentConfig:
         
         # Position and transform
         self.position_x = kwargs.get('position_x', 0.5)
-        self.position_y = kwargs.get('position_y', 0.9)
+        self.position_y = kwargs.get('position_y', -0.9)
         self.scale = kwargs.get('scale', 1.0)
         self.rotation = kwargs.get('rotation', 0.0)
         self.opacity = kwargs.get('opacity', 1.0)
@@ -253,7 +253,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
             },
             "transform": {
                 "position_x": info.get('position_x', 0.5),
-                "position_y": info.get('position_y', 0.9),
+                "position_y": info.get('position_y', -0.9),
                 "scale": info.get('scale', 1.0),
                 "rotation": info.get('rotation', 0.0),
                 "opacity": info.get('opacity', 1.0)

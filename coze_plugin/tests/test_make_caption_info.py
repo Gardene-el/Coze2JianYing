@@ -95,7 +95,7 @@ def test_make_caption_info_basic():
         start=1000,
         end=4000,
         position_x=0.5,  # default value
-        position_y=0.9,  # default value
+        position_y=-0.9,  # default value
         font_size=48,    # default value
         color="#FFFFFF"  # default value
     )
@@ -294,8 +294,8 @@ def test_integration_make_and_add():
         fps=30
     )))
     
-    assert create_result.success, "Draft creation should succeed"
-    draft_id = create_result.draft_id
+    assert create_result["success"], "Draft creation should succeed"
+    draft_id = create_result["draft_id"]
     print(f"Created test draft: {draft_id}")
     
     # Step 1: Generate caption info strings with make_caption_info
