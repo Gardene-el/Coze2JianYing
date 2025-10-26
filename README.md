@@ -1,19 +1,19 @@
-# Coze2JianYing - Coze 到剪映完整工作流
-
-一个基于 [pyJianYingDraft](https://github.com/GuanYixuan/pyJianYingDraft) 构建的完整工作流项目，专为 Coze 平台设计，包含从 Coze 插件到剪映草稿生成的全流程。
+# 
+<h1 align="center">
+<a>开源的Coze剪映小助手：Coze2JianYing</a>
+</h1>
 
 ## 项目概述
 
-本项目整合了 **Coze 到剪映自动化视频生成工作流** 中的两个核心组件，在同一 GitHub 项目中管理两个强关联但相对独立的子项目。
+<p>
+Coze2JianYing搭建了从Coze平台到剪映草稿的工作流，包含Coze插件与草稿生成软件。Coze2JianYing遵循 GPL-3.0 许可证，将所有源码<b>按原样</b>提供，此外也提供立即可用的服务形式。Coze2JianYing是一个个人项目，并主要依赖AI生成，难免存在许多粗陋之处，请多海涵，同时，欢迎质量监督。目前项目仍处于非常早期的阶段，当前仅确定支持对字幕，音效和图片进行最基本的添加和参数设置，不支持效果和关键帧。
+</p>
 
 ### 完整工作流程
 
 ```
-┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌─────────────┐
-│  Coze 工作流 │───▶│  Coze 插件       │───▶│ 草稿生成器       │───▶│    剪映     │
-│ (AI内容生成) │    │ (coze_plugin/)   │    │ (src/)          │    │ (视频编辑)   │
-│              │    │ 处理参数、导出JSON│    │ JSON转剪映草稿   │    │             │
-└─────────────┘    └──────────────────┘    └─────────────────┘    └─────────────┘
+Coze平台│──生成素材和设置草稿的参数───▶Coze 插件（本项目提供）│──导出草稿的内容───▶草稿生成器（本项目提供）│──生成剪影草稿至草稿文件夹───▶剪映
+
 ```
 
 ### 项目组成
@@ -36,15 +36,10 @@
 
 - 🎬 **完整的剪映草稿管理** - 基于 UUID 的草稿生成、存储和导出系统
 - 🔗 **网络资源处理** - 支持 Coze 平台的网络链接资源模式
-- ⏱️ **媒体时长分析** - 自动获取音视频文件时长和时间轴计算
 - 📊 **数据结构完备** - 覆盖 pyJianYingDraft 的所有可配置参数
-- 🛠️ **Coze 平台优化** - 遵循 Coze 平台的约束和开发规范
-- 🐍 **纯 Python 实现** - 易于扩展和自定义
-- 🔌 **模块化设计** - 两个子项目相对独立，易于维护
 - 🖥️ **GUI 应用** - 草稿生成器提供友好的图形界面
 - 📦 **可打包发布** - 支持打包为 Windows exe 可执行文件
 
-> 📢 **项目架构更新**: 项目已完成重大架构调整，整合了 Coze 插件和草稿生成器两个子项目。详见 [草稿生成器架构文档](./docs/draft_generator/ARCHITECTURE_AND_WORKFLOW.md)。
 
 ## 安装
 
@@ -176,37 +171,6 @@ python coze_plugin/tests/test_basic.py
 推荐阅读：
 - [项目开发历程](./docs/guides/DEVELOPMENT_ROADMAP.md) - 了解项目如何发展
 - [草稿管理指南](./docs/guides/DRAFT_MANAGEMENT_GUIDE.md) - 学习如何使用草稿系统
-
-## 项目结构
-
-```
-Coze2JianYing/
-├── coze_plugin/               # 🔌 Coze 插件子项目
-│   ├── __init__.py            # 子项目初始化
-│   ├── README.md              # 子项目说明文档
-│   ├── main.py                # 核心助手类和主程序入口
-│   ├── tools/                 # Coze 工具函数脚本
-│   │   ├── create_draft/      # 创建草稿工具
-│   │   ├── export_drafts/     # 导出草稿工具
-│   │   ├── add_videos/        # 添加视频工具
-│   │   ├── add_audios/        # 添加音频工具
-│   │   ├── add_images/        # 添加图片工具
-│   │   └── [更多工具...]
-│   ├── examples/              # 工具使用示例和工作流演示
-│   │   ├── coze_workflow_examples/
-│   │   └── json_output_samples/
-│   └── tests/                 # 测试文件目录
-├── data_structures/           # 数据结构定义
-│   ├── draft_generator_interface/  # 草稿生成器接口
-│   └── media_models/          # 媒体文件模型
-├── docs/                      # 📚 项目文档
-│   ├── guides/                # 开发与使用指南
-│   ├── updates/               # 功能更新记录
-│   ├── analysis/              # 技术分析报告
-│   └── reference/             # API 参考文档
-├── requirements.txt           # 项目依赖
-└── setup.py                  # 安装配置
-```
 
 ## 许可证
 
