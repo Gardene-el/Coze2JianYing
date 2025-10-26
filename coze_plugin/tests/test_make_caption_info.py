@@ -178,7 +178,7 @@ def test_make_caption_info_basic():
         content="测试",
         start=0,
         end=3000,
-        position_x=3.0  # > 2.0
+        position_x=1.5  # > 1.0
     )
     result = handler(MockArgs(input_data))
     assert not result["success"], "Should fail with invalid position"

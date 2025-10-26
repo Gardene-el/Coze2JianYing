@@ -24,8 +24,8 @@ class Input(NamedTuple):
     end: int                                    # End time in milliseconds
     
     # Optional position and transform fields
-    position_x: Optional[float] = 0.5           # X position (-2.0 to 2.0, default 0.5 center-right)
-    position_y: Optional[float] = -0.9          # Y position (-2.0 to 2.0, default -0.9 bottom)
+    position_x: Optional[float] = 0.5           # X position (-1.0 to 1.0, default 0.5 center-right)
+    position_y: Optional[float] = -0.9          # Y position (-1.0 to 1.0, default -0.9 bottom)
     scale: Optional[float] = 1.0                # Scale (default 1.0)
     rotation: Optional[float] = 0.0             # Rotation angle (default 0.0)
     opacity: Optional[float] = 1.0              # Opacity (0.0-1.0, default 1.0)
@@ -123,18 +123,18 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         opacity = args.input.opacity if args.input.opacity is not None else 1.0
         background_opacity = args.input.background_opacity if args.input.background_opacity is not None else 0.5
         
-        if not (-2.0 <= position_x <= 2.0):
+        if not (-1.0 <= position_x <= 1.0):
             return {
                 "caption_info_string": "",
                 "success": False,
-                "message": "position_x 必须在 -2.0 到 2.0 之间"
+                "message": "position_x 必须在 -1.0 到 1.0 之间"
             }
         
-        if not (-2.0 <= position_y <= 2.0):
+        if not (-1.0 <= position_y <= 1.0):
             return {
                 "caption_info_string": "",
                 "success": False,
-                "message": "position_y 必须在 -2.0 到 2.0 之间"
+                "message": "position_y 必须在 -1.0 到 1.0 之间"
             }
         
         if not (0.0 <= opacity <= 1.0):

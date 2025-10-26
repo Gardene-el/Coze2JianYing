@@ -32,8 +32,8 @@ class Input(NamedTuple):
     end: int                                    # 结束时间（毫秒）
     
     # Optional position and transform fields (5个位置变换参数)
-    position_x: Optional[float] = 0.5           # X位置 (-2.0到2.0, 默认0.5居中偏右)
-    position_y: Optional[float] = -0.9          # Y位置 (-2.0到2.0, 默认-0.9底部)
+    position_x: Optional[float] = 0.5           # X位置 (-1.0到1.0, 默认0.5居中偏右)
+    position_y: Optional[float] = -0.9          # Y位置 (-1.0到1.0, 默认-0.9底部)
     scale: Optional[float] = 1.0                # 缩放 (默认1.0)
     rotation: Optional[float] = 0.0             # 旋转角度 (默认0.0)
     opacity: Optional[float] = 1.0              # 透明度 (0.0-1.0, 默认1.0)

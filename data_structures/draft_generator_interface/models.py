@@ -279,7 +279,7 @@ class TextSegmentConfig:
     # Position and transform
     # Note: position_x/position_y map to transform_x/transform_y in pyJianYingDraft's ClipSettings
     # Values are in units of half canvas size: 0.0 = center, positive = up/right, negative = down/left
-    # Typical range: -1.0 to 1.0 (can extend to -2.0 to 2.0)
+    # Range: -1.0 to 1.0
     position_x: float = 0.5  # Default: 0.5 (center-right)
     position_y: float = -0.9  # Default: -0.9 (near bottom)
     scale: float = 1.0
