@@ -275,13 +275,13 @@ def example_4_multilayer_captions():
                 "content": "这是中文字幕",
                 "start": 0,
                 "end": 3000,
-                "position_y": 0.9  # Bottom
+                "position_y": -0.9  # Bottom
             },
             {
                 "content": "第二句中文",
                 "start": 3000,
                 "end": 6000,
-                "position_y": 0.9
+                "position_y": -0.9
             }
         ]
     )))
