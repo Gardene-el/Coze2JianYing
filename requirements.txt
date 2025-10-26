@@ -1,6 +1,18 @@
 # Core dependency for JianYing draft generation
 pyJianYingDraft>=0.2.5
 
-# Additional dependencies that may be useful for a Coze assistant
-requests>=2.25.0
+# HTTP requests for downloading materials
+requests>=2.31.0
+
+# Environment variables
 python-dotenv>=0.19.0
+
+# GUI (Tkinter is included in Python standard library)
+
+# Build tools
+pyinstaller>=5.0.0
+
+# Development tools (optional)
+pytest>=7.0.0
+black>=22.0.0
+flake8>=4.0.0

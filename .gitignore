@@ -144,3 +144,15 @@ Desktop.ini
 
 # GitHub agent files (exclude agents directory but keep copilot-instructions.md)
 .github/agents/
+
+# Draft Generator specific ignores
+# Note: JianyingProjects/, JianyingProjects_test/, resources/ are intentionally NOT ignored
+# as they may contain user content that should be version controlled based on use case
+# Add these to your local .git/info/exclude if needed for local development
+
+# Build artifacts
+*.spec
+
+# Testing
+temp/
+*.db
