@@ -28,7 +28,7 @@ class Input(NamedTuple):
     "font_size": 48,
     "color": "#FFFFFF",
     "position_x": 0.5,
-    "position_y": 0.9
+    "position_y": -0.9
   },
   {
     "content": "这是第二句字幕",
@@ -67,7 +67,7 @@ class Input(NamedTuple):
 #### 可选字段
 
 **位置和变换 (5个)**:
-- `position_x`, `position_y`: 归一化位置坐标（0.0-1.0，默认0.5, 0.9）
+- `position_x`, `position_y`: 位置坐标（-2.0到2.0，默认0.5, -0.9；0为中心，负值向下/左）
 - `scale`: 缩放比例（默认1.0）
 - `rotation`: 旋转角度（默认0.0）
 - `opacity`: 透明度（0.0-1.0，默认1.0）
@@ -391,7 +391,7 @@ print("草稿导出完成")
 - 对比度：确保文字颜色与背景有足够对比度
 - 描边：在复杂背景上建议启用描边增强可读性
 - 时长：每条字幕建议显示2-5秒
-- 位置：底部字幕使用 position_y=0.9，标题使用 0.3-0.5
+- 位置：底部字幕使用 position_y=-0.9（默认），标题使用 0.3-0.5
 
 ## 与其他工具的集成
 
@@ -486,7 +486,7 @@ caption_infos=[{
   "time_range": {"start": 0, "end": 3000},
   "transform": {
     "position_x": 0.5,
-    "position_y": 0.9,
+    "position_y": -0.9,
     "scale": 1.0,
     "rotation": 0.0,
     "opacity": 1.0

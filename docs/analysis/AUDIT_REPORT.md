@@ -268,7 +268,7 @@ class Input(NamedTuple):
     start: int                                  # 必需
     end: int                                    # 必需
     position_x: Optional[float] = 0.5           # 默认值在这里
-    position_y: Optional[float] = 0.9           # 默认值在这里
+    position_y: Optional[float] = -0.9          # 默认值在这里（底部）
     font_size: Optional[int] = 48               # 默认值在这里
     color: Optional[str] = "#FFFFFF"            # 默认值在这里
 ```

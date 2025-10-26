@@ -291,7 +291,7 @@ text_segment = TextSegmentConfig(
     content="欢迎使用Coze剪映助手",
     time_range=TimeRange(start=5000, end=10000),
     position_x=0.5,
-    position_y=0.9,
+    position_y=-0.9,
     style=text_style,
     intro_animation="淡入",
     outro_animation="淡出"
@@ -657,7 +657,7 @@ script_file.add_segment(audio_segment)
   "time_range": {"start": 5000, "end": 10000},
   "transform": {
     "position_x": 0.5,
-    "position_y": 0.9,
+    "position_y": -0.9,
     "scale": 1.0,
     "rotation": 0.0,
     "opacity": 1.0
