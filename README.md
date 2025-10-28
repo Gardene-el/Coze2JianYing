@@ -17,7 +17,7 @@
 <td width="33%">
 
 - [为什么是 Coze2JianYing](#-为什么是-coze2jianying)
-- [Coze2JianYing 的缺点](#coze2jianyingnbsp的缺点nbsp)
+- [Coze2JianYing 的缺点](#coze2jianyingn-的缺点)
 - [最速上手 Coze2JianYing](#-最速上手-coze2jianying)
 
 </td>
