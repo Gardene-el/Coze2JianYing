@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 from pathlib import Path
 import os
+import threading
+import queue
 
 from gui.log_window import LogWindow
 from utils.draft_generator import DraftGenerator
@@ -33,6 +35,10 @@ class MainWindow:
         
         # 创建日志窗口
         self.log_window = None
+        
+        # 后台线程相关
+        self.generation_thread = None
+        self.is_generating = False
         
         # 设置GUI日志回调
         set_gui_log_callback(self._on_log_message)
@@ -197,6 +203,11 @@ class MainWindow:
     
     def _generate_draft(self):
         """生成草稿"""
+        # 如果正在生成，提示用户
+        if self.is_generating:
+            messagebox.showwarning("警告", "正在生成草稿，请稍候...")
+            return
+        
         content = self.input_text.get("1.0", tk.END).strip()
         
         if not content:
@@ -225,28 +236,68 @@ class MainWindow:
             messagebox.showerror("错误", f"指定的路径不是文件夹:\n{output_folder}\n\n请选择一个文件夹。")
             return
         
+        # 自动打开日志窗口
+        if self.log_window is None or not self.log_window.is_open():
+            self.log_window = LogWindow(self.root)
+        else:
+            self.log_window.focus()
+        
         self.logger.info("开始生成草稿")
         self.status_var.set("正在生成草稿...")
         self.generate_btn.config(state=tk.DISABLED)
+        self.is_generating = True
         
+        # 在后台线程中生成草稿
+        self.generation_thread = threading.Thread(
+            target=self._generate_draft_worker,
+            args=(content, output_folder),
+            daemon=True
+        )
+        self.generation_thread.start()
+        
+        # 定期检查线程状态
+        self._check_generation_status()
+    
+    def _generate_draft_worker(self, content: str, output_folder: str):
+        """后台线程工作函数"""
         try:
             # 调用草稿生成器，传入已验证的输出文件夹
             draft_paths = self.draft_generator.generate(content, output_folder)
-            self.logger.info(f"草稿生成成功: {draft_paths}")
-            self.status_var.set("草稿生成成功")
             
-            # 构建结果消息
-            result_msg = f"成功生成 {len(draft_paths)} 个草稿！\n\n"
-            for i, path in enumerate(draft_paths, 1):
-                result_msg += f"{i}. {path}\n"
-            
-            messagebox.showinfo("成功", result_msg)
+            # 使用after方法在主线程中更新GUI
+            self.root.after(0, self._on_generation_success, draft_paths)
         except Exception as e:
-            self.logger.error(f"草稿生成失败: {e}", exc_info=True)
-            self.status_var.set("草稿生成失败")
-            messagebox.showerror("错误", f"草稿生成失败:\n{e}")
-        finally:
-            self.generate_btn.config(state=tk.NORMAL)
+            # 使用after方法在主线程中更新GUI
+            self.root.after(0, self._on_generation_error, e)
+    
+    def _check_generation_status(self):
+        """定期检查生成状态"""
+        if self.generation_thread and self.generation_thread.is_alive():
+            # 线程仍在运行，100ms后再次检查
+            self.root.after(100, self._check_generation_status)
+        else:
+            # 线程已结束
+            self.is_generating = False
+    
+    def _on_generation_success(self, draft_paths):
+        """生成成功的回调"""
+        self.logger.info(f"草稿生成成功: {draft_paths}")
+        self.status_var.set("草稿生成成功")
+        self.generate_btn.config(state=tk.NORMAL)
+        
+        # 构建结果消息
+        result_msg = f"成功生成 {len(draft_paths)} 个草稿！\n\n"
+        for i, path in enumerate(draft_paths, 1):
+            result_msg += f"{i}. {path}\n"
+        
+        messagebox.showinfo("成功", result_msg)
+    
+    def _on_generation_error(self, error):
+        """生成失败的回调"""
+        self.logger.error(f"草稿生成失败: {error}", exc_info=True)
+        self.status_var.set("草稿生成失败")
+        self.generate_btn.config(state=tk.NORMAL)
+        messagebox.showerror("错误", f"草稿生成失败:\n{error}")
     
     def _clear_input(self):
         """清空输入"""
@@ -272,9 +323,17 @@ class MainWindow:
         messagebox.showinfo("关于", about_text)
     
     def _on_log_message(self, message: str):
-        """处理日志消息"""
-        if self.log_window and self.log_window.is_open():
-            self.log_window.append_log(message)
+        """处理日志消息（线程安全）"""
+        # 使用after方法确保在主线程中更新GUI
+        def update_log():
+            if self.log_window and self.log_window.is_open():
+                self.log_window.append_log(message)
+        
+        try:
+            self.root.after(0, update_log)
+        except:
+            # 如果root已销毁，忽略错误
+            pass
     
     def _on_closing(self):
         """窗口关闭事件"""

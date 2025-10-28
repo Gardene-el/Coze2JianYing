@@ -21,6 +21,12 @@ class LogWindow:
         self.window.title("日志查看器")
         self.window.geometry("800x500")
         
+        # 允许窗口调整大小
+        self.window.resizable(True, True)
+        
+        # 设置最小窗口大小
+        self.window.minsize(600, 400)
+        
         # 创建UI
         self._create_widgets()
         self._setup_layout()
@@ -117,6 +123,9 @@ class LogWindow:
         # 自动滚动到底部
         if self.auto_scroll_var.get():
             self.log_text.see(tk.END)
+        
+        # 强制更新显示
+        self.log_text.update_idletasks()
     
     def _clear_logs(self):
         """清空日志"""

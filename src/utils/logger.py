@@ -40,6 +40,8 @@ class GUIHandler(logging.Handler):
         try:
             msg = self.format(record)
             LogHandler.emit_to_gui(msg)
+            # 强制刷新，确保日志立即显示
+            sys.stdout.flush()
         except Exception:
             self.handleError(record)
 
