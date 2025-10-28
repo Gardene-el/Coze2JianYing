@@ -16,23 +16,23 @@
 <tr>
 <td width="33%">
 
-- [为什么是 Coze2JianYing](#为什么是-coze2jianying)
-- [Coze2JianYing 的缺点](#coze2jianying的缺点)
-- [最速上手 Coze2JianYing](#最速上手-coze2jianying)
+- [为什么是 Coze2JianYing](#-为什么是-coze2jianying)
+- [Coze2JianYing 的缺点](#-coze2jianying-的缺点)
+- [最速上手 Coze2JianYing](#-最速上手-coze2jianying)
 
 </td>
 <td width="33%">
 
-- [从源码开始构建](#从源码开始构建-coze2jianying)
+- [从源码开始构建](#-从源码开始构建-coze2jianying)
   - [从零复刻 Coze 插件](#-1-从零复刻-coze-插件)
   - [编译草稿生成器程序](#️-2-编译草稿生成器程序)
 
 </td>
 <td width="33%">
 
-- [关于流程说明](#关于-扣子-2-剪映-的流程说明)
-- [贡献机制](#贡献机制)
-- [赞助支持](#赞助支持)
+- [关于流程说明](#-关于-扣子-2-剪映-的流程说明)
+- [贡献机制](#-贡献机制)
+- [赞助支持](#-赞助支持)
 - [许可证](#-许可证)
 
 </td>
@@ -43,7 +43,7 @@
 
 ---
 
-## 为什么是 Coze2JianYing&nbsp;🎯
+## 🎯 为什么是 Coze2JianYing
 
 相比市面上其他的剪映小助手，Coze2JianYing 具有以下核心优势：
 
@@ -70,7 +70,7 @@
 
 ---
 
-## Coze2JianYing&nbsp;的缺点&nbsp;⚠️
+## ⚠️ Coze2JianYing 的缺点
 
 **实话实说，Coze2JianYing 仍处于早期阶段**，以下是当前待解决的主要问题：
 
@@ -105,7 +105,7 @@
 
 ---
 
-## 最速上手 Coze2JianYing&nbsp;🚀
+## 🚀 最速上手 Coze2JianYing
 
 Coze2JianYing 的完整工作流程包含四个主要阶段：
 
@@ -143,7 +143,7 @@ graph LR
 
 ---
 
-## 从源码开始构建 Coze2JianYing&nbsp;🔨
+## 🔨 从源码开始构建 Coze2JianYing
 
 本项目包含两个主要部分，可以分别构建和使用：
 
@@ -370,7 +370,7 @@ Coze2JianYing/
 
 ---
 
-## 关于 扣子 2 剪映 的流程说明&nbsp;📋
+## 📋 关于 扣子 2 剪映 的流程说明
 
 Coze2JianYing 的完整工作流程包含四个主要阶段：
 
@@ -430,7 +430,7 @@ graph LR
 
 ---
 
-## 贡献机制&nbsp;🤝
+## 🤝 贡献机制
 
 <div align="center">
 
@@ -442,7 +442,7 @@ _贡献机制正在搭建中，敬请期待..._
 
 ---
 
-## 赞助支持&nbsp;💖
+## 💖 赞助支持
 
 <div align="center">
 
