@@ -4,6 +4,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 from pathlib import Path
+from datetime import datetime
 import os
 import threading
 import queue
@@ -20,7 +21,7 @@ class MainWindow:
         self.logger = get_logger(__name__)
         self.root = tk.Tk()
         self.root.title("Coze剪映草稿生成器")
-        self.root.geometry("800x600")
+        self.root.geometry("900x700")
         
         # 设置窗口图标（如果存在）
         icon_path = Path(__file__).parent.parent.parent / "resources" / "icon.ico"
@@ -33,8 +34,11 @@ class MainWindow:
         # 输出文件夹路径
         self.output_folder = None
         
-        # 创建日志窗口
+        # 外部日志窗口（保留用于文件菜单）
         self.log_window = None
+        
+        # 日志面板显示状态
+        self.log_panel_visible = True
         
         # 后台线程相关
         self.generation_thread = None
@@ -64,15 +68,24 @@ class MainWindow:
         # 查看菜单
         view_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="查看", menu=view_menu)
-        view_menu.add_command(label="日志窗口", command=self._show_log_window)
+        view_menu.add_command(label="切换日志面板", command=self._toggle_log_panel)
+        view_menu.add_command(label="日志窗口（独立）", command=self._show_log_window)
         
         # 帮助菜单
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="帮助", menu=help_menu)
         help_menu.add_command(label="关于", command=self._show_about)
         
+        # 主PanedWindow - 分隔上下区域
+        self.paned_window = ttk.PanedWindow(self.root, orient=tk.VERTICAL)
+        self.paned_window.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # 上部框架 - 主要工作区
+        top_frame = ttk.Frame(self.paned_window)
+        self.paned_window.add(top_frame, weight=3)
+        
         # 主框架
-        main_frame = ttk.Frame(self.root, padding="10")
+        main_frame = ttk.Frame(top_frame, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # 输出文件夹选择区域
@@ -96,7 +109,7 @@ class MainWindow:
         input_label = ttk.Label(main_frame, text="输入内容:")
         self.input_text = scrolledtext.ScrolledText(
             main_frame,
-            height=15,
+            height=10,
             wrap=tk.WORD,
             font=("Arial", 10)
         )
@@ -113,10 +126,10 @@ class MainWindow:
             text="清空",
             command=self._clear_input
         )
-        self.log_btn = ttk.Button(
+        self.toggle_log_btn = ttk.Button(
             button_frame,
-            text="查看日志",
-            command=self._show_log_window
+            text="隐藏日志",
+            command=self._toggle_log_panel
         )
         
         # 状态栏
@@ -128,20 +141,65 @@ class MainWindow:
             anchor=tk.W
         )
         
+        # 下部框架 - 日志面板
+        self.log_frame = ttk.LabelFrame(self.paned_window, text="日志", padding="5")
+        self.paned_window.add(self.log_frame, weight=1)
+        
+        # 日志工具栏
+        log_toolbar = ttk.Frame(self.log_frame)
+        
+        self.clear_log_btn = ttk.Button(
+            log_toolbar,
+            text="清空",
+            command=self._clear_embedded_logs
+        )
+        self.save_log_btn = ttk.Button(
+            log_toolbar,
+            text="保存",
+            command=self._save_embedded_logs
+        )
+        self.auto_scroll_var = tk.BooleanVar(value=True)
+        self.auto_scroll_check = ttk.Checkbutton(
+            log_toolbar,
+            text="自动滚动",
+            variable=self.auto_scroll_var
+        )
+        
+        # 日志文本框
+        self.embedded_log_text = scrolledtext.ScrolledText(
+            self.log_frame,
+            wrap=tk.WORD,
+            font=("Consolas", 9),
+            state=tk.DISABLED,
+            height=8
+        )
+        
+        # 配置日志文本标签（不同日志级别使用不同颜色）
+        self.embedded_log_text.tag_config("INFO", foreground="black")
+        self.embedded_log_text.tag_config("WARNING", foreground="orange")
+        self.embedded_log_text.tag_config("ERROR", foreground="red")
+        self.embedded_log_text.tag_config("DEBUG", foreground="gray")
+        
         # 保存组件引用
         self.main_frame = main_frame
+        self.top_frame = top_frame
         self.folder_frame = folder_frame
         self.folder_label = folder_label
         self.folder_entry = folder_entry
         self.input_label = input_label
         self.button_frame = button_frame
         self.status_bar = status_bar
+        self.log_toolbar = log_toolbar
         
         # 配置网格权重
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
+        top_frame.columnconfigure(0, weight=1)
+        top_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(2, weight=1)
+        self.log_frame.columnconfigure(0, weight=1)
+        self.log_frame.rowconfigure(1, weight=1)
     
     def _setup_layout(self):
         """设置布局"""
@@ -161,10 +219,19 @@ class MainWindow:
         self.button_frame.grid(row=3, column=0, sticky=tk.W, pady=(0, 10))
         self.generate_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.clear_btn.pack(side=tk.LEFT, padx=(0, 5))
-        self.log_btn.pack(side=tk.LEFT)
+        self.toggle_log_btn.pack(side=tk.LEFT)
         
         # 状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
+        
+        # 日志工具栏
+        self.log_toolbar.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+        self.clear_log_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.save_log_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.auto_scroll_check.pack(side=tk.LEFT)
+        
+        # 日志文本框
+        self.embedded_log_text.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
     
     def _select_output_folder(self):
         """选择输出文件夹"""
@@ -236,11 +303,9 @@ class MainWindow:
             messagebox.showerror("错误", f"指定的路径不是文件夹:\n{output_folder}\n\n请选择一个文件夹。")
             return
         
-        # 自动打开日志窗口
-        if self.log_window is None or not self.log_window.is_open():
-            self.log_window = LogWindow(self.root)
-        else:
-            self.log_window.focus()
+        # 确保日志面板可见
+        if not self.log_panel_visible:
+            self._toggle_log_panel()
         
         self.logger.info("开始生成草稿")
         self.status_var.set("正在生成草稿...")
@@ -305,8 +370,72 @@ class MainWindow:
         self.logger.info("已清空输入")
         self.status_var.set("已清空")
     
+    def _toggle_log_panel(self):
+        """切换日志面板显示/隐藏"""
+        if self.log_panel_visible:
+            # 隐藏日志面板
+            self.paned_window.remove(self.log_frame)
+            self.toggle_log_btn.config(text="显示日志")
+            self.log_panel_visible = False
+        else:
+            # 显示日志面板
+            self.paned_window.add(self.log_frame, weight=1)
+            self.toggle_log_btn.config(text="隐藏日志")
+            self.log_panel_visible = True
+    
+    def _clear_embedded_logs(self):
+        """清空嵌入式日志"""
+        self.embedded_log_text.config(state=tk.NORMAL)
+        self.embedded_log_text.delete("1.0", tk.END)
+        self.embedded_log_text.config(state=tk.DISABLED)
+    
+    def _save_embedded_logs(self):
+        """保存嵌入式日志到文件"""
+        from tkinter import filedialog
+        
+        # 获取日志内容
+        log_content = self.embedded_log_text.get("1.0", tk.END)
+        
+        # 选择保存位置
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".log",
+            filetypes=[("日志文件", "*.log"), ("文本文件", "*.txt"), ("所有文件", "*.*")],
+            initialfile=f"log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        )
+        
+        if filename:
+            try:
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(log_content)
+                messagebox.showinfo("成功", f"日志已保存到: {filename}")
+            except Exception as e:
+                messagebox.showerror("错误", f"保存日志失败: {e}")
+    
+    def _append_to_embedded_log(self, message: str):
+        """添加日志到嵌入式日志面板"""
+        # 确定日志级别
+        tag = "INFO"
+        if "ERROR" in message:
+            tag = "ERROR"
+        elif "WARNING" in message:
+            tag = "WARNING"
+        elif "DEBUG" in message:
+            tag = "DEBUG"
+        
+        # 添加日志
+        self.embedded_log_text.config(state=tk.NORMAL)
+        self.embedded_log_text.insert(tk.END, message + "\n", tag)
+        self.embedded_log_text.config(state=tk.DISABLED)
+        
+        # 自动滚动到底部
+        if self.auto_scroll_var.get():
+            self.embedded_log_text.see(tk.END)
+        
+        # 强制更新显示
+        self.embedded_log_text.update_idletasks()
+    
     def _show_log_window(self):
-        """显示日志窗口"""
+        """显示独立日志窗口"""
         if self.log_window is None or not self.log_window.is_open():
             self.log_window = LogWindow(self.root)
         else:
@@ -326,6 +455,10 @@ class MainWindow:
         """处理日志消息（线程安全）"""
         # 使用after方法确保在主线程中更新GUI
         def update_log():
+            # 更新嵌入式日志面板
+            self._append_to_embedded_log(message)
+            
+            # 同时更新独立日志窗口（如果已打开）
             if self.log_window and self.log_window.is_open():
                 self.log_window.append_log(message)
         
