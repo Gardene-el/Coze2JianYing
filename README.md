@@ -1,172 +1,520 @@
-# 
-<h1 align="center">
-<a>开源的Coze剪映小助手：Coze2JianYing</a>
-</h1>
+<h1 align="center">开源的Coze剪映小助手：Coze2JianYing</h1>
 
-## 项目概述
+<div align="center">
 
-<p>
-Coze2JianYing搭建了从Coze平台到剪映草稿的工作流，包含Coze插件与草稿生成软件。Coze2JianYing遵循 GPL-3.0 许可证，将所有源码<b>按原样</b>提供，此外也提供立即可用的服务形式。Coze2JianYing是一个个人项目，并主要依赖AI生成，难免存在许多粗陋之处，请多海涵，同时，欢迎质量监督。目前项目仍处于非常早期的阶段，当前仅确定支持对字幕，音效和图片进行最基本的添加和参数设置，不支持效果和关键帧。
-</p>
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-### 完整工作流程
+</div>
 
+---
+
+## 📑 目录
+
+<table>
+<tr>
+<td width="50%">
+
+- [为什么是 Coze2JianYing](#为什么是-coze2jianyingnbsp)
+- [Coze2JianYing 的缺点](#coze2jianyingnbsp的缺点nbsp)
+- [最速上手 Coze2JianYing](#最速上手-coze2jianyingnbsp)
+  - [方式一：直接使用打包好的 exe](#方式一直接使用打包好的-exe)
+  - [方式二：Python 命令行使用](#方式二python-命令行使用)
+
+</td>
+<td width="50%">
+
+- [从源码开始构建 Coze2JianYing](#从源码开始构建-coze2jianyingnbsp)
+- [关于 Coze2 剪映 的流程说明](#关于-coze2剪映-的流程说明nbsp)
+- [贡献机制](#贡献机制nbsp)
+- [赞助支持](#赞助支持nbsp)
+
+</td>
+</tr>
+</table>
+
+---
+
+## 为什么是 Coze2JianYing&nbsp;🎯
+
+相比市面上其他的剪映小助手，Coze2JianYing 具有以下核心优势：
+
+### ✅ 完全开源 - 用户可独立部署
+
+- **源代码完全公开** - 遵循 GPL-3.0 许可证，所有代码透明可审查
+- **自主部署构建** - 用户可以完全独立地部署和构建相关应用
+- **无后门风险** - 开源代码可审计，不存在隐藏的数据收集行为
+- **自由修改定制** - 支持根据个人需求进行二次开发和功能定制
+
+### � 完全免费 - 无广告无收费
+
+- **永久免费使用** - 不存在任何付费功能或服务
+- **无广告干扰** - 应用使用过程中不会有任何广告弹窗
+- **无隐藏收费** - 不会有任何形式的内购、订阅或额外收费
+- **无使用限制** - 不限制生成次数、视频时长或素材数量
+
+### � 数据隐私主权 - 完全用户掌控
+
+- **素材本地托管** - 所有素材文件由用户自行管理和存储
+- **不上传第三方** - 除用户自己的 Coze 和 剪映 的云端服务外，不会上传到任何第三方数据库
+- **隐私完全保护** - 草稿内容、素材数据不会被收集或分析
+- **数据自主可控** - 用户对所有数据拥有完全的控制权和处置权
+
+---
+
+## Coze2JianYing&nbsp;的缺点&nbsp;⚠️
+
+**实话实说，Coze2JianYing 仍处于早期阶段**，以下是当前待解决的主要问题：
+
+### 🔧 应用功能待完善
+
+- [ ] **视频轨道功能缺失** - 目前不支持视频轨道添加和编辑
+- [ ] **关键帧动画未实现** - 无法创建复杂的时间轴动画效果
+- [ ] **高级特效支持不足** - 部分剪映高级特效和滤镜尚未支持
+      ...
+
+### � 项目管理待成熟
+
+- [ ] **版本管理不规范** - 缺乏系统的版本发布和更新机制
+- [ ] **工作流不完整** - CI/CD 流程不够完善，自动化测试覆盖率低
+- [ ] **文档待补充** - 部分功能缺少详细文档和使用示例
+- [ ] **测试覆盖不足** - 缺少全面的单元测试和集成测试
+- [ ] **更新节奏不稳定** - 功能更新和 bug 修复没有明确的时间表
+      ...
+
+### 🌱 社区建设待发展
+
+- [ ] **社区处于早期** - 项目社区刚刚起步，缺少活跃的贡献者
+- [ ] **答疑机制欠缺** - 用户问题反馈和解答响应速度较慢
+- [ ] **贡献流程不明确** - 缺少清晰的贡献指南和代码审查流程
+      ...
+
+> **💡 说明**：非常抱歉，由于贡献机制尚未完善，目前暂时无法接受 PR 和其他形式的代码协作。但我非常欢迎您：
+>
+> - **提出问题和建议** - 在 [Issues](https://github.com/Gardene-el/Coze2JianYing/issues) 中反馈使用问题或功能建议
+> - **报告 Bug** - 帮助发现和记录项目中的问题
+> - **表达贡献意愿** - 如果您希望参与贡献，请在 Issue 中说明，我会优先完善相关的协作机制
+
+---
+
+## 最速上手 Coze2JianYing&nbsp;🚀
+
+Coze2JianYing 的完整工作流程包含四个主要阶段：
+
+### 🔄 完整工作流
+
+```mermaid
+graph LR
+    A[Coze 工作流] -->|生成素材和参数| B[Coze 插件（本项目提供）]
+    B -->|导出 JSON 数据| C[草稿生成器（本项目提供）]
+    C -->|生成草稿文件| D[剪映软件]
 ```
-Coze平台│──生成素材和设置草稿的参数───▶Coze 插件（本项目提供）│──导出草稿的内容───▶草稿生成器（本项目提供）│──生成剪影草稿至草稿文件夹───▶剪映
 
-```
+### 1. **下载 exe 文件**
 
-### 项目组成
+前往 [Releases 页面](https://github.com/Gardene-el/Coze2JianYing/releases) 下载最新版本的 `CozeJianYingDraftGenerator.exe`
 
-本项目包含两个主要子项目：
+...待编写
 
-#### 1. **Coze 插件** (`coze_plugin/`)
-- 处理 Coze 平台的参数和数据
-- 基于 UUID 的草稿创建、管理和导出
-- 网络资源处理和媒体时长分析
-- 导出标准化 JSON 数据供草稿生成器使用
+## 从源码开始构建 Coze2JianYing&nbsp;🔨
 
-#### 2. **草稿生成器** (`src/`)  
-- 从 JSON 数据生成剪映草稿文件
-- GUI 界面和完整的日志系统
-- 素材下载和管理
-- 可打包为独立 exe 文件
+本项目包含两个主要部分，可以分别构建和使用：
 
-## 安装
+### 📦 1. 从零复刻 Coze 插件
 
-### 从源码安装
+**适合场景**：需要在 Coze 平台（扣子）上从零开始创建插件工具
 
-1. 克隆仓库：
+#### 前置准备
+
+1. **克隆仓库到本地**
+
 ```bash
 git clone https://github.com/Gardene-el/Coze2JianYing.git
 cd Coze2JianYing
 ```
 
-2. 安装依赖：
+2. **准备 Coze 平台账号**
+   - 访问 [Coze 平台](https://www.coze.cn/)
+   - 注册并登录账号
+   - 进入扣子空间
+
+#### 创建插件步骤
+
+**第一步：创建插件**
+
+1. 在扣子空间的**资源库页面**点击右上角的 **"+ 资源"**
+2. 插件工具创建方式选择：**"云侧插件 - 在 Coze IDE 中创建"**
+3. IDE 运行时选择：**Python3**
+4. 插件名称和插件描述：可以随意填写（建议填写 "Coze2JianYing" 和简短描述）
+
+**第二步：逐个创建工具函数**
+
+#### 工具函数文件结构
+
+每个工具函数文件夹包含：
+
+- `handler.py` - 主处理函数（符合 Coze 平台规范）
+- `README.md` - 详细使用文档和参数说明
+
+#### 创建流程
+
+`coze_plugin/tools/` 目录下的每个文件夹对应一个工具函数，需要逐个创建：
+
+| 文件夹名称           | 工具功能     | 创建顺序建议  | 备注                      |
+| -------------------- | ------------ | ------------- | ------------------------- |
+| `create_draft/`      | 创建草稿     | ⭐ 第一个创建 |                           |
+| `make_video_info/`   | 生成视频配置 | 按需创建      |                           |
+| `make_image_info/`   | 生成图片配置 | 第二个创建    |                           |
+| `make_audio_info/`   | 生成音频配置 | 第三个创建    |                           |
+| `make_caption_info/` | 生成字幕配置 | 第四个创建    |                           |
+| `make_effect_info/`  | 生成特效配置 | ~~按需创建~~  | ⚠️ 已弃用，未来会重新实现 |
+| `add_videos/`        | 添加视频轨道 | 按需创建      |                           |
+| `add_images/`        | 添加图片轨道 | 第五个创建    |                           |
+| `add_audios/`        | 添加音频轨道 | 第六个创建    |                           |
+| `add_captions/`      | 添加字幕轨道 | 第七个创建    |                           |
+| `add_effects/`       | 添加特效轨道 | ~~按需创建~~  | ⚠️ 已弃用，未来会重新实现 |
+| `export_drafts/`     | 导出草稿     | ⭐ 最后创建   |                           |
+
+> **💡 说明**：`make_effect_info` 和 `add_effects` 工具当前已弃用，暂不建议创建。这些功能正在重新设计中，未来版本会提供更完善的实现。
+
+**对于每个工具函数，按以下步骤操作：**
+
+1. **填写工具名称**：使用文件夹名称（如 `create_draft`）
+
+2. **填写工具介绍**：
+
+   - 打开对应文件夹中的 `README.md`
+   - 复制"功能描述"部分的内容
+   - 粘贴到工具介绍框中
+
+3. **复制代码**：
+
+   - 打开文件夹中的 `handler.py` 文件
+   - 将全部内容复制
+   - 粘贴覆盖 Coze IDE 中的默认代码
+
+4. **配置输入参数**（元数据 - Input）：
+
+   - 在对应文件夹的 `README.md` 中找到 **Input 类型定义**
+   - 点击"编辑"按钮，逐个添加参数：
+     - **参数名**：使用 Input 类中定义的变量名
+     - **参数类型**：根据类型定义选择（str→string, int→number, bool→boolean, list→array）
+     - **是否必选**：如果类型是 `Optional[*]`，则**不打勾**；否则**打勾**
+     - **参数描述**：复制 README 中该参数的说明
+
+5. **配置输出参数**（元数据 - Output）：
+   - 在 `README.md` 中找到 **Output 类型定义**
+   - 添加方式与输入参数相同
+
+**第三步：测试工具函数**
+
+发布插件前必须测试所有工具，测试顺序很重要！
+
+**测试顺序和注意事项：**
+
+1. **首先测试 `create_draft`**
+
+   - 填写测试参数：draft_name（如"测试项目"）、width（1920）、height（1080）、fps（30）
+
+   > **💡 说明**：保存返回的 `draft_id` 值，后续所有测试都需要用到这个 ID
+
+2. **测试 `make_*_info` 系列工具**（在测试 `add_*s` 之前）
+
+   - 先测试 `make_image_info`、`make_audio_info`、`make_caption_info`
+   - 保存这些工具生成的 JSON 字符串结果
+
+3. **测试 `add_*s` 系列工具**
+
+   - 使用上一步保存的 `draft_id` 作为输入参数之一
+   - 使用对应 `make_*_info` 生成的结果作为配置参数
+
+4. **最后测试 `export_drafts`**
+   - `draft_ids` 参数可以**留空**
+   - `export_all` 参数**打勾**（选择 true）
+   - 这样会导出所有草稿用于验证
+
+**第四步：发布插件**
+
+- 所有工具测试通过后，点击"发布"按钮
+- 发布成功后即可在 Coze 工作流中使用
+
+---
+
+### 🖥️ 2. 编译草稿生成器程序
+
+**适合场景**：需要自行编译草稿生成器 exe 文件
+
+> **⚠️ 平台限制**：本项目仅支持 Windows 平台,因为剪映官方不支持 Linux,且作者没有 Mac 设备进行测试。
+
+#### 前置准备
+
+**安装 Python**（如果你没有）
+
+可以通过 [Python 官网](https://www.python.org/downloads/) 或 `winget install Python.Python.3.12` 安装。如需详细教程,推荐在 B 站 搜索或询问 AI 助手。
+
+**了解虚拟环境**（如果你不了解）
+
+为了避免依赖冲突。相关概念可以通过 AI 或搜索引擎进一步了解。
+
+#### 编译步骤
+
+**1. 克隆仓库**
+
+```bash
+git clone https://github.com/Gardene-el/Coze2JianYing.git
+cd Coze2JianYing
+```
+
+**2. 创建并激活虚拟环境**
+
+```bash
+# 创建虚拟环境
+python -m venv venv
+
+# 激活虚拟环境
+venv\Scripts\activate
+```
+
+> **💡 说明**：激活成功后，命令行前会显示 `(venv)` 标识
+
+**3. 安装依赖**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-3. 安装项目：
-```bash
-pip install -e .
-```
-
-## 使用说明
-
-### 使用 Coze 插件 (coze_plugin/)
-
-#### 在 Coze 平台使用
-
-参考 `coze_plugin/` 目录下的工具函数，将它们部署到 Coze 平台上：
-
-1. **create_draft** - 创建剪映草稿
-2. **export_drafts** - 导出草稿数据  
-3. **get_media_duration** - 获取媒体时长
-
-详细使用方法见 [Coze 插件 README](./coze_plugin/README.md)
-
-#### Python 开发测试
-
-```python
-# 测试数据结构
-from data_structures.draft_generator_interface.models import DraftConfig
-
-# 运行测试
-python coze_plugin/tests/test_basic.py
-```
-
-### 使用草稿生成器 (src/)
-
-#### GUI 模式（推荐）
+**4. 执行编译脚本**
 
 ```bash
-# 运行图形界面
-python src/main.py
-```
-
-#### 打包为 exe
-
-```bash
-# 打包成 Windows 可执行文件
 python build.py
 ```
 
-生成的 exe 文件将位于 `dist/` 目录。
+编译过程可能需要几分钟，请耐心等待。
 
-详细使用方法见 [草稿生成器文档](./docs/draft_generator/)
+**5. 获取编译后的 exe 文件**
 
-## 项目结构
+编译完成后，在 `dist/` 目录下找到生成的文件：
+
+```
+dist/
+└── CozeJianYingDraftGenerator.exe
+```
+
+该 exe 文件：
+
+- 可以在任何 Windows 系统上运行（无需安装 Python）
+- 可以独立分发给其他用户
+- 包含了所有必需的依赖
+
+---
+
+### 📁 项目结构说明
 
 ```
 Coze2JianYing/
 ├── coze_plugin/              # Coze 插件子项目
-│   ├── tools/                # 工具函数（create_draft, export_drafts 等）
-│   ├── examples/             # 使用示例
+│   ├── tools/                # 各种工具函数
+│   │   ├── create_draft/     # 创建草稿工具
+│   │   ├── add_images/       # 添加图片工具
+│   │   ├── add_audios/       # 添加音频工具
+│   │   ├── add_captions/     # 添加字幕工具
+│   │   ├── add_effects/      # 添加特效工具
+│   │   └── export_drafts/    # 导出草稿工具
+│   ├── examples/             # 使用示例和演示代码
 │   ├── tests/                # 测试文件
 │   └── main.py               # 核心助手类
-├── src/                      # 草稿生成器主代码
-│   ├── gui/                  # GUI 界面
-│   ├── utils/                # 工具模块
-│   │   ├── draft_generator.py    # 核心生成器
-│   │   ├── coze_parser.py        # Coze 输出解析
-│   │   ├── converter.py          # 数据转换
-│   │   └── material_manager.py   # 素材管理
-│   └── main.py               # GUI 应用入口
-├── test_utils/               # 测试和转换工具
-│   └── converters/           # 格式转换器
+├── src/                      # 草稿生成器应用
+│   ├── gui/                  # GUI 界面模块
+│   ├── utils/                # 核心工具模块
+│   │   ├── draft_generator.py    # 草稿生成主逻辑
+│   │   ├── coze_parser.py        # Coze 数据解析
+│   │   ├── material_manager.py   # 素材下载管理
+│   │   └── logger.py             # 日志系统
+│   └── main.py               # 应用入口
 ├── data_structures/          # 数据结构定义
 │   ├── draft_generator_interface/  # 草稿生成器接口
 │   └── media_models/         # 媒体文件模型
-├── docs/                     # 文档目录
-│   ├── guides/               # 使用指南
-│   └── draft_generator/      # 草稿生成器文档
-├── resources/                # 应用资源文件
+├── docs/                     # 完整项目文档
+├── test_utils/               # 测试和转换工具
 ├── build.py                  # PyInstaller 打包脚本
-├── requirements.txt          # 项目依赖
-└── setup.py                  # 安装配置
+├── requirements.txt          # 项目依赖列表
+└── setup.py                  # 项目安装配置
 ```
 
-## 依赖项目
+---
 
-本项目基于以下开源项目构建：
+## 关于 扣子 2 剪映 的流程说明&nbsp;📋
 
-- [pyJianYingDraft](https://github.com/GuanYixuan/pyJianYingDraft) - 轻量、灵活、易上手的Python剪映草稿生成及导出工具
+Coze2JianYing 的完整工作流程包含四个主要阶段：
 
-## 开发
+### 🔄 完整工作流
 
-### 运行测试
-```bash
-# 运行所有测试
-python -m pytest coze_plugin/tests/
-
-# 运行特定测试
-python coze_plugin/tests/test_basic.py
+```mermaid
+graph LR
+    A[Coze 工作流] -->|生成素材和参数| B[Coze 插件]
+    B -->|导出 JSON 数据| C[草稿生成器]
+    C -->|生成草稿文件| D[剪映软件]
 ```
+
+### 1️⃣ Coze 工作流阶段
+
+在 Coze 平台上创建 AI 工作流，自动生成视频内容：
+
+- **素材生成**：利用 AI 生成文本、图片、音频等素材
+- **参数配置**：工作流或者 AI 自动配置字幕样式、音频时长、特效参数等
+- **内容编排**：工作流或者 AI 安排素材的时间轴和展示顺序
+
+### 2️⃣ Coze 插件阶段（本项目提供）
+
+使用 Coze 插件记录、暂存和导出数据：
+
+### 3️⃣ 草稿生成器阶段（本项目提供）
+
+将 JSON 数据转换为剪映草稿文件：
+
+- **JSON 解析**：解析 Coze 插件导出的 JSON 数据
+- **素材下载**：自动从网络下载所需的媒体文件
+- **草稿生成**：调用 pyJianYingDraft 生成剪映草稿结构
+- **文件输出**：生成完整的草稿文件夹到指定位置
+
+**支持的数据格式**：
+
+- 单个草稿 JSON
+- 批量草稿数组
+- 多种嵌套格式兼容
+
+### 4️⃣ 剪映编辑阶段
+
+在剪映软件中打开生成的草稿：
+
+- 所有素材已经就位
+- 时间轴已经配置完成
+- 字幕、音频、特效等已添加
+- 用户可以进行最终的微调和导出
+
+### 💡 设计理念
+
+这种分离式架构的好处：
+
+- **解决空间限制**：Coze 平台 `/tmp` 目录仅 512MB，大型素材由草稿生成器下载
+- **避免变量干扰**：UUID 系统避免 Coze 工作流变量索引的复杂性
+- **提高灵活性**：每个阶段相对独立，便于调试和优化
+- **支持离线使用**：草稿生成器可打包为 exe，独立于 Coze 平台运行
+
+---
+
+## 贡献机制&nbsp;🤝
+
+我们欢迎各种形式的贡献！
+
+### 如何贡献
+
+1. **报告问题**
+
+   - 在 [Issues](https://github.com/Gardene-el/Coze2JianYing/issues) 中报告 bug
+   - 描述问题的复现步骤
+   - 附上相关的日志和截图
+
+2. **提交功能建议**
+
+   - 在 Issues 中描述您的需求
+   - 说明使用场景和预期效果
+   - 社区讨论可行性
+
+3. **贡献代码**
+
+   ```bash
+   # Fork 项目
+   # 创建功能分支
+   git checkout -b feature/your-feature
+
+   # 提交更改
+   git commit -m "Add: 新功能描述"
+
+   # 推送到分支
+   git push origin feature/your-feature
+
+   # 创建 Pull Request
+   ```
+
+4. **完善文档**
+   - 修正文档中的错误
+   - 添加使用示例
+   - 翻译文档到其他语言
 
 ### 贡献指南
-欢迎提交 Issue 和 Pull Request！提交前请确保：
-- 代码通过所有测试
-- 遵循项目的代码风格
-- 更新相关文档
 
-## 📚 文档
+在提交 PR 之前，请确保：
 
-完整的项目文档位于 [docs/](./docs/) 目录：
+- ✅ 代码通过所有测试（`pytest coze_plugin/tests/`）
+- ✅ 遵循项目的代码风格
+- ✅ 更新相关文档
+- ✅ 添加必要的测试用例
+- ✅ 提交信息清晰明确
 
-- **[开发指南](./docs/guides/)** - 项目开发历程和使用指南
-- **[功能更新记录](./docs/updates/)** - 各功能模块的实现总结
-- **[技术分析](./docs/analysis/)** - 深入的技术分析和审计报告
-- **[API 参考](./docs/reference/)** - 参数列表和快速查询指南
+### 行为准则
 
-推荐阅读：
-- [项目开发历程](./docs/guides/DEVELOPMENT_ROADMAP.md) - 了解项目如何发展
-- [草稿管理指南](./docs/guides/DRAFT_MANAGEMENT_GUIDE.md) - 学习如何使用草稿系统
+- 尊重所有贡献者
+- 建设性的讨论和反馈
+- 包容不同的观点和经验水平
 
-## 许可证
+---
 
-本项目采用 GPL-3.0 许可证 - 详见 [LICENSE](LICENSE) 文件。
+## 赞助支持&nbsp;💖
 
-## 贡献
+Coze2JianYing 是一个完全开源的个人项目，主要依靠 AI 辅助开发。如果这个项目对您有帮助，欢迎通过以下方式支持：
 
-欢迎提交 Issue 和 Pull Request！
+### 💰 资金支持
+
+_（待添加赞助链接）_
+
+您的赞助将用于：
+
+- 服务器和存储费用
+- 开发工具和服务订阅
+- 项目维护和更新
+- 文档和教程制作
+
+### 🌟 其他支持方式
+
+- **Star 项目**：给项目点个 ⭐，让更多人发现
+- **分享推广**：在社交媒体分享项目
+- **提供反馈**：使用后告诉我们您的体验
+- **贡献代码**：参与开发，完善功能
+
+### 📧 联系方式
+
+- GitHub Issues: [提交问题](https://github.com/Gardene-el/Coze2JianYing/issues)
+- 项目讨论: [Discussions](https://github.com/Gardene-el/Coze2JianYing/discussions)
+
+---
+
+## 📄 许可证
+
+本项目采用 [GPL-3.0](LICENSE) 许可证开源。
+
+这意味着：
+
+- ✅ 自由使用、修改、分发
+- ✅ 商业使用需遵循 GPL-3.0 条款
+- ✅ 修改后的代码必须同样开源
+- ❌ 不提供任何形式的担保
+
+---
+
+## 🙏 致谢 Credit！
+
+感谢以下开源项目：
+
+- [pyJianYingDraft](https://github.com/GuanYixuan/pyJianYingDraft) - 核心的剪映草稿生成库
+
+以及所有为项目做出贡献的开发者！
+
+---
+
+<div align="center">
+
+**[⬆ 返回顶部](#-目录)**
+
+Made with ❤️ by [Gardene-el](https://github.com/Gardene-el)
+
+</div>
