@@ -1,0 +1,58 @@
+# Dependabot configuration for Coze2JianYing project
+# Reference: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Python dependencies (pip)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    # Group all patch and minor updates together
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Keep development dependencies up to date
+    allow:
+      - dependency-type: "all"
+    # Create PRs with useful labels
+    labels:
+      - "dependencies"
+      - "python"
+    # Limit open PRs to avoid overwhelming maintainers
+    open-pull-requests-limit: 5
+    # Commit message prefix
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    # Group all GitHub Actions updates together
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    # Create PRs with useful labels
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Limit open PRs
+    open-pull-requests-limit: 3
+    # Commit message prefix
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
