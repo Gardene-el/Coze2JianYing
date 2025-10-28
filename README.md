@@ -16,24 +16,24 @@
 <tr>
 <td width="33%">
 
-- [为什么是 Coze2JianYing](#为什么是-coze2jianyingnbsp)
-- [Coze2JianYing 的缺点](#coze2jianyingnbsp的缺点nbsp)
-- [最速上手 Coze2JianYing](#最速上手-coze2jianyingnbsp)
+- [为什么是 Coze2JianYing](#为什么是-coze2jianying)
+- [Coze2JianYing 的缺点](#coze2jianying的缺点)
+- [最速上手 Coze2JianYing](#最速上手-coze2jianying)
 
 </td>
 <td width="33%">
 
-- [从源码开始构建](#从源码开始构建-coze2jianyingnbsp)
-  - [从零复刻 Coze 插件](#-1-从零复刻-coze-插件)
-  - [编译草稿生成器程序](#️-2-编译草稿生成器程序)
+- [从源码开始构建](#从源码开始构建-coze2jianying)
+  - [从零复刻 Coze 插件](#1-从零复刻-coze-插件)
+  - [编译草稿生成器程序](#2-编译草稿生成器程序)
 
 </td>
 <td width="33%">
 
-- [关于流程说明](#关于-扣子-2-剪映-的流程说明nbsp)
-- [贡献机制](#贡献机制nbsp)
-- [赞助支持](#赞助支持nbsp)
-- [许可证](#-许可证)
+- [关于流程说明](#关于-扣子-2-剪映-的流程说明)
+- [贡献机制](#贡献机制)
+- [赞助支持](#赞助支持)
+- [许可证](#许可证)
 
 </td>
 </tr>
