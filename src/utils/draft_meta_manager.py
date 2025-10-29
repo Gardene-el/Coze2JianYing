@@ -199,7 +199,7 @@ class DraftMetaManager:
                 with open(draft_content_path, 'r', encoding='utf-8') as f:
                     content = f.read()
             except UnicodeDecodeError:
-                # 如果 utf-8 失败，尝试 utf-8-sig (处理 BOM)
+                # 如果 utf-8 失败，尝试 utf-8-sig (处理某些特殊编码)
                 with open(draft_content_path, 'r', encoding='utf-8-sig') as f:
                     content = f.read()
             
@@ -208,7 +208,9 @@ class DraftMetaManager:
                 self.logger.debug(f"草稿内容为空，跳过时长计算")
                 return 0
             
-            # 检查并移除 BOM 标记（如果存在）
+            # 显式检查并移除 BOM 标记
+            # Note: 即使使用 utf-8 编码，BOM 也可能被读取为字符 '\ufeff'
+            # utf-8-sig 在 UnicodeDecodeError 时才会使用，所以这里需要额外检查
             if content.startswith('\ufeff'):
                 content = content[1:]
                 self.logger.debug("检测到 BOM 标记，已自动移除")
@@ -219,6 +221,7 @@ class DraftMetaManager:
             except json.JSONDecodeError as je:
                 # 检查是否是常见的可忽略错误
                 error_msg = str(je)
+                # Note: BOM 已在上面处理，这里不应该再出现 BOM 相关错误
                 if any(keyword in error_msg for keyword in ['Extra data', 'Expecting value']):
                     self.logger.debug(f"draft_content.json 格式异常（非严重），跳过时长计算: {error_msg}")
                 else:
