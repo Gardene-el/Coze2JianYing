@@ -185,16 +185,52 @@ class DraftMetaManager:
             draft_content_path: draft_content.json 文件路径
             
         Returns:
-            草稿总时长（微秒）
+            草稿总时长（微秒），失败时返回 0
+            
+        Note:
+            此函数尝试从 draft_content.json 计算时长，但不是必需的。
+            如果文件损坏、加密或格式错误，将返回 0，不影响草稿的其他功能。
+            剪映可以正常打开 tm_duration 为 0 的草稿。
         """
         try:
-            with open(draft_content_path, 'r', encoding='utf-8') as f:
-                draft_content = json.load(f)
+            # 尝试读取并解析 JSON，处理可能的编码问题
+            try:
+                # 先尝试 utf-8
+                with open(draft_content_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                # 如果 utf-8 失败，尝试 utf-8-sig (处理 BOM)
+                with open(draft_content_path, 'r', encoding='utf-8-sig') as f:
+                    content = f.read()
+            
+            # 检查是否为空文件
+            if not content or not content.strip():
+                self.logger.debug(f"草稿内容为空，跳过时长计算")
+                return 0
+            
+            # 尝试解析 JSON
+            try:
+                draft_content = json.loads(content)
+            except json.JSONDecodeError as je:
+                # 检查是否是常见的可忽略错误
+                error_msg = str(je)
+                if any(keyword in error_msg for keyword in ['Extra data', 'BOM', 'Expecting value']):
+                    self.logger.debug(f"draft_content.json 格式异常（非严重），跳过时长计算: {error_msg}")
+                else:
+                    self.logger.warning(
+                        f"无法解析 draft_content.json（可能是加密或损坏的文件），"
+                        f"将使用默认时长 0。这不影响草稿的正常使用。错误: {error_msg}"
+                    )
+                return 0
             
             # 查找所有轨道中的最大结束时间
             max_end_time = 0
             
             tracks = draft_content.get('tracks', [])
+            if not tracks:
+                self.logger.debug("草稿中没有轨道，时长为 0")
+                return 0
+            
             for track in tracks:
                 segments = track.get('segments', [])
                 for segment in segments:
@@ -210,7 +246,10 @@ class DraftMetaManager:
             return max_end_time
             
         except Exception as e:
-            self.logger.error(f"计算草稿时长失败: {e}")
+            # 捕获所有其他异常，记录为警告而非错误
+            self.logger.warning(
+                f"计算草稿时长时遇到问题: {e}。将使用默认时长 0，这不影响草稿的正常使用。"
+            )
             return 0
     
     def _calculate_assets_size(self, draft_folder_path: str) -> int:
