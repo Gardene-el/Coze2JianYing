@@ -65,7 +65,7 @@
 
    ```python
    # 改进后：详细的错误分类和适当的日志级别
-   # 1. 处理编码问题（BOM）
+   # 1. 处理编码问题
    try:
        with open(draft_content_path, 'r', encoding='utf-8') as f:
            content = f.read()
@@ -73,18 +73,23 @@
        with open(draft_content_path, 'r', encoding='utf-8-sig') as f:
            content = f.read()
    
-   # 2. 检查空文件
+   # 2. 检查并移除 BOM 标记
+   if content.startswith('\ufeff'):
+       content = content[1:]
+       self.logger.debug("检测到 BOM 标记，已自动移除")
+   
+   # 3. 检查空文件
    if not content or not content.strip():
        self.logger.debug(f"草稿内容为空，跳过时长计算")
        return 0
    
-   # 3. 分类处理 JSON 错误
+   # 4. 分类处理 JSON 错误
    try:
        draft_content = json.loads(content)
    except json.JSONDecodeError as je:
        error_msg = str(je)
        # 常见的可忽略错误 -> DEBUG 级别
-       if any(keyword in error_msg for keyword in ['Extra data', 'BOM', 'Expecting value']):
+       if any(keyword in error_msg for keyword in ['Extra data', 'Expecting value']):
            self.logger.debug(f"draft_content.json 格式异常（非严重），跳过时长计算: {error_msg}")
        # 严重错误（损坏或加密）-> WARNING 级别
        else:
@@ -103,6 +108,7 @@
 3. **添加清晰的说明**
    - 在日志消息中明确说明"这不影响草稿的正常使用"
    - 在文档注释中解释时长字段是可选的
+   - BOM 标记现在被自动移除，可以正确计算时长
 
 ### 代码变更
 

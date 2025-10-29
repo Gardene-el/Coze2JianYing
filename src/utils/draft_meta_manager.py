@@ -208,13 +208,18 @@ class DraftMetaManager:
                 self.logger.debug(f"草稿内容为空，跳过时长计算")
                 return 0
             
+            # 检查并移除 BOM 标记（如果存在）
+            if content.startswith('\ufeff'):
+                content = content[1:]
+                self.logger.debug("检测到 BOM 标记，已自动移除")
+            
             # 尝试解析 JSON
             try:
                 draft_content = json.loads(content)
             except json.JSONDecodeError as je:
                 # 检查是否是常见的可忽略错误
                 error_msg = str(je)
-                if any(keyword in error_msg for keyword in ['Extra data', 'BOM', 'Expecting value']):
+                if any(keyword in error_msg for keyword in ['Extra data', 'Expecting value']):
                     self.logger.debug(f"draft_content.json 格式异常（非严重），跳过时长计算: {error_msg}")
                 else:
                     self.logger.warning(

@@ -51,15 +51,15 @@ def create_test_drafts():
         'normal_draft': {
             'content': valid_content,
             'write_mode': 'json',
-            'expected_duration': 5000000,  # 5秒 = 5000毫秒 = 5000000微秒
+            'expected_duration': 5000000,  # 5000毫秒 * 1000 = 5000000微秒
             'description': '正常的草稿，应该计算出正确时长'
         },
         # BOM 标记问题
         'bom_draft': {
             'content': '\ufeff' + json.dumps(valid_content),
             'write_mode': 'raw',
-            'expected_duration': 0,
-            'description': 'BOM 标记导致的格式问题，时长为 0'
+            'expected_duration': 5000000,  # BOM 现在被自动移除，可以正确计算时长
+            'description': 'BOM 标记被自动移除，可以正确计算时长'
         },
         # 多余的花括号 (Extra data)
         'extra_data_draft': {
@@ -140,6 +140,7 @@ def test_draft_content_parsing():
         print(f"  ✅ 找到有效草稿: {result['draft_ids']}")
         
         # 验证所有草稿都被识别
+        # Note: result['draft_ids'] is an integer count, not a list
         if result['draft_ids'] == len(test_cases):
             print(f"  ✅ 所有 {len(test_cases)} 个草稿都被正确识别")
         else:
@@ -247,6 +248,7 @@ def test_user_scenario():
         print("-" * 80)
         
         # 验证结果
+        # Note: result['draft_ids'] is an integer count, not a list
         if result['draft_ids'] == len(drafts):
             print(f"\n✅ 成功识别所有 {len(drafts)} 个草稿")
             print("✅ 没有 ERROR 级别的日志")
