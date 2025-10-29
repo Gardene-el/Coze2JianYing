@@ -37,6 +37,7 @@ class DraftMetaManager:
         # 扫描所有草稿文件夹
         draft_stores = []
         draft_count = 0
+        failed_drafts = []  # 记录失败的草稿
         
         for item in os.listdir(draft_root_path):
             item_path = os.path.join(draft_root_path, item)
@@ -61,9 +62,12 @@ class DraftMetaManager:
                         draft_stores.append(draft_info)
                         draft_count += 1
                         self.logger.info(f"  ✅ 找到草稿: {item}")
+                    else:
+                        failed_drafts.append(item)
                     
                 except Exception as e:
                     self.logger.error(f"  ❌ 处理草稿 {item} 失败: {e}")
+                    failed_drafts.append(item)
                     continue
         
         # 生成完整的 root_meta_info 结构
@@ -73,7 +77,18 @@ class DraftMetaManager:
             "root_path": draft_root_path.replace("\\", "/")  # 统一使用正斜杠
         }
         
-        self.logger.info(f"扫描完成，共找到 {draft_count} 个草稿")
+        # 输出扫描总结
+        self.logger.info(f"扫描完成，共找到 {draft_count} 个有效草稿")
+        if failed_drafts:
+            self.logger.warning(
+                f"⚠️  以下 {len(failed_drafts)} 个草稿由于文件损坏或格式错误被跳过: "
+                f"{', '.join(failed_drafts)}"
+            )
+            self.logger.info(
+                f"💡 提示：这些草稿可能是剪映未正确保存的草稿。"
+                f"建议在剪映中重新打开并保存它们，或者删除这些文件夹。"
+            )
+        
         return root_meta_info
     
     def _generate_draft_store_info(
@@ -96,8 +111,7 @@ class DraftMetaManager:
         try:
             # 读取 draft_meta_info.json
             draft_meta_path = os.path.join(draft_folder_path, "draft_meta_info.json")
-            with open(draft_meta_path, 'r', encoding='utf-8') as f:
-                draft_meta = json.load(f)
+            draft_meta = self._load_json_file(draft_meta_path, draft_folder_name)
             
             # 读取 draft_content.json 获取时长信息
             draft_content_path = os.path.join(draft_folder_path, "draft_content.json")
@@ -154,7 +168,24 @@ class DraftMetaManager:
             return draft_store
             
         except Exception as e:
-            self.logger.error(f"生成草稿 {draft_folder_name} 的元信息失败: {e}")
+            # 提供更详细的错误信息
+            error_msg = str(e)
+            if "文件为空" in error_msg or "空白字符" in error_msg:
+                self.logger.error(
+                    f"草稿 {draft_folder_name} 的 draft_meta_info.json 文件为空或仅包含空白字符。"
+                    f"这可能是因为文件损坏、被意外清空，或者该草稿未被剪映正确初始化。"
+                    f"建议：1) 在剪映中重新打开并保存该草稿  2) 或删除该草稿文件夹"
+                )
+            elif "JSON解析失败" in error_msg and ("Extra data" in error_msg or "Expecting" in error_msg):
+                self.logger.error(
+                    f"草稿 {draft_folder_name} 的 draft_meta_info.json 格式不正确。"
+                    f"文件可能包含多余数据、损坏，或由不兼容的剪映版本创建。"
+                    f"建议：1) 在剪映中重新打开并保存该草稿  2) 或删除该草稿文件夹"
+                )
+            else:
+                self.logger.error(
+                    f"草稿 {draft_folder_name} 的元信息处理失败: {error_msg}"
+                )
             return None
     
     def _calculate_draft_duration(self, draft_content_path: str) -> int:
@@ -255,6 +286,57 @@ class DraftMetaManager:
             格式化的草稿ID (如: FD3DD75A-5085-42DA-A47F-93A1CB9A850C)
         """
         return str(uuid.uuid4()).upper()
+    
+    def _load_json_file(self, file_path: str, draft_name: str) -> Dict[str, Any]:
+        """
+        安全地加载JSON文件，提供详细的错误诊断
+        
+        Args:
+            file_path: JSON文件路径
+            draft_name: 草稿名称（用于错误日志）
+            
+        Returns:
+            解析后的JSON对象
+            
+        Raises:
+            Exception: 包含详细错误信息的异常
+        """
+        try:
+            # 检查文件是否存在
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"文件不存在: {file_path}")
+            
+            # 获取文件大小
+            file_size = os.path.getsize(file_path)
+            
+            # 读取文件内容
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # 检查文件是否为空
+            if not content or not content.strip():
+                raise ValueError(
+                    f"文件为空或仅包含空白字符 (大小: {file_size} 字节)。"
+                    f"该草稿可能损坏或未正确初始化。"
+                )
+            
+            # 尝试解析JSON
+            try:
+                data = json.loads(content)
+                return data
+            except json.JSONDecodeError as je:
+                # 提供内容预览以帮助诊断
+                preview = content[:100] if len(content) > 100 else content
+                raise ValueError(
+                    f"JSON解析失败: {je}。"
+                    f"文件大小: {file_size} 字节。"
+                    f"内容预览: {repr(preview)}"
+                )
+        
+        except Exception as e:
+            # 重新抛出带有上下文的异常
+            raise Exception(f"读取草稿 {draft_name} 的JSON文件失败: {e}")
+
     
     def save_root_meta_info(self, root_meta_info: Dict[str, Any], output_path: str):
         """
