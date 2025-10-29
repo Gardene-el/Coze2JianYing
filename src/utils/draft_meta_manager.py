@@ -217,6 +217,10 @@ class DraftMetaManager:
         """
         计算 Assets 文件夹的总大小（字节）
         
+        检查两个可能的位置：
+        1. {draft_folder_path}/Assets/ (传统位置)
+        2. {draft_root}/CozeJianYingAssistantAssets/{draft_folder_name}/ (新位置)
+        
         Args:
             draft_folder_path: 草稿文件夹路径
             
@@ -224,16 +228,29 @@ class DraftMetaManager:
             Assets 文件夹总大小（字节）
         """
         try:
-            assets_path = os.path.join(draft_folder_path, "Assets")
-            if not os.path.exists(assets_path):
-                return 0
-            
             total_size = 0
-            for root, dirs, files in os.walk(assets_path):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    if os.path.exists(file_path):
-                        total_size += os.path.getsize(file_path)
+            
+            # 检查传统位置: draft_folder_path/Assets/
+            assets_path = os.path.join(draft_folder_path, "Assets")
+            if os.path.exists(assets_path):
+                for root, dirs, files in os.walk(assets_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if os.path.exists(file_path):
+                            total_size += os.path.getsize(file_path)
+            
+            # 检查新位置: {draft_root}/CozeJianYingAssistantAssets/{draft_folder_name}/
+            # 从完整路径中提取草稿文件夹名称
+            draft_folder_name = os.path.basename(draft_folder_path)
+            draft_root = os.path.dirname(draft_folder_path)
+            coze_assets_path = os.path.join(draft_root, "CozeJianYingAssistantAssets", draft_folder_name)
+            
+            if os.path.exists(coze_assets_path):
+                for root, dirs, files in os.walk(coze_assets_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if os.path.exists(file_path):
+                            total_size += os.path.getsize(file_path)
             
             return total_size
             
