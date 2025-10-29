@@ -37,6 +37,7 @@ class DraftMetaManager:
         # 扫描所有草稿文件夹
         draft_stores = []
         draft_count = 0
+        failed_drafts = []  # 记录失败的草稿
         
         for item in os.listdir(draft_root_path):
             item_path = os.path.join(draft_root_path, item)
@@ -61,9 +62,12 @@ class DraftMetaManager:
                         draft_stores.append(draft_info)
                         draft_count += 1
                         self.logger.info(f"  ✅ 找到草稿: {item}")
+                    else:
+                        failed_drafts.append(item)
                     
                 except Exception as e:
                     self.logger.error(f"  ❌ 处理草稿 {item} 失败: {e}")
+                    failed_drafts.append(item)
                     continue
         
         # 生成完整的 root_meta_info 结构
@@ -73,7 +77,18 @@ class DraftMetaManager:
             "root_path": draft_root_path.replace("\\", "/")  # 统一使用正斜杠
         }
         
-        self.logger.info(f"扫描完成，共找到 {draft_count} 个草稿")
+        # 输出扫描总结
+        self.logger.info(f"扫描完成，共找到 {draft_count} 个有效草稿")
+        if failed_drafts:
+            self.logger.warning(
+                f"⚠️  以下 {len(failed_drafts)} 个草稿由于文件损坏或格式错误被跳过: "
+                f"{', '.join(failed_drafts)}"
+            )
+            self.logger.info(
+                f"💡 提示：这些草稿可能是剪映未正确保存的草稿。"
+                f"建议在剪映中重新打开并保存它们，或者删除这些文件夹。"
+            )
+        
         return root_meta_info
     
     def _generate_draft_store_info(
@@ -92,13 +107,15 @@ class DraftMetaManager:
             
         Returns:
             单个草稿的 draft_store 信息
+            
+        Note:
+            不读取 draft_meta_info.json 的内容，因为：
+            1. 新版剪映会加密该文件，无法解析
+            2. 原有设计中读取后也从未使用其内容
+            3. 所有需要的信息都从 draft_content.json 或文件系统获取
+            该文件的存在性检查在 scan_and_generate_meta_info() 中进行
         """
         try:
-            # 读取 draft_meta_info.json
-            draft_meta_path = os.path.join(draft_folder_path, "draft_meta_info.json")
-            with open(draft_meta_path, 'r', encoding='utf-8') as f:
-                draft_meta = json.load(f)
-            
             # 读取 draft_content.json 获取时长信息
             draft_content_path = os.path.join(draft_folder_path, "draft_content.json")
             duration = self._calculate_draft_duration(draft_content_path)
@@ -154,7 +171,10 @@ class DraftMetaManager:
             return draft_store
             
         except Exception as e:
-            self.logger.error(f"生成草稿 {draft_folder_name} 的元信息失败: {e}")
+            # 记录处理失败的错误
+            self.logger.error(
+                f"草稿 {draft_folder_name} 的元信息生成失败: {e}"
+            )
             return None
     
     def _calculate_draft_duration(self, draft_content_path: str) -> int:
@@ -197,6 +217,10 @@ class DraftMetaManager:
         """
         计算 Assets 文件夹的总大小（字节）
         
+        检查两个可能的位置：
+        1. {draft_folder_path}/Assets/ (传统位置)
+        2. {draft_root}/CozeJianYingAssistantAssets/{draft_folder_name}/ (新位置)
+        
         Args:
             draft_folder_path: 草稿文件夹路径
             
@@ -204,16 +228,29 @@ class DraftMetaManager:
             Assets 文件夹总大小（字节）
         """
         try:
-            assets_path = os.path.join(draft_folder_path, "Assets")
-            if not os.path.exists(assets_path):
-                return 0
-            
             total_size = 0
-            for root, dirs, files in os.walk(assets_path):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    if os.path.exists(file_path):
-                        total_size += os.path.getsize(file_path)
+            
+            # 检查传统位置: draft_folder_path/Assets/
+            assets_path = os.path.join(draft_folder_path, "Assets")
+            if os.path.exists(assets_path):
+                for root, dirs, files in os.walk(assets_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if os.path.exists(file_path):
+                            total_size += os.path.getsize(file_path)
+            
+            # 检查新位置: {draft_root}/CozeJianYingAssistantAssets/{draft_folder_name}/
+            # 从完整路径中提取草稿文件夹名称
+            draft_folder_name = os.path.basename(draft_folder_path)
+            draft_root = os.path.dirname(draft_folder_path)
+            coze_assets_path = os.path.join(draft_root, "CozeJianYingAssistantAssets", draft_folder_name)
+            
+            if os.path.exists(coze_assets_path):
+                for root, dirs, files in os.walk(coze_assets_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if os.path.exists(file_path):
+                            total_size += os.path.getsize(file_path)
             
             return total_size
             
