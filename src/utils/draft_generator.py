@@ -267,16 +267,121 @@ class DraftGenerator:
                 except Exception as e:
                     self.logger.error(f"    ❌ 片段 {seg_idx} 处理失败: {e}")
         
-        # 7. 保存草稿
+        # 7. 保存草稿（使用健壮的保存逻辑处理文件夹重命名）
         self.logger.info("保存草稿...")
-        script.save()
+        actual_draft_folder = self._save_draft_robust(script, draft_folder, draft_id)
         
         # 8. 打印素材统计
         downloaded_materials = material_manager.list_downloaded_materials()
         self.logger.info(f"下载素材数量: {len(downloaded_materials)}")
         self.logger.info(f"素材文件夹大小: {material_manager.get_assets_folder_size():.2f} MB")
         
-        return draft_folder
+        return actual_draft_folder
+    
+    def _save_draft_robust(self, script: ScriptFile, expected_draft_folder: str, draft_id: str) -> str:
+        """
+        使用健壮的逻辑保存草稿，处理剪映自动重命名文件夹的情况
+        
+        Args:
+            script: ScriptFile对象
+            expected_draft_folder: 预期的草稿文件夹路径
+            draft_id: 草稿ID
+            
+        Returns:
+            实际保存的草稿文件夹路径
+            
+        Raises:
+            Exception: 保存失败时抛出异常
+        """
+        import json
+        
+        # 尝试1: 使用标准的 script.save() 方法
+        try:
+            script.save()
+            self.logger.info(f"✅ 草稿保存成功: {expected_draft_folder}")
+            return expected_draft_folder
+        except FileNotFoundError as e:
+            self.logger.warning(f"标准保存失败 (文件夹可能被剪映重命名): {e}")
+            self.logger.info("尝试检测重命名的文件夹...")
+        
+        # 尝试2: 检测剪映是否重命名了文件夹
+        # 剪映可能会将文件夹重命名为 draft_meta_info.json 中的 draft_id
+        base_dir = os.path.dirname(expected_draft_folder)
+        
+        # 查找可能被重命名的文件夹
+        renamed_folder = None
+        if os.path.exists(base_dir):
+            for item in os.listdir(base_dir):
+                item_path = os.path.join(base_dir, item)
+                if not os.path.isdir(item_path):
+                    continue
+                
+                # 检查是否有 draft_meta_info.json 文件
+                meta_info_path = os.path.join(item_path, "draft_meta_info.json")
+                if os.path.exists(meta_info_path):
+                    try:
+                        with open(meta_info_path, 'r', encoding='utf-8') as f:
+                            meta_info = json.load(f)
+                        
+                        # 检查是否是我们要找的草稿
+                        # 我们通过检查文件夹的创建时间和名称来匹配
+                        if item != os.path.basename(expected_draft_folder):
+                            # 这可能是被重命名的文件夹
+                            self.logger.info(f"发现可能被重命名的文件夹: {item}")
+                            
+                            # 检查是否有 draft_content.json (说明是同一个草稿)
+                            content_path = os.path.join(item_path, "draft_content.json")
+                            if not os.path.exists(content_path):
+                                # 如果没有 draft_content.json，说明这可能是我们的草稿
+                                # (因为我们还没有保存 draft_content.json)
+                                renamed_folder = item_path
+                                self.logger.info(f"✅ 检测到剪映重命名的文件夹: {item}")
+                                break
+                    except Exception as e:
+                        self.logger.debug(f"检查文件夹 {item} 时出错: {e}")
+                        continue
+        
+        # 如果找到了重命名的文件夹，使用 dumps() 手动保存
+        if renamed_folder:
+            try:
+                self.logger.info(f"使用手动保存方式保存到: {renamed_folder}")
+                
+                # 使用 dumps() 获取 JSON 内容
+                draft_content = script.dumps()
+                
+                # 手动写入 draft_content.json
+                content_path = os.path.join(renamed_folder, "draft_content.json")
+                with open(content_path, 'w', encoding='utf-8') as f:
+                    f.write(draft_content)
+                
+                self.logger.info(f"✅ 草稿保存成功 (已处理文件夹重命名): {renamed_folder}")
+                return renamed_folder
+                
+            except Exception as e:
+                self.logger.error(f"手动保存失败: {e}")
+                raise
+        
+        # 尝试3: 如果没有找到重命名的文件夹，尝试使用 dumps() 手动创建
+        try:
+            self.logger.warning("未找到重命名的文件夹，尝试手动创建并保存...")
+            
+            # 确保目标文件夹存在
+            os.makedirs(expected_draft_folder, exist_ok=True)
+            
+            # 使用 dumps() 获取 JSON 内容
+            draft_content = script.dumps()
+            
+            # 手动写入 draft_content.json
+            content_path = os.path.join(expected_draft_folder, "draft_content.json")
+            with open(content_path, 'w', encoding='utf-8') as f:
+                f.write(draft_content)
+            
+            self.logger.info(f"✅ 草稿保存成功 (手动创建): {expected_draft_folder}")
+            return expected_draft_folder
+            
+        except Exception as e:
+            self.logger.error(f"所有保存尝试均失败: {e}")
+            raise
     
     def _create_track_by_type(self, script: ScriptFile, track_type: str, track_name: str) -> bool:
         """
