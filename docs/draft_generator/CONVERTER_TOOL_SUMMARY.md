@@ -17,7 +17,7 @@
 
 ### 2. 测试脚本
 
-**文件**: `test_utils/test_converter.py`
+**文件**: `scripts/test_coze_json_formatter.py`
 
 测试内容：
 
@@ -32,17 +32,16 @@
 **文件**:
 
 - `docs/COZE_OUTPUT_CONVERTER_GUIDE.md` - 完整使用指南
-- `test_utils/README.md` - 快速开始指南
+- `scripts/README.md` - 快速开始指南
 - 更新了主 `README.md`
 
-### 4. 模块结构
+### 4. 目录结构
 
 ```
-test_utils/
-├── __init__.py                 # 模块初始化
-├── coze_output_converter.py    # 核心转换工具
-├── test_converter.py            # 测试脚本
-└── README.md                    # 快速指南
+scripts/
+├── coze_json_formatter.py        # JSON 格式化工具
+├── test_coze_json_formatter.py   # 测试脚本
+└── README.md                      # 使用指南
 ```
 
 ---
@@ -94,17 +93,17 @@ test_utils/
 
 ```bash
 # 1. 转换单个文件（自动命名）
-python test_utils\coze_output_converter.py coze_example_for_paste_context.json
+python scripts/coze_json_formatter.py coze_example_for_paste_context.json
 # 输出: coze_example_for_paste_context_converted.json
 
 # 2. 指定输出文件名
-python test_utils\coze_output_converter.py input.json output.json
+python scripts/coze_json_formatter.py input.json output.json
 
 # 3. 批量转换当前目录
-python test_utils\coze_output_converter.py --batch
+python scripts/coze_json_formatter.py --batch
 
 # 4. 批量转换指定目录和模式
-python test_utils\coze_output_converter.py --batch ./data "*coze*.json"
+python scripts/coze_json_formatter.py --batch ./data "*coze*.json"
 ```
 
 ### Python 模块使用
@@ -231,13 +230,13 @@ docs/
     ├── 集成方式
     └── 问题排查
 
-test_utils/
+scripts/
 └── README.md                        # 快速开始指南
-    ├── 工具位置
+    ├── 工具说明
     ├── 快速使用
     ├── 格式说明
     ├── 测试说明
-    ├── 完整工作流
+    ├── 使用示例
     └── 主要功能
 ```
 
@@ -249,17 +248,17 @@ test_utils/
 
 ```bash
 # 转换测试数据
-python test_utils\coze_output_converter.py test_data.json
+python scripts/coze_json_formatter.py test_data.json
 
 # 使用转换后的数据进行测试
-python test_utils\test_converter.py
+python scripts/test_coze_json_formatter.py
 ```
 
 ### 场景 2: 生产使用
 
 ```bash
 # 批量转换所有 Coze 输出
-python test_utils\coze_output_converter.py --batch ./coze_outputs
+python scripts/coze_json_formatter.py --batch ./coze_outputs
 
 # 生成草稿
 python src\main.py
@@ -363,7 +362,7 @@ for file in os.listdir(input_dir):
 
 ```bash
 # 查看帮助
-python test_utils\coze_output_converter.py
+python scripts/coze_json_formatter.py
 
 # 输出:
 用法:

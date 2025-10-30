@@ -5,7 +5,7 @@
 ## 📁 文件位置
 
 - **工具文件**: `scripts/coze_json_formatter.py`
-- **测试模块**: `test_utils/__init__.py`
+- **测试模块**: `scripts/` (standalone scripts)
 
 ## 🎯 功能
 
@@ -29,21 +29,21 @@
 
 ```bash
 # 自动生成输出文件名（添加 _converted 后缀）
-python test_utils\coze_output_converter.py coze_example_for_paste_context.json
+python scripts/coze_json_formatter.py coze_example_for_paste_context.json
 
 # 指定输出文件名
-python test_utils\coze_output_converter.py input.json output.json
+python scripts/coze_json_formatter.py input.json output.json
 ```
 
 #### 批量转换
 
 ```bash
 # 转换当前目录下所有包含 'coze' 的 JSON 文件
-python test_utils\coze_output_converter.py --batch
+python scripts/coze_json_formatter.py --batch
 
 # 指定目录和匹配模式
-python test_utils\coze_output_converter.py --batch . "*coze*.json"
-python test_utils\coze_output_converter.py --batch ./data "*.json"
+python scripts/coze_json_formatter.py --batch . "*coze*.json"
+python scripts/coze_json_formatter.py --batch ./data "*.json"
 ```
 
 ### 方法 2: 作为 Python 模块使用
@@ -52,7 +52,7 @@ python test_utils\coze_output_converter.py --batch ./data "*.json"
 import sys
 sys.path.append('.')
 
-from test_utils.coze_output_converter import (
+from coze_json_formatter import (
     convert_coze_to_standard_format,
     extract_output_from_coze_file,
     validate_conversion,
@@ -146,7 +146,7 @@ batch_convert(input_dir='.', pattern='*coze*.json')
 ### 示例 1: 转换单个文件
 
 ```bash
-$ python test_utils\coze_output_converter.py coze_example_for_paste_context.json
+$ python scripts/coze_json_formatter.py coze_example_for_paste_context.json
 
 读取文件: coze_example_for_paste_context.json
 output 字段长度: 12986 字符
@@ -177,7 +177,7 @@ output 字段长度: 12986 字符
 ### 示例 2: 批量转换
 
 ```bash
-$ python test_utils\coze_output_converter.py --batch
+$ python scripts/coze_json_formatter.py --batch
 
 找到 3 个文件:
   - coze_example1.json
@@ -237,7 +237,7 @@ $ python test_utils\coze_output_converter.py --batch
 from src.utils.draft_generator import DraftGenerator
 
 # 转换文件
-from test_utils.coze_output_converter import convert_coze_to_standard_format
+from coze_json_formatter import convert_coze_to_standard_format
 converted_file = convert_coze_to_standard_format('coze_example.json')
 
 # 生成草稿
@@ -274,7 +274,7 @@ draft_paths = generator.generate_from_file(converted_file)
 2. **手动解析 output 字段**:
 
    ```python
-   from test_utils.coze_output_converter import extract_output_from_coze_file
+   from coze_json_formatter import extract_output_from_coze_file
    try:
        data = extract_output_from_coze_file('input.json')
        print("✅ 解析成功")
