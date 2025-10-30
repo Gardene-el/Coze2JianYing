@@ -85,7 +85,8 @@ def main():
         ]
     )
     
-    # Generate both formats
+    # Generate both formats using DraftConfig.to_dict() method
+    # (implemented in data_structures/draft_generator_interface/models.py)
     full_dict = draft.to_dict(include_defaults=True)
     minimal_dict = draft.to_dict(include_defaults=False)
     
@@ -121,27 +122,35 @@ def main():
     print("="*80)
     print("Sample Audio Segment Comparison")
     print("="*80)
+    
+    audio_full = full_export['drafts'][0]['tracks'][0]['segments'][0]
+    audio_minimal = minimal_export['drafts'][0]['tracks'][0]['segments'][0]
+    
     print("\nOriginal Format (with all defaults):")
-    print(json.dumps(full_export['drafts'][0]['tracks'][0]['segments'][0], indent=2, ensure_ascii=False))
-    print(f"\nSize: {len(json.dumps(full_export['drafts'][0]['tracks'][0]['segments'][0]))} characters")
+    print(json.dumps(audio_full, indent=2, ensure_ascii=False))
+    print(f"\nSize: {len(json.dumps(audio_full))} characters")
     
     print("\n" + "-"*80)
     print("\nSimplified Format (defaults omitted):")
-    print(json.dumps(minimal_export['drafts'][0]['tracks'][0]['segments'][0], indent=2, ensure_ascii=False))
-    print(f"\nSize: {len(json.dumps(minimal_export['drafts'][0]['tracks'][0]['segments'][0]))} characters")
+    print(json.dumps(audio_minimal, indent=2, ensure_ascii=False))
+    print(f"\nSize: {len(json.dumps(audio_minimal))} characters")
     
     # Show another sample
     print("\n" + "="*80)
     print("Sample Image Segment Comparison")
     print("="*80)
+    
+    image_full = full_export['drafts'][0]['tracks'][1]['segments'][0]
+    image_minimal = minimal_export['drafts'][0]['tracks'][1]['segments'][0]
+    
     print("\nOriginal Format (with all defaults):")
-    print(json.dumps(full_export['drafts'][0]['tracks'][1]['segments'][0], indent=2, ensure_ascii=False))
-    print(f"\nSize: {len(json.dumps(full_export['drafts'][0]['tracks'][1]['segments'][0]))} characters")
+    print(json.dumps(image_full, indent=2, ensure_ascii=False))
+    print(f"\nSize: {len(json.dumps(image_full))} characters")
     
     print("\n" + "-"*80)
     print("\nSimplified Format (defaults omitted):")
-    print(json.dumps(minimal_export['drafts'][0]['tracks'][1]['segments'][0], indent=2, ensure_ascii=False))
-    print(f"\nSize: {len(json.dumps(minimal_export['drafts'][0]['tracks'][1]['segments'][0]))} characters")
+    print(json.dumps(image_minimal, indent=2, ensure_ascii=False))
+    print(f"\nSize: {len(json.dumps(image_minimal))} characters")
     
     print("\n" + "="*80)
     print("SUMMARY")
