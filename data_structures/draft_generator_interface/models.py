@@ -39,6 +39,56 @@ from enum import Enum
 import uuid
 
 
+def _omit_if_default(value: Any, default: Any, include_defaults: bool) -> bool:
+    """Helper to determine if a field should be omitted from serialization
+    
+    Args:
+        value: Current value
+        default: Default value
+        include_defaults: If True, never omit; if False, omit if value equals default
+    
+    Returns:
+        True if field should be omitted
+    """
+    if include_defaults:
+        return False
+    
+    # Handle None specially - only omit if default is also None
+    if value is None:
+        return default is None
+    
+    # Handle empty lists - only omit if default is also an empty list
+    if isinstance(value, list) and not value:
+        return isinstance(default, list) and not default
+    
+    # Compare values
+    return value == default
+
+
+def _build_dict_omitting_defaults(fields: Dict[str, Any], defaults: Dict[str, Any], 
+                                   include_defaults: bool) -> Dict[str, Any]:
+    """Build dictionary, optionally omitting fields with default values
+    
+    Args:
+        fields: Dictionary of field_name: value pairs
+        defaults: Dictionary of field_name: default_value pairs
+        include_defaults: If False, omit fields matching defaults
+    
+    Returns:
+        Dictionary with optionally filtered fields
+    """
+    if include_defaults:
+        return fields
+    
+    result = {}
+    for key, value in fields.items():
+        default = defaults.get(key, None)
+        if not _omit_if_default(value, default, include_defaults):
+            result[key] = value
+    
+    return result
+
+
 @dataclass
 class ProjectSettings:
     """Basic project configuration
@@ -463,9 +513,14 @@ class DraftConfig:
     created_timestamp: float = 0.0
     last_modified: float = 0.0
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for JSON serialization"""
-        return {
+    def to_dict(self, include_defaults: bool = True) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization
+        
+        Args:
+            include_defaults: If True, include all fields even if they have default values.
+                            If False, omit fields with default values to reduce data size.
+        """
+        result = {
             "draft_id": self.draft_id,
             "project": {
                 "name": self.project.name,
@@ -473,258 +528,501 @@ class DraftConfig:
                 "height": self.project.height,
                 "fps": self.project.fps
             },
-            "tracks": [
-                {
-                    "track_type": track.track_type,
-                    "muted": track.muted,
-                    "volume": track.volume,
-                    "segments": self._serialize_segments(track.segments)
-                }
-                for track in self.tracks
-            ],
-            "created_timestamp": self.created_timestamp,
-            "last_modified": self.last_modified
+            "tracks": []
         }
+        
+        # Serialize tracks
+        for track in self.tracks:
+            track_dict = {
+                "track_type": track.track_type,
+                "segments": self._serialize_segments(track.segments, include_defaults)
+            }
+            
+            # Add optional track fields only if non-default
+            if include_defaults or track.muted != False:
+                track_dict["muted"] = track.muted
+            if include_defaults or track.volume != 1.0:
+                track_dict["volume"] = track.volume
+            
+            result["tracks"].append(track_dict)
+        
+        result["created_timestamp"] = self.created_timestamp
+        result["last_modified"] = self.last_modified
+        
+        return result
     
-    def _serialize_segments(self, segments: List) -> List[Dict[str, Any]]:
-        """Serialize segment configurations to dictionaries"""
+    def _serialize_segments(self, segments: List, include_defaults: bool = True) -> List[Dict[str, Any]]:
+        """Serialize segment configurations to dictionaries
+        
+        Args:
+            segments: List of segment configurations
+            include_defaults: If False, omit fields with default values
+        """
         result = []
         for segment in segments:
             if isinstance(segment, VideoSegmentConfig):
-                result.append(self._serialize_video_segment(segment))
+                result.append(self._serialize_video_segment(segment, include_defaults))
             elif isinstance(segment, AudioSegmentConfig):
-                result.append(self._serialize_audio_segment(segment))
+                result.append(self._serialize_audio_segment(segment, include_defaults))
             elif isinstance(segment, ImageSegmentConfig):
-                result.append(self._serialize_image_segment(segment))
+                result.append(self._serialize_image_segment(segment, include_defaults))
             elif isinstance(segment, TextSegmentConfig):
-                result.append(self._serialize_text_segment(segment))
+                result.append(self._serialize_text_segment(segment, include_defaults))
             elif isinstance(segment, StickerSegmentConfig):
-                result.append(self._serialize_sticker_segment(segment))
+                result.append(self._serialize_sticker_segment(segment, include_defaults))
             elif isinstance(segment, EffectSegmentConfig):
-                result.append(self._serialize_effect_segment(segment))
+                result.append(self._serialize_effect_segment(segment, include_defaults))
             elif isinstance(segment, FilterSegmentConfig):
-                result.append(self._serialize_filter_segment(segment))
+                result.append(self._serialize_filter_segment(segment, include_defaults))
         return result
     
-    def _serialize_video_segment(self, segment: VideoSegmentConfig) -> Dict[str, Any]:
+    def _serialize_video_segment(self, segment: VideoSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize video segment configuration"""
-        return {
+        # Base fields (always include)
+        result = {
             "type": "video",
             "material_url": segment.material_url,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "material_range": {"start": segment.material_range.start, "end": segment.material_range.end} if segment.material_range else None,
-            "transform": {
-                "position_x": segment.position_x,
-                "position_y": segment.position_y,
-                "scale_x": segment.scale_x,
-                "scale_y": segment.scale_y,
-                "rotation": segment.rotation,
-                "opacity": segment.opacity
-            },
-            "crop": {
-                "enabled": segment.crop_enabled,
-                "left": segment.crop_left,
-                "top": segment.crop_top,
-                "right": segment.crop_right,
-                "bottom": segment.crop_bottom
-            },
-            "effects": {
-                "filter_type": segment.filter_type,
-                "filter_intensity": segment.filter_intensity,
-                "transition_type": segment.transition_type,
-                "transition_duration": segment.transition_duration
-            },
-            "speed": {
-                "speed": segment.speed,
-                "reverse": segment.reverse
-            },
-            "audio": {
-                "volume": segment.volume,
-                "change_pitch": segment.change_pitch
-            },
-            "background": {
-                "blur": segment.background_blur,
-                "color": segment.background_color
-            },
-            "keyframes": {
-                "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
-                "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
-                "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
-                "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
-            }
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Material range (optional, only if set)
+        if segment.material_range is not None:
+            result["material_range"] = {
+                "start": segment.material_range.start,
+                "end": segment.material_range.end
+            }
+        elif include_defaults:
+            result["material_range"] = None
+        
+        # Transform properties with defaults
+        transform_defaults = {
+            "position_x": 0.0, "position_y": 0.0, "scale_x": 1.0,
+            "scale_y": 1.0, "rotation": 0.0, "opacity": 1.0
+        }
+        transform = _build_dict_omitting_defaults({
+            "position_x": segment.position_x,
+            "position_y": segment.position_y,
+            "scale_x": segment.scale_x,
+            "scale_y": segment.scale_y,
+            "rotation": segment.rotation,
+            "opacity": segment.opacity
+        }, transform_defaults, include_defaults)
+        if transform:
+            result["transform"] = transform
+        
+        # Crop settings with defaults
+        crop_defaults = {
+            "enabled": False, "left": 0.0, "top": 0.0,
+            "right": 1.0, "bottom": 1.0
+        }
+        crop = _build_dict_omitting_defaults({
+            "enabled": segment.crop_enabled,
+            "left": segment.crop_left,
+            "top": segment.crop_top,
+            "right": segment.crop_right,
+            "bottom": segment.crop_bottom
+        }, crop_defaults, include_defaults)
+        if crop:
+            result["crop"] = crop
+        
+        # Effects with defaults
+        effects_defaults = {
+            "filter_type": None, "filter_intensity": 1.0,
+            "transition_type": None, "transition_duration": 500
+        }
+        effects = _build_dict_omitting_defaults({
+            "filter_type": segment.filter_type,
+            "filter_intensity": segment.filter_intensity,
+            "transition_type": segment.transition_type,
+            "transition_duration": segment.transition_duration
+        }, effects_defaults, include_defaults)
+        if effects:
+            result["effects"] = effects
+        
+        # Speed settings with defaults
+        speed_defaults = {"speed": 1.0, "reverse": False}
+        speed = _build_dict_omitting_defaults({
+            "speed": segment.speed,
+            "reverse": segment.reverse
+        }, speed_defaults, include_defaults)
+        if speed:
+            result["speed"] = speed
+        
+        # Audio properties with defaults
+        audio_defaults = {"volume": 1.0, "change_pitch": False}
+        audio = _build_dict_omitting_defaults({
+            "volume": segment.volume,
+            "change_pitch": segment.change_pitch
+        }, audio_defaults, include_defaults)
+        if audio:
+            result["audio"] = audio
+        
+        # Background settings with defaults
+        background_defaults = {"blur": False, "color": None}
+        background = _build_dict_omitting_defaults({
+            "blur": segment.background_blur,
+            "color": segment.background_color
+        }, background_defaults, include_defaults)
+        if background:
+            result["background"] = background
+        
+        # Keyframes
+        keyframes_defaults = {
+            "position": [], "scale": [], "rotation": [], "opacity": []
+        }
+        keyframes = _build_dict_omitting_defaults({
+            "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
+            "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
+            "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
+            "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
+        }, keyframes_defaults, include_defaults)
+        if keyframes:
+            result["keyframes"] = keyframes
+        
+        return result
     
-    def _serialize_audio_segment(self, segment: AudioSegmentConfig) -> Dict[str, Any]:
+    def _serialize_audio_segment(self, segment: AudioSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize audio segment configuration"""
-        return {
+        # Base fields (always include)
+        result = {
             "type": "audio",
             "material_url": segment.material_url,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "material_range": {"start": segment.material_range.start, "end": segment.material_range.end} if segment.material_range else None,
-            "audio": {
-                "volume": segment.volume,
-                "fade_in": segment.fade_in,
-                "fade_out": segment.fade_out,
-                "effect_type": segment.effect_type,
-                "effect_intensity": segment.effect_intensity,
-                "speed": segment.speed,
-                "change_pitch": segment.change_pitch
-            },
-            "keyframes": {
-                "volume": [{"time": kf.time, "value": kf.value} for kf in segment.volume_keyframes]
-            }
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Material range (optional, only if set)
+        if segment.material_range is not None:
+            result["material_range"] = {
+                "start": segment.material_range.start,
+                "end": segment.material_range.end
+            }
+        elif include_defaults:
+            result["material_range"] = None
+        
+        # Audio properties with defaults
+        audio_defaults = {
+            "volume": 1.0, "fade_in": 0, "fade_out": 0,
+            "effect_type": None, "effect_intensity": 1.0,
+            "speed": 1.0, "change_pitch": False
+        }
+        audio = _build_dict_omitting_defaults({
+            "volume": segment.volume,
+            "fade_in": segment.fade_in,
+            "fade_out": segment.fade_out,
+            "effect_type": segment.effect_type,
+            "effect_intensity": segment.effect_intensity,
+            "speed": segment.speed,
+            "change_pitch": segment.change_pitch
+        }, audio_defaults, include_defaults)
+        if audio:
+            result["audio"] = audio
+        
+        # Keyframes
+        keyframes_defaults = {"volume": []}
+        keyframes = _build_dict_omitting_defaults({
+            "volume": [{"time": kf.time, "value": kf.value} for kf in segment.volume_keyframes]
+        }, keyframes_defaults, include_defaults)
+        if keyframes:
+            result["keyframes"] = keyframes
+        
+        return result
     
-    def _serialize_image_segment(self, segment: ImageSegmentConfig) -> Dict[str, Any]:
+    def _serialize_image_segment(self, segment: ImageSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize image segment configuration"""
-        return {
+        # Base fields (always include)
+        result = {
             "type": "image",
             "material_url": segment.material_url,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "transform": {
-                "position_x": segment.position_x,
-                "position_y": segment.position_y,
-                "scale_x": segment.scale_x,
-                "scale_y": segment.scale_y,
-                "rotation": segment.rotation,
-                "opacity": segment.opacity
-            },
-            "dimensions": {
-                "width": segment.width,
-                "height": segment.height
-            },
-            "crop": {
-                "enabled": segment.crop_enabled,
-                "left": segment.crop_left,
-                "top": segment.crop_top,
-                "right": segment.crop_right,
-                "bottom": segment.crop_bottom
-            },
-            "effects": {
-                "filter_type": segment.filter_type,
-                "filter_intensity": segment.filter_intensity,
-                "transition_type": segment.transition_type,
-                "transition_duration": segment.transition_duration
-            },
-            "background": {
-                "blur": segment.background_blur,
-                "color": segment.background_color,
-                "fit_mode": segment.fit_mode
-            },
-            "animations": {
-                "intro": segment.intro_animation,
-                "intro_duration": segment.intro_animation_duration,
-                "outro": segment.outro_animation,
-                "outro_duration": segment.outro_animation_duration
-            },
-            "keyframes": {
-                "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
-                "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
-                "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
-                "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
-            }
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Optional field groups with defaults
+        transform_defaults = {
+            "position_x": 0.0, "position_y": 0.0, "scale_x": 1.0,
+            "scale_y": 1.0, "rotation": 0.0, "opacity": 1.0
+        }
+        transform = _build_dict_omitting_defaults({
+            "position_x": segment.position_x,
+            "position_y": segment.position_y,
+            "scale_x": segment.scale_x,
+            "scale_y": segment.scale_y,
+            "rotation": segment.rotation,
+            "opacity": segment.opacity
+        }, transform_defaults, include_defaults)
+        if transform:
+            result["transform"] = transform
+        
+        dimensions_defaults = {"width": None, "height": None}
+        dimensions = _build_dict_omitting_defaults({
+            "width": segment.width,
+            "height": segment.height
+        }, dimensions_defaults, include_defaults)
+        if dimensions:
+            result["dimensions"] = dimensions
+        
+        crop_defaults = {
+            "enabled": False, "left": 0.0, "top": 0.0,
+            "right": 1.0, "bottom": 1.0
+        }
+        crop = _build_dict_omitting_defaults({
+            "enabled": segment.crop_enabled,
+            "left": segment.crop_left,
+            "top": segment.crop_top,
+            "right": segment.crop_right,
+            "bottom": segment.crop_bottom
+        }, crop_defaults, include_defaults)
+        if crop:
+            result["crop"] = crop
+        
+        effects_defaults = {
+            "filter_type": None, "filter_intensity": 1.0,
+            "transition_type": None, "transition_duration": 500
+        }
+        effects = _build_dict_omitting_defaults({
+            "filter_type": segment.filter_type,
+            "filter_intensity": segment.filter_intensity,
+            "transition_type": segment.transition_type,
+            "transition_duration": segment.transition_duration
+        }, effects_defaults, include_defaults)
+        if effects:
+            result["effects"] = effects
+        
+        background_defaults = {
+            "blur": False, "color": None, "fit_mode": "fit"
+        }
+        background = _build_dict_omitting_defaults({
+            "blur": segment.background_blur,
+            "color": segment.background_color,
+            "fit_mode": segment.fit_mode
+        }, background_defaults, include_defaults)
+        if background:
+            result["background"] = background
+        
+        animations_defaults = {
+            "intro": None, "intro_duration": 500,
+            "outro": None, "outro_duration": 500
+        }
+        animations = _build_dict_omitting_defaults({
+            "intro": segment.intro_animation,
+            "intro_duration": segment.intro_animation_duration,
+            "outro": segment.outro_animation,
+            "outro_duration": segment.outro_animation_duration
+        }, animations_defaults, include_defaults)
+        if animations:
+            result["animations"] = animations
+        
+        keyframes_defaults = {
+            "position": [], "scale": [], "rotation": [], "opacity": []
+        }
+        keyframes = _build_dict_omitting_defaults({
+            "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
+            "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
+            "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
+            "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
+        }, keyframes_defaults, include_defaults)
+        if keyframes:
+            result["keyframes"] = keyframes
+        
+        return result
     
-    def _serialize_text_segment(self, segment: TextSegmentConfig) -> Dict[str, Any]:
+    def _serialize_text_segment(self, segment: TextSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize text segment configuration"""
-        return {
+        # Base fields (always include)
+        result = {
             "type": "text",
             "content": segment.content,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "transform": {
-                "position_x": segment.position_x,
-                "position_y": segment.position_y,
-                "scale": segment.scale,
-                "rotation": segment.rotation,
-                "opacity": segment.opacity
-            },
-            "style": {
-                "font_family": segment.style.font_family,
-                "font_size": segment.style.font_size,
-                "font_weight": segment.style.font_weight,
-                "font_style": segment.style.font_style,
-                "color": segment.style.color,
-                "stroke": {
-                    "enabled": segment.style.stroke_enabled,
-                    "color": segment.style.stroke_color,
-                    "width": segment.style.stroke_width
-                },
-                "shadow": {
-                    "enabled": segment.style.shadow_enabled,
-                    "color": segment.style.shadow_color,
-                    "offset_x": segment.style.shadow_offset_x,
-                    "offset_y": segment.style.shadow_offset_y,
-                    "blur": segment.style.shadow_blur
-                },
-                "background": {
-                    "enabled": segment.style.background_enabled,
-                    "color": segment.style.background_color,
-                    "opacity": segment.style.background_opacity
-                }
-            },
-            "alignment": segment.alignment,
-            "animations": {
-                "intro": segment.intro_animation,
-                "outro": segment.outro_animation,
-                "loop": segment.loop_animation
-            },
-            "keyframes": {
-                "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
-                "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
-                "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
-                "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
-            }
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Transform properties with defaults
+        transform_defaults = {
+            "position_x": 0.5, "position_y": -0.9, "scale": 1.0,
+            "rotation": 0.0, "opacity": 1.0
+        }
+        transform = _build_dict_omitting_defaults({
+            "position_x": segment.position_x,
+            "position_y": segment.position_y,
+            "scale": segment.scale,
+            "rotation": segment.rotation,
+            "opacity": segment.opacity
+        }, transform_defaults, include_defaults)
+        if transform:
+            result["transform"] = transform
+        
+        # Style properties with defaults
+        style_defaults_main = {
+            "font_family": "默认", "font_size": 48,
+            "font_weight": "normal", "font_style": "normal",
+            "color": "#FFFFFF"
+        }
+        stroke_defaults = {
+            "enabled": False, "color": "#000000", "width": 2
+        }
+        shadow_defaults = {
+            "enabled": False, "color": "#000000",
+            "offset_x": 2, "offset_y": 2, "blur": 4
+        }
+        background_defaults = {
+            "enabled": False, "color": "#000000", "opacity": 0.5
+        }
+        
+        style_main = _build_dict_omitting_defaults({
+            "font_family": segment.style.font_family,
+            "font_size": segment.style.font_size,
+            "font_weight": segment.style.font_weight,
+            "font_style": segment.style.font_style,
+            "color": segment.style.color
+        }, style_defaults_main, include_defaults)
+        
+        stroke = _build_dict_omitting_defaults({
+            "enabled": segment.style.stroke_enabled,
+            "color": segment.style.stroke_color,
+            "width": segment.style.stroke_width
+        }, stroke_defaults, include_defaults)
+        
+        shadow = _build_dict_omitting_defaults({
+            "enabled": segment.style.shadow_enabled,
+            "color": segment.style.shadow_color,
+            "offset_x": segment.style.shadow_offset_x,
+            "offset_y": segment.style.shadow_offset_y,
+            "blur": segment.style.shadow_blur
+        }, shadow_defaults, include_defaults)
+        
+        background = _build_dict_omitting_defaults({
+            "enabled": segment.style.background_enabled,
+            "color": segment.style.background_color,
+            "opacity": segment.style.background_opacity
+        }, background_defaults, include_defaults)
+        
+        # Build style object if any fields are non-default
+        if style_main or stroke or shadow or background:
+            style = {}
+            if style_main:
+                style.update(style_main)
+            if stroke:
+                style["stroke"] = stroke
+            if shadow:
+                style["shadow"] = shadow
+            if background:
+                style["background"] = background
+            result["style"] = style
+        
+        # Alignment with default
+        if include_defaults or segment.alignment != "center":
+            result["alignment"] = segment.alignment
+        
+        # Animations with defaults
+        animations_defaults = {
+            "intro": None, "outro": None, "loop": None
+        }
+        animations = _build_dict_omitting_defaults({
+            "intro": segment.intro_animation,
+            "outro": segment.outro_animation,
+            "loop": segment.loop_animation
+        }, animations_defaults, include_defaults)
+        if animations:
+            result["animations"] = animations
+        
+        # Keyframes
+        keyframes_defaults = {
+            "position": [], "scale": [], "rotation": [], "opacity": []
+        }
+        keyframes = _build_dict_omitting_defaults({
+            "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
+            "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
+            "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
+            "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
+        }, keyframes_defaults, include_defaults)
+        if keyframes:
+            result["keyframes"] = keyframes
+        
+        return result
     
-    def _serialize_effect_segment(self, segment: EffectSegmentConfig) -> Dict[str, Any]:
+    def _serialize_effect_segment(self, segment: EffectSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize effect segment configuration"""
-        return {
+        result = {
             "type": "effect",
             "effect_type": segment.effect_type,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "properties": {
-                "intensity": segment.intensity,
-                "position_x": segment.position_x,
-                "position_y": segment.position_y,
-                "scale": segment.scale,
-                **segment.properties
-            }
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Properties with defaults
+        properties_defaults = {
+            "intensity": 1.0, "position_x": None, "position_y": None, "scale": 1.0
+        }
+        properties = _build_dict_omitting_defaults({
+            "intensity": segment.intensity,
+            "position_x": segment.position_x,
+            "position_y": segment.position_y,
+            "scale": segment.scale,
+            **segment.properties
+        }, properties_defaults, include_defaults)
+        if properties:
+            result["properties"] = properties
+        
+        return result
     
-    def _serialize_filter_segment(self, segment: FilterSegmentConfig) -> Dict[str, Any]:
+    def _serialize_filter_segment(self, segment: FilterSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize filter segment configuration"""
-        return {
+        result = {
             "type": "filter",
             "filter_type": segment.filter_type,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "intensity": segment.intensity
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Intensity with default
+        if include_defaults or segment.intensity != 1.0:
+            result["intensity"] = segment.intensity
+        
+        return result
     
-    def _serialize_sticker_segment(self, segment: StickerSegmentConfig) -> Dict[str, Any]:
+    def _serialize_sticker_segment(self, segment: StickerSegmentConfig, include_defaults: bool = True) -> Dict[str, Any]:
         """Serialize sticker segment configuration"""
-        return {
+        result = {
             "type": "sticker",
             "resource_id": segment.resource_id,
-            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end},
-            "transform": {
-                "position_x": segment.position_x,
-                "position_y": segment.position_y,
-                "scale_x": segment.scale_x,
-                "scale_y": segment.scale_y,
-                "rotation": segment.rotation,
-                "opacity": segment.opacity
-            },
-            "flip": {
-                "horizontal": segment.flip_horizontal,
-                "vertical": segment.flip_vertical
-            },
-            "keyframes": {
-                "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
-                "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
-                "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
-                "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
-            }
+            "time_range": {"start": segment.time_range.start, "end": segment.time_range.end}
         }
+        
+        # Transform with defaults
+        transform_defaults = {
+            "position_x": 0.0, "position_y": 0.0, "scale_x": 1.0,
+            "scale_y": 1.0, "rotation": 0.0, "opacity": 1.0
+        }
+        transform = _build_dict_omitting_defaults({
+            "position_x": segment.position_x,
+            "position_y": segment.position_y,
+            "scale_x": segment.scale_x,
+            "scale_y": segment.scale_y,
+            "rotation": segment.rotation,
+            "opacity": segment.opacity
+        }, transform_defaults, include_defaults)
+        if transform:
+            result["transform"] = transform
+        
+        # Flip with defaults
+        flip_defaults = {"horizontal": False, "vertical": False}
+        flip = _build_dict_omitting_defaults({
+            "horizontal": segment.flip_horizontal,
+            "vertical": segment.flip_vertical
+        }, flip_defaults, include_defaults)
+        if flip:
+            result["flip"] = flip
+        
+        # Keyframes
+        keyframes_defaults = {
+            "position": [], "scale": [], "rotation": [], "opacity": []
+        }
+        keyframes = _build_dict_omitting_defaults({
+            "position": [{"time": kf.time, "value": kf.value} for kf in segment.position_keyframes],
+            "scale": [{"time": kf.time, "value": kf.value} for kf in segment.scale_keyframes],
+            "rotation": [{"time": kf.time, "value": kf.value} for kf in segment.rotation_keyframes],
+            "opacity": [{"time": kf.time, "value": kf.value} for kf in segment.opacity_keyframes]
+        }, keyframes_defaults, include_defaults)
+        if keyframes:
+            result["keyframes"] = keyframes
+        
+        return result
 
 
 # Input/Output types for Coze tools
