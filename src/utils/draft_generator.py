@@ -196,6 +196,7 @@ class DraftGenerator:
         # 1. 提取项目信息
         project = draft_data.get('project', {})
         draft_id = draft_data.get('draft_id', None)
+        project_name = project.get('name', 'Coze剪映项目')
         width = project.get('width', 1920)
         height = project.get('height', 1080)
         fps = project.get('fps', 30)
@@ -207,15 +208,17 @@ class DraftGenerator:
             self.logger.warning(f"未找到 draft_id，已生成: {draft_id}")
         
         self.logger.info(f"草稿ID: {draft_id}")
+        self.logger.info(f"项目名称: {project_name}")
         self.logger.info(f"分辨率: {width}x{height}, 帧率: {fps}")
         
         # 2. 创建DraftFolder和Script
-        # 注意: create_draft 会在 output_base_dir 中创建一个以 draft_name 命名的子文件夹
-        # 但我们需要使用 draft_id 作为文件夹名，所以直接传 draft_id 作为 draft_name
+        # 重要: 使用项目名称(project_name)而非 UUID 作为文件夹名
+        # 这样可以避免剪映自动重命名文件夹，导致保存时找不到路径的问题
+        # 参考 pyJianYingDraft 的 demo.py，使用人类可读的名称不会被剪映重命名
         self.logger.info("创建草稿...")
         draft_folder_obj = draft.DraftFolder(self.output_base_dir)
         script: ScriptFile = draft_folder_obj.create_draft(
-            draft_name=draft_id,  # 使用 draft_id 作为文件夹名
+            draft_name=project_name,  # 使用项目名称作为文件夹名，避免剪映重命名
             width=width,
             height=height,
             fps=fps,
@@ -223,15 +226,15 @@ class DraftGenerator:
         )
         
         # 草稿实际路径
-        draft_folder = os.path.join(self.output_base_dir, draft_id)
+        draft_folder = os.path.join(self.output_base_dir, project_name)
         
         # 3. 初始化MaterialManager
-        # MaterialManager 现在将素材下载到 {draft_folder_path}/CozeJianYingAssistantAssets/{draft_id}/
+        # MaterialManager 现在将素材下载到 {draft_folder_path}/CozeJianYingAssistantAssets/{project_name}/
         self.logger.info("初始化MaterialManager...")
         material_manager = create_material_manager(
             draft_folder=draft_folder_obj,
-            draft_name=draft_id,  # 使用 draft_id，与 create_draft 一致
-            project_id=draft_id   # 传入 project_id，用于素材文件夹命名
+            draft_name=project_name,  # 使用项目名称，与 create_draft 一致
+            project_id=draft_id        # 传入 draft_id 用于素材文件夹命名
         )
         self.material_managers[draft_id] = material_manager  # 使用 draft_id 作为键
         
