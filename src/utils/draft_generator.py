@@ -97,10 +97,6 @@ class DraftGenerator:
             # 3. 转换所有草稿
             draft_paths = self._convert_drafts(normalized_data)
             
-            # 4. 生成 root_meta_info.json
-            if draft_paths:  # 只有在成功生成草稿时才生成元信息文件
-                self._generate_root_meta_info()
-            
             # 恢复原始输出目录
             self.output_base_dir = original_output_dir
             
@@ -143,10 +139,6 @@ class DraftGenerator:
             
             # 3. 转换所有草稿
             draft_paths = self._convert_drafts(normalized_data)
-            
-            # 4. 生成 root_meta_info.json
-            if draft_paths:  # 只有在成功生成草稿时才生成元信息文件
-                self._generate_root_meta_info()
             
             # 恢复原始输出目录
             self.output_base_dir = original_output_dir
@@ -323,29 +315,37 @@ class DraftGenerator:
             self.logger.error(f"  ❌ 创建轨道失败: {e}")
             return False
     
-    def _generate_root_meta_info(self):
+    def generate_root_meta_info(self, folder_path: Optional[str] = None):
         """
         生成 root_meta_info.json 文件
-        扫描输出文件夹中的所有草稿并生成元信息文件
+        扫描指定文件夹中的所有草稿并生成元信息文件
+        
+        Args:
+            folder_path: 草稿文件夹路径（可选，默认使用 output_base_dir）
         """
         try:
-            self.logger.info("步骤4: 生成 root_meta_info.json...")
+            # 确定要扫描的文件夹
+            target_folder = folder_path if folder_path else self.output_base_dir
+            
+            self.logger.info(f"开始生成 root_meta_info.json...")
+            self.logger.info(f"目标文件夹: {target_folder}")
             
             # 创建元信息管理器
             meta_manager = create_draft_meta_manager()
             
             # 扫描草稿文件夹并生成元信息
-            root_meta_info = meta_manager.scan_and_generate_meta_info(self.output_base_dir)
+            root_meta_info = meta_manager.scan_and_generate_meta_info(target_folder)
             
             # 保存到输出文件夹
-            meta_info_path = os.path.join(self.output_base_dir, "root_meta_info.json")
+            meta_info_path = os.path.join(target_folder, "root_meta_info.json")
             meta_manager.save_root_meta_info(root_meta_info, meta_info_path)
             
             self.logger.info("✅ root_meta_info.json 生成完成")
+            return meta_info_path
             
         except Exception as e:
             self.logger.error(f"生成 root_meta_info.json 失败: {e}")
-            # 不抛出异常，避免影响主要的草稿生成流程
+            raise
     
     def _process_segment(
         self,
