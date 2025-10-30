@@ -307,39 +307,63 @@ class DraftGenerator:
         # 尝试2: 检测剪映是否重命名了文件夹
         # 剪映可能会将文件夹重命名为 draft_meta_info.json 中的 draft_id
         base_dir = os.path.dirname(expected_draft_folder)
+        expected_folder_name = os.path.basename(expected_draft_folder)
         
         # 查找可能被重命名的文件夹
         renamed_folder = None
         if os.path.exists(base_dir):
+            # 获取预期文件夹的创建时间（如果存在的话）
+            expected_ctime = None
+            if os.path.exists(expected_draft_folder):
+                expected_ctime = os.path.getctime(expected_draft_folder)
+            
+            # 收集候选文件夹（按创建时间排序）
+            candidates = []
             for item in os.listdir(base_dir):
                 item_path = os.path.join(base_dir, item)
-                if not os.path.isdir(item_path):
+                if not os.path.isdir(item_path) or item == expected_folder_name:
                     continue
                 
                 # 检查是否有 draft_meta_info.json 文件
                 meta_info_path = os.path.join(item_path, "draft_meta_info.json")
-                if os.path.exists(meta_info_path):
-                    try:
-                        with open(meta_info_path, 'r', encoding='utf-8') as f:
-                            meta_info = json.load(f)
-                        
-                        # 检查是否是我们要找的草稿
-                        # 我们通过检查文件夹的创建时间和名称来匹配
-                        if item != os.path.basename(expected_draft_folder):
-                            # 这可能是被重命名的文件夹
-                            self.logger.info(f"发现可能被重命名的文件夹: {item}")
-                            
-                            # 检查是否有 draft_content.json (说明是同一个草稿)
-                            content_path = os.path.join(item_path, "draft_content.json")
-                            if not os.path.exists(content_path):
-                                # 如果没有 draft_content.json，说明这可能是我们的草稿
-                                # (因为我们还没有保存 draft_content.json)
-                                renamed_folder = item_path
-                                self.logger.info(f"✅ 检测到剪映重命名的文件夹: {item}")
-                                break
-                    except Exception as e:
-                        self.logger.debug(f"检查文件夹 {item} 时出错: {e}")
-                        continue
+                if not os.path.exists(meta_info_path):
+                    continue
+                
+                # 检查是否缺少 draft_content.json (表示还未完成保存)
+                content_path = os.path.join(item_path, "draft_content.json")
+                if os.path.exists(content_path):
+                    continue
+                
+                try:
+                    # 读取元数据
+                    with open(meta_info_path, 'r', encoding='utf-8') as f:
+                        meta_info = json.load(f)
+                    
+                    # 获取文件夹创建时间
+                    ctime = os.path.getctime(item_path)
+                    
+                    candidates.append({
+                        'path': item_path,
+                        'name': item,
+                        'ctime': ctime,
+                        'draft_id': meta_info.get('draft_id', '')
+                    })
+                    
+                except Exception as e:
+                    self.logger.debug(f"检查文件夹 {item} 时出错: {e}")
+                    continue
+            
+            # 如果有候选文件夹，选择最新创建的一个
+            if candidates:
+                # 按创建时间排序（最新的在前）
+                candidates.sort(key=lambda x: x['ctime'], reverse=True)
+                newest = candidates[0]
+                
+                renamed_folder = newest['path']
+                self.logger.info(f"发现可能被重命名的文件夹: {newest['name']}")
+                self.logger.info(f"  原预期名称: {expected_folder_name}")
+                self.logger.info(f"  剪映内部ID: {newest['draft_id']}")
+                self.logger.info(f"✅ 检测到剪映重命名的文件夹")
         
         # 如果找到了重命名的文件夹，使用 dumps() 手动保存
         if renamed_folder:
