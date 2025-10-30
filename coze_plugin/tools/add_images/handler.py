@@ -238,7 +238,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         })
         
         # Create segment following the proper data structure format
-        # This matches the _serialize_image_segment format from DraftConfig
+        # Only include fields that are present in info (non-defaults from make_image_info)
         segment = {
             "id": segment_id,
             "type": "image",
@@ -246,59 +246,79 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
             "time_range": {
                 "start": info['start'],
                 "end": info['end']
-            },
-            "transform": {
-                "position_x": info.get('position_x', 0.0),
-                "position_y": info.get('position_y', 0.0),
-                "scale_x": info.get('scale_x', 1.0),
-                "scale_y": info.get('scale_y', 1.0),
-                "rotation": info.get('rotation', 0.0),
-                "opacity": info.get('opacity', 1.0)
-            },
-            "dimensions": {
-                "width": info.get('width'),
-                "height": info.get('height')
-            },
-            "crop": {
-                "enabled": info.get('crop_enabled', False),
+            }
+        }
+        
+        # Build transform dict, only including fields that exist in info
+        transform = {}
+        if 'position_x' in info:
+            transform['position_x'] = info['position_x']
+        if 'position_y' in info:
+            transform['position_y'] = info['position_y']
+        if 'scale_x' in info:
+            transform['scale_x'] = info['scale_x']
+        if 'scale_y' in info:
+            transform['scale_y'] = info['scale_y']
+        if 'rotation' in info:
+            transform['rotation'] = info['rotation']
+        if 'opacity' in info:
+            transform['opacity'] = info['opacity']
+        if transform:
+            segment["transform"] = transform
+        
+        # Crop - only add if enabled
+        if info.get('crop_enabled'):
+            segment["crop"] = {
+                "enabled": True,
                 "left": info.get('crop_left', 0.0),
                 "top": info.get('crop_top', 0.0),
                 "right": info.get('crop_right', 1.0),
                 "bottom": info.get('crop_bottom', 1.0)
-            },
-            "effects": {
-                "filter_type": info.get('filter_type'),
-                "filter_intensity": info.get('filter_intensity', 1.0),
-                "transition_type": info.get('transition_type'),
-                "transition_duration": info.get('transition_duration', 500)
-            },
-            "background": {
-                "blur": info.get('background_blur', False),
-                "color": info.get('background_color'),
-                "fit_mode": info.get('fit_mode', 'fit')
-            },
-            "animations": {
-                "intro": info.get('in_animation'),  # Map in_animation to intro
-                "intro_duration": info.get('in_animation_duration', 500),
-                "outro": info.get('outro_animation'),
-                "outro_duration": info.get('outro_animation_duration', 500)
-            },
-            "keyframes": {
-                "position": [],
-                "scale": [],
-                "rotation": [],
-                "opacity": []
             }
-        }
+        
+        # Effects - only add if filter or transition specified
+        effects = {}
+        if 'filter_type' in info:
+            effects['filter_type'] = info['filter_type']
+            if 'filter_intensity' in info:
+                effects['filter_intensity'] = info['filter_intensity']
+        if 'transition_type' in info:
+            effects['transition_type'] = info['transition_type']
+            if 'transition_duration' in info:
+                effects['transition_duration'] = info['transition_duration']
+        if effects:
+            segment["effects"] = effects
+        
+        # Background - only add if any background properties specified
+        background = {}
+        if 'background_blur' in info:
+            background['blur'] = info['background_blur']
+        if 'background_color' in info:
+            background['color'] = info['background_color']
+        if 'fit_mode' in info:
+            background['fit_mode'] = info['fit_mode']
+        if background:
+            segment["background"] = background
+        
+        # Animations - only add if any animation specified
+        animations = {}
+        if 'in_animation' in info:  # Map in_animation to intro
+            animations['intro'] = info['in_animation']
+            if 'in_animation_duration' in info:
+                animations['intro_duration'] = info['in_animation_duration']
+        if 'outro_animation' in info:
+            animations['outro'] = info['outro_animation']
+            if 'outro_animation_duration' in info:
+                animations['outro_duration'] = info['outro_animation_duration']
+        if animations:
+            segment["animations"] = animations
         
         segments.append(segment)
     
     # Create track following the proper TrackConfig format
     # Note: Images are placed on video tracks (no separate image track type)
-    # Images don't have volume parameter (static content has no audio)
     track = {
         "track_type": "video",
-        "muted": False,
         "segments": segments
     }
     

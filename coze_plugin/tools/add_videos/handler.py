@@ -245,7 +245,7 @@ def create_video_track_with_segments(video_infos: List[Dict[str, Any]]) -> tuple
         })
         
         # Create segment following the proper data structure format
-        # This matches the _serialize_video_segment format from DraftConfig
+        # Only include fields that are present in info (non-defaults from make_video_info)
         segment = {
             "id": segment_id,
             "type": "video",
@@ -253,59 +253,79 @@ def create_video_track_with_segments(video_infos: List[Dict[str, Any]]) -> tuple
             "time_range": {
                 "start": info['start'],
                 "end": info['end']
-            },
-            "material_range": None,
-            "transform": {
-                "position_x": info.get('position_x', 0.0),
-                "position_y": info.get('position_y', 0.0),
-                "scale_x": info.get('scale_x', 1.0),
-                "scale_y": info.get('scale_y', 1.0),
-                "rotation": info.get('rotation', 0.0),
-                "opacity": info.get('opacity', 1.0)
-            },
-            "crop": {
-                "enabled": info.get('crop_enabled', False),
-                "left": info.get('crop_left', 0.0),
-                "top": info.get('crop_top', 0.0),
-                "right": info.get('crop_right', 1.0),
-                "bottom": info.get('crop_bottom', 1.0)
-            },
-            "effects": {
-                "filter_type": info.get('filter_type'),
-                "filter_intensity": info.get('filter_intensity', 1.0),
-                "transition_type": info.get('transition_type'),
-                "transition_duration": info.get('transition_duration', 500)
-            },
-            "speed": {
-                "speed": info.get('speed', 1.0),
-                "reverse": info.get('reverse', False)
-            },
-            "background": {
-                "blur": info.get('background_blur', False),
-                "color": info.get('background_color')
-            },
-            "keyframes": {
-                "position": [],
-                "scale": [],
-                "rotation": [],
-                "opacity": []
             }
         }
         
-        # Add material_range if provided
+        # Add material_range if provided (for trimming video)
         if 'material_start' in info and 'material_end' in info:
             segment["material_range"] = {
                 "start": info['material_start'],
                 "end": info['material_end']
             }
         
+        # Build transform dict, only including fields that exist in info
+        transform = {}
+        if 'position_x' in info:
+            transform['position_x'] = info['position_x']
+        if 'position_y' in info:
+            transform['position_y'] = info['position_y']
+        if 'scale_x' in info:
+            transform['scale_x'] = info['scale_x']
+        if 'scale_y' in info:
+            transform['scale_y'] = info['scale_y']
+        if 'rotation' in info:
+            transform['rotation'] = info['rotation']
+        if 'opacity' in info:
+            transform['opacity'] = info['opacity']
+        if transform:
+            segment["transform"] = transform
+        
+        # Crop - only add if enabled
+        if info.get('crop_enabled'):
+            segment["crop"] = {
+                "enabled": True,
+                "left": info.get('crop_left', 0.0),
+                "top": info.get('crop_top', 0.0),
+                "right": info.get('crop_right', 1.0),
+                "bottom": info.get('crop_bottom', 1.0)
+            }
+        
+        # Effects - only add if filter or transition specified
+        effects = {}
+        if 'filter_type' in info:
+            effects['filter_type'] = info['filter_type']
+            if 'filter_intensity' in info:
+                effects['filter_intensity'] = info['filter_intensity']
+        if 'transition_type' in info:
+            effects['transition_type'] = info['transition_type']
+            if 'transition_duration' in info:
+                effects['transition_duration'] = info['transition_duration']
+        if effects:
+            segment["effects"] = effects
+        
+        # Speed - only add if not defaults
+        speed = {}
+        if 'speed' in info:
+            speed['speed'] = info['speed']
+        if 'reverse' in info:
+            speed['reverse'] = info['reverse']
+        if speed:
+            segment["speed"] = speed
+        
+        # Background - only add if any background properties specified
+        background = {}
+        if 'background_blur' in info:
+            background['blur'] = info['background_blur']
+        if 'background_color' in info:
+            background['color'] = info['background_color']
+        if background:
+            segment["background"] = background
+        
         segments.append(segment)
     
     # Create track following the proper TrackConfig format
     track = {
         "track_type": "video",
-        "muted": False,
-        "volume": 1.0,
         "segments": segments
     }
     

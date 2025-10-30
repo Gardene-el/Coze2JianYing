@@ -222,7 +222,7 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
         })
         
         # Create segment following the proper data structure format
-        # This matches the _serialize_audio_segment format from DraftConfig
+        # Only include fields that are present in info (non-defaults from make_audio_info)
         segment = {
             "id": segment_id,
             "type": "audio",
@@ -233,37 +233,40 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
             }
         }
         
-        # Add material_range if provided (for trimming audio)
+        # Add material_range only if provided (for trimming audio)
         if 'material_start' in info and 'material_end' in info:
             segment["material_range"] = {
                 "start": info['material_start'],
                 "end": info['material_end']
             }
-        else:
-            segment["material_range"] = None
         
-        # Add audio properties
-        segment["audio"] = {
-            "volume": info.get('volume', 1.0),
-            "fade_in": info.get('fade_in', 0),
-            "fade_out": info.get('fade_out', 0),
-            "effect_type": info.get('effect_type'),
-            "effect_intensity": info.get('effect_intensity', 1.0),
-            "speed": info.get('speed', 1.0)
-        }
+        # Build audio properties dict, only including fields that exist in info
+        audio_props = {}
+        if 'volume' in info:
+            audio_props['volume'] = info['volume']
+        if 'fade_in' in info:
+            audio_props['fade_in'] = info['fade_in']
+        if 'fade_out' in info:
+            audio_props['fade_out'] = info['fade_out']
+        if 'effect_type' in info:
+            audio_props['effect_type'] = info['effect_type']
+        if 'effect_intensity' in info:
+            audio_props['effect_intensity'] = info['effect_intensity']
+        if 'speed' in info:
+            audio_props['speed'] = info['speed']
+        if 'change_pitch' in info:
+            audio_props['change_pitch'] = info['change_pitch']
         
-        # Add empty keyframes
-        segment["keyframes"] = {
-            "volume": []
-        }
+        # Only add audio properties if there are any
+        if audio_props:
+            segment["audio"] = audio_props
         
         segments.append(segment)
     
     # Create track following the proper TrackConfig format
+    # Only include non-default track properties
     track = {
         "track_type": "audio",
-        "muted": False,
-        "volume": 1.0,
         "segments": segments
     }
     

@@ -242,7 +242,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         })
         
         # Create segment following the proper data structure format
-        # This matches the _serialize_text_segment format from DraftConfig
+        # Only include fields that are present in info (non-defaults from make_caption_info)
         segment = {
             "id": segment_id,
             "type": "text",
@@ -250,59 +250,91 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
             "time_range": {
                 "start": info['start'],
                 "end": info['end']
-            },
-            "transform": {
-                "position_x": info.get('position_x', 0.5),
-                "position_y": info.get('position_y', -0.9),
-                "scale": info.get('scale', 1.0),
-                "rotation": info.get('rotation', 0.0),
-                "opacity": info.get('opacity', 1.0)
-            },
-            "style": {
-                "font_family": info.get('font_family', "默认"),
-                "font_size": info.get('font_size', 48),
-                "font_weight": info.get('font_weight', "normal"),
-                "font_style": info.get('font_style', "normal"),
-                "color": info.get('color', "#FFFFFF"),
-                "stroke": {
-                    "enabled": info.get('stroke_enabled', False),
-                    "color": info.get('stroke_color', "#000000"),
-                    "width": info.get('stroke_width', 2)
-                },
-                "shadow": {
-                    "enabled": info.get('shadow_enabled', False),
-                    "color": info.get('shadow_color', "#000000"),
-                    "offset_x": info.get('shadow_offset_x', 2),
-                    "offset_y": info.get('shadow_offset_y', 2),
-                    "blur": info.get('shadow_blur', 4)
-                },
-                "background": {
-                    "enabled": info.get('background_enabled', False),
-                    "color": info.get('background_color', "#000000"),
-                    "opacity": info.get('background_opacity', 0.5)
-                }
-            },
-            "alignment": info.get('alignment', 'center'),
-            "animations": {
-                "intro": info.get('intro_animation'),
-                "outro": info.get('outro_animation'),
-                "loop": info.get('loop_animation')
-            },
-            "keyframes": {
-                "position": [],
-                "scale": [],
-                "rotation": [],
-                "opacity": []
             }
         }
+        
+        # Build transform dict, only including fields that exist in info
+        transform = {}
+        if 'position_x' in info:
+            transform['position_x'] = info['position_x']
+        if 'position_y' in info:
+            transform['position_y'] = info['position_y']
+        if 'scale' in info:
+            transform['scale'] = info['scale']
+        if 'rotation' in info:
+            transform['rotation'] = info['rotation']
+        if 'opacity' in info:
+            transform['opacity'] = info['opacity']
+        if transform:
+            segment["transform"] = transform
+        
+        # Build style dict, only including fields that exist in info
+        style = {}
+        if 'font_family' in info:
+            style['font_family'] = info['font_family']
+        if 'font_size' in info:
+            style['font_size'] = info['font_size']
+        if 'font_weight' in info:
+            style['font_weight'] = info['font_weight']
+        if 'font_style' in info:
+            style['font_style'] = info['font_style']
+        if 'color' in info:
+            style['color'] = info['color']
+        
+        # Stroke - only add if enabled
+        if info.get('stroke_enabled'):
+            stroke = {'enabled': True}
+            if 'stroke_color' in info:
+                stroke['color'] = info['stroke_color']
+            if 'stroke_width' in info:
+                stroke['width'] = info['stroke_width']
+            style['stroke'] = stroke
+        
+        # Shadow - only add if enabled
+        if info.get('shadow_enabled'):
+            shadow = {'enabled': True}
+            if 'shadow_color' in info:
+                shadow['color'] = info['shadow_color']
+            if 'shadow_offset_x' in info:
+                shadow['offset_x'] = info['shadow_offset_x']
+            if 'shadow_offset_y' in info:
+                shadow['offset_y'] = info['shadow_offset_y']
+            if 'shadow_blur' in info:
+                shadow['blur'] = info['shadow_blur']
+            style['shadow'] = shadow
+        
+        # Background - only add if enabled
+        if info.get('background_enabled'):
+            background = {'enabled': True}
+            if 'background_color' in info:
+                background['color'] = info['background_color']
+            if 'background_opacity' in info:
+                background['opacity'] = info['background_opacity']
+            style['background'] = background
+        
+        if style:
+            segment["style"] = style
+        
+        # Alignment - only add if not default
+        if 'alignment' in info:
+            segment["alignment"] = info['alignment']
+        
+        # Animations - only add if any animation specified
+        animations = {}
+        if 'intro_animation' in info:
+            animations['intro'] = info['intro_animation']
+        if 'outro_animation' in info:
+            animations['outro'] = info['outro_animation']
+        if 'loop_animation' in info:
+            animations['loop'] = info['loop_animation']
+        if animations:
+            segment["animations"] = animations
         
         segments.append(segment)
     
     # Create track following the proper TrackConfig format
     track = {
         "track_type": "text",
-        "muted": False,
-        "volume": 1.0,
         "segments": segments
     }
     
