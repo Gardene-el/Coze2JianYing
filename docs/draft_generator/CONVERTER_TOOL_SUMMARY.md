@@ -4,7 +4,7 @@
 
 ### 1. 核心工具文件
 
-**文件**: `test_utils/coze_output_converter.py`
+**文件**: `scripts/coze_json_formatter.py`
 
 功能：
 
@@ -110,7 +110,7 @@ python test_utils\coze_output_converter.py --batch ./data "*coze*.json"
 ### Python 模块使用
 
 ```python
-from test_utils.coze_output_converter import convert_coze_to_standard_format
+from scripts.coze_output_converter import convert_coze_to_standard_format
 
 # 转换文件
 output_file = convert_coze_to_standard_format(
@@ -122,7 +122,7 @@ output_file = convert_coze_to_standard_format(
 ### 与 DraftGenerator 集成
 
 ```python
-from test_utils.coze_output_converter import convert_coze_to_standard_format
+from scripts.coze_output_converter import convert_coze_to_standard_format
 from src.utils.draft_generator import DraftGenerator
 
 # 1. 转换格式
@@ -270,7 +270,7 @@ python src\main.py
 
 ```python
 import os
-from test_utils.coze_output_converter import convert_coze_to_standard_format
+from scripts.coze_output_converter import convert_coze_to_standard_format
 from src.utils.draft_generator import DraftGenerator
 
 # 自动化处理流程

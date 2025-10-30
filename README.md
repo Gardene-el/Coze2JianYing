@@ -362,7 +362,9 @@ Coze2JianYing/
 │   ├── draft_generator_interface/  # 草稿生成器接口
 │   └── media_models/         # 媒体文件模型
 ├── docs/                     # 完整项目文档
-├── test_utils/               # 测试和转换工具
+├── scripts/                  # 实用工具脚本
+│   ├── coze_json_formatter.py    # Coze JSON 格式化工具
+│   └── test_coze_json_formatter.py  # 测试脚本
 ├── build.py                  # PyInstaller 打包脚本
 ├── requirements.txt          # 项目依赖列表
 └── setup.py                  # 项目安装配置

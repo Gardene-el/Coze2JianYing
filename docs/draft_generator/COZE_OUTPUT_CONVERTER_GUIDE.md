@@ -4,7 +4,7 @@
 
 ## 📁 文件位置
 
-- **工具文件**: `test_utils/coze_output_converter.py`
+- **工具文件**: `scripts/coze_json_formatter.py`
 - **测试模块**: `test_utils/__init__.py`
 
 ## 🎯 功能
@@ -288,6 +288,6 @@ draft_paths = generator.generate_from_file(converted_file)
 
 如有问题，请查看：
 
-- 工具代码: `test_utils/coze_output_converter.py`
+- 工具代码: `scripts/coze_json_formatter.py`
 - 项目文档: `docs/` 目录
 - 示例文件: `sample.json`, `coze_example_for_paste_context.json`
