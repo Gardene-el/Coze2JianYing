@@ -161,18 +161,18 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
             video_info["material_start"] = args.input.material_start
             video_info["material_end"] = args.input.material_end
         
-        # Transform (only add if not default values)
-        if args.input.position_x != 0.0:
+        # Transform (only add if not None and not default values)
+        if args.input.position_x is not None and args.input.position_x != 0.0:
             video_info["position_x"] = args.input.position_x
-        if args.input.position_y != 0.0:
+        if args.input.position_y is not None and args.input.position_y != 0.0:
             video_info["position_y"] = args.input.position_y
-        if args.input.scale_x != 1.0:
+        if args.input.scale_x is not None and args.input.scale_x != 1.0:
             video_info["scale_x"] = args.input.scale_x
-        if args.input.scale_y != 1.0:
+        if args.input.scale_y is not None and args.input.scale_y != 1.0:
             video_info["scale_y"] = args.input.scale_y
-        if args.input.rotation != 0.0:
+        if args.input.rotation is not None and args.input.rotation != 0.0:
             video_info["rotation"] = args.input.rotation
-        if args.input.opacity != 1.0:
+        if args.input.opacity is not None and args.input.opacity != 1.0:
             video_info["opacity"] = args.input.opacity
         if args.input.flip_horizontal:
             video_info["flip_horizontal"] = args.input.flip_horizontal
