@@ -8,9 +8,10 @@ import sys
 import tempfile
 import shutil
 import json
-import time
+import traceback
 
 # 添加项目根目录到路径
+# Note: This is acceptable for test files not part of the installed package
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import pyJianYingDraft as draft
@@ -116,7 +117,10 @@ def test_multiple_drafts_with_rename():
         # 删除旧草稿的 draft_content.json
         os.remove(os.path.join(old_renamed, "draft_content.json"))
         
-        time.sleep(0.1)  # 确保时间戳不同
+        # 使用 os.utime 设置时间戳以确保新旧草稿的时间戳有明显差异
+        # 将旧文件夹的时间设置为更早
+        old_time = os.path.getctime(old_renamed) - 10  # 10秒前
+        os.utime(old_renamed, (old_time, old_time))
         
         # 创建新草稿
         new_draft_id = "new-draft"
@@ -217,7 +221,6 @@ def run_all_tests():
         except Exception as e:
             print(f"❌ 测试失败: {name}")
             print(f"   错误: {e}\n")
-            import traceback
             traceback.print_exc()
             results.append((name, False, str(e)))
     
