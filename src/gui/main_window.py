@@ -121,6 +121,11 @@ class MainWindow:
             text="生成草稿",
             command=self._generate_draft
         )
+        self.generate_meta_btn = ttk.Button(
+            button_frame,
+            text="生成元信息",
+            command=self._generate_meta_info
+        )
         self.clear_btn = ttk.Button(
             button_frame,
             text="清空",
@@ -218,6 +223,7 @@ class MainWindow:
         # 按钮区域
         self.button_frame.grid(row=3, column=0, sticky=tk.W, pady=(0, 10))
         self.generate_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.generate_meta_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.clear_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.toggle_log_btn.pack(side=tk.LEFT)
         
@@ -369,6 +375,61 @@ class MainWindow:
         self.input_text.delete("1.0", tk.END)
         self.logger.info("已清空输入")
         self.status_var.set("已清空")
+    
+    def _generate_meta_info(self):
+        """生成元信息文件"""
+        # 确定目标文件夹
+        target_folder = self.output_folder
+        if target_folder is None:
+            # 尝试自动检测
+            target_folder = self.draft_generator.detect_default_draft_folder()
+            if target_folder is None:
+                messagebox.showerror(
+                    "错误",
+                    "未指定文件夹，且无法自动检测到剪映草稿文件夹。\n\n请点击「选择文件夹...」或「自动检测」按钮指定位置。"
+                )
+                return
+            self.logger.info(f"自动检测到文件夹: {target_folder}")
+        
+        # 验证文件夹是否存在
+        if not os.path.exists(target_folder):
+            messagebox.showerror("错误", f"指定的文件夹不存在:\n{target_folder}\n\n请重新选择有效的文件夹。")
+            return
+        
+        if not os.path.isdir(target_folder):
+            messagebox.showerror("错误", f"指定的路径不是文件夹:\n{target_folder}\n\n请选择一个文件夹。")
+            return
+        
+        # 确认操作
+        if not messagebox.askyesno(
+            "确认生成",
+            f"将在以下文件夹生成 root_meta_info.json:\n{target_folder}\n\n是否继续？"
+        ):
+            return
+        
+        # 确保日志面板可见
+        if not self.log_panel_visible:
+            self._toggle_log_panel()
+        
+        self.logger.info("开始生成元信息文件")
+        self.status_var.set("正在生成元信息...")
+        self.generate_meta_btn.config(state=tk.DISABLED)
+        
+        try:
+            # 调用草稿生成器的方法
+            meta_info_path = self.draft_generator.generate_root_meta_info(target_folder)
+            
+            self.logger.info(f"元信息文件生成成功: {meta_info_path}")
+            self.status_var.set("元信息生成成功")
+            messagebox.showinfo("成功", f"元信息文件已生成:\n{meta_info_path}")
+            
+        except Exception as e:
+            self.logger.error(f"元信息生成失败: {e}", exc_info=True)
+            self.status_var.set("元信息生成失败")
+            messagebox.showerror("错误", f"元信息生成失败:\n{e}")
+        
+        finally:
+            self.generate_meta_btn.config(state=tk.NORMAL)
     
     def _toggle_log_panel(self):
         """切换日志面板显示/隐藏"""
