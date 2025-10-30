@@ -121,18 +121,18 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         # Add optional parameters only if they are not None
         # This keeps the output clean and only includes specified parameters
         
-        # Transform (only add if not default values)
-        if args.input.position_x != 0.0:
+        # Transform (only add if not None and not default values)
+        if args.input.position_x is not None and args.input.position_x != 0.0:
             image_info["position_x"] = args.input.position_x
-        if args.input.position_y != 0.0:
+        if args.input.position_y is not None and args.input.position_y != 0.0:
             image_info["position_y"] = args.input.position_y
-        if args.input.scale_x != 1.0:
+        if args.input.scale_x is not None and args.input.scale_x != 1.0:
             image_info["scale_x"] = args.input.scale_x
-        if args.input.scale_y != 1.0:
+        if args.input.scale_y is not None and args.input.scale_y != 1.0:
             image_info["scale_y"] = args.input.scale_y
-        if args.input.rotation != 0.0:
+        if args.input.rotation is not None and args.input.rotation != 0.0:
             image_info["rotation"] = args.input.rotation
-        if args.input.opacity != 1.0:
+        if args.input.opacity is not None and args.input.opacity != 1.0:
             image_info["opacity"] = args.input.opacity
         
         # Crop
@@ -154,12 +154,12 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
             if args.input.transition_duration != 500:
                 image_info["transition_duration"] = args.input.transition_duration
         
-        # Background
+        # Background (only add if not None and not default values)
         if args.input.background_blur:
             image_info["background_blur"] = args.input.background_blur
         if args.input.background_color is not None:
             image_info["background_color"] = args.input.background_color
-        if args.input.fit_mode != "fit":
+        if args.input.fit_mode is not None and args.input.fit_mode != "fit":
             image_info["fit_mode"] = args.input.fit_mode
         
         # Animations
