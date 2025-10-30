@@ -1,8 +1,23 @@
 """
-Coze输出格式转换工具
+Coze JSON 格式化工具
 
-用于将 coze_example_for_paste_context.json 格式的文件
-（包含 output 字段的字符串JSON）转换为标准的 sample.json 格式
+用于将 Coze 输出的特殊格式（包含 output 字段的字符串 JSON）
+转换为标准的 JSON 格式，便于剪映草稿生成器使用。
+
+功能：
+- 从 Coze 输出文件中提取并解析 output 字段
+- 将字符串形式的 JSON 转换为标准 JSON 对象
+- 支持单文件转换和批量转换
+- 提供格式验证功能
+
+使用方式：
+  命令行：
+    python scripts/coze_json_formatter.py <input_file> [output_file]
+    python scripts/coze_json_formatter.py --batch [directory] [pattern]
+  
+  Python 模块：
+    from coze_json_formatter import convert_coze_to_standard_format
+    output = convert_coze_to_standard_format('input.json')
 """
 import json
 import sys
@@ -173,14 +188,17 @@ def batch_convert(input_dir: str = ".", pattern: str = "*coze*.json", output_suf
 
 def main():
     """命令行入口"""
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 2 or sys.argv[1] in ['--help', '-h', 'help']:
         print("用法:")
-        print("  python coze_output_converter.py <input_file> [output_file]")
-        print("  python coze_output_converter.py --batch [directory] [pattern]")
+        print("  python scripts/coze_json_formatter.py <input_file> [output_file]")
+        print("  python scripts/coze_json_formatter.py --batch [directory] [pattern]")
         print("\n示例:")
-        print("  python coze_output_converter.py coze_example_for_paste_context.json")
-        print("  python coze_output_converter.py coze_example.json output.json")
-        print("  python coze_output_converter.py --batch . '*coze*.json'")
+        print("  python scripts/coze_json_formatter.py coze_example_for_paste_context.json")
+        print("  python scripts/coze_json_formatter.py coze_example.json output.json")
+        print("  python scripts/coze_json_formatter.py --batch . '*coze*.json'")
+        print("\n说明:")
+        print("  此工具用于将 Coze 输出格式（包含 output 字段的字符串 JSON）")
+        print("  转换为标准 JSON 格式，供剪映草稿生成器使用。")
         return
     
     if sys.argv[1] == '--batch':
