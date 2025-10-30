@@ -27,9 +27,10 @@ def test_actual_scenario_with_jianyingpro_folder():
     4. script.save() 时找不到原始路径，抛出 FileNotFoundError
     
     修复后的行为：
-    1. 使用项目名称作为文件夹名 (e.g., "测试项目")
-    2. 剪映不会重命名人类可读的文件夹名
+    1. 使用"扣子2剪映：" + UUID 作为文件夹名 (e.g., "扣子2剪映：e559681e-...")
+    2. 剪映不会重命名带有人类可读前缀的文件夹名
     3. script.save() 成功保存
+    4. UUID 保留用于批量识别
     """
     print("=== 模拟实际场景测试 ===\n")
     
@@ -93,15 +94,25 @@ def test_actual_scenario_with_jianyingpro_folder():
         print(f"   草稿文件夹: {draft_path}")
         print(f"   文件夹名称: {folder_name}")
         
-        # 验证1: 文件夹名称是项目名称而非 UUID
-        if folder_name == "e559681e-6730-4c6b-b7ba-4e785e2c9f86":
-            print("   ❌ 错误：仍在使用 UUID 作为文件夹名（这会导致原始问题）")
+        # 验证1: 文件夹名称使用"扣子2剪映：" + UUID
+        test_draft_id = "e559681e-6730-4c6b-b7ba-4e785e2c9f86"
+        expected_folder_name = f"扣子2剪映：{test_draft_id}"
+        
+        if folder_name == test_draft_id:
+            print("   ❌ 错误：仍在使用纯 UUID 作为文件夹名（这会导致原始问题）")
             return False
         
-        if folder_name == "剪映小助手生成的项目":
-            print("   ✅ 正确：使用项目名称作为文件夹名")
+        if folder_name == expected_folder_name:
+            print("   ✅ 正确：使用'扣子2剪映：' + UUID 作为文件夹名")
         else:
-            print(f"   ⚠️  警告：文件夹名称不是预期的项目名称: {folder_name}")
+            print(f"   ⚠️  警告：文件夹名称不是预期格式: {folder_name}")
+        
+        # 验证UUID包含在文件夹名中
+        if test_draft_id in folder_name:
+            print("   ✅ UUID 保留用于批量识别")
+        else:
+            print("   ❌ 错误：UUID 未包含在文件夹名中")
+            return False
         
         # 验证2: draft_content.json 存在且可以读取
         draft_content_file = os.path.join(draft_path, "draft_content.json")
@@ -141,6 +152,7 @@ def test_actual_scenario_with_jianyingpro_folder():
         print("\n对比原始问题:")
         print("   原始问题: FileNotFoundError - 找不到 draft_content.json")
         print("   修复后: 草稿成功创建，所有文件都在预期位置")
+        print("   优势: '扣子2剪映：' 前缀防止重命名，UUID 保留用于批量识别")
         
         return True
         
@@ -158,35 +170,35 @@ def test_actual_scenario_with_jianyingpro_folder():
 
 
 def test_edge_case_special_characters_in_name():
-    """测试边界情况：项目名称包含特殊字符"""
-    print("\n=== 测试特殊字符处理 ===\n")
+    """测试边界情况：UUID包含不同格式"""
+    print("\n=== 测试不同UUID格式 ===\n")
     
     temp_dir = tempfile.mkdtemp(prefix="test_special_chars_")
     
     try:
         generator = DraftGenerator(output_base_dir=temp_dir)
         
-        # 测试包含特殊字符的项目名称
+        # 测试包含不同格式的UUID
         test_cases = [
-            "项目名称 - 包含空格",
-            "项目_下划线_测试",
-            "项目-连字符-测试",
-            "项目123数字",
+            ("标准UUID", "e559681e-6730-4c6b-b7ba-4e785e2c9f86"),
+            ("短UUID", "abc-123"),
+            ("数字UUID", "12345"),
+            ("中文UUID", "测试-uuid-001"),
         ]
         
         all_passed = True
         
-        for project_name in test_cases:
-            print(f"测试项目名称: {project_name}")
+        for test_name, test_uuid in test_cases:
+            print(f"测试{test_name}: {test_uuid}")
             
             test_draft_data = {
                 "format_version": "1.0",
                 "export_type": "single_draft",
                 "draft_count": 1,
                 "drafts": [{
-                    "draft_id": "test-uuid",
+                    "draft_id": test_uuid,
                     "project": {
-                        "name": project_name,
+                        "name": "测试项目",
                         "width": 1920,
                         "height": 1080,
                         "fps": 30
@@ -203,12 +215,20 @@ def test_edge_case_special_characters_in_name():
                 if draft_paths:
                     draft_path = draft_paths[0]
                     folder_name = os.path.basename(draft_path)
+                    expected_name = f"扣子2剪映：{test_uuid}"
                     
-                    # 验证文件夹名称
-                    if folder_name == project_name:
+                    # 验证文件夹名称格式
+                    if folder_name == expected_name:
                         print(f"   ✅ 成功: {folder_name}")
                     else:
-                        print(f"   ⚠️  名称不匹配: 期望 '{project_name}', 实际 '{folder_name}'")
+                        print(f"   ⚠️  名称不匹配: 期望 '{expected_name}', 实际 '{folder_name}'")
+                        all_passed = False
+                    
+                    # 验证UUID包含在文件夹名中
+                    if test_uuid in folder_name:
+                        print(f"   ✅ UUID保留: {test_uuid}")
+                    else:
+                        print(f"   ❌ UUID未保留")
                         all_passed = False
                     
                     # 清理草稿文件夹以便下一个测试
@@ -223,9 +243,9 @@ def test_edge_case_special_characters_in_name():
                 all_passed = False
         
         if all_passed:
-            print("\n✅ 所有特殊字符测试通过")
+            print("\n✅ 所有UUID格式测试通过")
         else:
-            print("\n⚠️  部分特殊字符测试失败")
+            print("\n⚠️  部分UUID格式测试失败")
         
         return all_passed
         
@@ -243,7 +263,7 @@ if __name__ == "__main__":
     
     # 运行测试
     results.append(("实际场景测试", test_actual_scenario_with_jianyingpro_folder()))
-    results.append(("特殊字符测试", test_edge_case_special_characters_in_name()))
+    results.append(("UUID格式测试", test_edge_case_special_characters_in_name()))
     
     # 打印总结
     print("\n" + "=" * 80)
@@ -262,8 +282,9 @@ if __name__ == "__main__":
     if all_passed:
         print("\n✅ 所有测试通过！修复有效解决了原始问题")
         print("\n说明:")
-        print("  - 使用项目名称而非 UUID 作为文件夹名")
-        print("  - 剪映不会重命名人类可读的文件夹名")
+        print("  - 使用'扣子2剪映：' + UUID 作为文件夹名")
+        print("  - 剪映不会重命名带有人类可读前缀的文件夹名")
+        print("  - UUID 保留用于批量识别")
         print("  - script.save() 可以正常工作")
         print("  - 避免了 FileNotFoundError")
         sys.exit(0)
