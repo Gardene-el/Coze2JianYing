@@ -1,8 +1,8 @@
 """
-Export Drafts Tool Handler
+导出草稿工具处理器
 
-Exports draft data from /tmp storage for use by the draft generator.
-Supports single draft or batch export, with optional cleanup of temporary files.
+从 /tmp 存储导出草稿数据以供草稿生成器使用。
+支持单个草稿或批量导出，可选择清理临时文件。
 """
 
 import os
@@ -12,27 +12,27 @@ from typing import NamedTuple, Union, List, Dict, Any
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for export_drafts tool"""
-    draft_ids: Union[str, List[str], None] = None  # Single UUID string, list of UUIDs, or None for export_all
-    remove_temp_files: bool = False   # Whether to remove temp files after export
-    export_all: bool = False          # Whether to export all drafts in the directory
+    """输入参数 for export_drafts tool"""
+    draft_ids: Union[str, List[str], None] = None  # 单个 UUID 字符串、UUID 列表或 None（用于 export_all）
+    remove_temp_files: bool = False   # 是否在导出后删除临时文件
+    export_all: bool = False          # 是否导出目录中的所有草稿
 
 
-# Output is now returned as Dict[str, Any] instead of NamedTuple
-# This ensures proper JSON object serialization in Coze platform
+# Output 现在返回 Dict[str, Any] 而不是 NamedTuple
+# 这确保了在 Coze 平台中正确的 JSON 对象序列化
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
     """
-    Validate UUID string format
+    验证 UUID 字符串格式
     
     Args:
-        uuid_str: UUID string to validate
+        uuid_str: 要验证的 UUID 字符串
         
     Returns:
-        True if valid UUID format
+        如果是有效的 UUID 格式则为 True
     """
     try:
         import uuid
@@ -44,13 +44,13 @@ def validate_uuid_format(uuid_str: str) -> bool:
 
 def normalize_draft_ids(draft_ids: Union[str, List[str], None]) -> List[str]:
     """
-    Normalize draft_ids input to list format
+    将 draft_ids 输入规范化为列表格式
     
     Args:
-        draft_ids: Single UUID string, list of UUIDs, or None
+        draft_ids: 单个 UUID 字符串、UUID 列表或 None
         
     Returns:
-        List of UUID strings
+        UUID 字符串列表
     """
     if draft_ids is None:
         return []
@@ -64,7 +64,7 @@ def normalize_draft_ids(draft_ids: Union[str, List[str], None]) -> List[str]:
 
 def load_draft_config(draft_id: str) -> tuple[bool, dict, str]:
     """
-    Load draft configuration from file
+    从文件加载草稿配置
     
     Args:
         draft_id: UUID string for the draft
@@ -177,10 +177,10 @@ def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
 
 def handler(args: Args[Input]) -> Dict[str, Any]:
     """
-    Main handler function for exporting drafts
+    导出草稿的主处理函数
     
     Args:
-        args: Input arguments containing draft_ids and options
+        args: 包含 draft_ids 和选项的输入参数
         
     Returns:
         Dict containing draft_data, exported_count, success status, and message
@@ -191,7 +191,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         logger.info(f"Exporting drafts with parameters: {args.input}")
     
     try:
-        # Handle export_all mode
+        # 处理 export_all 模式
         export_all = getattr(args.input, 'export_all', None) or False
         
         if export_all:

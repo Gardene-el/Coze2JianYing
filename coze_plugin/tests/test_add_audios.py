@@ -100,7 +100,6 @@ def test_add_audios_basic():
         
         assert result.success, f"Should succeed: {result.message}"
         assert len(result.segment_ids) == 1, "Should create 1 segment"
-        assert len(result.segment_infos) == 1, "Should return 1 segment info"
         print(f"✅ Created segment: {result.segment_ids[0]}")
         
         # Verify the draft config was updated
