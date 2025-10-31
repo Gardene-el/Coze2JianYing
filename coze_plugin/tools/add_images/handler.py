@@ -1,8 +1,8 @@
 """
-Add Images Tool Handler
+添加图片工具处理器
 
-Adds image segments to an existing draft by creating a new image track.
-Each call creates a new track containing all the specified images.
+向现有草稿添加图片片段，创建新的图片轨道。
+每次调用创建一个包含所有指定图片的新轨道。
 """
 
 import os
@@ -13,24 +13,23 @@ from typing import NamedTuple, List, Dict, Any
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for add_images tool"""
-    draft_id: str                # UUID of the existing draft
-    image_infos: Any             # JSON string or list containing image information (flexible type)
+    """add_images 工具的输入参数"""
+    draft_id: str                # 现有草稿的 UUID
+    image_infos: List[str]       # 包含image信息的 JSON 字符串列表
 
 
 class Output(NamedTuple):
-    """Output for add_images tool"""
-    segment_ids: List[str]       # List of generated segment UUIDs
-    segment_infos: List[Dict[str, Any]]  # List of segment info (id, start, end)
-    success: bool = True         # Operation success status
-    message: str = "图片添加成功"  # Status message
+    """add_images 工具的输出"""
+    segment_ids: List[str]       # 生成的片段 UUID 列表
+    success: bool = True         # 操作成功状态
+    message: str = "图片添加成功"  # 状态消息
 
 
-# Data models (duplicated here for Coze tool independence)
+# 数据模型（为 Coze 工具独立性在此重复定义）
 class TimeRange:
-    """Time range in milliseconds"""
+    """时间范围，单位：毫秒"""
     def __init__(self, start: int = 0, end: int = 0):
         self.start = start
         self.end = end
@@ -41,7 +40,7 @@ class TimeRange:
 
 
 class ImageSegmentConfig:
-    """Configuration for an image segment"""
+    """图片片段的配置"""
     def __init__(self, material_url: str, time_range: TimeRange, **kwargs):
         self.material_url = material_url
         self.time_range = time_range
@@ -90,7 +89,7 @@ class ImageSegmentConfig:
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
-    """Validate UUID string format"""
+    """验证 UUID 字符串格式"""
     try:
         uuid.UUID(uuid_str)
         return True
@@ -98,56 +97,39 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
-    """Parse image_infos from any input format and validate"""
+def parse_image_infos(image_infos_input: List[str]) -> List[Dict[str, Any]]:
+    """从输入格式解析 image_infos 并验证"""
     try:
-        # Handle multiple input formats with extensive debugging
-        if isinstance(image_infos_input, str):
-            # Parse JSON string
-            image_infos = json.loads(image_infos_input)
-        elif isinstance(image_infos_input, list):
-            # Direct list - could be list of dicts OR list of strings
-            # Check if first element is a string (array of strings format)
-            if image_infos_input and isinstance(image_infos_input[0], str):
-                # Array of strings - parse each string as JSON
-                parsed_infos = []
-                for i, info_str in enumerate(image_infos_input):
-                    try:
-                        parsed_info = json.loads(info_str)
-                        parsed_infos.append(parsed_info)
-                    except json.JSONDecodeError as e:
-                        raise ValueError(f"Invalid JSON in image_infos[{i}]: {str(e)}")
-                image_infos = parsed_infos
-            else:
-                # List of objects (original behavior)
-                image_infos = image_infos_input
-        elif hasattr(image_infos_input, '__iter__') and not isinstance(image_infos_input, (str, bytes)):
-            # Other iterable types
-            image_infos = list(image_infos_input)
+        # 处理 JSON 字符串列表格式
+        if isinstance(image_infos_input, list):
+            # 字符串数组 - 将每个字符串解析为 JSON
+            parsed_infos = []
+            for i, info_str in enumerate(image_infos_input):
+                try:
+                    parsed_info = json.loads(info_str)
+                    parsed_infos.append(parsed_info)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON in image_infos[{i}]: {str(e)}")
+            images = parsed_infos
         else:
-            # Last resort - try string conversion
-            try:
-                image_infos_str = str(image_infos_input)
-                image_infos = json.loads(image_infos_str)
-            except (json.JSONDecodeError, ValueError):
-                raise ValueError(f"Cannot parse image_infos from type {type(image_infos_input)}")
+            raise ValueError(f"image_infos 必须是字符串列表，得到 {type(image_infos_input)}")
         
-        # Ensure it's a list
-        if not isinstance(image_infos, list):
-            raise ValueError(f"image_infos must resolve to a list, got {type(image_infos)}")
+        # 确保是列表
+        if not isinstance(images, list):
+            raise ValueError(f"image_infos 必须解析为列表，得到 {type(images)}")
         
-        # Process each item with very robust handling
+        # 处理每一项并进行健壮性检查
         result = []
-        for i, info in enumerate(image_infos):
-            # Convert to plain dict - handle various object types
+        for i, info in enumerate(images):
+            # 转换为纯字典 - 处理各种对象类型
             if isinstance(info, dict):
-                # Already a plain dict
-                converted_info = dict(info)  # Make a copy to be safe
+                # 已经是纯字典
+                converted_info = dict(info)  # 为安全起见制作副本
             else:
-                # Try various conversion strategies
+                # 尝试各种转换策略
                 converted_info = {}
                 
-                # Strategy 1: Try to access like a dict
+                # 策略 1：尝试像字典一样访问
                 try:
                     if hasattr(info, 'keys') and hasattr(info, '__getitem__'):
                         for key in info.keys():
@@ -155,38 +137,37 @@ def parse_image_infos(image_infos_input: Any) -> List[Dict[str, Any]]:
                     else:
                         raise TypeError("Not dict-like")
                 except Exception:
-                    # Strategy 2: Try vars() for object attributes
+                    # 策略 2：尝试 vars() 获取对象属性
                     try:
                         converted_info = vars(info)
                     except Exception:
-                        # Strategy 3: Try dir() and getattr
+                        # 策略 3：尝试 dir() 和 getattr
                         try:
                             for attr in dir(info):
                                 if not attr.startswith('_'):
                                     converted_info[attr] = getattr(info, attr)
                         except Exception:
-                            raise ValueError(f"image_infos[{i}] cannot be converted to dictionary (type: {type(info)})")
-            
-            # Validate required fields
+                            raise ValueError(f"image_infos[{i}] 无法转换为字典（类型：{type(info)}）")
+
+            # 验证必需字段
             required_fields = ['image_url', 'start', 'end']
             for field in required_fields:
                 if field not in converted_info:
-                    raise ValueError(f"Missing required field '{field}' in image_infos[{i}]")
+                    raise ValueError(f"{info_param}[{{i}}] 中缺少必需字段 '{{field}}'")
             
-            # Map image_url to material_url for consistency
+            # 将 image_url 映射到 material_url 以保持一致性
             converted_info['material_url'] = converted_info['image_url']
-            
+
             result.append(converted_info)
         
         return result
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format in image_infos: {str(e)}")
+        raise ValueError(f"image_infos 中的 JSON 格式无效：{str(e)}")
     except Exception as e:
-        raise ValueError(f"Error parsing image_infos (type: {type(image_infos_input)}): {str(e)}")
-
+        raise ValueError(f"解析 image_infos 时出错（类型：{type(image_infos_input)}）：{str(e)}")
 
 def load_draft_config(draft_id: str) -> Dict[str, Any]:
-    """Load existing draft configuration"""
+    """加载现有草稿配置"""
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
@@ -204,7 +185,7 @@ def load_draft_config(draft_id: str) -> Dict[str, Any]:
 
 
 def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
-    """Save updated draft configuration"""
+    """保存更新后的草稿配置"""
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
@@ -215,30 +196,21 @@ def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple[List[str], List[Dict[str, Any]], Dict[str, Any]]:
+def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple[List[str], Dict[str, Any]]:
     """
-    Create a properly structured image track with segments following data structure patterns
+    创建包含片段的图片轨道，遵循数据结构模式
     
-    Returns:
-        tuple: (segment_ids, segment_infos, track_dict)
+    返回值:
+        tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-    segment_infos = []
     segments = []
     
     for info in image_infos:
         segment_id = str(uuid.uuid4())
-        segment_ids.append(segment_id)
-        
-        # Create segment info for return
-        segment_infos.append({
-            "id": segment_id,
-            "start": info['start'],
-            "end": info['end']
-        })
-        
-        # Create segment following the proper data structure format
-        # Only include fields that are present in info (non-defaults from make_image_info)
+        segment_ids.append(segment_id)        
+        # 遵循正确的数据结构格式创建片段
+        # 仅包含 info 中存在的字段（来自 make_image_info 的非默认值）
         segment = {
             "id": segment_id,
             "type": "image",
@@ -249,7 +221,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
             }
         }
         
-        # Build transform dict, only including fields that exist in info
+        # 构建变换字典，仅包含 info 中存在的字段
         transform = {}
         if 'position_x' in info:
             transform['position_x'] = info['position_x']
@@ -300,7 +272,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         if background:
             segment["background"] = background
         
-        # Animations - only add if any animation specified
+        # 动画 - 仅在指定了任何动画时添加
         animations = {}
         if 'in_animation' in info:  # Map in_animation to intro
             animations['intro'] = info['in_animation']
@@ -315,25 +287,25 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
-    # Note: Images are placed on video tracks (no separate image track type)
+    # 遵循正确的 TrackConfig 格式创建轨道
+    # 注意：图片放置在视频轨道上（没有单独的图片轨道类型）
     track = {
         "track_type": "video",
         "segments": segments
     }
     
-    return segment_ids, segment_infos, track
+    return segment_ids, track
 
 
 def handler(args: Args[Input]) -> Output:
     """
-    Main handler function for adding images to a draft
+    向草稿添加图片的主处理函数
     
-    Args:
-        args: Input arguments containing draft_id and image_infos
+    参数:
+        args: 包含 draft_id 和 image_infos 的输入参数
         
-    Returns:
-        Output containing segment_ids and segment_infos
+    返回值:
+        包含 segment_ids 的输出
     """
     logger = getattr(args, 'logger', None)
     
@@ -341,11 +313,10 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding images to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="缺少必需的 draft_id 参数"
             )
@@ -353,7 +324,6 @@ def handler(args: Args[Input]) -> Output:
         if not validate_uuid_format(args.input.draft_id):
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="无效的 draft_id 格式"
             )
@@ -361,12 +331,11 @@ def handler(args: Args[Input]) -> Output:
         if args.input.image_infos is None:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="缺少必需的 image_infos 参数"
             )
         
-        # Parse image information with detailed logging
+        # 解析图片信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse image_infos: type={type(args.input.image_infos)}, value={repr(args.input.image_infos)[:500]}...")
@@ -381,7 +350,6 @@ def handler(args: Args[Input]) -> Output:
                 logger.error(f"Failed to parse image_infos: {str(e)}")
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"解析 image_infos 失败: {str(e)}"
             )
@@ -389,41 +357,38 @@ def handler(args: Args[Input]) -> Output:
         if not image_infos:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="image_infos 不能为空"
             )
         
-        # Load existing draft configuration
+        # 加载现有草稿配置
         try:
             draft_config = load_draft_config(args.input.draft_id)
         except (FileNotFoundError, Exception) as e:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create image track with segments using proper data structure patterns
-        segment_ids, segment_infos, image_track = create_image_track_with_segments(image_infos)
+        # 使用正确的数据结构模式创建带片段的图片轨道
+        segment_ids, image_track = create_image_track_with_segments(image_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(image_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"保存草稿配置失败: {str(e)}"
             )
@@ -432,9 +397,7 @@ def handler(args: Args[Input]) -> Output:
             logger.info(f"Successfully added {len(image_infos)} images to draft {args.input.draft_id}")
         
         return Output(
-            segment_ids=segment_ids,
-            segment_infos=segment_infos,
-            success=True,
+            segment_ids=segment_ids,            success=True,
             message=f"成功添加 {len(image_infos)} 张图片到草稿"
         )
         
@@ -445,7 +408,6 @@ def handler(args: Args[Input]) -> Output:
         
         return Output(
             segment_ids=[],
-            segment_infos=[],
-            success=False,
+                success=False,
             message=error_msg
         )

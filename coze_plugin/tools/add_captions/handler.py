@@ -1,8 +1,8 @@
 """
-Add Captions Tool Handler
+添加字幕工具处理器
 
-Adds text/caption segments to an existing draft by creating a new text track.
-Each call creates a new track containing all the specified captions.
+向现有草稿添加文本/字幕片段，创建新的文本轨道。
+每次调用创建一个包含所有指定字幕的新轨道。
 """
 
 import os
@@ -13,24 +13,23 @@ from typing import NamedTuple, List, Dict, Any
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for add_captions tool"""
-    draft_id: str                # UUID of the existing draft
-    caption_infos: Any           # JSON string or list containing caption information (flexible type)
+    """add_captions 工具的输入参数"""
+    draft_id: str                # 现有草稿的 UUID
+    caption_infos: List[str]       # 包含caption信息的 JSON 字符串列表
 
 
 class Output(NamedTuple):
-    """Output for add_captions tool"""
-    segment_ids: List[str]       # List of generated segment UUIDs
-    segment_infos: List[Dict[str, Any]]  # List of segment info (id, start, end)
-    success: bool = True         # Operation success status
-    message: str = "字幕添加成功"  # Status message
+    """add_captions 工具的输出"""
+    segment_ids: List[str]       # 生成的片段 UUID 列表
+    success: bool = True         # 操作成功状态
+    message: str = "字幕添加成功"  # 状态消息
 
 
-# Data models (duplicated here for Coze tool independence)
+# 数据模型（为 Coze 工具独立性在此重复定义）
 class TimeRange:
-    """Time range in milliseconds"""
+    """时间范围，单位：毫秒"""
     def __init__(self, start: int = 0, end: int = 0):
         self.start = start
         self.end = end
@@ -41,7 +40,7 @@ class TimeRange:
 
 
 class TextStyle:
-    """Text styling configuration"""
+    """文本样式配置"""
     def __init__(self, **kwargs):
         self.font_family = kwargs.get('font_family', "默认")
         self.font_size = kwargs.get('font_size', 48)
@@ -49,7 +48,7 @@ class TextStyle:
         self.font_style = kwargs.get('font_style', "normal")
         self.color = kwargs.get('color', "#FFFFFF")
         
-        # Text effects
+        # 文本特效
         self.stroke_enabled = kwargs.get('stroke_enabled', False)
         self.stroke_color = kwargs.get('stroke_color', "#000000")
         self.stroke_width = kwargs.get('stroke_width', 2)
@@ -66,7 +65,7 @@ class TextStyle:
 
 
 class TextSegmentConfig:
-    """Configuration for a text/caption segment"""
+    """文本/字幕片段的配置"""
     def __init__(self, content: str, time_range: TimeRange, **kwargs):
         self.content = content
         self.time_range = time_range
@@ -97,7 +96,7 @@ class TextSegmentConfig:
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
-    """Validate UUID string format"""
+    """验证 UUID 字符串格式"""
     try:
         uuid.UUID(uuid_str)
         return True
@@ -105,56 +104,39 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def parse_caption_infos(caption_infos_input: Any) -> List[Dict[str, Any]]:
-    """Parse caption_infos from any input format and validate"""
+def parse_caption_infos(caption_infos_input: List[str]) -> List[Dict[str, Any]]:
+    """从输入格式解析 caption_infos 并验证"""
     try:
-        # Handle multiple input formats with extensive debugging
-        if isinstance(caption_infos_input, str):
-            # Parse JSON string
-            caption_infos = json.loads(caption_infos_input)
-        elif isinstance(caption_infos_input, list):
-            # Direct list - could be list of dicts OR list of strings
-            # Check if first element is a string (array of strings format)
-            if caption_infos_input and isinstance(caption_infos_input[0], str):
-                # Array of strings - parse each string as JSON
-                parsed_infos = []
-                for i, info_str in enumerate(caption_infos_input):
-                    try:
-                        parsed_info = json.loads(info_str)
-                        parsed_infos.append(parsed_info)
-                    except json.JSONDecodeError as e:
-                        raise ValueError(f"Invalid JSON in caption_infos[{i}]: {str(e)}")
-                caption_infos = parsed_infos
-            else:
-                # List of objects (original behavior)
-                caption_infos = caption_infos_input
-        elif hasattr(caption_infos_input, '__iter__') and not isinstance(caption_infos_input, (str, bytes)):
-            # Other iterable types
-            caption_infos = list(caption_infos_input)
+        # 处理 JSON 字符串列表格式
+        if isinstance(caption_infos_input, list):
+            # 字符串数组 - 将每个字符串解析为 JSON
+            parsed_infos = []
+            for i, info_str in enumerate(caption_infos_input):
+                try:
+                    parsed_info = json.loads(info_str)
+                    parsed_infos.append(parsed_info)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON in caption_infos[{i}]: {str(e)}")
+            captions = parsed_infos
         else:
-            # Last resort - try string conversion
-            try:
-                caption_infos_str = str(caption_infos_input)
-                caption_infos = json.loads(caption_infos_str)
-            except (json.JSONDecodeError, ValueError):
-                raise ValueError(f"Cannot parse caption_infos from type {type(caption_infos_input)}")
+            raise ValueError(f"caption_infos 必须是字符串列表，得到 {type(caption_infos_input)}")
         
-        # Ensure it's a list
-        if not isinstance(caption_infos, list):
-            raise ValueError(f"caption_infos must resolve to a list, got {type(caption_infos)}")
+        # 确保是列表
+        if not isinstance(captions, list):
+            raise ValueError(f"caption_infos 必须解析为列表，得到 {type(captions)}")
         
-        # Process each item with very robust handling
+        # 处理每一项并进行健壮性检查
         result = []
-        for i, info in enumerate(caption_infos):
-            # Convert to plain dict - handle various object types
+        for i, info in enumerate(captions):
+            # 转换为纯字典 - 处理各种对象类型
             if isinstance(info, dict):
-                # Already a plain dict
-                converted_info = dict(info)  # Make a copy to be safe
+                # 已经是纯字典
+                converted_info = dict(info)  # 为安全起见制作副本
             else:
-                # Try various conversion strategies
+                # 尝试各种转换策略
                 converted_info = {}
                 
-                # Strategy 1: Try to access like a dict
+                # 策略 1：尝试像字典一样访问
                 try:
                     if hasattr(info, 'keys') and hasattr(info, '__getitem__'):
                         for key in info.keys():
@@ -162,35 +144,34 @@ def parse_caption_infos(caption_infos_input: Any) -> List[Dict[str, Any]]:
                     else:
                         raise TypeError("Not dict-like")
                 except Exception:
-                    # Strategy 2: Try vars() for object attributes
+                    # 策略 2：尝试 vars() 获取对象属性
                     try:
                         converted_info = vars(info)
                     except Exception:
-                        # Strategy 3: Try dir() and getattr
+                        # 策略 3：尝试 dir() 和 getattr
                         try:
                             for attr in dir(info):
                                 if not attr.startswith('_'):
                                     converted_info[attr] = getattr(info, attr)
                         except Exception:
-                            raise ValueError(f"caption_infos[{i}] cannot be converted to dictionary (type: {type(info)})")
-            
-            # Validate required fields
+                            raise ValueError(f"caption_infos[{i}] 无法转换为字典（类型：{type(info)}）")
+
+            # 验证必需字段
             required_fields = ['content', 'start', 'end']
             for field in required_fields:
                 if field not in converted_info:
-                    raise ValueError(f"Missing required field '{field}' in caption_infos[{i}]")
-            
+                    raise ValueError(f"{info_param}[{{i}}] 中缺少必需字段 '{{field}}'")
+
             result.append(converted_info)
         
         return result
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format in caption_infos: {str(e)}")
+        raise ValueError(f"caption_infos 中的 JSON 格式无效：{str(e)}")
     except Exception as e:
-        raise ValueError(f"Error parsing caption_infos (type: {type(caption_infos_input)}): {str(e)}")
-
+        raise ValueError(f"解析 caption_infos 时出错（类型：{type(caption_infos_input)}）：{str(e)}")
 
 def load_draft_config(draft_id: str) -> Dict[str, Any]:
-    """Load existing draft configuration"""
+    """加载现有草稿配置"""
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
@@ -208,7 +189,7 @@ def load_draft_config(draft_id: str) -> Dict[str, Any]:
 
 
 def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
-    """Save updated draft configuration"""
+    """保存更新后的草稿配置"""
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
@@ -219,30 +200,21 @@ def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tuple[List[str], List[Dict[str, Any]], Dict[str, Any]]:
+def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tuple[List[str], Dict[str, Any]]:
     """
-    Create a properly structured text track with segments following data structure patterns
+    创建包含片段的文本轨道，遵循数据结构模式
     
-    Returns:
-        tuple: (segment_ids, segment_infos, track_dict)
+    返回值:
+        tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-    segment_infos = []
     segments = []
     
     for info in caption_infos:
         segment_id = str(uuid.uuid4())
-        segment_ids.append(segment_id)
-        
-        # Create segment info for return
-        segment_infos.append({
-            "id": segment_id,
-            "start": info['start'],
-            "end": info['end']
-        })
-        
-        # Create segment following the proper data structure format
-        # Only include fields that are present in info (non-defaults from make_caption_info)
+        segment_ids.append(segment_id)        
+        # 遵循正确的数据结构格式创建片段
+        # 仅包含 info 中存在的字段（来自 make_caption_info 的非默认值）
         segment = {
             "id": segment_id,
             "type": "text",
@@ -253,7 +225,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
             }
         }
         
-        # Build transform dict, only including fields that exist in info
+        # 构建变换字典，仅包含 info 中存在的字段
         transform = {}
         if 'position_x' in info:
             transform['position_x'] = info['position_x']
@@ -268,7 +240,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         if transform:
             segment["transform"] = transform
         
-        # Build style dict, only including fields that exist in info
+        # 构建样式字典，仅包含 info 中存在的字段
         style = {}
         if 'font_family' in info:
             style['font_family'] = info['font_family']
@@ -281,7 +253,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         if 'color' in info:
             style['color'] = info['color']
         
-        # Stroke - only add if enabled
+        # 描边 - 仅在启用时添加
         if info.get('stroke_enabled'):
             stroke = {'enabled': True}
             if 'stroke_color' in info:
@@ -290,7 +262,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
                 stroke['width'] = info['stroke_width']
             style['stroke'] = stroke
         
-        # Shadow - only add if enabled
+        # 阴影 - 仅在启用时添加
         if info.get('shadow_enabled'):
             shadow = {'enabled': True}
             if 'shadow_color' in info:
@@ -303,7 +275,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
                 shadow['blur'] = info['shadow_blur']
             style['shadow'] = shadow
         
-        # Background - only add if enabled
+        # 背景 - 仅在启用时添加
         if info.get('background_enabled'):
             background = {'enabled': True}
             if 'background_color' in info:
@@ -315,11 +287,11 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         if style:
             segment["style"] = style
         
-        # Alignment - only add if not default
+        # 对齐 - 仅在非默认值时添加
         if 'alignment' in info:
             segment["alignment"] = info['alignment']
         
-        # Animations - only add if any animation specified
+        # 动画 - 仅在指定了任何动画时添加
         animations = {}
         if 'intro_animation' in info:
             animations['intro'] = info['intro_animation']
@@ -332,24 +304,24 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
+    # 遵循正确的 TrackConfig 格式创建轨道
     track = {
         "track_type": "text",
         "segments": segments
     }
     
-    return segment_ids, segment_infos, track
+    return segment_ids, track
 
 
 def handler(args: Args[Input]) -> Output:
     """
-    Main handler function for adding captions to a draft
+    向草稿添加字幕的主处理函数
     
-    Args:
-        args: Input arguments containing draft_id and caption_infos
+    参数:
+        args: 包含 draft_id 和 caption_infos 的输入参数
         
-    Returns:
-        Output containing segment_ids and segment_infos
+    返回值:
+        包含 segment_ids 的输出
     """
     logger = getattr(args, 'logger', None)
     
@@ -357,11 +329,10 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding captions to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="缺少必需的 draft_id 参数"
             )
@@ -369,7 +340,6 @@ def handler(args: Args[Input]) -> Output:
         if not validate_uuid_format(args.input.draft_id):
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="无效的 draft_id 格式"
             )
@@ -377,12 +347,11 @@ def handler(args: Args[Input]) -> Output:
         if args.input.caption_infos is None:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="缺少必需的 caption_infos 参数"
             )
         
-        # Parse caption information with detailed logging
+        # 解析字幕信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse caption_infos: type={type(args.input.caption_infos)}, value={repr(args.input.caption_infos)[:500]}...")
@@ -397,7 +366,6 @@ def handler(args: Args[Input]) -> Output:
                 logger.error(f"Failed to parse caption_infos: {str(e)}")
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"解析 caption_infos 失败: {str(e)}"
             )
@@ -405,41 +373,38 @@ def handler(args: Args[Input]) -> Output:
         if not caption_infos:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="caption_infos 不能为空"
             )
         
-        # Load existing draft configuration
+        # 加载现有草稿配置
         try:
             draft_config = load_draft_config(args.input.draft_id)
         except (FileNotFoundError, Exception) as e:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create text track with segments using proper data structure patterns
-        segment_ids, segment_infos, text_track = create_text_track_with_segments(caption_infos)
+        # 使用正确的数据结构模式创建带片段的文本轨道
+        segment_ids, text_track = create_text_track_with_segments(caption_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(text_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"保存草稿配置失败: {str(e)}"
             )
@@ -448,9 +413,7 @@ def handler(args: Args[Input]) -> Output:
             logger.info(f"Successfully added {len(caption_infos)} captions to draft {args.input.draft_id}")
         
         return Output(
-            segment_ids=segment_ids,
-            segment_infos=segment_infos,
-            success=True,
+            segment_ids=segment_ids,            success=True,
             message=f"成功添加 {len(caption_infos)} 条字幕到草稿"
         )
         
@@ -461,7 +424,6 @@ def handler(args: Args[Input]) -> Output:
         
         return Output(
             segment_ids=[],
-            segment_infos=[],
-            success=False,
+                success=False,
             message=error_msg
         )

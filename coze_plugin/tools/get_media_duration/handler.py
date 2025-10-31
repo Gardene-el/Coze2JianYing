@@ -21,14 +21,14 @@ except ImportError:
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for get_media_duration tool"""
+    """输入参数 for get_media_duration tool"""
     links: List[str]  # List of media file URLs to analyze
 
 
 class Output(NamedTuple):
-    """Output for get_media_duration tool"""
+    """get_media_duration 工具的输出"""
     all_timelines: List[Dict[str, int]]  # Overall timeline (start, end)
     timelines: List[Dict[str, int]]      # Individual timelines for each media file
 
@@ -102,7 +102,7 @@ def check_media_url_accessibility(url: str, timeout: int = 10) -> dict:
     Check if a media URL is accessible and get basic info
     
     Args:
-        url: Media file URL
+        url: 媒体文件 URL
         timeout: Request timeout
         
     Returns:
@@ -148,7 +148,7 @@ def download_media_file(url: str, timeout: int = 30) -> str:
     Download media file to temporary location for analysis
     
     Args:
-        url: Media file URL
+        url: 媒体文件 URL
         timeout: Download timeout in seconds
         
     Returns:
@@ -273,7 +273,7 @@ def get_media_duration_ms(file_path: str) -> int:
         file_path: Path to media file
         
     Returns:
-        Duration in milliseconds
+        时长（毫秒）
         
     Raises:
         Exception: If duration cannot be determined
@@ -291,7 +291,7 @@ def get_media_duration_ms(file_path: str) -> int:
         duration_ms = None
         
         for track in media_info.tracks:
-            if track.track_type in ['Video', 'Audio', 'General']:
+            if track.track_type in ['Video', '音频', 'General']:
                 if hasattr(track, 'duration') and track.duration:
                     duration_ms = int(float(track.duration))
                     break
@@ -316,7 +316,7 @@ def cleanup_temp_file(file_path: str):
 
 def handler(args: Args[Input]) -> Output:
     """
-    Main handler function for getting media duration
+    获取媒体时长的主处理函数
     
     Args:
         args: Input arguments containing links array

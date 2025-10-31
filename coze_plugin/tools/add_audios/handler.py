@@ -1,8 +1,8 @@
 """
-Add Audios Tool Handler
+添加音频工具处理器
 
-Adds audio segments to an existing draft by creating a new audio track.
-Each call creates a new track containing all the specified audios.
+向现有草稿添加音频片段，创建新的音频轨道。
+每次调用创建一个包含所有指定音频的新轨道。
 """
 
 import os
@@ -13,24 +13,23 @@ from typing import NamedTuple, List, Dict, Any
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for add_audios tool"""
-    draft_id: str                # UUID of the existing draft
-    audio_infos: Any             # JSON string or list containing audio information (flexible type)
+    """add_audios 工具的输入参数"""
+    draft_id: str                # 现有草稿的 UUID
+    audio_infos: List[str]       # 包含audio信息的 JSON 字符串列表
 
 
 class Output(NamedTuple):
-    """Output for add_audios tool"""
-    segment_ids: List[str]       # List of generated segment UUIDs
-    segment_infos: List[Dict[str, Any]]  # List of segment info (id, start, end)
-    success: bool = True         # Operation success status
-    message: str = "音频添加成功"  # Status message
+    """add_audios 工具的输出"""
+    segment_ids: List[str]       # 生成的片段 UUID 列表
+    success: bool = True         # 操作成功状态
+    message: str = "音频添加成功"  # 状态消息
 
 
-# Data models (duplicated here for Coze tool independence)
+# 数据模型（为 Coze 工具独立性在此重复定义）
 class TimeRange:
-    """Time range in milliseconds"""
+    """时间范围，单位：毫秒"""
     def __init__(self, start: int = 0, end: int = 0):
         self.start = start
         self.end = end
@@ -41,12 +40,12 @@ class TimeRange:
 
 
 class AudioSegmentConfig:
-    """Configuration for an audio segment"""
+    """音频片段的配置"""
     def __init__(self, material_url: str, time_range: TimeRange, **kwargs):
         self.material_url = material_url
         self.time_range = time_range
         
-        # Material range (for trimming)
+        # 素材范围（用于剪裁）
         material_start = kwargs.get('material_start')
         material_end = kwargs.get('material_end')
         if material_start is not None and material_end is not None:
@@ -54,25 +53,25 @@ class AudioSegmentConfig:
         else:
             self.material_range = None
         
-        # Audio properties
+        # 音频属性
         self.volume = kwargs.get('volume', 1.0)
         self.fade_in = kwargs.get('fade_in', 0)
         self.fade_out = kwargs.get('fade_out', 0)
         
-        # Audio effects
+        # 音频特效
         self.effect_type = kwargs.get('effect_type')
         self.effect_intensity = kwargs.get('effect_intensity', 1.0)
         
-        # Speed control
+        # 速度控制
         self.speed = kwargs.get('speed', 1.0)
         self.change_pitch = kwargs.get('change_pitch', False)
         
-        # Volume keyframes (empty by default)
+        # 音量关键帧（默认为空）
         self.volume_keyframes = []
 
 
 def validate_uuid_format(uuid_str: str) -> bool:
-    """Validate UUID string format"""
+    """验证 UUID 字符串格式"""
     try:
         uuid.UUID(uuid_str)
         return True
@@ -80,58 +79,39 @@ def validate_uuid_format(uuid_str: str) -> bool:
         return False
 
 
-def parse_audio_infos(audio_infos_input: Any) -> List[Dict[str, Any]]:
-    """Parse audio_infos from any input format and validate"""
+def parse_audio_infos(audio_infos_input: List[str]) -> List[Dict[str, Any]]:
+    """从输入格式解析 audio_infos 并验证"""
     try:
-        # Handle multiple input formats with extensive debugging
-        if isinstance(audio_infos_input, str):
-            # Parse JSON string
-            audio_infos = json.loads(audio_infos_input)
-        elif isinstance(audio_infos_input, list):
-            # Direct list - could be list of dicts OR list of strings
-            # Check if first element is a string (array of strings format)
-            if audio_infos_input and isinstance(audio_infos_input[0], str):
-                # Array of strings - parse each string as JSON
-                parsed_infos = []
-                for i, info_str in enumerate(audio_infos_input):
-                    try:
-                        parsed_info = json.loads(info_str)
-                        parsed_infos.append(parsed_info)
-                    except json.JSONDecodeError as e:
-                        # Provide helpful error message with snippet of malformed string
-                        snippet = info_str[:100] + ('...' if len(info_str) > 100 else '')
-                        raise ValueError(f"Invalid JSON in audio_infos[{i}]: {str(e)}. String snippet: {snippet}")
-                audio_infos = parsed_infos
-            else:
-                # List of objects (original behavior)
-                audio_infos = audio_infos_input
-        elif hasattr(audio_infos_input, '__iter__') and not isinstance(audio_infos_input, (str, bytes)):
-            # Other iterable types
-            audio_infos = list(audio_infos_input)
+        # 处理 JSON 字符串列表格式
+        if isinstance(audio_infos_input, list):
+            # 字符串数组 - 将每个字符串解析为 JSON
+            parsed_infos = []
+            for i, info_str in enumerate(audio_infos_input):
+                try:
+                    parsed_info = json.loads(info_str)
+                    parsed_infos.append(parsed_info)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON in audio_infos[{i}]: {str(e)}")
+            audios = parsed_infos
         else:
-            # Last resort - try string conversion
-            try:
-                audio_infos_str = str(audio_infos_input)
-                audio_infos = json.loads(audio_infos_str)
-            except (json.JSONDecodeError, ValueError):
-                raise ValueError(f"Cannot parse audio_infos from type {type(audio_infos_input)}")
+            raise ValueError(f"audio_infos 必须是字符串列表，得到 {type(audio_infos_input)}")
         
-        # Ensure it's a list
-        if not isinstance(audio_infos, list):
-            raise ValueError(f"audio_infos must resolve to a list, got {type(audio_infos)}")
+        # 确保是列表
+        if not isinstance(audios, list):
+            raise ValueError(f"audio_infos 必须解析为列表，得到 {type(audios)}")
         
-        # Process each item with very robust handling
+        # 处理每一项并进行健壮性检查
         result = []
-        for i, info in enumerate(audio_infos):
-            # Convert to plain dict - handle various object types
+        for i, info in enumerate(audios):
+            # 转换为纯字典 - 处理各种对象类型
             if isinstance(info, dict):
-                # Already a plain dict
-                converted_info = dict(info)  # Make a copy to be safe
+                # 已经是纯字典
+                converted_info = dict(info)  # 为安全起见制作副本
             else:
-                # Try various conversion strategies
+                # 尝试各种转换策略
                 converted_info = {}
                 
-                # Strategy 1: Try to access like a dict
+                # 策略 1：尝试像字典一样访问
                 try:
                     if hasattr(info, 'keys') and hasattr(info, '__getitem__'):
                         for key in info.keys():
@@ -139,38 +119,37 @@ def parse_audio_infos(audio_infos_input: Any) -> List[Dict[str, Any]]:
                     else:
                         raise TypeError("Not dict-like")
                 except Exception:
-                    # Strategy 2: Try vars() for object attributes
+                    # 策略 2：尝试 vars() 获取对象属性
                     try:
                         converted_info = vars(info)
                     except Exception:
-                        # Strategy 3: Try dir() and getattr
+                        # 策略 3：尝试 dir() 和 getattr
                         try:
                             for attr in dir(info):
                                 if not attr.startswith('_'):
                                     converted_info[attr] = getattr(info, attr)
                         except Exception:
-                            raise ValueError(f"audio_infos[{i}] cannot be converted to dictionary (type: {type(info)})")
-            
-            # Validate required fields
+                            raise ValueError(f"audio_infos[{i}] 无法转换为字典（类型：{type(info)}）")
+
+            # 验证必需字段
             required_fields = ['audio_url', 'start', 'end']
             for field in required_fields:
                 if field not in converted_info:
-                    raise ValueError(f"Missing required field '{field}' in audio_infos[{i}]")
+                    raise ValueError(f"{info_param}[{{i}}] 中缺少必需字段 '{{field}}'")
             
-            # Map audio_url to material_url for consistency
+            # 将 audio_url 映射到 material_url 以保持一致性
             converted_info['material_url'] = converted_info['audio_url']
-            
+
             result.append(converted_info)
         
         return result
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format in audio_infos: {str(e)}")
+        raise ValueError(f"audio_infos 中的 JSON 格式无效：{str(e)}")
     except Exception as e:
-        raise ValueError(f"Error parsing audio_infos (type: {type(audio_infos_input)}): {str(e)}")
-
+        raise ValueError(f"解析 audio_infos 时出错（类型：{type(audio_infos_input)}）：{str(e)}")
 
 def load_draft_config(draft_id: str) -> Dict[str, Any]:
-    """Load existing draft configuration"""
+    """加载现有草稿配置"""
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
@@ -188,7 +167,7 @@ def load_draft_config(draft_id: str) -> Dict[str, Any]:
 
 
 def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
-    """Save updated draft configuration"""
+    """保存更新后的草稿配置"""
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
@@ -199,30 +178,21 @@ def save_draft_config(draft_id: str, config: Dict[str, Any]) -> None:
         raise Exception(f"Failed to save draft config: {str(e)}")
 
 
-def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple[List[str], List[Dict[str, Any]], Dict[str, Any]]:
+def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple[List[str], Dict[str, Any]]:
     """
-    Create a properly structured audio track with segments following data structure patterns
+    创建包含片段的音频轨道，遵循数据结构模式
     
-    Returns:
-        tuple: (segment_ids, segment_infos, track_dict)
+    返回值:
+        tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-    segment_infos = []
     segments = []
     
     for info in audio_infos:
         segment_id = str(uuid.uuid4())
-        segment_ids.append(segment_id)
-        
-        # Create segment info for return
-        segment_infos.append({
-            "id": segment_id,
-            "start": info['start'],
-            "end": info['end']
-        })
-        
-        # Create segment following the proper data structure format
-        # Only include fields that are present in info (non-defaults from make_audio_info)
+        segment_ids.append(segment_id)        
+        # 遵循正确的数据结构格式创建片段
+        # 仅包含 info 中存在的字段（来自 make_audio_info 的非默认值）
         segment = {
             "id": segment_id,
             "type": "audio",
@@ -233,14 +203,14 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
             }
         }
         
-        # Add material_range only if provided (for trimming audio)
+        # 仅在提供时添加 material_range（用于剪裁音频）
         if 'material_start' in info and 'material_end' in info:
             segment["material_range"] = {
                 "start": info['material_start'],
                 "end": info['material_end']
             }
         
-        # Build audio properties dict, only including fields that exist in info
+        # 构建音频属性字典，仅包含 info 中存在的字段
         audio_props = {}
         if 'volume' in info:
             audio_props['volume'] = info['volume']
@@ -257,31 +227,31 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
         if 'change_pitch' in info:
             audio_props['change_pitch'] = info['change_pitch']
         
-        # Only add audio properties if there are any
+        # 仅在有音频属性时添加
         if audio_props:
             segment["audio"] = audio_props
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
-    # Only include non-default track properties
+    # 遵循正确的 TrackConfig 格式创建轨道
+    # 仅包含非默认轨道属性
     track = {
         "track_type": "audio",
         "segments": segments
     }
     
-    return segment_ids, segment_infos, track
+    return segment_ids, track
 
 
 def handler(args: Args[Input]) -> Output:
     """
-    Main handler function for adding audios to a draft
+    向草稿添加音频的主处理函数
     
-    Args:
-        args: Input arguments containing draft_id and audio_infos
+    参数:
+        args: 包含 draft_id 和 audio_infos 的输入参数
         
-    Returns:
-        Output containing segment_ids and segment_infos
+    返回值:
+        包含 segment_ids 的输出
     """
     logger = getattr(args, 'logger', None)
     
@@ -289,11 +259,10 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding audios to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="缺少必需的 draft_id 参数"
             )
@@ -301,7 +270,6 @@ def handler(args: Args[Input]) -> Output:
         if not validate_uuid_format(args.input.draft_id):
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="无效的 draft_id 格式"
             )
@@ -309,12 +277,11 @@ def handler(args: Args[Input]) -> Output:
         if args.input.audio_infos is None:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="缺少必需的 audio_infos 参数"
             )
         
-        # Parse audio information with detailed logging
+        # 解析音频信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse audio_infos: type={type(args.input.audio_infos)}, value={repr(args.input.audio_infos)[:500]}...")
@@ -329,7 +296,6 @@ def handler(args: Args[Input]) -> Output:
                 logger.error(f"Failed to parse audio_infos: {str(e)}")
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"解析 audio_infos 失败: {str(e)}"
             )
@@ -337,41 +303,38 @@ def handler(args: Args[Input]) -> Output:
         if not audio_infos:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message="audio_infos 不能为空"
             )
         
-        # Load existing draft configuration
+        # 加载现有草稿配置
         try:
             draft_config = load_draft_config(args.input.draft_id)
         except (FileNotFoundError, Exception) as e:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create audio track with segments using proper data structure patterns
-        segment_ids, segment_infos, audio_track = create_audio_track_with_segments(audio_infos)
+        # 使用正确的数据结构模式创建带片段的音频轨道
+        segment_ids, audio_track = create_audio_track_with_segments(audio_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(audio_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:
             return Output(
                 segment_ids=[],
-                segment_infos=[],
                 success=False,
                 message=f"保存草稿配置失败: {str(e)}"
             )
@@ -380,9 +343,7 @@ def handler(args: Args[Input]) -> Output:
             logger.info(f"Successfully added {len(audio_infos)} audios to draft {args.input.draft_id}")
         
         return Output(
-            segment_ids=segment_ids,
-            segment_infos=segment_infos,
-            success=True,
+            segment_ids=segment_ids,            success=True,
             message=f"成功添加 {len(audio_infos)} 个音频到草稿"
         )
         
@@ -393,7 +354,6 @@ def handler(args: Args[Input]) -> Output:
         
         return Output(
             segment_ids=[],
-            segment_infos=[],
-            success=False,
+                success=False,
             message=error_msg
         )
