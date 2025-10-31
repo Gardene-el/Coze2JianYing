@@ -270,27 +270,32 @@ def generate_documentation(handler_path: str) -> str:
     
     # Output parameters section
     if output_parameters and output_type == 'NamedTuple':
-        # Filter out 'success' and 'message' fields from output parameters
-        filtered_output_params = [
-            param for param in output_parameters 
-            if param['name'] not in ['success', 'message']
-        ]
+        doc_lines.append("## 输出参数")
+        doc_lines.append("")
+        doc_lines.append("```python")
+        doc_lines.append("class Output(NamedTuple):")
+        for param in output_parameters:
+            # Format parameter line
+            param_line = f"    {param['name']}: {param['type']}"
+            if param['default'] != 'N/A':
+                param_line += f" = {param['default']}"
+            if param['comment']:
+                param_line += f"  # {param['comment']}"
+            doc_lines.append(param_line)
+        doc_lines.append("```")
+        doc_lines.append("")
         
-        # Only show output section if there are parameters after filtering
-        if filtered_output_params:
-            doc_lines.append("## 输出参数")
+        # Add explanation for common fields if they exist
+        has_success = any(param['name'] == 'success' for param in output_parameters)
+        has_message = any(param['name'] == 'message' for param in output_parameters)
+        
+        if has_success or has_message:
+            doc_lines.append("### 通用字段说明")
             doc_lines.append("")
-            doc_lines.append("```python")
-            doc_lines.append("class Output(NamedTuple):")
-            for param in filtered_output_params:
-                # Format parameter line
-                param_line = f"    {param['name']}: {param['type']}"
-                if param['default'] != 'N/A':
-                    param_line += f" = {param['default']}"
-                if param['comment']:
-                    param_line += f"  # {param['comment']}"
-                doc_lines.append(param_line)
-            doc_lines.append("```")
+            if has_success:
+                doc_lines.append("- `success`: 表示操作是否成功的布尔值")
+            if has_message:
+                doc_lines.append("- `message`: 操作结果的描述信息")
             doc_lines.append("")
     elif output_type == 'Dict':
         doc_lines.append("## 输出参数")

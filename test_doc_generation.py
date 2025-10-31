@@ -186,10 +186,10 @@ def test_add_videos_tool():
     
     print(f"\n📁 Handler path: {handler_path}")
     
-    # Test 1: Extract output parameters (raw extraction, before filtering)
+    # Test 1: Extract output parameters
     print("\n1️⃣ Testing output parameters extraction...")
     output_params = extract_output_parameters(handler_path)
-    print(f"   Found {len(output_params)} output parameters in handler.py:")
+    print(f"   Found {len(output_params)} output parameters:")
     for param in output_params:
         print(f"     - {param['name']}: {param['type']}")
         if param['default'] != 'N/A':
@@ -197,12 +197,12 @@ def test_add_videos_tool():
         if param['comment']:
             print(f"       Comment: {param['comment']}")
     
-    # Check that at least segment_ids is present (main output field)
+    # Check for key output parameters
     found_output_params = [p['name'] for p in output_params]
-    if 'segment_ids' in found_output_params:
-        print("   ✅ Key output parameter 'segment_ids' found")
+    if 'segment_ids' in found_output_params and 'success' in found_output_params and 'message' in found_output_params:
+        print("   ✅ Key output parameters found (segment_ids, success, message)")
     else:
-        print(f"   ❌ Error! Expected 'segment_ids' in output parameters, Found: {found_output_params}")
+        print(f"   ❌ Error! Expected segment_ids, success, message. Found: {found_output_params}")
         return False
     
     # Test 2: Check output type
@@ -215,18 +215,21 @@ def test_add_videos_tool():
         print(f"   ❌ Error! Expected: NamedTuple, Got: {output_type}")
         return False
     
-    # Test 3: Generate full documentation with Output section (success and message fields omitted)
-    print("\n3️⃣ Testing full documentation generation with Output (success/message omitted)...")
+    # Test 3: Generate full documentation with Output section and common fields explanation
+    print("\n3️⃣ Testing full documentation generation with Output and common fields explanation...")
     try:
         doc_content = generate_documentation(handler_path)
         
-        # Check for Output section - success and message should be omitted
+        # Check for Output section and common fields explanation
         checks = [
             ("## 输出参数" in doc_content, "Output parameters section"),
             ("class Output(NamedTuple):" in doc_content, "Output class definition"),
             ("segment_ids" in doc_content, "segment_ids field"),
-            ("success" not in doc_content, "success field omitted (as intended)"),
-            ("message" not in doc_content or "状态消息" not in doc_content, "message field omitted (as intended)"),
+            ("success" in doc_content, "success field"),
+            ("message" in doc_content, "message field"),
+            ("### 通用字段说明" in doc_content, "Common fields explanation section"),
+            ("`success`: 表示操作是否成功的布尔值" in doc_content, "success field explanation"),
+            ("`message`: 操作结果的描述信息" in doc_content, "message field explanation"),
         ]
         
         all_passed = True
@@ -234,13 +237,13 @@ def test_add_videos_tool():
             if check:
                 print(f"   ✅ {description}")
             else:
-                print(f"   ❌ Failed: {description}")
+                print(f"   ❌ Missing: {description}")
                 all_passed = False
         
         if not all_passed:
             print("\n   Generated documentation preview:")
             print("   " + "-" * 76)
-            for line in doc_content.split('\n')[:30]:
+            for line in doc_content.split('\n')[:40]:
                 print(f"   {line}")
             print("   " + "-" * 76)
             return False
