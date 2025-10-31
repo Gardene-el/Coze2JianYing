@@ -340,19 +340,22 @@ def handler(args: Args[Input]) -> Output:
         # 验证输入参数
         if not args.input.draft_id:
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message="缺少必需的 draft_id 参数"
             )
         
         if not validate_uuid_format(args.input.draft_id):
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message="无效的 draft_id 格式"
             )
         
         if args.input.caption_infos is None:
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message="缺少必需的 caption_infos 参数"
             )
         
@@ -370,13 +373,15 @@ def handler(args: Args[Input]) -> Output:
             if logger:
                 logger.error(f"Failed to parse caption_infos: {str(e)}")
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message=f"解析 caption_infos 失败: {str(e)}"
             )
         
         if not caption_infos:
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message="caption_infos 不能为空"
             )
         
@@ -385,7 +390,8 @@ def handler(args: Args[Input]) -> Output:
             draft_config = load_draft_config(args.input.draft_id)
         except (FileNotFoundError, Exception) as e:
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
@@ -406,7 +412,8 @@ def handler(args: Args[Input]) -> Output:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:
             return Output(
-                segment_ids=[],                success=False,
+                segment_ids=[],
+                success=False,
                 message=f"保存草稿配置失败: {str(e)}"
             )
         
@@ -424,6 +431,7 @@ def handler(args: Args[Input]) -> Output:
             logger.error(error_msg)
         
         return Output(
-            segment_ids=[],            success=False,
+            segment_ids=[],
+                success=False,
             message=error_msg
         )
