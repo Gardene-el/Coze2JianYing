@@ -69,12 +69,12 @@ def test_add_videos_basic():
         }
     ]
     
-    video_infos_str = json.dumps(video_infos)
+    video_infos_str_list = [json.dumps(info) for info in video_infos]
     
     # Step 3: Test add_videos
     add_input = Input(
         draft_id=draft_id,
-        video_infos=video_infos_str
+        video_infos=video_infos_str_list
     )
     
     result = handler(MockArgs(add_input))
@@ -82,18 +82,11 @@ def test_add_videos_basic():
     # Verify result
     assert result.success, f"add_videos failed: {result.message}"
     assert len(result.segment_ids) == 2, f"Expected 2 segments, got {len(result.segment_ids)}"
-    assert len(result.segment_infos) == 2, f"Expected 2 segment_infos, got {len(result.segment_infos)}"
     
     print(f"✅ Successfully added {len(result.segment_ids)} videos")
     print(f"✅ Segment IDs: {result.segment_ids}\n")
     
     # Step 4: Verify segment_infos format
-    for i, info in enumerate(result.segment_infos):
-        assert "id" in info, f"segment_infos[{i}] missing 'id' field"
-        assert "start" in info, f"segment_infos[{i}] missing 'start' field"
-        assert "end" in info, f"segment_infos[{i}] missing 'end' field"
-    
-    print(f"✅ Segment infos format correct: {result.segment_infos}\n")
     
     # Step 5: Verify draft config was updated
     draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)

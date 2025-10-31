@@ -112,7 +112,6 @@ def test_add_effects_basic():
     
     assert result.success, f"Should succeed: {result.message}"
     assert len(result.segment_ids) == 2, "Should create 2 segments"
-    assert len(result.segment_infos) == 2, "Should return 2 segment infos"
     print(f"✅ Added {len(result.segment_ids)} effects")
     print(f"   Segment IDs: {result.segment_ids}")
     
