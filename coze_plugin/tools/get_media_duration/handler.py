@@ -8,7 +8,7 @@ including individual and cumulative durations.
 import os
 import tempfile
 import requests
-from typing import List, Dict, Any
+from typing import List, Dict, Any, NamedTuple
 from urllib.parse import urlparse
 import json
 
@@ -19,7 +19,18 @@ except ImportError:
     MediaInfo = None
 
 from runtime import Args
-from typings.get_media_duration.get_media_duration import Input, Output
+
+
+# Input/Output type definitions (required for each Coze tool)
+class Input(NamedTuple):
+    """Input parameters for get_media_duration tool"""
+    links: List[str]  # List of media file URLs to analyze
+
+
+class Output(NamedTuple):
+    """Output for get_media_duration tool"""
+    all_timelines: List[Dict[str, int]]  # Overall timeline (start, end)
+    timelines: List[Dict[str, int]]      # Individual timelines for each media file
 
 
 def validate_url(url: str) -> bool:
@@ -303,7 +314,7 @@ def cleanup_temp_file(file_path: str):
         pass  # Ignore cleanup errors
 
 
-def handler(args: Args) -> Output:
+def handler(args: Args[Input]) -> Output:
     """
     Main handler function for getting media duration
     

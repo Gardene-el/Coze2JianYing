@@ -62,7 +62,14 @@ class Input(NamedTuple):
     background_color: Optional[str] = None      # Background color
 
 
-def handler(args: Args[Input]) -> Dict[str, Any]:
+class Output(NamedTuple):
+    """Output for make_video_info tool"""
+    video_info_string: str    # JSON string representation of video info
+    success: bool             # Operation success status
+    message: str              # Status message
+
+
+def handler(args: Args[Input]) -> Output:
     """
     Main handler function for creating video info string
     
@@ -80,71 +87,71 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
     try:
         # Validate required parameters
         if not args.input.video_url:
-            return {
-                "video_info_string": "",
-                "success": False,
-                "message": "缺少必需的 video_url 参数"
-            }
+            return Output(
+                video_info_string="",
+                success=False,
+                message="缺少必需的 video_url 参数"
+            )
         
         if args.input.start is None:
-            return {
-                "video_info_string": "",
-                "success": False,
-                "message": "缺少必需的 start 参数"
-            }
+            return Output(
+                video_info_string="",
+                success=False,
+                message="缺少必需的 start 参数"
+            )
         
         if args.input.end is None:
-            return {
-                "video_info_string": "",
-                "success": False,
-                "message": "缺少必需的 end 参数"
-            }
+            return Output(
+                video_info_string="",
+                success=False,
+                message="缺少必需的 end 参数"
+            )
         
         # Validate time range
         if args.input.start < 0:
-            return {
-                "video_info_string": "",
-                "success": False,
-                "message": "start 时间不能为负数"
-            }
+            return Output(
+                video_info_string="",
+                success=False,
+                message="start 时间不能为负数"
+            )
         
         if args.input.end <= args.input.start:
-            return {
-                "video_info_string": "",
-                "success": False,
-                "message": "end 时间必须大于 start 时间"
-            }
+            return Output(
+                video_info_string="",
+                success=False,
+                message="end 时间必须大于 start 时间"
+            )
         
         # Validate material range if provided
         if args.input.material_start is not None or args.input.material_end is not None:
             if args.input.material_start is None or args.input.material_end is None:
-                return {
-                    "video_info_string": "",
-                    "success": False,
-                    "message": "material_start 和 material_end 必须同时提供"
-                }
+                return Output(
+                    video_info_string="",
+                    success=False,
+                    message="material_start 和 material_end 必须同时提供"
+                )
             
             if args.input.material_start < 0:
-                return {
-                    "video_info_string": "",
-                    "success": False,
-                    "message": "material_start 时间不能为负数"
-                }
+                return Output(
+                    video_info_string="",
+                    success=False,
+                    message="material_start 时间不能为负数"
+                )
             
             if args.input.material_end <= args.input.material_start:
-                return {
-                    "video_info_string": "",
-                    "success": False,
-                    "message": "material_end 时间必须大于 material_start 时间"
-                }
+                return Output(
+                    video_info_string="",
+                    success=False,
+                    message="material_end 时间必须大于 material_start 时间"
+                )
         
         # Validate speed
         if args.input.speed is not None and (args.input.speed < 0.5 or args.input.speed > 2.0):
-            return {
-                "video_info_string": "",
-                "success": False,
-                "message": "speed 必须在 0.5 到 2.0 之间"
-            }
+            return Output(
+                video_info_string="",
+                success=False,
+                message="speed 必须在 0.5 到 2.0 之间"
+            )
         
         # Build video info dictionary with all parameters
         video_info = {
@@ -222,19 +229,19 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         if logger:
             logger.info(f"Successfully created video info string: {len(video_info_string)} characters")
         
-        return {
-            "video_info_string": video_info_string,
-            "success": True,
-            "message": "视频信息字符串生成成功"
-        }
+        return Output(
+            video_info_string=video_info_string,
+            success=True,
+            message="视频信息字符串生成成功"
+        )
         
     except Exception as e:
         error_msg = f"生成视频信息字符串时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return {
-            "video_info_string": "",
-            "success": False,
-            "message": error_msg
-        }
+        return Output(
+            video_info_string="",
+            success=False,
+            message=error_msg
+        )
