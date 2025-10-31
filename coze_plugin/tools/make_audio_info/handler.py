@@ -40,6 +40,10 @@ class Input(NamedTuple):
     material_end: Optional[int] = None          # Material end time in milliseconds
 
 
+# Output is returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
+
+
 
 def handler(args: Args[Input]) -> Dict[str, Any]:
     """

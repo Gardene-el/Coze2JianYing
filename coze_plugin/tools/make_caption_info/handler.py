@@ -63,6 +63,9 @@ class Input(NamedTuple):
     loop_animation: Optional[str] = None        # Loop animation type
 
 
+# Output is returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
+
 
 def handler(args: Args[Input]) -> Dict[str, Any]:
     """

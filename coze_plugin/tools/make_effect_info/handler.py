@@ -10,7 +10,7 @@ Based on EffectSegmentConfig from data_structures/draft_generator_interface/mode
 """
 
 import json
-from typing import NamedTuple, Optional, Dict, Any, Dict, Any
+from typing import NamedTuple, Optional, Dict, Any
 from runtime import Args
 
 
@@ -33,6 +33,9 @@ class Input(NamedTuple):
     # Optional custom properties
     properties: Optional[str] = None            # JSON string of custom effect properties
 
+
+# Output is returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
 
 
 def handler(args: Args[Input]) -> Dict[str, Any]:

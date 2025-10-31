@@ -57,6 +57,9 @@ class Input(NamedTuple):
     outro_animation_duration: Optional[int] = 500  # Outro animation duration in ms
 
 
+# Output is returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
+
 
 def handler(args: Args[Input]) -> Dict[str, Any]:
     """

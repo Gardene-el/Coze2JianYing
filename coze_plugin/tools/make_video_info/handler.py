@@ -62,6 +62,10 @@ class Input(NamedTuple):
     background_color: Optional[str] = None      # Background color
 
 
+# Output is returned as Dict[str, Any] instead of NamedTuple
+# This ensures proper JSON object serialization in Coze platform
+
+
 def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     Main handler function for creating video info string
