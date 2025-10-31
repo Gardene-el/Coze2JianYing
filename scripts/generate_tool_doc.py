@@ -270,20 +270,28 @@ def generate_documentation(handler_path: str) -> str:
     
     # Output parameters section
     if output_parameters and output_type == 'NamedTuple':
-        doc_lines.append("## 输出参数")
-        doc_lines.append("")
-        doc_lines.append("```python")
-        doc_lines.append("class Output(NamedTuple):")
-        for param in output_parameters:
-            # Format parameter line
-            param_line = f"    {param['name']}: {param['type']}"
-            if param['default'] != 'N/A':
-                param_line += f" = {param['default']}"
-            if param['comment']:
-                param_line += f"  # {param['comment']}"
-            doc_lines.append(param_line)
-        doc_lines.append("```")
-        doc_lines.append("")
+        # Filter out 'success' and 'message' fields from output parameters
+        filtered_output_params = [
+            param for param in output_parameters 
+            if param['name'] not in ['success', 'message']
+        ]
+        
+        # Only show output section if there are parameters after filtering
+        if filtered_output_params:
+            doc_lines.append("## 输出参数")
+            doc_lines.append("")
+            doc_lines.append("```python")
+            doc_lines.append("class Output(NamedTuple):")
+            for param in filtered_output_params:
+                # Format parameter line
+                param_line = f"    {param['name']}: {param['type']}"
+                if param['default'] != 'N/A':
+                    param_line += f" = {param['default']}"
+                if param['comment']:
+                    param_line += f"  # {param['comment']}"
+                doc_lines.append(param_line)
+            doc_lines.append("```")
+            doc_lines.append("")
     elif output_type == 'Dict':
         doc_lines.append("## 输出参数")
         doc_lines.append("")
