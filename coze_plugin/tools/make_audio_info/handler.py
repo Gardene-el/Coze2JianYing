@@ -40,12 +40,14 @@ class Input(NamedTuple):
     material_end: Optional[int] = None          # Material end time in milliseconds
 
 
-# Output is returned as Dict[str, Any] instead of NamedTuple
-# This ensures proper JSON object serialization in Coze platform
+class Output(NamedTuple):
+    """Output for make_audio_info tool"""
+    audio_info_string: str    # JSON string representation of audio info
+    success: bool             # Operation success status
+    message: str              # Status message
 
 
-
-def handler(args: Args[Input]) -> Dict[str, Any]:
+def handler(args: Args[Input]) -> Output:
     """
     Main handler function for creating audio info string
     
@@ -63,92 +65,92 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
     try:
         # Validate required parameters
         if not args.input.audio_url:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "缺少必需的 audio_url 参数"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="缺少必需的 audio_url 参数"
+            )
         
         if args.input.start is None:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "缺少必需的 start 参数"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="缺少必需的 start 参数"
+            )
         
         if args.input.end is None:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "缺少必需的 end 参数"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="缺少必需的 end 参数"
+            )
         
         # Validate time range
         if args.input.start < 0:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "start 时间不能为负数"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="start 时间不能为负数"
+            )
         
         if args.input.end <= args.input.start:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "end 时间必须大于 start 时间"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="end 时间必须大于 start 时间"
+            )
         
         # Validate optional parameters
         if args.input.volume is not None and (args.input.volume < 0.0 or args.input.volume > 2.0):
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "volume 必须在 0.0 到 2.0 之间"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="volume 必须在 0.0 到 2.0 之间"
+            )
         
         if args.input.speed is not None and (args.input.speed < 0.5 or args.input.speed > 2.0):
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "speed 必须在 0.5 到 2.0 之间"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="speed 必须在 0.5 到 2.0 之间"
+            )
         
         if args.input.fade_in is not None and args.input.fade_in < 0:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "fade_in 时间不能为负数"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="fade_in 时间不能为负数"
+            )
         
         if args.input.fade_out is not None and args.input.fade_out < 0:
-            return {
-                "audio_info_string": "",
-                "success": False,
-                "message": "fade_out 时间不能为负数"
-            }
+            return Output(
+                audio_info_string="",
+                success=False,
+                message="fade_out 时间不能为负数"
+            )
         
         # Validate material range if provided
         if args.input.material_start is not None or args.input.material_end is not None:
             if args.input.material_start is None or args.input.material_end is None:
-                return {
-                    "audio_info_string": "",
-                    "success": False,
-                    "message": "material_start 和 material_end 必须同时提供"
-            }
+                return Output(
+                    audio_info_string="",
+                    success=False,
+                    message="material_start 和 material_end 必须同时提供"
+                )
             
             if args.input.material_start < 0:
-                return {
-                    "audio_info_string": "",
-                    "success": False,
-                    "message": "material_start 时间不能为负数"
-            }
+                return Output(
+                    audio_info_string="",
+                    success=False,
+                    message="material_start 时间不能为负数"
+                )
             
             if args.input.material_end <= args.input.material_start:
-                return {
-                    "audio_info_string": "",
-                    "success": False,
-                    "message": "material_end 时间必须大于 material_start 时间"
-            }
+                return Output(
+                    audio_info_string="",
+                    success=False,
+                    message="material_end 时间必须大于 material_start 时间"
+                )
         
         # Build audio info dictionary with all parameters
         audio_info = {
@@ -191,19 +193,19 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         if logger:
             logger.info(f"Successfully created audio info string: {len(audio_info_string)} characters")
         
-        return {
-            "audio_info_string": audio_info_string,
-            "success": True,
-            "message": "音频信息字符串生成成功"
-            }
+        return Output(
+            audio_info_string=audio_info_string,
+            success=True,
+            message="音频信息字符串生成成功"
+        )
         
     except Exception as e:
         error_msg = f"生成音频信息字符串时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return {
-            "audio_info_string": "",
-            "success": False,
-            "message": error_msg
-            }
+        return Output(
+            audio_info_string="",
+            success=False,
+            message=error_msg
+        )

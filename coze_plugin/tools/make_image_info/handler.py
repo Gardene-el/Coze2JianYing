@@ -57,11 +57,14 @@ class Input(NamedTuple):
     outro_animation_duration: Optional[int] = 500  # Outro animation duration in ms
 
 
-# Output is returned as Dict[str, Any] instead of NamedTuple
-# This ensures proper JSON object serialization in Coze platform
+class Output(NamedTuple):
+    """Output for make_image_info tool"""
+    image_info_string: str    # JSON string representation of image info
+    success: bool             # Operation success status
+    message: str              # Status message
 
 
-def handler(args: Args[Input]) -> Dict[str, Any]:
+def handler(args: Args[Input]) -> Output:
     """
     Main handler function for creating image info string
     
@@ -79,40 +82,40 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
     try:
         # Validate required parameters
         if not args.input.image_url:
-            return {
-                "image_info_string": "",
-                "success": False,
-                "message": "缺少必需的 image_url 参数"
-            }
+            return Output(
+                image_info_string="",
+                success=False,
+                message="缺少必需的 image_url 参数"
+            )
         
         if args.input.start is None:
-            return {
-                "image_info_string": "",
-                "success": False,
-                "message": "缺少必需的 start 参数"
-            }
+            return Output(
+                image_info_string="",
+                success=False,
+                message="缺少必需的 start 参数"
+            )
         
         if args.input.end is None:
-            return {
-                "image_info_string": "",
-                "success": False,
-                "message": "缺少必需的 end 参数"
-            }
+            return Output(
+                image_info_string="",
+                success=False,
+                message="缺少必需的 end 参数"
+            )
         
         # Validate time range
         if args.input.start < 0:
-            return {
-                "image_info_string": "",
-                "success": False,
-                "message": "start 时间不能为负数"
-            }
+            return Output(
+                image_info_string="",
+                success=False,
+                message="start 时间不能为负数"
+            )
         
         if args.input.end <= args.input.start:
-            return {
-                "image_info_string": "",
-                "success": False,
-                "message": "end 时间必须大于 start 时间"
-            }
+            return Output(
+                image_info_string="",
+                success=False,
+                message="end 时间必须大于 start 时间"
+            )
         
         # Build image info dictionary with all parameters
         image_info = {
@@ -182,19 +185,19 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         if logger:
             logger.info(f"Successfully created image info string: {len(image_info_string)} characters")
         
-        return {
-            "image_info_string": image_info_string,
-            "success": True,
-            "message": "图片信息字符串生成成功"
-            }
+        return Output(
+            image_info_string=image_info_string,
+            success=True,
+            message="图片信息字符串生成成功"
+        )
         
     except Exception as e:
         error_msg = f"生成图片信息字符串时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return {
-            "image_info_string": "",
-            "success": False,
-            "message": error_msg
-            }
+        return Output(
+            image_info_string="",
+            success=False,
+            message=error_msg
+        )

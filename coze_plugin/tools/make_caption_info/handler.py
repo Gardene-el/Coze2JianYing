@@ -63,11 +63,14 @@ class Input(NamedTuple):
     loop_animation: Optional[str] = None        # Loop animation type
 
 
-# Output is returned as Dict[str, Any] instead of NamedTuple
-# This ensures proper JSON object serialization in Coze platform
+class Output(NamedTuple):
+    """Output for make_caption_info tool"""
+    caption_info_string: str  # JSON string representation of caption info
+    success: bool             # Operation success status
+    message: str              # Status message
 
 
-def handler(args: Args[Input]) -> Dict[str, Any]:
+def handler(args: Args[Input]) -> Output:
     """
     Main handler function for creating caption info string
     
@@ -85,40 +88,40 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
     try:
         # Validate required parameters
         if not args.input.content:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "缺少必需的 content 参数"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="缺少必需的 content 参数"
+            )
         
         if args.input.start is None:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "缺少必需的 start 参数"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="缺少必需的 start 参数"
+            )
         
         if args.input.end is None:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "缺少必需的 end 参数"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="缺少必需的 end 参数"
+            )
         
         # Validate time range
         if args.input.start < 0:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "start 时间不能为负数"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="start 时间不能为负数"
+            )
         
         if args.input.end <= args.input.start:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "end 时间必须大于 start 时间"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="end 时间必须大于 start 时间"
+            )
         
         # Validate numeric ranges (handle None values with defaults)
         position_x = args.input.position_x if args.input.position_x is not None else 0.5
@@ -127,61 +130,61 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         background_opacity = args.input.background_opacity if args.input.background_opacity is not None else 0.5
         
         if not (-1.0 <= position_x <= 1.0):
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "position_x 必须在 -1.0 到 1.0 之间"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="position_x 必须在 -1.0 到 1.0 之间"
+            )
         
         if not (-1.0 <= position_y <= 1.0):
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "position_y 必须在 -1.0 到 1.0 之间"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="position_y 必须在 -1.0 到 1.0 之间"
+            )
         
         if not (0.0 <= opacity <= 1.0):
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "opacity 必须在 0.0 到 1.0 之间"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="opacity 必须在 0.0 到 1.0 之间"
+            )
         
         if not (0.0 <= background_opacity <= 1.0):
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": "background_opacity 必须在 0.0 到 1.0 之间"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message="background_opacity 必须在 0.0 到 1.0 之间"
+            )
         
         # Validate text alignment (handle None with default)
         alignment = args.input.alignment if args.input.alignment is not None else "center"
         valid_alignments = ["left", "center", "right"]
         if alignment not in valid_alignments:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": f"alignment 必须是以下值之一: {', '.join(valid_alignments)}"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message=f"alignment 必须是以下值之一: {', '.join(valid_alignments)}"
+            )
         
         # Validate font weight and style (handle None with defaults)
         font_weight = args.input.font_weight if args.input.font_weight is not None else "normal"
         valid_weights = ["normal", "bold"]
         if font_weight not in valid_weights:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": f"font_weight 必须是以下值之一: {', '.join(valid_weights)}"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message=f"font_weight 必须是以下值之一: {', '.join(valid_weights)}"
+            )
         
         font_style = args.input.font_style if args.input.font_style is not None else "normal"
         valid_styles = ["normal", "italic"]
         if font_style not in valid_styles:
-            return {
-                "caption_info_string": "",
-                "success": False,
-                "message": f"font_style 必须是以下值之一: {', '.join(valid_styles)}"
-            }
+            return Output(
+                caption_info_string="",
+                success=False,
+                message=f"font_style 必须是以下值之一: {', '.join(valid_styles)}"
+            )
         
         # Build caption info dictionary with all parameters
         caption_info = {
@@ -302,19 +305,19 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         if logger:
             logger.info(f"Successfully created caption info string: {len(caption_info_string)} characters")
         
-        return {
-            "caption_info_string": caption_info_string,
-            "success": True,
-            "message": "字幕信息字符串生成成功"
-            }
+        return Output(
+            caption_info_string=caption_info_string,
+            success=True,
+            message="字幕信息字符串生成成功"
+        )
         
     except Exception as e:
         error_msg = f"生成字幕信息字符串时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return {
-            "caption_info_string": "",
-            "success": False,
-            "message": error_msg
-            }
+        return Output(
+            caption_info_string="",
+            success=False,
+            message=error_msg
+        )
