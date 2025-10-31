@@ -54,12 +54,13 @@ def extract_module_docstring(handler_path: str) -> str:
         return ""
 
 
-def extract_input_parameters(handler_path: str) -> List[Dict[str, Any]]:
+def extract_class_parameters(handler_path: str, class_name: str) -> List[Dict[str, Any]]:
     """
-    Extract Input class parameters from handler.py
+    Extract parameters from a NamedTuple class (Input or Output) in handler.py
     
     Args:
         handler_path: Path to handler.py file
+        class_name: Name of the class to extract ('Input' or 'Output')
         
     Returns:
         List of parameter dictionaries with keys: name, type, default, comment
@@ -71,21 +72,21 @@ def extract_input_parameters(handler_path: str) -> List[Dict[str, Any]]:
         # Parse the file to get the AST
         tree = ast.parse(content)
         
-        # Find the Input class
-        input_class = None
+        # Find the specified class
+        target_class = None
         for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and node.name == 'Input':
-                input_class = node
+            if isinstance(node, ast.ClassDef) and node.name == class_name:
+                target_class = node
                 break
         
-        if not input_class:
+        if not target_class:
             return []
         
         parameters = []
         
         # Extract from NamedTuple style class definition
         # Look for annotated assignments (field: type = default)
-        for item in input_class.body:
+        for item in target_class.body:
             if isinstance(item, ast.AnnAssign):
                 param_info = {}
                 
@@ -127,10 +128,67 @@ def extract_input_parameters(handler_path: str) -> List[Dict[str, Any]]:
         return parameters
         
     except Exception as e:
-        print(f"Error extracting input parameters: {e}")
+        print(f"Error extracting {class_name} parameters: {e}")
         import traceback
         traceback.print_exc()
         return []
+
+
+def extract_input_parameters(handler_path: str) -> List[Dict[str, Any]]:
+    """
+    Extract Input class parameters from handler.py
+    
+    Args:
+        handler_path: Path to handler.py file
+        
+    Returns:
+        List of parameter dictionaries with keys: name, type, default, comment
+    """
+    return extract_class_parameters(handler_path, 'Input')
+
+
+def extract_output_parameters(handler_path: str) -> List[Dict[str, Any]]:
+    """
+    Extract Output class parameters from handler.py
+    
+    Args:
+        handler_path: Path to handler.py file
+        
+    Returns:
+        List of parameter dictionaries with keys: name, type, default, comment
+    """
+    return extract_class_parameters(handler_path, 'Output')
+
+
+def check_output_type(handler_path: str) -> str:
+    """
+    Check if Output is defined as NamedTuple or Dict[str, Any]
+    
+    Args:
+        handler_path: Path to handler.py file
+        
+    Returns:
+        'NamedTuple' if Output class exists, 'Dict' if using Dict[str, Any], or 'Unknown'
+    """
+    try:
+        with open(handler_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Check for Output class definition
+        if 'class Output(NamedTuple):' in content or 'class Output(NamedTuple)' in content:
+            return 'NamedTuple'
+        
+        # Check for Dict[str, Any] pattern in comments or return type
+        if 'Output is now returned as Dict[str, Any]' in content or \
+           'returned as Dict[str, Any]' in content or \
+           '-> Dict[str, Any]' in content:
+            return 'Dict'
+        
+        return 'Unknown'
+        
+    except Exception as e:
+        print(f"Error checking output type: {e}")
+        return 'Unknown'
 
 
 def get_tool_name_from_path(handler_path: str) -> str:
@@ -177,7 +235,9 @@ def generate_documentation(handler_path: str) -> str:
     tool_name = get_tool_name_from_path(handler_path)
     tool_display_name = format_tool_name_display(tool_name)
     description = extract_module_docstring(handler_path)
-    parameters = extract_input_parameters(handler_path)
+    input_parameters = extract_input_parameters(handler_path)
+    output_parameters = extract_output_parameters(handler_path)
+    output_type = check_output_type(handler_path)
     
     # Build documentation
     doc_lines = []
@@ -192,12 +252,12 @@ def generate_documentation(handler_path: str) -> str:
     doc_lines.append("")
     
     # Input parameters section
-    if parameters:
+    if input_parameters:
         doc_lines.append("## 输入参数")
         doc_lines.append("")
         doc_lines.append("```python")
         doc_lines.append("class Input(NamedTuple):")
-        for param in parameters:
+        for param in input_parameters:
             # Format parameter line
             param_line = f"    {param['name']}: {param['type']}"
             if param['default'] != 'N/A':
@@ -205,6 +265,34 @@ def generate_documentation(handler_path: str) -> str:
             if param['comment']:
                 param_line += f"  # {param['comment']}"
             doc_lines.append(param_line)
+        doc_lines.append("```")
+        doc_lines.append("")
+    
+    # Output parameters section
+    if output_parameters and output_type == 'NamedTuple':
+        doc_lines.append("## 输出参数")
+        doc_lines.append("")
+        doc_lines.append("```python")
+        doc_lines.append("class Output(NamedTuple):")
+        for param in output_parameters:
+            # Format parameter line
+            param_line = f"    {param['name']}: {param['type']}"
+            if param['default'] != 'N/A':
+                param_line += f" = {param['default']}"
+            if param['comment']:
+                param_line += f"  # {param['comment']}"
+            doc_lines.append(param_line)
+        doc_lines.append("```")
+        doc_lines.append("")
+    elif output_type == 'Dict':
+        doc_lines.append("## 输出参数")
+        doc_lines.append("")
+        doc_lines.append("```python")
+        doc_lines.append("# Output is returned as Dict[str, Any]")
+        doc_lines.append("# Common fields:")
+        doc_lines.append("#   success: bool    # Operation success status")
+        doc_lines.append("#   message: str     # Status message")
+        doc_lines.append("#   [other fields]   # Tool-specific return data")
         doc_lines.append("```")
         doc_lines.append("")
     

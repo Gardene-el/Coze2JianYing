@@ -18,6 +18,8 @@ sys.path.insert(0, str(script_dir))
 from generate_tool_doc import (
     extract_module_docstring,
     extract_input_parameters,
+    extract_output_parameters,
+    check_output_type,
     get_tool_name_from_path,
     format_tool_name_display,
     generate_documentation
@@ -170,6 +172,90 @@ def test_export_drafts_tool():
         return False
 
 
+def test_add_videos_tool():
+    """Test documentation generation for add_videos tool with Output extraction"""
+    print("\n" + "=" * 80)
+    print("Test 3: Testing add_videos tool with Output extraction")
+    print("=" * 80)
+    
+    handler_path = "coze_plugin/tools/add_videos/handler.py"
+    
+    if not os.path.exists(handler_path):
+        print(f"❌ Error: {handler_path} not found")
+        return False
+    
+    print(f"\n📁 Handler path: {handler_path}")
+    
+    # Test 1: Extract output parameters
+    print("\n1️⃣ Testing output parameters extraction...")
+    output_params = extract_output_parameters(handler_path)
+    print(f"   Found {len(output_params)} output parameters:")
+    for param in output_params:
+        print(f"     - {param['name']}: {param['type']}")
+        if param['default'] != 'N/A':
+            print(f"       Default: {param['default']}")
+        if param['comment']:
+            print(f"       Comment: {param['comment']}")
+    
+    expected_output_params = ['segment_ids', 'segment_infos', 'success', 'message']
+    found_output_params = [p['name'] for p in output_params]
+    if all(ep in found_output_params for ep in expected_output_params):
+        print("   ✅ All expected output parameters found")
+    else:
+        print(f"   ❌ Error! Expected: {expected_output_params}, Found: {found_output_params}")
+        return False
+    
+    # Test 2: Check output type
+    print("\n2️⃣ Testing output type detection...")
+    output_type = check_output_type(handler_path)
+    print(f"   Output type: {output_type}")
+    if output_type == 'NamedTuple':
+        print("   ✅ Correctly detected NamedTuple output")
+    else:
+        print(f"   ❌ Error! Expected: NamedTuple, Got: {output_type}")
+        return False
+    
+    # Test 3: Generate full documentation with Output section
+    print("\n3️⃣ Testing full documentation generation with Output...")
+    try:
+        doc_content = generate_documentation(handler_path)
+        
+        # Check for Output section
+        checks = [
+            ("## 输出参数" in doc_content, "Output parameters section"),
+            ("class Output(NamedTuple):" in doc_content, "Output class definition"),
+            ("segment_ids" in doc_content, "segment_ids field"),
+            ("segment_infos" in doc_content, "segment_infos field"),
+            ("success" in doc_content, "success field"),
+            ("message" in doc_content, "message field"),
+        ]
+        
+        all_passed = True
+        for check, description in checks:
+            if check:
+                print(f"   ✅ {description}")
+            else:
+                print(f"   ❌ Missing: {description}")
+                all_passed = False
+        
+        if not all_passed:
+            print("\n   Generated documentation preview:")
+            print("   " + "-" * 76)
+            for line in doc_content.split('\n')[:30]:
+                print(f"   {line}")
+            print("   " + "-" * 76)
+            return False
+        
+        print("\n✅ All tests passed for add_videos tool with Output!")
+        return True
+        
+    except Exception as e:
+        print(f"   ❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 def print_usage_instructions():
     """Print usage instructions for the scripts"""
     print("\n" + "=" * 80)
@@ -223,6 +309,14 @@ def main():
         import traceback
         traceback.print_exc()
         results.append(("export_drafts tool", False))
+    
+    try:
+        results.append(("add_videos tool (with Output)", test_add_videos_tool()))
+    except Exception as e:
+        print(f"\n❌ Exception in add_videos test: {e}")
+        import traceback
+        traceback.print_exc()
+        results.append(("add_videos tool (with Output)", False))
     
     # Summary
     print("\n" + "=" * 80)

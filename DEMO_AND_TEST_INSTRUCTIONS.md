@@ -7,6 +7,8 @@
 1. **generate_tool_doc.py** - 根据 handler.py 生成文档的脚本
 2. **scan_and_generate_docs.py** - 自动扫描文件有哪些 handler.py 并触发生成脚本的脚本
 
+**新增功能**：现在支持提取和生成 Output 结构体定义文档（根据 handler_structure_analysis.md 的调查结果实现）
+
 ## 生成文档格式示例（以 create_draft 为例）
 
 生成的文档格式如下：
@@ -28,6 +30,45 @@ class Input(NamedTuple):
     height: int = 1080
     fps: int = 30
 \`\`\`
+
+## 输出参数
+
+\`\`\`python
+# Output is returned as Dict[str, Any]
+# Common fields:
+#   success: bool    # Operation success status
+#   message: str     # Status message
+#   [other fields]   # Tool-specific return data
+\`\`\`
+```
+
+## 生成文档格式示例（以 add_videos 为例 - 带 Output NamedTuple）
+
+```markdown
+# 工具函数 Add Videos
+
+工具名称：add_videos
+工具描述：Add Videos Tool Handler
+Adds video segments to an existing draft by creating a new video track.
+Each call creates a new track containing all the specified videos.
+
+## 输入参数
+
+\`\`\`python
+class Input(NamedTuple):
+    draft_id: str  # UUID of the existing draft
+    video_infos: Any  # JSON string or list containing video information
+\`\`\`
+
+## 输出参数
+
+\`\`\`python
+class Output(NamedTuple):
+    segment_ids: List[str]  # List of generated segment UUIDs
+    segment_infos: List[Dict[str, Any]]  # List of segment info
+    success: bool = True  # Operation success status
+    message: str = '视频添加成功'  # Status message
+\`\`\`
 ```
 
 ### 格式说明
@@ -40,6 +81,12 @@ class Input(NamedTuple):
    - 参数类型
    - 默认值
    - 行内注释（如果有）
+5. **输出参数** *(新增)*: 通过读取 handler.py 里的 `class Output(NamedTuple):` 实现，包含：
+   - 输出字段名称
+   - 输出字段类型
+   - 默认值
+   - 行内注释（如果有）
+   - 对于使用 `Dict[str, Any]` 返回类型的工具，显示通用字段说明
 
 ## 测试效果指令
 
