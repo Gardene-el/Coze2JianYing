@@ -34,8 +34,14 @@ class Input(NamedTuple):
     properties: Optional[str] = None            # JSON string of custom effect properties
 
 
+class Output(NamedTuple):
+    """Output for make_effect_info tool"""
+    effect_info_string: str   # JSON string representation of effect info
+    success: bool             # Operation success status
+    message: str              # Status message
 
-def handler(args: Args[Input]) -> Dict[str, Any]:
+
+def handler(args: Args[Input]) -> Output:
     """
     Main handler function for creating effect info string
     
@@ -53,40 +59,40 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
     try:
         # Validate required parameters
         if not args.input.effect_type:
-            return {
-                "effect_info_string": "",
-                "success": False,
-                "message": "缺少必需的 effect_type 参数"
-            }
+            return Output(
+                effect_info_string="",
+                success=False,
+                message="缺少必需的 effect_type 参数"
+            )
         
         if args.input.start is None:
-            return {
-                "effect_info_string": "",
-                "success": False,
-                "message": "缺少必需的 start 参数"
-            }
+            return Output(
+                effect_info_string="",
+                success=False,
+                message="缺少必需的 start 参数"
+            )
         
         if args.input.end is None:
-            return {
-                "effect_info_string": "",
-                "success": False,
-                "message": "缺少必需的 end 参数"
-            }
+            return Output(
+                effect_info_string="",
+                success=False,
+                message="缺少必需的 end 参数"
+            )
         
         # Validate time range
         if args.input.start < 0:
-            return {
-                "effect_info_string": "",
-                "success": False,
-                "message": "start 时间不能为负数"
-            }
+            return Output(
+                effect_info_string="",
+                success=False,
+                message="start 时间不能为负数"
+            )
         
         if args.input.end <= args.input.start:
-            return {
-                "effect_info_string": "",
-                "success": False,
-                "message": "end 时间必须大于 start 时间"
-            }
+            return Output(
+                effect_info_string="",
+                success=False,
+                message="end 时间必须大于 start 时间"
+            )
         
         # Build effect info dictionary with all parameters
         effect_info = {
@@ -119,11 +125,11 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
                 if properties_dict:  # Only add if not empty
                     effect_info["properties"] = properties_dict
             except json.JSONDecodeError as e:
-                return {
-                    "effect_info_string": "",
-                    "success": False,
-                    "message": f"properties 参数必须是有效的 JSON 字符串: {str(e)}"
-            }
+                return Output(
+                    effect_info_string="",
+                    success=False,
+                    message=f"properties 参数必须是有效的 JSON 字符串: {str(e)}"
+                )
         
         # Convert to JSON string without extra whitespace for compact representation
         effect_info_string = json.dumps(effect_info, ensure_ascii=False, separators=(',', ':'))
@@ -131,19 +137,19 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         if logger:
             logger.info(f"Successfully created effect info string: {len(effect_info_string)} characters")
         
-        return {
-            "effect_info_string": effect_info_string,
-            "success": True,
-            "message": "特效信息字符串生成成功"
-            }
+        return Output(
+            effect_info_string=effect_info_string,
+            success=True,
+            message="特效信息字符串生成成功"
+        )
         
     except Exception as e:
         error_msg = f"生成特效信息字符串时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return {
-            "effect_info_string": "",
-            "success": False,
-            "message": error_msg
-            }
+        return Output(
+            effect_info_string="",
+            success=False,
+            message=error_msg
+        )
