@@ -48,7 +48,7 @@ class TextStyle:
         self.font_style = kwargs.get('font_style', "normal")
         self.color = kwargs.get('color', "#FFFFFF")
         
-        # Text effects
+        # 文本特效
         self.stroke_enabled = kwargs.get('stroke_enabled', False)
         self.stroke_color = kwargs.get('stroke_color', "#000000")
         self.stroke_width = kwargs.get('stroke_width', 2)
@@ -208,21 +208,21 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-        segments = []
+    segments = []
     
     for info in caption_infos:
         segment_id = str(uuid.uuid4())
         segment_ids.append(segment_id)
         
-        # Create segment info for return
+        # 创建要返回的片段信息
         segment_infos.append({
             "id": segment_id,
             "start": info['start'],
             "end": info['end']
         })
         
-        # Create segment following the proper data structure format
-        # Only include fields that are present in info (non-defaults from make_caption_info)
+        # 遵循正确的数据结构格式创建片段
+        # 仅包含 info 中存在的字段（来自 make_caption_info 的非默认值）
         segment = {
             "id": segment_id,
             "type": "text",
@@ -233,7 +233,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
             }
         }
         
-        # Build transform dict, only including fields that exist in info
+        # 构建变换字典，仅包含 info 中存在的字段
         transform = {}
         if 'position_x' in info:
             transform['position_x'] = info['position_x']
@@ -248,7 +248,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         if transform:
             segment["transform"] = transform
         
-        # Build style dict, only including fields that exist in info
+        # 构建样式字典，仅包含 info 中存在的字段
         style = {}
         if 'font_family' in info:
             style['font_family'] = info['font_family']
@@ -261,7 +261,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         if 'color' in info:
             style['color'] = info['color']
         
-        # Stroke - only add if enabled
+        # 描边 - 仅在启用时添加
         if info.get('stroke_enabled'):
             stroke = {'enabled': True}
             if 'stroke_color' in info:
@@ -270,7 +270,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
                 stroke['width'] = info['stroke_width']
             style['stroke'] = stroke
         
-        # Shadow - only add if enabled
+        # 阴影 - 仅在启用时添加
         if info.get('shadow_enabled'):
             shadow = {'enabled': True}
             if 'shadow_color' in info:
@@ -283,7 +283,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
                 shadow['blur'] = info['shadow_blur']
             style['shadow'] = shadow
         
-        # Background - only add if enabled
+        # 背景 - 仅在启用时添加
         if info.get('background_enabled'):
             background = {'enabled': True}
             if 'background_color' in info:
@@ -295,11 +295,11 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         if style:
             segment["style"] = style
         
-        # Alignment - only add if not default
+        # 对齐 - 仅在非默认值时添加
         if 'alignment' in info:
             segment["alignment"] = info['alignment']
         
-        # Animations - only add if any animation specified
+        # 动画 - 仅在指定了任何动画时添加
         animations = {}
         if 'intro_animation' in info:
             animations['intro'] = info['intro_animation']
@@ -312,7 +312,7 @@ def create_text_track_with_segments(caption_infos: List[Dict[str, Any]]) -> tupl
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
+    # 遵循正确的 TrackConfig 格式创建轨道
     track = {
         "track_type": "text",
         "segments": segments
@@ -337,7 +337,7 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding captions to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],                success=False,
@@ -356,7 +356,7 @@ def handler(args: Args[Input]) -> Output:
                 message="缺少必需的 caption_infos 参数"
             )
         
-        # Parse caption information with detailed logging
+        # 解析字幕信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse caption_infos: type={type(args.input.caption_infos)}, value={repr(args.input.caption_infos)[:500]}...")
@@ -389,19 +389,19 @@ def handler(args: Args[Input]) -> Output:
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create text track with segments using proper data structure patterns
+        # 使用正确的数据结构模式创建带片段的文本轨道
         segment_ids, segment_infos, text_track = create_text_track_with_segments(caption_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(text_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:

@@ -204,21 +204,21 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-        segments = []
+    segments = []
     
     for info in image_infos:
         segment_id = str(uuid.uuid4())
         segment_ids.append(segment_id)
         
-        # Create segment info for return
+        # 创建要返回的片段信息
         segment_infos.append({
             "id": segment_id,
             "start": info['start'],
             "end": info['end']
         })
         
-        # Create segment following the proper data structure format
-        # Only include fields that are present in info (non-defaults from make_image_info)
+        # 遵循正确的数据结构格式创建片段
+        # 仅包含 info 中存在的字段（来自 make_image_info 的非默认值）
         segment = {
             "id": segment_id,
             "type": "image",
@@ -229,7 +229,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
             }
         }
         
-        # Build transform dict, only including fields that exist in info
+        # 构建变换字典，仅包含 info 中存在的字段
         transform = {}
         if 'position_x' in info:
             transform['position_x'] = info['position_x']
@@ -280,7 +280,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         if background:
             segment["background"] = background
         
-        # Animations - only add if any animation specified
+        # 动画 - 仅在指定了任何动画时添加
         animations = {}
         if 'in_animation' in info:  # Map in_animation to intro
             animations['intro'] = info['in_animation']
@@ -295,7 +295,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
+    # 遵循正确的 TrackConfig 格式创建轨道
     # Note: Images are placed on video tracks (no separate image track type)
     track = {
         "track_type": "video",
@@ -321,7 +321,7 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding images to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],                success=False,
@@ -340,7 +340,7 @@ def handler(args: Args[Input]) -> Output:
                 message="缺少必需的 image_infos 参数"
             )
         
-        # Parse image information with detailed logging
+        # 解析图片信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse image_infos: type={type(args.input.image_infos)}, value={repr(args.input.image_infos)[:500]}...")
@@ -373,19 +373,19 @@ def handler(args: Args[Input]) -> Output:
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create image track with segments using proper data structure patterns
+        # 使用正确的数据结构模式创建带片段的图片轨道
         segment_ids, image_track = create_image_track_with_segments(image_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(image_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:

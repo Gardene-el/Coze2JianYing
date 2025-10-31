@@ -45,7 +45,7 @@ class AudioSegmentConfig:
         self.material_url = material_url
         self.time_range = time_range
         
-        # Material range (for trimming)
+        # 素材范围（用于剪裁）
         material_start = kwargs.get('material_start')
         material_end = kwargs.get('material_end')
         if material_start is not None and material_end is not None:
@@ -53,20 +53,20 @@ class AudioSegmentConfig:
         else:
             self.material_range = None
         
-        # Audio properties
+        # 音频属性
         self.volume = kwargs.get('volume', 1.0)
         self.fade_in = kwargs.get('fade_in', 0)
         self.fade_out = kwargs.get('fade_out', 0)
         
-        # Audio effects
+        # 音频特效
         self.effect_type = kwargs.get('effect_type')
         self.effect_intensity = kwargs.get('effect_intensity', 1.0)
         
-        # Speed control
+        # 速度控制
         self.speed = kwargs.get('speed', 1.0)
         self.change_pitch = kwargs.get('change_pitch', False)
         
-        # Volume keyframes (empty by default)
+        # 音量关键帧（默认为空）
         self.volume_keyframes = []
 
 
@@ -186,21 +186,21 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
         tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-        segments = []
+    segments = []
     
     for info in audio_infos:
         segment_id = str(uuid.uuid4())
         segment_ids.append(segment_id)
         
-        # Create segment info for return
+        # 创建要返回的片段信息
         segment_infos.append({
             "id": segment_id,
             "start": info['start'],
             "end": info['end']
         })
         
-        # Create segment following the proper data structure format
-        # Only include fields that are present in info (non-defaults from make_audio_info)
+        # 遵循正确的数据结构格式创建片段
+        # 仅包含 info 中存在的字段（来自 make_audio_info 的非默认值）
         segment = {
             "id": segment_id,
             "type": "audio",
@@ -211,14 +211,14 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
             }
         }
         
-        # Add material_range only if provided (for trimming audio)
+        # 仅在提供时添加 material_range（用于剪裁音频）
         if 'material_start' in info and 'material_end' in info:
             segment["material_range"] = {
                 "start": info['material_start'],
                 "end": info['material_end']
             }
         
-        # Build audio properties dict, only including fields that exist in info
+        # 构建音频属性字典，仅包含 info 中存在的字段
         audio_props = {}
         if 'volume' in info:
             audio_props['volume'] = info['volume']
@@ -235,14 +235,14 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
         if 'change_pitch' in info:
             audio_props['change_pitch'] = info['change_pitch']
         
-        # Only add audio properties if there are any
+        # 仅在有音频属性时添加
         if audio_props:
             segment["audio"] = audio_props
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
-    # Only include non-default track properties
+    # 遵循正确的 TrackConfig 格式创建轨道
+    # 仅包含非默认轨道属性
     track = {
         "track_type": "audio",
         "segments": segments
@@ -267,7 +267,7 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding audios to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],                success=False,
@@ -286,7 +286,7 @@ def handler(args: Args[Input]) -> Output:
                 message="缺少必需的 audio_infos 参数"
             )
         
-        # Parse audio information with detailed logging
+        # 解析音频信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse audio_infos: type={type(args.input.audio_infos)}, value={repr(args.input.audio_infos)[:500]}...")
@@ -319,19 +319,19 @@ def handler(args: Args[Input]) -> Output:
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create audio track with segments using proper data structure patterns
+        # 使用正确的数据结构模式创建带片段的音频轨道
         segment_ids, audio_track = create_audio_track_with_segments(audio_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(audio_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:

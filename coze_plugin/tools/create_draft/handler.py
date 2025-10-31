@@ -1,8 +1,8 @@
 """
-Create Draft Tool Handler
+创建草稿工具处理器
 
-Creates a new draft with basic project settings and returns a UUID for future reference.
-The draft data is stored in /tmp directory with UUID as folder name.
+创建具有基本项目设置的新草稿并返回 UUID 以供将来参考。
+草稿数据存储在 /tmp 目录中，以 UUID 作为文件夹名称。
 """
 
 import os
@@ -13,36 +13,36 @@ from typing import NamedTuple, Dict, Any
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for create_draft tool"""
+    """create_draft 工具的输入参数"""
     draft_name: str = "Coze剪映项目"
     width: int = 1920
     height: int = 1080
     fps: int = 30
 
 
-# Output is now returned as Dict[str, Any] instead of NamedTuple
-# This ensures proper JSON object serialization in Coze platform
+# Output 现在返回 Dict[str, Any] 而不是 NamedTuple
+# 这确保了在 Coze 平台中正确的 JSON 对象序列化
 
 
 def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
     """
-    Validate input parameters for create_draft
+    验证 create_draft 的输入参数
     
     Args:
-        input_data: Input parameters
+        input_data: 输入参数
         
     Returns:
-        Tuple of (is_valid, error_message)
+        元组 (is_valid, error_message)
     """
-    # Validate dimensions (handle None values)
+    # 验证尺寸（处理 None 值）
     width = getattr(input_data, 'width', None) or 1920
     height = getattr(input_data, 'height', None) or 1080
     if width <= 0 or height <= 0:
         return False, f"Invalid dimensions: {width}x{height}"
     
-    # Validate fps (handle None values)
+    # 验证 fps（处理 None 值）
     fps = getattr(input_data, 'fps', None) or 30
     if fps <= 0 or fps > 120:
         return False, f"Invalid fps: {fps}"
@@ -80,7 +80,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
     Create initial draft configuration file
     
     Args:
-        input_data: Input parameters
+        input_data: 输入参数
         draft_id: UUID string for the draft
         draft_folder: Path to draft folder
         
@@ -122,7 +122,7 @@ def create_initial_draft_config(input_data: Input, draft_id: str, draft_folder: 
 
 def handler(args: Args[Input]) -> Dict[str, Any]:
     """
-    Main handler function for creating a draft
+    创建草稿的主处理函数
     
     Args:
         args: Input arguments containing project settings
@@ -143,7 +143,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
                        f"fps: {getattr(args.input, 'fps', None)}, "
                        f"draft_name: {getattr(args.input, 'draft_name', None)}")
         
-        # Validate input parameters
+        # 验证输入 parameters
         is_valid, error_msg = validate_input_parameters(args.input)
         if not is_valid:
             if logger:

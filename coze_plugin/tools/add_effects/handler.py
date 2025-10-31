@@ -168,21 +168,21 @@ def create_effect_track_with_segments(effect_infos: List[Dict[str, Any]]) -> tup
         tuple: (segment_ids, track_dict)
     """
     segment_ids = []
-        segments = []
+    segments = []
     
     for info in effect_infos:
         segment_id = str(uuid.uuid4())
         segment_ids.append(segment_id)
         
-        # Create segment info for return
+        # 创建要返回的片段信息
         segment_infos.append({
             "id": segment_id,
             "start": info['start'],
             "end": info['end']
         })
         
-        # Create segment following the proper data structure format
-        # This matches the _serialize_effect_segment format from DraftConfig
+        # 遵循正确的数据结构格式创建片段
+        # 这匹配 DraftConfig 的 _serialize_effect_segment 格式
         segment = {
             "id": segment_id,
             "type": "effect",
@@ -199,13 +199,13 @@ def create_effect_track_with_segments(effect_infos: List[Dict[str, Any]]) -> tup
             }
         }
         
-        # Add custom properties if provided
+        # 如果提供了自定义属性则添加
         if 'properties' in info and info['properties']:
             segment["properties"].update(info['properties'])
         
         segments.append(segment)
     
-    # Create track following the proper TrackConfig format
+    # 遵循正确的 TrackConfig 格式创建轨道
     track = {
         "track_type": "effect",
         "muted": False,
@@ -232,7 +232,7 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Adding effects to draft: {args.input.draft_id}")
     
     try:
-        # Validate input parameters
+        # 验证输入参数
         if not args.input.draft_id:
             return Output(
                 segment_ids=[],                success=False,
@@ -251,7 +251,7 @@ def handler(args: Args[Input]) -> Output:
                 message="缺少必需的 effect_infos 参数"
             )
         
-        # Parse effect information with detailed logging
+        # 解析特效信息并进行详细日志记录
         try:
             if logger:
                 logger.info(f"About to parse effect_infos: type={type(args.input.effect_infos)}, value={repr(args.input.effect_infos)[:500]}...")
@@ -284,19 +284,19 @@ def handler(args: Args[Input]) -> Output:
                 message=f"加载草稿配置失败: {str(e)}"
             )
         
-        # Create effect track with segments using proper data structure patterns
+        # 使用正确的数据结构模式创建带片段的特效轨道
         segment_ids, effect_track = create_effect_track_with_segments(effect_infos)
         
-        # Add track to draft configuration
+        # 将轨道添加到草稿配置
         if "tracks" not in draft_config:
             draft_config["tracks"] = []
         
         draft_config["tracks"].append(effect_track)
         
-        # Update timestamp
+        # 更新时间戳
         draft_config["last_modified"] = time.time()
         
-        # Save updated configuration
+        # 保存更新后的配置
         try:
             save_draft_config(args.input.draft_id, draft_config)
         except Exception as e:

@@ -1,11 +1,11 @@
 """
-Make Effect Info Tool Handler
+生成特效信息工具处理器
 
-Creates a JSON string representation of effect configuration with all possible parameters.
-This is a helper tool for add_effects - generates a single effect info string that can be
-collected into an array and passed to add_effects.
+创建包含所有可能参数的特效配置的 JSON 字符串表示。
+这是 add_effects 的辅助工具 - 生成单个特效信息字符串，可以
+收集到数组中并传递给 add_effects。
 
-Total parameters: 8 (3 required + 5 optional)
+总参数数： 8 (3 必需 + 5 可选)
 Based on EffectSegmentConfig from data_structures/draft_generator_interface/models.py
 """
 
@@ -14,42 +14,42 @@ from typing import NamedTuple, Optional, Dict, Any, Dict, Any
 from runtime import Args
 
 
-# Input/Output type definitions (required for each Coze tool)
+# Input/Output 类型定义（每个 Coze 工具都需要）
 class Input(NamedTuple):
-    """Input parameters for make_effect_info tool"""
-    # Required fields
-    effect_type: str                            # Effect type name (e.g., "模糊", "锐化", "马赛克")
-    start: int                                  # Start time in milliseconds
-    end: int                                    # End time in milliseconds
+    """make_effect_info 工具的输入参数"""
+    # 必需字段
+    effect_type: str                            # 特效类型 name (e.g., "模糊", "锐化", "马赛克")
+    start: int                                  # 开始时间（毫秒）
+    end: int                                    # 结束时间（毫秒）
     
-    # Optional effect properties
-    intensity: Optional[float] = 1.0            # Effect intensity (0.0-1.0, default 1.0)
+    # 可选特效属性
+    intensity: Optional[float] = 1.0            # 特效强度 (0.0-1.0, default 1.0)
     
     # Optional position (for localized effects)
     position_x: Optional[float] = None          # X position (for localized effects)
     position_y: Optional[float] = None          # Y position (for localized effects)
-    scale: Optional[float] = 1.0                # Scale (default 1.0)
+    scale: Optional[float] = 1.0                # 缩放（默认 1.0）
     
     # Optional custom properties
     properties: Optional[str] = None            # JSON string of custom effect properties
 
 
 class Output(NamedTuple):
-    """Output for make_effect_info tool"""
-    effect_info_string: str   # JSON string representation of effect info
+    """make_effect_info 工具的输出"""
+    effect_info_string: str   # 特效信息的 JSON 字符串表示
     success: bool             # Operation success status
     message: str              # Status message
 
 
 def handler(args: Args[Input]) -> Output:
     """
-    Main handler function for creating effect info string
+    创建特效信息字符串的主处理函数
     
     Args:
-        args: Input arguments containing all effect parameters
+        args: 包含所有特效参数的输入参数
         
     Returns:
-        Dict containing the JSON string representation of effect info
+        Dict containing the 特效信息的 JSON 字符串表示
     """
     logger = getattr(args, 'logger', None)
     
@@ -57,7 +57,7 @@ def handler(args: Args[Input]) -> Output:
         logger.info(f"Creating effect info string for: {args.input.effect_type}")
     
     try:
-        # Validate required parameters
+        # 验证必需参数
         if not args.input.effect_type:
             return Output(
                 effect_info_string="",
@@ -79,7 +79,7 @@ def handler(args: Args[Input]) -> Output:
                 message="缺少必需的 end 参数"
             )
         
-        # Validate time range
+        # 验证时间范围
         if args.input.start < 0:
             return Output(
                 effect_info_string="",
@@ -94,15 +94,15 @@ def handler(args: Args[Input]) -> Output:
                 message="end 时间必须大于 start 时间"
             )
         
-        # Build effect info dictionary with all parameters
+        # 使用所有参数构建特效信息字典
         effect_info = {
             "effect_type": args.input.effect_type,
             "start": args.input.start,
             "end": args.input.end
         }
         
-        # Add optional parameters only if they are not None or default values
-        # This keeps the output clean and only includes specified parameters
+        # Add 可选 parameters only if they are not None or default values
+        # 这使输出保持清洁，仅包含指定的参数
         
         # Intensity (only add if not default)
         if args.input.intensity != 1.0:
@@ -131,7 +131,7 @@ def handler(args: Args[Input]) -> Output:
                     message=f"properties 参数必须是有效的 JSON 字符串: {str(e)}"
                 )
         
-        # Convert to JSON string without extra whitespace for compact representation
+        # 转换为 JSON 字符串，不带额外空格以进行紧凑表示
         effect_info_string = json.dumps(effect_info, ensure_ascii=False, separators=(',', ':'))
         
         if logger:
