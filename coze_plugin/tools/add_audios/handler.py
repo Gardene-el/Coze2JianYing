@@ -190,15 +190,7 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
     
     for info in audio_infos:
         segment_id = str(uuid.uuid4())
-        segment_ids.append(segment_id)
-        
-        # 创建要返回的片段信息
-        segment_infos.append({
-            "id": segment_id,
-            "start": info['start'],
-            "end": info['end']
-        })
-        
+        segment_ids.append(segment_id)        
         # 遵循正确的数据结构格式创建片段
         # 仅包含 info 中存在的字段（来自 make_audio_info 的非默认值）
         segment = {
@@ -248,7 +240,7 @@ def create_audio_track_with_segments(audio_infos: List[Dict[str, Any]]) -> tuple
         "segments": segments
     }
     
-    return segment_ids, segment_infos, track
+    return segment_ids, track
 
 
 def handler(args: Args[Input]) -> Output:

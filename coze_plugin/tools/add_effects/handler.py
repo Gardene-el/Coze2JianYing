@@ -172,15 +172,7 @@ def create_effect_track_with_segments(effect_infos: List[Dict[str, Any]]) -> tup
     
     for info in effect_infos:
         segment_id = str(uuid.uuid4())
-        segment_ids.append(segment_id)
-        
-        # 创建要返回的片段信息
-        segment_infos.append({
-            "id": segment_id,
-            "start": info['start'],
-            "end": info['end']
-        })
-        
+        segment_ids.append(segment_id)        
         # 遵循正确的数据结构格式创建片段
         # 这匹配 DraftConfig 的 _serialize_effect_segment 格式
         segment = {
@@ -213,7 +205,7 @@ def create_effect_track_with_segments(effect_infos: List[Dict[str, Any]]) -> tup
         "segments": segments
     }
     
-    return segment_ids, segment_infos, track
+    return segment_ids, track
 
 
 def handler(args: Args[Input]) -> Output:

@@ -208,15 +208,7 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
     
     for info in image_infos:
         segment_id = str(uuid.uuid4())
-        segment_ids.append(segment_id)
-        
-        # 创建要返回的片段信息
-        segment_infos.append({
-            "id": segment_id,
-            "start": info['start'],
-            "end": info['end']
-        })
-        
+        segment_ids.append(segment_id)        
         # 遵循正确的数据结构格式创建片段
         # 仅包含 info 中存在的字段（来自 make_image_info 的非默认值）
         segment = {
@@ -296,13 +288,13 @@ def create_image_track_with_segments(image_infos: List[Dict[str, Any]]) -> tuple
         segments.append(segment)
     
     # 遵循正确的 TrackConfig 格式创建轨道
-    # Note: Images are placed on video tracks (no separate image track type)
+    # 注意：图片放置在视频轨道上（没有单独的图片轨道类型）
     track = {
         "track_type": "video",
         "segments": segments
     }
     
-    return segment_ids, segment_infos, track
+    return segment_ids, track
 
 
 def handler(args: Args[Input]) -> Output:
