@@ -42,7 +42,7 @@ class DraftGeneratorTab(BaseTab):
         self.is_generating = False
         
         # 调用父类初始化
-        super().__init__(parent, "草稿生成")
+        super().__init__(parent, "手动草稿生成")
     
     def _create_widgets(self):
         """创建UI组件"""
