@@ -83,7 +83,7 @@ def test_create_draft_tool():
     print("\n4️⃣ Testing full documentation generation...")
     doc_content = generate_documentation(handler_path)
     
-    # Check if key elements are present
+    # Check if key elements are present, including input field explanations
     checks = [
         ("工具函数 Create Draft" in doc_content, "Title with 'Create Draft'"),
         ("工具名称：create_draft" in doc_content, "Tool name line"),
@@ -94,6 +94,7 @@ def test_create_draft_tool():
         ("width" in doc_content, "width parameter"),
         ("height" in doc_content, "height parameter"),
         ("fps" in doc_content, "fps parameter"),
+        (doc_content.count("### 字段说明") >= 1, "Input field explanation section"),
     ]
     
     all_passed = True
@@ -215,19 +216,23 @@ def test_add_videos_tool():
         print(f"   ❌ Error! Expected: NamedTuple, Got: {output_type}")
         return False
     
-    # Test 3: Generate full documentation with Output section and field explanations
-    print("\n3️⃣ Testing full documentation generation with Output and field explanations...")
+    # Test 3: Generate full documentation with Input and Output field explanations
+    print("\n3️⃣ Testing full documentation generation with Input and Output field explanations...")
     try:
         doc_content = generate_documentation(handler_path)
         
-        # Check for Output section and non-common field explanations
+        # Check for Input and Output sections with field explanations
         checks = [
+            ("## 输入参数" in doc_content, "Input parameters section"),
+            ("class Input(NamedTuple):" in doc_content, "Input class definition"),
+            ("`draft_id`:" in doc_content, "draft_id field explanation"),
+            ("`video_infos`:" in doc_content, "video_infos field explanation"),
             ("## 输出参数" in doc_content, "Output parameters section"),
             ("class Output(NamedTuple):" in doc_content, "Output class definition"),
             ("segment_ids" in doc_content, "segment_ids field"),
             ("success" in doc_content, "success field"),
             ("message" in doc_content, "message field"),
-            ("### 字段说明" in doc_content, "Field explanation section"),
+            (doc_content.count("### 字段说明") >= 2, "Field explanation sections (Input and Output)"),
             ("`segment_ids`:" in doc_content, "segment_ids field explanation"),
         ]
         
@@ -242,12 +247,12 @@ def test_add_videos_tool():
         if not all_passed:
             print("\n   Generated documentation preview:")
             print("   " + "-" * 76)
-            for line in doc_content.split('\n')[:40]:
+            for line in doc_content.split('\n')[:45]:
                 print(f"   {line}")
             print("   " + "-" * 76)
             return False
         
-        print("\n✅ All tests passed for add_videos tool with Output!")
+        print("\n✅ All tests passed for add_videos tool with Input and Output!")
         return True
         
     except Exception as e:

@@ -267,6 +267,16 @@ def generate_documentation(handler_path: str) -> str:
             doc_lines.append(param_line)
         doc_lines.append("```")
         doc_lines.append("")
+        
+        # Add explanation for input fields
+        if input_parameters:
+            doc_lines.append("### 字段说明")
+            doc_lines.append("")
+            for param in input_parameters:
+                field_name = param['name']
+                field_comment = param['comment'] if param['comment'] else ''
+                doc_lines.append(f"- `{field_name}`: {field_comment}")
+            doc_lines.append("")
     
     # Output parameters section
     if output_parameters and output_type == 'NamedTuple':
