@@ -285,17 +285,20 @@ def generate_documentation(handler_path: str) -> str:
         doc_lines.append("```")
         doc_lines.append("")
         
-        # Add explanation for common fields if they exist
-        has_success = any(param['name'] == 'success' for param in output_parameters)
-        has_message = any(param['name'] == 'message' for param in output_parameters)
+        # Add explanation for non-common fields (fields other than success and message)
+        non_common_params = [
+            param for param in output_parameters 
+            if param['name'] not in ['success', 'message']
+        ]
         
-        if has_success or has_message:
-            doc_lines.append("### 通用字段说明")
+        if non_common_params:
+            doc_lines.append("### 字段说明")
             doc_lines.append("")
-            if has_success:
-                doc_lines.append("- `success`: 表示操作是否成功的布尔值")
-            if has_message:
-                doc_lines.append("- `message`: 操作结果的描述信息")
+            for param in non_common_params:
+                # Create explanation based on comment or type
+                field_name = param['name']
+                field_comment = param['comment'] if param['comment'] else ''
+                doc_lines.append(f"- `{field_name}`: {field_comment}")
             doc_lines.append("")
     elif output_type == 'Dict':
         doc_lines.append("## 输出参数")

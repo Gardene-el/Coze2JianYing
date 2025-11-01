@@ -215,21 +215,20 @@ def test_add_videos_tool():
         print(f"   ❌ Error! Expected: NamedTuple, Got: {output_type}")
         return False
     
-    # Test 3: Generate full documentation with Output section and common fields explanation
-    print("\n3️⃣ Testing full documentation generation with Output and common fields explanation...")
+    # Test 3: Generate full documentation with Output section and field explanations
+    print("\n3️⃣ Testing full documentation generation with Output and field explanations...")
     try:
         doc_content = generate_documentation(handler_path)
         
-        # Check for Output section and common fields explanation
+        # Check for Output section and non-common field explanations
         checks = [
             ("## 输出参数" in doc_content, "Output parameters section"),
             ("class Output(NamedTuple):" in doc_content, "Output class definition"),
             ("segment_ids" in doc_content, "segment_ids field"),
             ("success" in doc_content, "success field"),
             ("message" in doc_content, "message field"),
-            ("### 通用字段说明" in doc_content, "Common fields explanation section"),
-            ("`success`: 表示操作是否成功的布尔值" in doc_content, "success field explanation"),
-            ("`message`: 操作结果的描述信息" in doc_content, "message field explanation"),
+            ("### 字段说明" in doc_content, "Field explanation section"),
+            ("`segment_ids`:" in doc_content, "segment_ids field explanation"),
         ]
         
         all_passed = True
