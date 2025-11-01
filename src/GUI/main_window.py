@@ -9,7 +9,7 @@ import os
 import threading
 import queue
 
-from gui.log_window import LogWindow
+from GUI.log_window import LogWindow
 from utils.draft_generator import DraftGenerator
 from utils.logger import get_logger, set_gui_log_callback
 

@@ -26,21 +26,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build executable
+      - name: Build executables
         run: |
           python build.py
 
-      - name: Upload artifact
+      - name: Upload GUI artifact
         uses: actions/upload-artifact@v5
         with:
-          name: CozeJianYingDraftGenerator-Windows
-          path: dist/CozeJianYingDraftGenerator.exe
+          name: CozeJianYingDraftGenerator-GUI-Windows
+          path: dist/CozeJianYingDraftGenerator-GUI.exe
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: CozeJianYingDraftGenerator-CLI-Windows
+          path: dist/CozeJianYingDraftGenerator-CLI.exe
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/CozeJianYingDraftGenerator.exe
+          files: |
+            dist/CozeJianYingDraftGenerator-GUI.exe
+            dist/CozeJianYingDraftGenerator-CLI.exe
           draft: false
           prerelease: false
         env:

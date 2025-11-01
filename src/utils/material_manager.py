@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Union, Optional, Dict, Any
 from urllib.parse import urlparse, unquote
 import pyJianYingDraft as draft
-from src.utils.logger import get_logger
+from utils.logger import get_logger
 
 
 class MaterialManager:

@@ -1,5 +1,6 @@
 """
 打包脚本 - 使用PyInstaller将应用打包为exe
+支持打包GUI和CLI两个版本
 """
 import sys
 import PyInstaller.__main__
@@ -28,15 +29,14 @@ def clean_build_dirs():
             shutil.rmtree(dir_path)
 
 
-def build_exe():
-    """构建exe文件"""
-    print("开始打包应用程序...")
-    
+def get_common_args():
+    """获取通用的PyInstaller参数"""
     # 根据操作系统确定路径分隔符 (Windows: ';', Linux/Mac: ':')
     import os
     separator = ';' if os.name == 'nt' else ':'
     
     # 获取 pyJianYingDraft 的 assets 路径
+    pyjy_assets = None
     try:
         import pyJianYingDraft
         pyjy_path = Path(pyJianYingDraft.__file__).parent
@@ -44,43 +44,86 @@ def build_exe():
         print(f"找到 pyJianYingDraft assets: {pyjy_assets}")
     except Exception as e:
         print(f"警告: 无法找到 pyJianYingDraft assets: {e}")
-        pyjy_assets = None
     
-    # PyInstaller参数
-    args = [
-        'src/main.py',              # 主程序入口
-        '--name=CozeJianYingDraftGenerator',  # 应用名称
-        '--windowed',                # 不显示控制台窗口
-        '--onefile',                 # 打包成单个exe文件
+    common_args = [
         '--clean',                   # 清理临时文件
-        # '--icon=resources/icon.ico', # 应用图标（如果有的话）
         f'--add-data=resources{separator}resources',  # 添加资源文件
         '--hidden-import=tkinter',   # 确保包含tkinter
         '--hidden-import=tkinter.ttk',
         '--hidden-import=tkinter.scrolledtext',
         '--hidden-import=pyJianYingDraft',  # 添加pyJianYingDraft库
+        '--hidden-import=click',     # CLI依赖
+        '--hidden-import=rich',      # CLI依赖
         '--noconfirm',               # 不询问确认
     ]
     
     # 添加 pyJianYingDraft assets
     if pyjy_assets and pyjy_assets.exists():
-        args.append(f'--add-data={pyjy_assets}{separator}pyJianYingDraft/assets')
+        common_args.append(f'--add-data={pyjy_assets}{separator}pyJianYingDraft/assets')
         print("已添加 pyJianYingDraft assets 到打包配置")
     
     # 检查图标文件是否存在
     icon_path = Path('resources/icon.ico')
     if icon_path.exists():
-        args.append(f'--icon={icon_path}')
+        common_args.append(f'--icon={icon_path}')
+    
+    return common_args, separator
+
+
+def build_gui():
+    """构建GUI版本的exe文件"""
+    print("\n" + "=" * 60)
+    print("开始打包GUI应用程序...")
+    print("=" * 60)
+    
+    common_args, separator = get_common_args()
+    
+    # PyInstaller参数 - GUI版本
+    args = [
+        'src/GUI/main.py',           # GUI主程序入口
+        '--name=CozeJianYingDraftGenerator-GUI',  # 应用名称
+        '--windowed',                # 不显示控制台窗口
+        '--onefile',                 # 打包成单个exe文件
+    ] + common_args
     
     try:
         PyInstaller.__main__.run(args)
         print("\n" + "=" * 60)
-        print("打包完成！")
-        print(f"可执行文件位于: {Path('dist/CozeJianYingDraftGenerator.exe').absolute()}")
+        print("GUI版本打包完成！")
+        print(f"可执行文件位于: {Path('dist/CozeJianYingDraftGenerator-GUI.exe').absolute()}")
         print("=" * 60)
+        return True
     except Exception as e:
-        print(f"\n打包失败: {e}")
-        raise
+        print(f"\nGUI版本打包失败: {e}")
+        return False
+
+
+def build_cli():
+    """构建CLI版本的exe文件"""
+    print("\n" + "=" * 60)
+    print("开始打包CLI应用程序...")
+    print("=" * 60)
+    
+    common_args, separator = get_common_args()
+    
+    # PyInstaller参数 - CLI版本
+    args = [
+        'src/CLI/main.py',           # CLI主程序入口
+        '--name=CozeJianYingDraftGenerator-CLI',  # 应用名称
+        '--console',                 # 显示控制台窗口
+        '--onefile',                 # 打包成单个exe文件
+    ] + common_args
+    
+    try:
+        PyInstaller.__main__.run(args)
+        print("\n" + "=" * 60)
+        print("CLI版本打包完成！")
+        print(f"可执行文件位于: {Path('dist/CozeJianYingDraftGenerator-CLI.exe').absolute()}")
+        print("=" * 60)
+        return True
+    except Exception as e:
+        print(f"\nCLI版本打包失败: {e}")
+        return False
 
 
 def create_resources_dir():
@@ -102,8 +145,24 @@ def main():
     # 清理旧的构建文件
     clean_build_dirs()
     
-    # 构建exe
-    build_exe()
+    # 构建GUI和CLI版本
+    gui_success = build_gui()
+    cli_success = build_cli()
+    
+    # 输出最终结果
+    print("\n" + "=" * 60)
+    print("打包总结:")
+    print("=" * 60)
+    print(f"GUI版本: {'✓ 成功' if gui_success else '✗ 失败'}")
+    print(f"CLI版本: {'✓ 成功' if cli_success else '✗ 失败'}")
+    print("=" * 60)
+    
+    if gui_success and cli_success:
+        print("\n所有版本打包成功！")
+        print(f"输出目录: {Path('dist').absolute()}")
+    else:
+        print("\n部分版本打包失败，请检查错误信息")
+        sys.exit(1)
 
 
 if __name__ == '__main__':
