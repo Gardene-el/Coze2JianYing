@@ -324,14 +324,17 @@ python build.py
 
 ```
 dist/
-└── CozeJianYingDraftGenerator.exe
+├── CozeJianYingDraftGenerator-GUI.exe  # GUI版本（图形界面）
+└── CozeJianYingDraftGenerator-CLI.exe  # CLI版本（命令行）
 ```
 
-该 exe 文件：
+这两个 exe 文件：
 
 - 可以在任何 Windows 系统上运行（无需安装 Python）
 - 可以独立分发给其他用户
 - 包含了所有必需的依赖
+
+**GUI版本** 提供图形界面，适合日常使用；**CLI版本** 提供命令行界面，适合脚本自动化和批处理
 
 ---
 
@@ -351,13 +354,17 @@ Coze2JianYing/
 │   ├── tests/                # 测试文件
 │   └── main.py               # 核心助手类
 ├── src/                      # 草稿生成器应用
-│   ├── gui/                  # GUI 界面模块
+│   ├── GUI/                  # GUI 界面模块
+│   │   ├── main.py           # GUI 主入口
+│   │   └── main_window.py    # 主窗口实现
+│   ├── CLI/                  # CLI 命令行模块
+│   │   └── main.py           # CLI 主入口
 │   ├── utils/                # 核心工具模块
 │   │   ├── draft_generator.py    # 草稿生成主逻辑
 │   │   ├── coze_parser.py        # Coze 数据解析
 │   │   ├── material_manager.py   # 素材下载管理
 │   │   └── logger.py             # 日志系统
-│   └── main.py               # 应用入口
+│   └── main.py               # 统一入口（支持GUI/CLI）
 ├── data_structures/          # 数据结构定义
 │   ├── draft_generator_interface/  # 草稿生成器接口
 │   └── media_models/         # 媒体文件模型
