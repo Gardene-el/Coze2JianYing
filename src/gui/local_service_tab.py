@@ -66,6 +66,12 @@ class LocalServiceTab(BaseTab):
         self.port_entry = ttk.Entry(self.config_frame, textvariable=self.port_var, width=10)
         self.check_port_btn = ttk.Button(self.config_frame, text="检测端口", command=self._check_port_available)
 
+        # 端口状态显示
+        self.port_status_frame = ttk.Frame(self.service_frame)
+        self.port_status_label = ttk.Label(self.port_status_frame, text="端口状态: 未检测", font=("Arial", 10))
+        self.port_status_indicator = tk.Canvas(self.port_status_frame, width=20, height=20, highlightthickness=0)
+        self._update_port_status_indicator("未检测")
+
         # 服务状态显示
         self.status_frame = ttk.Frame(self.service_frame)
         self.service_status_label = ttk.Label(self.status_frame, text="服务状态: 未启动", font=("Arial", 10, "bold"))
@@ -109,6 +115,11 @@ class LocalServiceTab(BaseTab):
         self.port_label.pack(side=tk.LEFT, padx=(0, 5))
         self.port_entry.pack(side=tk.LEFT, padx=(0, 5))
         self.check_port_btn.pack(side=tk.LEFT)
+
+        # 端口状态
+        self.port_status_frame.pack(fill=tk.X, pady=(0, 10))
+        self.port_status_indicator.pack(side=tk.LEFT, padx=(0, 10))
+        self.port_status_label.pack(side=tk.LEFT)
 
         # 服务状态
         self.status_frame.pack(fill=tk.X, pady=(0, 10))
@@ -163,6 +174,7 @@ class LocalServiceTab(BaseTab):
             if not (1024 <= port <= 65535):
                 raise ValueError("端口必须在 1024-65535 之间")
         except ValueError as e:
+            # 只在输入无效时使用对话框
             messagebox.showerror("错误", f"无效的端口号: {e}")
             return
 
@@ -171,11 +183,13 @@ class LocalServiceTab(BaseTab):
 
         if is_available:
             self.logger.info(f"端口 {port} 可用")
-            messagebox.showinfo("端口可用", f"端口 {port} 当前空闲，可以使用。")
+            self.port_status_label.config(text=f"端口状态: 端口 {port} 可用")
+            self._update_port_status_indicator("可用")
             self.status_var.set(f"端口 {port} 可用")
         else:
             self.logger.warning(f"端口 {port} 已被占用")
-            messagebox.showwarning("端口被占用", f"端口 {port} 已被其他程序占用，请选择其他端口。")
+            self.port_status_label.config(text=f"端口状态: 端口 {port} 已被占用")
+            self._update_port_status_indicator("被占用")
             self.status_var.set(f"端口 {port} 被占用")
 
     def _is_port_available(self, port: int) -> bool:
@@ -196,6 +210,21 @@ class LocalServiceTab(BaseTab):
         except OSError:
             # 端口已被占用
             return False
+
+    def _update_port_status_indicator(self, status: str):
+        """更新端口状态指示器
+
+        Args:
+            status: 端口状态 ("未检测", "可用", "被占用")
+        """
+        self.port_status_indicator.delete("all")
+        if status == "可用":
+            color = "green"
+        elif status == "被占用":
+            color = "red"
+        else:  # 未检测
+            color = "gray"
+        self.port_status_indicator.create_oval(2, 2, 18, 18, fill=color, outline=color)
 
     def _update_status_indicator(self, running: bool):
         """更新服务状态指示器
@@ -230,6 +259,8 @@ class LocalServiceTab(BaseTab):
 
         # 检查端口是否可用
         if not self._is_port_available(port):
+            self.port_status_label.config(text=f"端口状态: 端口 {port} 已被占用")
+            self._update_port_status_indicator("被占用")
             messagebox.showerror(
                 "端口被占用", f"端口 {port} 已被其他程序占用。\n\n请选择其他端口或停止占用该端口的程序。"
             )
@@ -248,6 +279,8 @@ class LocalServiceTab(BaseTab):
         self.service_running = True
         self._update_status_indicator(True)
         self.service_status_label.config(text=f"服务状态: 运行中 (端口 {port})")
+        self.port_status_label.config(text=f"端口状态: 端口 {port} 使用中")
+        self._update_port_status_indicator("被占用")
         self.start_service_btn.config(state=tk.DISABLED)
         self.stop_service_btn.config(state=tk.NORMAL)
         self.port_entry.config(state=tk.DISABLED)
@@ -271,6 +304,8 @@ class LocalServiceTab(BaseTab):
         self.service_running = False
         self._update_status_indicator(False)
         self.service_status_label.config(text="服务状态: 未启动")
+        self.port_status_label.config(text="端口状态: 未检测")
+        self._update_port_status_indicator("未检测")
         self.start_service_btn.config(state=tk.NORMAL)
         self.stop_service_btn.config(state=tk.DISABLED)
         self.port_entry.config(state=tk.NORMAL)

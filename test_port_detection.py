@@ -106,6 +106,37 @@ def test_code_structure():
         print("❌ 检测端口按钮文本不正确")
         return False
 
+    # 检查端口状态显示组件
+    if "port_status_label" in content and "port_status_indicator" in content:
+        print("✅ 已添加端口状态显示组件")
+    else:
+        print("❌ 缺少端口状态显示组件")
+        return False
+
+    # 检查端口状态更新方法
+    if "_update_port_status_indicator" in content:
+        print("✅ 已添加 _update_port_status_indicator 方法")
+    else:
+        print("❌ 未添加 _update_port_status_indicator 方法")
+        return False
+
+    # 检查是否不使用弹窗显示检测结果（除了错误）
+    # 检查 _check_port_available 方法中不使用 showinfo 或 showwarning
+    check_method_start = content.find("def _check_port_available(self):")
+    if check_method_start != -1:
+        # 找到下一个方法的开始位置
+        next_method = content.find("\n    def ", check_method_start + 1)
+        check_method_content = content[check_method_start:next_method] if next_method != -1 else content[check_method_start:]
+        
+        # 应该只有 showerror 用于无效输入，不应该有 showinfo 或 showwarning
+        has_showinfo = "showinfo" in check_method_content
+        has_showwarning = "showwarning" in check_method_content
+        
+        if not has_showinfo and not has_showwarning:
+            print("✅ 端口检测结果不使用弹窗（使用状态显示）")
+        else:
+            print("⚠️  端口检测可能仍使用弹窗")
+
     return True
 
 

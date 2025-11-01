@@ -225,6 +225,8 @@ def test_ui_components():
         "start_service_btn",
         "stop_service_btn",
         "check_port_btn",
+        "port_status_label",
+        "port_status_indicator",
         "service_status_label",
         "service_status_indicator",
         "info_text",
