@@ -52,13 +52,14 @@ def generate(json_file, output, verbose):
     ))
     
     try:
-        # 读取JSON文件
+        # 验证JSON文件
         json_path = Path(json_file)
-        if verbose:
-            console.print(f"[green]✓[/green] 读取JSON文件: {json_path}")
+        if not json_path.exists():
+            console.print(f"[bold red]✗ 文件不存在: {json_path}[/bold red]")
+            sys.exit(1)
         
-        with open(json_path, 'r', encoding='utf-8') as f:
-            json_content = f.read()
+        if verbose:
+            console.print(f"[green]✓[/green] JSON文件: {json_path}")
         
         # 初始化草稿生成器
         draft_generator = DraftGenerator()
@@ -82,8 +83,8 @@ def generate(json_file, output, verbose):
         ) as progress:
             task = progress.add_task("正在生成草稿...", total=None)
             
-            result = draft_generator.generate_from_json(
-                json_content,
+            result = draft_generator.generate_from_file(
+                str(json_path),
                 str(output_path)
             )
             
@@ -92,6 +93,7 @@ def generate(json_file, output, verbose):
         if result:
             console.print(f"\n[bold green]✓ 草稿生成成功！[/bold green]")
             console.print(f"输出目录: {output_path}")
+            console.print(f"生成的草稿: {len(result)} 个")
         else:
             console.print(f"\n[bold red]✗ 草稿生成失败[/bold red]")
             sys.exit(1)
