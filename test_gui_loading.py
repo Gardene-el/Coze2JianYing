@@ -4,15 +4,18 @@
 """
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+
+# 添加src目录到Python路径，与main.py保持一致
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 # 设置环境变量以避免实际显示窗口
 os.environ['DISPLAY'] = ':99'
 
 try:
     import tkinter as tk
-    from src.gui.main_window import MainWindow
-    from src.gui.draft_generator_tab import DraftGeneratorTab
+    from gui.main_window import MainWindow
+    from gui.draft_generator_tab import DraftGeneratorTab
     
     print("=== 测试 GUI 加载 ===")
     

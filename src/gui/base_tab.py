@@ -5,7 +5,7 @@
 """
 import tkinter as tk
 from tkinter import ttk
-from ..utils.logger import get_logger
+from utils.logger import get_logger
 
 
 class BaseTab:

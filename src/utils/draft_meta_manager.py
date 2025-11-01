@@ -8,7 +8,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from src.utils.logger import get_logger
+from utils.logger import get_logger
 
 
 class DraftMetaManager:

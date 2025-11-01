@@ -7,10 +7,10 @@ from pathlib import Path
 from datetime import datetime
 import os
 
-from .log_window import LogWindow
-from .draft_generator_tab import DraftGeneratorTab
-from .example_tab import ExampleTab
-from ..utils.logger import get_logger, set_gui_log_callback
+from gui.log_window import LogWindow
+from gui.draft_generator_tab import DraftGeneratorTab
+from gui.example_tab import ExampleTab
+from utils.logger import get_logger, set_gui_log_callback
 
 
 class MainWindow:

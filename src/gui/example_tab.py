@@ -6,7 +6,7 @@
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 
-from .base_tab import BaseTab
+from gui.base_tab import BaseTab
 
 
 class ExampleTab(BaseTab):
