@@ -9,6 +9,7 @@ import os
 
 from gui.log_window import LogWindow
 from gui.draft_generator_tab import DraftGeneratorTab
+from gui.local_service_tab import LocalServiceTab
 from gui.example_tab import ExampleTab
 from utils.logger import get_logger, set_gui_log_callback
 
@@ -135,9 +136,13 @@ class MainWindow:
     
     def _create_tabs(self):
         """创建所有标签页"""
-        # 创建草稿生成器标签页（原有功能）
+        # 创建手动草稿生成器标签页（原有功能）
         draft_tab = DraftGeneratorTab(self.notebook, log_callback=self._on_log_message)
         self.tabs.append(draft_tab)
+        
+        # 创建本地服务标签页
+        local_service_tab = LocalServiceTab(self.notebook, log_callback=self._on_log_message)
+        self.tabs.append(local_service_tab)
         
         # 创建示例标签页（演示扩展性）
         example_tab = ExampleTab(self.notebook)
