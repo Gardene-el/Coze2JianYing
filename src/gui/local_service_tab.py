@@ -9,6 +9,7 @@ from tkinter import ttk, messagebox, filedialog
 import os
 import threading
 import time
+import socket
 
 from gui.base_tab import BaseTab
 from utils.draft_generator import DraftGenerator
@@ -63,6 +64,7 @@ class LocalServiceTab(BaseTab):
         self.port_label = ttk.Label(self.config_frame, text="端口:")
         self.port_var = tk.StringVar(value="8000")
         self.port_entry = ttk.Entry(self.config_frame, textvariable=self.port_var, width=10)
+        self.check_port_btn = ttk.Button(self.config_frame, text="检测端口", command=self._check_port_available)
 
         # 服务状态显示
         self.status_frame = ttk.Frame(self.service_frame)
@@ -105,7 +107,8 @@ class LocalServiceTab(BaseTab):
         # 服务配置
         self.config_frame.pack(fill=tk.X, pady=(0, 10))
         self.port_label.pack(side=tk.LEFT, padx=(0, 5))
-        self.port_entry.pack(side=tk.LEFT)
+        self.port_entry.pack(side=tk.LEFT, padx=(0, 5))
+        self.check_port_btn.pack(side=tk.LEFT)
 
         # 服务状态
         self.status_frame.pack(fill=tk.X, pady=(0, 10))
@@ -153,6 +156,47 @@ class LocalServiceTab(BaseTab):
             self.logger.warning("未能检测到剪映草稿文件夹")
             messagebox.showwarning("检测失败", "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。")
 
+    def _check_port_available(self):
+        """检测端口是否可用"""
+        try:
+            port = int(self.port_var.get())
+            if not (1024 <= port <= 65535):
+                raise ValueError("端口必须在 1024-65535 之间")
+        except ValueError as e:
+            messagebox.showerror("错误", f"无效的端口号: {e}")
+            return
+
+        # 检测端口是否可用
+        is_available = self._is_port_available(port)
+
+        if is_available:
+            self.logger.info(f"端口 {port} 可用")
+            messagebox.showinfo("端口可用", f"端口 {port} 当前空闲，可以使用。")
+            self.status_var.set(f"端口 {port} 可用")
+        else:
+            self.logger.warning(f"端口 {port} 已被占用")
+            messagebox.showwarning("端口被占用", f"端口 {port} 已被其他程序占用，请选择其他端口。")
+            self.status_var.set(f"端口 {port} 被占用")
+
+    def _is_port_available(self, port: int) -> bool:
+        """检查端口是否可用
+
+        Args:
+            port: 要检查的端口号
+
+        Returns:
+            True 如果端口可用，False 如果端口被占用
+        """
+        try:
+            # 尝试创建一个socket并绑定到指定端口
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(("localhost", port))
+                return True
+        except OSError:
+            # 端口已被占用
+            return False
+
     def _update_status_indicator(self, running: bool):
         """更新服务状态指示器
 
@@ -184,6 +228,14 @@ class LocalServiceTab(BaseTab):
             messagebox.showerror("错误", f"无效的端口号: {e}")
             return
 
+        # 检查端口是否可用
+        if not self._is_port_available(port):
+            messagebox.showerror(
+                "端口被占用", f"端口 {port} 已被其他程序占用。\n\n请选择其他端口或停止占用该端口的程序。"
+            )
+            self.logger.warning(f"无法启动服务: 端口 {port} 已被占用")
+            return
+
         self.service_port = port
         self.logger.info(f"准备启动FastAPI服务，端口: {port}")
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 正在启动服务...")
@@ -199,6 +251,7 @@ class LocalServiceTab(BaseTab):
         self.start_service_btn.config(state=tk.DISABLED)
         self.stop_service_btn.config(state=tk.NORMAL)
         self.port_entry.config(state=tk.DISABLED)
+        self.check_port_btn.config(state=tk.DISABLED)
         self.status_var.set(f"服务运行中 - http://localhost:{port}")
 
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务已启动")
@@ -221,6 +274,7 @@ class LocalServiceTab(BaseTab):
         self.start_service_btn.config(state=tk.NORMAL)
         self.stop_service_btn.config(state=tk.DISABLED)
         self.port_entry.config(state=tk.NORMAL)
+        self.check_port_btn.config(state=tk.NORMAL)
         self.status_var.set("就绪")
 
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务已停止")

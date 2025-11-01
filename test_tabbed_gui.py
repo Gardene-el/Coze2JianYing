@@ -79,6 +79,7 @@ try:
         assert hasattr(service_tab, 'output_folder'), "应该有 output_folder"
         assert hasattr(service_tab, 'start_service_btn'), "应该有启动服务按钮"
         assert hasattr(service_tab, 'stop_service_btn'), "应该有停止服务按钮"
+        assert hasattr(service_tab, 'check_port_btn'), "应该有检测端口按钮"
         assert hasattr(service_tab, 'service_running'), "应该有服务运行状态"
         assert hasattr(service_tab, 'service_status_indicator'), "应该有服务状态指示器"
         print("✅ 本地服务标签页组件验证通过")

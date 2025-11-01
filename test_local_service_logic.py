@@ -195,6 +195,20 @@ def test_service_management_logic():
         print("❌ 不支持端口配置")
         return False
     
+    # 检查端口检测功能
+    if "_is_port_available" in content:
+        print("✅ 包含端口可用性检测方法")
+    else:
+        print("❌ 缺少端口可用性检测方法")
+        return False
+    
+    # 检查socket导入
+    if "import socket" in content:
+        print("✅ 导入 socket 模块用于端口检测")
+    else:
+        print("❌ 未导入 socket 模块")
+        return False
+    
     return True
 
 def test_ui_components():
@@ -210,6 +224,7 @@ def test_ui_components():
         "service_frame",
         "start_service_btn",
         "stop_service_btn",
+        "check_port_btn",
         "service_status_label",
         "service_status_indicator",
         "info_text",
