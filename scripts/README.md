@@ -71,6 +71,119 @@ python scripts/test_coze_json_formatter.py
 - 自定义输出文件名
 - 与 DraftGenerator 集成
 
+### generate_tool_doc.py
+
+**功能**: 工具文档生成器
+
+从 Coze 插件工具的 handler.py 文件自动生成文档，包括工具名称、描述和输入参数。
+
+**使用方法**:
+
+```bash
+# 显示帮助信息
+python scripts/generate_tool_doc.py
+
+# 为单个工具生成文档（自动生成输出文件名）
+python scripts/generate_tool_doc.py coze_plugin/tools/create_draft/handler.py
+
+# 指定输出文件名
+python scripts/generate_tool_doc.py coze_plugin/tools/create_draft/handler.py output.md
+```
+
+**作为 Python 模块使用**:
+
+```python
+import sys
+from pathlib import Path
+
+# 添加 scripts 目录到路径
+sys.path.insert(0, str(Path(__file__).parent / 'scripts'))
+
+from generate_tool_doc import generate_documentation, get_tool_name_from_path
+
+# 生成文档
+handler_path = "coze_plugin/tools/create_draft/handler.py"
+doc_content = generate_documentation(handler_path)
+print(doc_content)
+```
+
+**主要功能**:
+- ✅ 从模块文档字符串提取工具描述
+- ✅ 解析 Input 类获取参数定义
+- ✅ 自动格式化工具名称
+- ✅ 生成标准格式的 Markdown 文档
+- ✅ 支持自定义输出路径
+
+**生成的文档格式**:
+
+```markdown
+# 工具函数 Tool Name
+
+工具名称：tool_name
+工具描述：[从 handler.py 模块文档字符串提取]
+
+## 输入参数
+
+\`\`\`python
+class Input(NamedTuple):
+    param1: type = default_value  # 参数注释
+    param2: type = default_value
+\`\`\`
+```
+
+### scan_and_generate_docs.py
+
+**功能**: 批量文档生成工具
+
+扫描 `coze_plugin/tools/` 目录下的所有 handler.py 文件，并为每个工具自动生成文档。
+
+**使用方法**:
+
+```bash
+# 显示帮助信息
+python scripts/scan_and_generate_docs.py --help
+
+# 扫描并生成所有工具的文档（默认输出到各工具目录）
+python scripts/scan_and_generate_docs.py
+
+# 指定工具目录
+python scripts/scan_and_generate_docs.py coze_plugin/tools
+
+# 指定输出目录（统一输出到一个目录）
+python scripts/scan_and_generate_docs.py coze_plugin/tools /tmp/docs
+```
+
+**主要功能**:
+- ✅ 自动扫描所有 handler.py 文件
+- ✅ 批量生成工具文档
+- ✅ 支持自定义输出目录
+- ✅ 提供详细的处理进度和统计
+- ✅ 错误处理和报告
+
+**输出示例**:
+
+```
+🔍 Scanning for handler.py files in: coze_plugin/tools
+================================================================================
+
+📋 Found 13 handler.py files
+================================================================================
+
+📝 Generating documentation...
+================================================================================
+✅ create_draft         -> coze_plugin/tools/create_draft/create_draft_generated.md
+✅ export_drafts        -> coze_plugin/tools/export_drafts/export_drafts_generated.md
+...
+
+================================================================================
+📊 Summary
+================================================================================
+✅ Successfully generated: 13
+❌ Failed: 0
+
+✨ Documentation generation complete!
+```
+
 ## 📊 输入输出格式
 
 ### 输入格式（Coze 特殊格式）
