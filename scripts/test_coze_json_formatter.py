@@ -109,7 +109,7 @@ def test_with_draft_generator():
         
         # 2. 使用 DraftGenerator 生成草稿
         print("\n步骤 2: 使用 DraftGenerator 生成草稿")
-        from src.utils.draft_generator import DraftGenerator
+        from app.utils.draft_generator import DraftGenerator
         import tempfile
         
         with tempfile.TemporaryDirectory() as temp_dir:

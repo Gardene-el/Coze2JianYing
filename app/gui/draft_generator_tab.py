@@ -10,9 +10,9 @@ from datetime import datetime
 import os
 import threading
 
-from gui.base_tab import BaseTab
-from utils.draft_generator import DraftGenerator
-from utils.logger import get_logger
+from app.gui.base_tab import BaseTab
+from app.utils.draft_generator import DraftGenerator
+from app.utils.logger import get_logger
 
 
 class DraftGeneratorTab(BaseTab):

@@ -11,8 +11,8 @@ import threading
 import time
 import socket
 
-from gui.base_tab import BaseTab
-from utils.draft_generator import DraftGenerator
+from app.gui.base_tab import BaseTab
+from app.utils.draft_generator import DraftGenerator
 
 
 class LocalServiceTab(BaseTab):

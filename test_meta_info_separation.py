@@ -7,8 +7,8 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.utils.draft_generator import DraftGenerator
-from src.utils.draft_meta_manager import DraftMetaManager
+from app.utils.draft_generator import DraftGenerator
+from app.utils.draft_meta_manager import DraftMetaManager
 import tempfile
 import json
 import shutil

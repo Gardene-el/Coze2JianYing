@@ -6,11 +6,11 @@
 from pathlib import Path
 from typing import Optional, Dict, List, Any
 import os
-from utils.logger import get_logger
-from utils.coze_parser import CozeOutputParser
-from utils.converter import DraftInterfaceConverter
-from utils.material_manager import MaterialManager, create_material_manager
-from utils.draft_meta_manager import DraftMetaManager, create_draft_meta_manager
+from app.utils.logger import get_logger
+from app.utils.coze_parser import CozeOutputParser
+from app.utils.converter import DraftInterfaceConverter
+from app.utils.material_manager import MaterialManager, create_material_manager
+from app.utils.draft_meta_manager import DraftMetaManager, create_draft_meta_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
