@@ -13,7 +13,7 @@ import shutil
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.utils.draft_generator import DraftGenerator
+from app.utils.draft_generator import DraftGenerator
 
 
 def test_actual_scenario_with_jianyingpro_folder():

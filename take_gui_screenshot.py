@@ -11,7 +11,7 @@ from PIL import Image
 import time
 
 # Import the main window
-from src.gui.main_window import MainWindow
+from app.gui.main_window import MainWindow
 
 def take_screenshot():
     """创建GUI并截图"""

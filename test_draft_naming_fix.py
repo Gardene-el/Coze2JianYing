@@ -13,7 +13,7 @@ import shutil
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.utils.draft_generator import DraftGenerator
+from app.utils.draft_generator import DraftGenerator
 
 
 def test_draft_naming_with_project_name():

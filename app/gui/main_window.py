@@ -7,11 +7,11 @@ from pathlib import Path
 from datetime import datetime
 import os
 
-from gui.log_window import LogWindow
-from gui.draft_generator_tab import DraftGeneratorTab
-from gui.local_service_tab import LocalServiceTab
-from gui.example_tab import ExampleTab
-from utils.logger import get_logger, set_gui_log_callback
+from app.gui.log_window import LogWindow
+from app.gui.draft_generator_tab import DraftGeneratorTab
+from app.gui.local_service_tab import LocalServiceTab
+from app.gui.example_tab import ExampleTab
+from app.utils.logger import get_logger, set_gui_log_callback
 
 
 class MainWindow:

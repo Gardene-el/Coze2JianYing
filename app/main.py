@@ -5,11 +5,11 @@ import sys
 import os
 from pathlib import Path
 
-# 添加src目录到Python路径
+# 添加app目录到Python路径
 sys.path.insert(0, str(Path(__file__).parent))
 
-from gui.main_window import MainWindow
-from utils.logger import setup_logger, get_logger
+from app.gui.main_window import MainWindow
+from app.utils.logger import setup_logger, get_logger
 
 
 def main():

@@ -48,7 +48,7 @@ def build_exe():
     
     # PyInstaller参数
     args = [
-        'src/main.py',              # 主程序入口
+        'app/main.py',              # 主程序入口
         '--name=CozeJianYingDraftGenerator',  # 应用名称
         '--windowed',                # 不显示控制台窗口
         '--onefile',                 # 打包成单个exe文件
