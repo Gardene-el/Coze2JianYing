@@ -18,6 +18,15 @@ from pathlib import Path
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
 
+# Coze API 相关导入
+try:
+    from cozepy import Coze, TokenAuth, COZE_CN_BASE_URL, COZE_COM_BASE_URL
+    COZEPY_AVAILABLE = True
+except ImportError:
+    COZEPY_AVAILABLE = False
+    COZE_CN_BASE_URL = "https://api.coze.cn"
+    COZE_COM_BASE_URL = "https://api.coze.com"
+
 
 class LocalServiceTab(BaseTab):
     """本地服务标签页
@@ -41,6 +50,11 @@ class LocalServiceTab(BaseTab):
         # 输出文件夹路径
         self.output_folder = None
 
+        # Coze API 配置
+        self.coze_api_token = None
+        self.coze_base_url = COZE_CN_BASE_URL
+        self.coze_client = None
+
         # FastAPI服务相关（使用子进程方式）
         self.service_process = None  # 子进程对象
         self.service_running = False
@@ -62,6 +76,40 @@ class LocalServiceTab(BaseTab):
         self.folder_entry = ttk.Entry(self.folder_frame, textvariable=self.folder_var, state="readonly", width=50)
         self.folder_btn = ttk.Button(self.folder_frame, text="选择文件夹...", command=self._select_output_folder)
         self.auto_detect_btn = ttk.Button(self.folder_frame, text="自动检测", command=self._auto_detect_folder)
+
+        # Coze API 配置区域
+        self.coze_frame = ttk.LabelFrame(self.frame, text="Coze API 配置", padding="5")
+        
+        # API Token 输入
+        self.token_label = ttk.Label(self.coze_frame, text="API Token:")
+        self.token_var = tk.StringVar(value="")
+        self.token_entry = ttk.Entry(self.coze_frame, textvariable=self.token_var, show="*", width=50)
+        
+        # 显示/隐藏密码按钮
+        self.show_token_var = tk.BooleanVar(value=False)
+        self.show_token_btn = ttk.Checkbutton(
+            self.coze_frame, 
+            text="显示", 
+            variable=self.show_token_var,
+            command=self._toggle_token_visibility
+        )
+        
+        # Base URL 选择
+        self.base_url_label = ttk.Label(self.coze_frame, text="服务地址:")
+        self.base_url_var = tk.StringVar(value=COZE_CN_BASE_URL)
+        self.base_url_combo = ttk.Combobox(
+            self.coze_frame,
+            textvariable=self.base_url_var,
+            values=[COZE_CN_BASE_URL, COZE_COM_BASE_URL],
+            state="readonly",
+            width=30
+        )
+        
+        # Coze 客户端状态
+        self.coze_status_label = ttk.Label(self.coze_frame, text="状态: 未配置", font=("Arial", 9))
+        
+        # 测试连接按钮
+        self.test_coze_btn = ttk.Button(self.coze_frame, text="测试连接", command=self._test_coze_connection)
 
         # FastAPI服务管理区域
         self.service_frame = ttk.LabelFrame(self.frame, text="FastAPI 服务管理", padding="10")
@@ -116,7 +164,7 @@ class LocalServiceTab(BaseTab):
 
         # 配置网格权重
         self.frame.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(2, weight=1)  # 更新为row 2，因为添加了Coze配置框
 
     def _setup_layout(self):
         """设置布局"""
@@ -128,8 +176,26 @@ class LocalServiceTab(BaseTab):
         self.auto_detect_btn.grid(row=0, column=3)
         self.folder_frame.columnconfigure(1, weight=1)
 
+        # Coze API 配置区域
+        self.coze_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        # Token 输入行
+        self.token_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5), pady=(0, 5))
+        self.token_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5), pady=(0, 5))
+        self.show_token_btn.grid(row=0, column=2, padx=(0, 5), pady=(0, 5))
+        
+        # Base URL 选择行
+        self.base_url_label.grid(row=1, column=0, sticky=tk.W, padx=(0, 5), pady=(0, 5))
+        self.base_url_combo.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(0, 5), pady=(0, 5))
+        
+        # 状态和测试按钮行
+        self.coze_status_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, padx=(0, 5), pady=(5, 0))
+        self.test_coze_btn.grid(row=2, column=2, padx=(0, 5), pady=(5, 0))
+        
+        self.coze_frame.columnconfigure(1, weight=1)
+
         # FastAPI服务管理区域
-        self.service_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        self.service_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
 
         # 服务配置
         self.config_frame.pack(fill=tk.X, pady=(0, 10))
@@ -165,7 +231,7 @@ class LocalServiceTab(BaseTab):
         self.clear_log_btn.pack(side=tk.RIGHT)
 
         # 底部状态栏
-        self.status_bar.grid(row=2, column=0, sticky=(tk.W, tk.E))
+        self.status_bar.grid(row=3, column=0, sticky=(tk.W, tk.E))
 
     def _select_output_folder(self):
         """选择输出文件夹"""
@@ -195,6 +261,81 @@ class LocalServiceTab(BaseTab):
         else:
             self.logger.warning("未能检测到剪映草稿文件夹")
             messagebox.showwarning("检测失败", "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。")
+
+    def _toggle_token_visibility(self):
+        """切换 API Token 的显示/隐藏"""
+        if self.show_token_var.get():
+            self.token_entry.config(show="")
+        else:
+            self.token_entry.config(show="*")
+
+    def _test_coze_connection(self):
+        """测试 Coze API 连接"""
+        if not COZEPY_AVAILABLE:
+            messagebox.showerror("错误", "cozepy 库未安装。\n请运行: pip install cozepy")
+            self.logger.error("cozepy 库未安装")
+            return
+
+        token = self.token_var.get().strip()
+        if not token:
+            messagebox.showwarning("警告", "请先输入 API Token")
+            self.logger.warning("尝试测试连接但未输入 API Token")
+            return
+
+        base_url = self.base_url_var.get()
+        
+        self.logger.info(f"测试 Coze API 连接... (Base URL: {base_url})")
+        self.coze_status_label.config(text="状态: 测试连接中...")
+        self.status_var.set("正在测试 Coze API 连接...")
+        
+        try:
+            # 创建 Coze 客户端
+            from cozepy import Coze, TokenAuth
+            test_client = Coze(auth=TokenAuth(token), base_url=base_url)
+            
+            # 存储配置
+            self.coze_api_token = token
+            self.coze_base_url = base_url
+            self.coze_client = test_client
+            
+            # 更新状态
+            self.coze_status_label.config(text="状态: 已配置 ✓", foreground="green")
+            self.status_var.set("Coze API 配置成功")
+            self.logger.info("Coze API 连接测试成功")
+            
+            messagebox.showinfo(
+                "连接成功", 
+                f"Coze API 配置成功!\n\nAPI Token: {'*' * (len(token) - 4) + token[-4:]}\nBase URL: {base_url}"
+            )
+            
+        except Exception as e:
+            self.coze_status_label.config(text="状态: 连接失败 ✗", foreground="red")
+            self.status_var.set("Coze API 连接失败")
+            self.logger.error(f"Coze API 连接测试失败: {e}", exc_info=True)
+            messagebox.showerror("连接失败", f"无法连接到 Coze API:\n\n{str(e)}\n\n请检查:\n1. API Token 是否正确\n2. 网络连接是否正常\n3. Base URL 是否正确")
+
+    def _get_coze_client(self):
+        """获取配置好的 Coze 客户端
+        
+        Returns:
+            Coze客户端实例，如果未配置则返回None
+        """
+        if self.coze_client is None:
+            token = self.token_var.get().strip()
+            if token and COZEPY_AVAILABLE:
+                try:
+                    from cozepy import Coze, TokenAuth
+                    self.coze_api_token = token
+                    self.coze_base_url = self.base_url_var.get()
+                    self.coze_client = Coze(
+                        auth=TokenAuth(self.coze_api_token),
+                        base_url=self.coze_base_url
+                    )
+                    self.logger.info("Coze 客户端已初始化")
+                except Exception as e:
+                    self.logger.error(f"初始化 Coze 客户端失败: {e}")
+                    return None
+        return self.coze_client
 
     def _check_port_available(self):
         """检测端口是否可用"""
@@ -517,3 +658,7 @@ class LocalServiceTab(BaseTab):
         self.service_process = None
         self.log_reader_thread = None
         self.stop_event.clear()
+        
+        # 清理 Coze API 相关资源
+        self.coze_api_token = None
+        self.coze_client = None
