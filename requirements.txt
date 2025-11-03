@@ -1,6 +1,9 @@
 # Core dependency for JianYing draft generation
 pyJianYingDraft>=0.2.5
 
+# Coze platform SDK
+cozepy>=0.20.0
+
 # HTTP requests for downloading materials
 requests>=2.31.0
 
