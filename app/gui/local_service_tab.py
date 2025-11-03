@@ -10,6 +10,10 @@ import os
 import threading
 import time
 import socket
+import subprocess
+import sys
+import queue
+from pathlib import Path
 
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
@@ -37,10 +41,13 @@ class LocalServiceTab(BaseTab):
         # 输出文件夹路径
         self.output_folder = None
 
-        # FastAPI服务相关
-        self.service_thread = None
+        # FastAPI服务相关（使用子进程方式）
+        self.service_process = None  # 子进程对象
         self.service_running = False
         self.service_port = 8000
+        self.log_queue = queue.Queue()  # 日志队列
+        self.log_reader_thread = None  # 日志读取线程
+        self.stop_event = threading.Event()
 
         # 调用父类初始化
         super().__init__(parent, "本地服务")
@@ -85,9 +92,23 @@ class LocalServiceTab(BaseTab):
             self.control_frame, text="停止服务", command=self._stop_service, state=tk.DISABLED
         )
 
-        # 服务信息显示
-        self.info_frame = ttk.LabelFrame(self.service_frame, text="服务信息", padding="5")
-        self.info_text = tk.Text(self.info_frame, height=8, wrap=tk.WORD, font=("Consolas", 9), state=tk.DISABLED)
+        # 服务信息显示（实时日志）
+        self.info_frame = ttk.LabelFrame(self.service_frame, text="服务实时日志", padding="5")
+        self.info_text = tk.Text(
+            self.info_frame, 
+            height=12, 
+            wrap=tk.WORD, 
+            font=("Consolas", 9), 
+            state=tk.DISABLED,
+            bg="#1e1e1e",  # 深色背景
+            fg="#d4d4d4"   # 浅色文字
+        )
+        # 添加滚动条
+        self.info_scrollbar = ttk.Scrollbar(self.info_frame, orient=tk.VERTICAL, command=self.info_text.yview)
+        self.info_text.config(yscrollcommand=self.info_scrollbar.set)
+        
+        # 清空日志按钮
+        self.clear_log_btn = ttk.Button(self.info_frame, text="清空日志", command=self._clear_log)
 
         # 底部状态栏
         self.status_var = tk.StringVar(value="就绪")
@@ -133,7 +154,15 @@ class LocalServiceTab(BaseTab):
 
         # 服务信息
         self.info_frame.pack(fill=tk.BOTH, expand=True)
-        self.info_text.pack(fill=tk.BOTH, expand=True)
+        
+        # 日志显示区域布局
+        log_content_frame = ttk.Frame(self.info_frame)
+        log_content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
+        
+        self.info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, in_=log_content_frame)
+        self.info_scrollbar.pack(side=tk.RIGHT, fill=tk.Y, in_=log_content_frame)
+        
+        self.clear_log_btn.pack(side=tk.RIGHT)
 
         # 底部状态栏
         self.status_bar.grid(row=2, column=0, sticky=(tk.W, tk.E))
@@ -236,12 +265,27 @@ class LocalServiceTab(BaseTab):
         color = "green" if running else "red"
         self.service_status_indicator.create_oval(2, 2, 18, 18, fill=color, outline=color)
 
-    def _append_to_info(self, message: str):
-        """添加信息到服务信息文本框"""
+    def _append_to_info(self, message: str, tag: str = None):
+        """添加信息到服务信息文本框
+        
+        Args:
+            message: 日志消息
+            tag: 可选的文本标签，用于着色
+        """
         self.info_text.config(state=tk.NORMAL)
-        self.info_text.insert(tk.END, message + "\n")
+        if tag:
+            self.info_text.insert(tk.END, message + "\n", tag)
+        else:
+            self.info_text.insert(tk.END, message + "\n")
         self.info_text.see(tk.END)
         self.info_text.config(state=tk.DISABLED)
+    
+    def _clear_log(self):
+        """清空日志显示"""
+        self.info_text.config(state=tk.NORMAL)
+        self.info_text.delete(1.0, tk.END)
+        self.info_text.config(state=tk.DISABLED)
+        self.logger.info("日志已清空")
 
     def _start_service(self):
         """启动FastAPI服务"""
@@ -270,10 +314,15 @@ class LocalServiceTab(BaseTab):
         self.service_port = port
         self.logger.info(f"准备启动FastAPI服务，端口: {port}")
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 正在启动服务...")
+        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 使用子进程模式，可完整捕获日志")
 
-        # 在后台线程中启动服务
-        self.service_thread = threading.Thread(target=self._run_service, args=(port,), daemon=True)
-        self.service_thread.start()
+        # 启动服务子进程
+        try:
+            self._start_service_process(port)
+        except Exception as e:
+            self.logger.error(f"启动服务失败: {e}", exc_info=True)
+            messagebox.showerror("启动失败", f"无法启动服务:\n{e}")
+            return
 
         # 更新UI状态
         self.service_running = True
@@ -287,9 +336,13 @@ class LocalServiceTab(BaseTab):
         self.check_port_btn.config(state=tk.DISABLED)
         self.status_var.set(f"服务运行中 - http://localhost:{port}")
 
-        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务已启动")
+        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务进程已启动 (PID: {self.service_process.pid})")
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 访问地址: http://localhost:{port}")
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] API文档: http://localhost:{port}/docs")
+        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] " + "-" * 60)
+        
+        # 启动日志处理
+        self._start_log_processing()
 
     def _stop_service(self):
         """停止FastAPI服务"""
@@ -300,8 +353,29 @@ class LocalServiceTab(BaseTab):
         self.logger.info("停止FastAPI服务")
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 正在停止服务...")
 
-        # 更新状态（实际的停止逻辑在占位符服务中处理）
+        # 设置停止标志
         self.service_running = False
+        self.stop_event.set()
+        
+        # 终止子进程
+        if self.service_process:
+            try:
+                self.service_process.terminate()  # 发送终止信号
+                try:
+                    self.service_process.wait(timeout=5)  # 等待进程结束
+                    self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务进程已正常终止")
+                except subprocess.TimeoutExpired:
+                    self.service_process.kill()  # 强制终止
+                    self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务进程已强制终止")
+                self.service_process = None
+            except Exception as e:
+                self.logger.warning(f"停止服务进程时出错: {e}")
+
+        # 停止日志读取线程
+        if self.log_reader_thread and self.log_reader_thread.is_alive():
+            self.log_reader_thread.join(timeout=2)
+
+        # 更新UI状态
         self._update_status_indicator(False)
         self.service_status_label.config(text="服务状态: 未启动")
         self.port_status_label.config(text="端口状态: 未检测")
@@ -314,26 +388,90 @@ class LocalServiceTab(BaseTab):
 
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务已停止")
 
-    def _run_service(self, port: int):
-        """运行FastAPI服务（后台线程）
-
+    def _start_service_process(self, port: int):
+        """启动FastAPI服务子进程
+        
         Args:
             port: 服务端口
         """
+        # 构建启动命令
+        python_exe = sys.executable  # 当前Python解释器路径
+        
+        # 使用uvicorn命令行方式启动
+        cmd = [
+            python_exe,
+            "-m", "uvicorn",
+            "app.api_main:app",
+            "--host", "127.0.0.1",
+            "--port", str(port),
+            "--log-level", "info",
+        ]
+        
+        self.logger.info(f"启动命令: {' '.join(cmd)}")
+        
+        # 启动子进程，捕获输出
+        self.service_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # 将stderr重定向到stdout
+            text=True,  # 文本模式
+            bufsize=1,  # 行缓冲
+            encoding='utf-8',
+            errors='replace'  # 替换无法解码的字符
+        )
+        
+        self.logger.info(f"服务进程已启动，PID: {self.service_process.pid}")
+    
+    def _start_log_processing(self):
+        """启动日志处理（读取子进程输出）"""
+        # 启动日志读取线程
+        self.log_reader_thread = threading.Thread(
+            target=self._read_process_output, 
+            daemon=True
+        )
+        self.log_reader_thread.start()
+        
+        # 启动日志显示更新
+        self._update_log_display()
+    
+    def _read_process_output(self):
+        """读取子进程输出（在后台线程中运行）"""
         try:
-            # 这是一个占位符实现
-            # 实际的FastAPI服务将在后续实现
-            self.logger.info("FastAPI服务线程已启动（占位符实现）")
-
-            # 模拟服务运行
-            while self.service_running:
-                time.sleep(1)
-
-            self.logger.info("FastAPI服务线程已停止")
+            for line in iter(self.service_process.stdout.readline, ''):
+                if not line:
+                    break
+                # 去除末尾换行符
+                line = line.rstrip()
+                if line:
+                    # 将日志放入队列
+                    self.log_queue.put(line)
+                
+                # 检查是否需要停止
+                if self.stop_event.is_set():
+                    break
         except Exception as e:
-            self.logger.error(f"FastAPI服务出错: {e}", exc_info=True)
-            # 在主线程中更新UI
-            self.frame.after(0, self._on_service_error, e)
+            self.logger.error(f"读取进程输出时出错: {e}", exc_info=True)
+        finally:
+            self.logger.info("日志读取线程已停止")
+    
+    def _update_log_display(self):
+        """更新日志显示（在主线程中定期调用）"""
+        try:
+            # 从队列中获取所有可用的日志
+            has_new_log = False
+            while not self.log_queue.empty():
+                try:
+                    log_line = self.log_queue.get_nowait()
+                    self._append_to_info(log_line)
+                    has_new_log = True
+                except queue.Empty:
+                    break
+            
+            # 如果服务正在运行，继续定期更新
+            if self.service_running:
+                self.frame.after(100, self._update_log_display)  # 每100ms更新一次
+        except Exception as e:
+            self.logger.error(f"更新日志显示时出错: {e}", exc_info=True)
 
     def _on_service_error(self, error):
         """服务错误回调"""
@@ -352,12 +490,30 @@ class LocalServiceTab(BaseTab):
         """清理标签页资源"""
         # 停止服务
         if self.service_running:
+            self.logger.info("清理时停止FastAPI服务")
             self.service_running = False
-            if self.service_thread and self.service_thread.is_alive():
-                self.service_thread.join(timeout=2)
+            self.stop_event.set()
+            
+            # 终止子进程
+            if self.service_process:
+                try:
+                    self.service_process.terminate()
+                    try:
+                        self.service_process.wait(timeout=3)
+                    except subprocess.TimeoutExpired:
+                        self.service_process.kill()
+                    self.service_process = None
+                except Exception as e:
+                    self.logger.warning(f"清理时停止服务进程出错: {e}")
+            
+            # 等待日志线程结束
+            if self.log_reader_thread and self.log_reader_thread.is_alive():
+                self.log_reader_thread.join(timeout=2)
 
         super().cleanup()
         # 清理标签页特定的资源
         self.output_folder = None
         self.draft_generator = None
-        self.service_thread = None
+        self.service_process = None
+        self.log_reader_thread = None
+        self.stop_event.clear()
