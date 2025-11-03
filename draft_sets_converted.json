@@ -1,0 +1,79 @@
+{
+  "format_version": "1.0",
+  "export_type": "batch_draft",
+  "draft_count": 6,
+  "drafts": [
+    {
+      "draft_id": "8093f3a0-d9b7-4649-a338-4ca96bd7e469",
+      "project": {
+        "name": "Coze剪映项目",
+        "width": 800,
+        "height": 600,
+        "fps": 30
+      },
+      "media_resources": [],
+      "tracks": [
+        {
+          "track_type": "audio",
+          "segments": [
+            {
+              "id": "353282d1-6c88-44ed-9e13-2c561ce82c63",
+              "type": "audio",
+              "material_url": "https://lf3-appstore-sign.oceancloudapi.com/ocean-cloud-tos/VolcanoUserVoice/speech_7426725529589645339_538af1a2-4634-4b4d-be4e-97ed4db4d8ad.mp3?lk3s=da27ec82&x-expires=1759570092&x-signature=lSMggG0zkVOlYO5i7vToL5tGXPM%3D",
+              "time_range": {
+                "start": 0,
+                "end": 3
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "text",
+          "segments": [
+            {
+              "id": "17e0fb77-5cd2-4fd1-ba5c-8ce92f263064",
+              "type": "text",
+              "content": "hello",
+              "time_range": {
+                "start": 0,
+                "end": 100000
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "video",
+          "segments": [
+            {
+              "id": "057e36a5-ed20-4288-903c-f8850dea1210",
+              "type": "image",
+              "material_url": "https://s.coze.cn/t/iHombFeLlx0",
+              "time_range": {
+                "start": 0,
+                "end": 3
+              }
+            }
+          ]
+        },
+        {
+          "track_type": "video",
+          "segments": [
+            {
+              "id": "5462544d-ee4d-479f-91d8-5ce98737d3c1",
+              "type": "video",
+              "material_url": "https://ark-content-generation-cn-beijing.tos-cn-beijing.volces.com/doubao-seedance-1-0-lite-t2v/02175928644208500000000000000000000ffffac15ae3363c58d.mp4?X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Credential=AKLTYWJkZTExNjA1ZDUyNDc3YzhjNTM5OGIyNjBhNDcyOTQ%2F20251001%2Fcn-beijing%2Ftos%2Frequest&X-Tos-Date=20251001T024053Z&X-Tos-Expires=86400&X-Tos-Signature=09bd56a159a8111243f4b12d8fbefaf7a9efc41bf6d98b8b20fc7cd3f903367b&X-Tos-SignedHeaders=host",
+              "time_range": {
+                "start": 0,
+                "end": 10000000
+              }
+            }
+          ]
+        }
+      ],
+      "total_duration_ms": 0,
+      "created_timestamp": 1761856389.357298,
+      "last_modified": 1761857507.3442342,
+      "status": "created"
+    }
+  ]
+}
