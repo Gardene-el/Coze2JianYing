@@ -10,6 +10,7 @@ import os
 from app.gui.log_window import LogWindow
 from app.gui.draft_generator_tab import DraftGeneratorTab
 from app.gui.local_service_tab import LocalServiceTab
+from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.example_tab import ExampleTab
 from app.utils.logger import get_logger, set_gui_log_callback
 
@@ -139,16 +140,112 @@ class MainWindow:
         # 创建手动草稿生成器标签页（原有功能）
         draft_tab = DraftGeneratorTab(self.notebook, log_callback=self._on_log_message)
         self.tabs.append(draft_tab)
+        self._add_tooltip(0, "手动粘贴 JSON 生成草稿")
         
-        # 创建本地服务标签页
+        # 创建云端服务标签页（基于已有服务的云侧插件）
+        cloud_service_tab = CloudServiceTab(self.notebook, log_callback=self._on_log_message)
+        self.tabs.append(cloud_service_tab)
+        self._add_tooltip(1, "启动 FastAPI 服务，配置为 Coze 云侧插件\n无需 cozepy SDK 或 Coze Token")
+        
+        # 创建本地服务标签页（端插件）
         local_service_tab = LocalServiceTab(self.notebook, log_callback=self._on_log_message)
         self.tabs.append(local_service_tab)
+        self._add_tooltip(2, "使用 cozepy SDK 监听 Coze Bot 事件\n需要配置 Coze Token 和 Bot ID")
         
         # 创建示例标签页（演示扩展性）
         example_tab = ExampleTab(self.notebook)
         self.tabs.append(example_tab)
+        self._add_tooltip(3, "示例标签页")
         
         self.logger.info(f"已创建 {len(self.tabs)} 个标签页")
+    
+    def _add_tooltip(self, tab_index: int, text: str):
+        """为标签页添加工具提示
+        
+        Args:
+            tab_index: 标签页索引
+            text: 提示文本
+        """
+        # 创建工具提示类
+        class ToolTip:
+            def __init__(self, widget, text):
+                self.widget = widget
+                self.text = text
+                self.tip_window = None
+                widget.bind("<Enter>", self.show_tip)
+                widget.bind("<Leave>", self.hide_tip)
+            
+            def show_tip(self, event=None):
+                if self.tip_window or not self.text:
+                    return
+                x, y, _, _ = self.widget.bbox("insert")
+                x += self.widget.winfo_rootx() + 25
+                y += self.widget.winfo_rooty() + 25
+                
+                self.tip_window = tw = tk.Toplevel(self.widget)
+                tw.wm_overrideredirect(True)
+                tw.wm_geometry(f"+{x}+{y}")
+                
+                label = tk.Label(
+                    tw, text=self.text, justify=tk.LEFT,
+                    background="#ffffe0", relief=tk.SOLID, borderwidth=1,
+                    font=("Arial", 9)
+                )
+                label.pack()
+            
+            def hide_tip(self, event=None):
+                if self.tip_window:
+                    self.tip_window.destroy()
+                    self.tip_window = None
+        
+        # 获取标签页的标签控件
+        try:
+            tab_id = self.notebook.tabs()[tab_index]
+            # 为整个notebook绑定鼠标事件
+            if not hasattr(self, '_tab_tooltips'):
+                self._tab_tooltips = {}
+                self.notebook.bind("<Motion>", self._on_tab_motion)
+                self.notebook.bind("<Leave>", self._hide_all_tooltips)
+            
+            self._tab_tooltips[tab_index] = text
+        except Exception as e:
+            self.logger.warning(f"添加工具提示失败: {e}")
+    
+    def _on_tab_motion(self, event):
+        """处理鼠标在notebook上移动"""
+        try:
+            # 获取鼠标下的标签页索引
+            tab_index = self.notebook.index(f"@{event.x},{event.y}")
+            
+            # 如果鼠标在标签上且有tooltip
+            if tab_index >= 0 and tab_index in self._tab_tooltips:
+                self._show_tab_tooltip(event.x_root, event.y_root, self._tab_tooltips[tab_index])
+            else:
+                self._hide_all_tooltips()
+        except:
+            self._hide_all_tooltips()
+    
+    def _show_tab_tooltip(self, x, y, text):
+        """显示标签页工具提示"""
+        if hasattr(self, '_tooltip_window') and self._tooltip_window:
+            return
+        
+        self._tooltip_window = tw = tk.Toplevel(self.root)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x+10}+{y+10}")
+        
+        label = tk.Label(
+            tw, text=text, justify=tk.LEFT,
+            background="#ffffe0", relief=tk.SOLID, borderwidth=1,
+            font=("Arial", 9), padx=5, pady=3
+        )
+        label.pack()
+    
+    def _hide_all_tooltips(self, event=None):
+        """隐藏所有工具提示"""
+        if hasattr(self, '_tooltip_window') and self._tooltip_window:
+            self._tooltip_window.destroy()
+            self._tooltip_window = None
     
     def _setup_layout(self):
         """设置布局"""
