@@ -14,6 +14,9 @@ import subprocess
 import sys
 import queue
 from pathlib import Path
+import asyncio
+import uvicorn
+import atexit
 
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
@@ -55,16 +58,37 @@ class LocalServiceTab(BaseTab):
         self.coze_base_url = COZE_CN_BASE_URL
         self.coze_client = None
 
-        # FastAPI服务相关（使用子进程方式）
-        self.service_process = None  # 子进程对象
+        # FastAPI服务相关(使用子进程方式)
+        self.service_process = None  # 子进程对象(源码环境)
+        self.service_thread = None   # 服务线程(打包环境)
+        self.uvicorn_server = None   # uvicorn 服务器实例(用于停止)
         self.service_running = False
         self.service_port = 8000
         self.log_queue = queue.Queue()  # 日志队列
         self.log_reader_thread = None  # 日志读取线程
         self.stop_event = threading.Event()
+        
+        # 注册清理函数,确保应用退出时停止服务
+        atexit.register(self._cleanup_on_exit)
 
         # 调用父类初始化
         super().__init__(parent, "本地服务")
+    
+    def _cleanup_on_exit(self):
+        """应用退出时的清理函数"""
+        try:
+            if self.service_running:
+                self._stop_service()
+        except:
+            pass  # 忽略清理时的错误
+    
+    def __del__(self):
+        """析构函数：确保在对象销毁时停止服务"""
+        try:
+            if self.service_running:
+                self._stop_service()
+        except:
+            pass  # 忽略析构时的错误
 
     def _create_widgets(self):
         """创建UI组件"""
@@ -498,23 +522,43 @@ class LocalServiceTab(BaseTab):
         self.service_running = False
         self.stop_event.set()
         
-        # 终止子进程
-        if self.service_process:
-            try:
-                self.service_process.terminate()  # 发送终止信号
+        is_frozen = getattr(sys, 'frozen', False)
+        
+        # 停止服务
+        try:
+            if is_frozen and self.uvicorn_server:
+                # 打包环境：停止 uvicorn 服务器（线程模式）
+                self.uvicorn_server.should_exit = True
+                self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 正在停止嵌入式服务...")
+                
+                # 等待线程结束
+                if self.service_thread and self.service_thread.is_alive():
+                    self.service_thread.join(timeout=5)
+                
+                self.uvicorn_server = None
+                self.service_thread = None
+                self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 嵌入式服务已停止")
+                
+            elif self.service_process:
+                # 源码环境：Popen 对象
+                self.service_process.terminate()
                 try:
-                    self.service_process.wait(timeout=5)  # 等待进程结束
+                    self.service_process.wait(timeout=5)
                     self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务进程已正常终止")
                 except subprocess.TimeoutExpired:
-                    self.service_process.kill()  # 强制终止
+                    self.service_process.kill()
                     self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务进程已强制终止")
+                
                 self.service_process = None
-            except Exception as e:
-                self.logger.warning(f"停止服务进程时出错: {e}")
+                
+        except Exception as e:
+            self.logger.warning(f"停止服务时出错: {e}")
+            self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 停止服务时出错: {e}")
 
-        # 停止日志读取线程
+        # 停止日志读取线程（仅源码环境）
         if self.log_reader_thread and self.log_reader_thread.is_alive():
             self.log_reader_thread.join(timeout=2)
+            self.log_reader_thread = None
 
         # 更新UI状态
         self._update_status_indicator(False)
@@ -530,15 +574,90 @@ class LocalServiceTab(BaseTab):
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务已停止")
 
     def _start_service_process(self, port: int):
-        """启动FastAPI服务子进程
+        """启动FastAPI服务
+        
+        根据运行环境选择不同的启动方式：
+        - 打包环境（exe）：使用多进程方式启动
+        - 源码环境：使用子进程+uvicorn方式启动
         
         Args:
             port: 服务端口
         """
-        # 构建启动命令
-        python_exe = sys.executable  # 当前Python解释器路径
+        is_frozen = getattr(sys, 'frozen', False)
         
-        # 使用uvicorn命令行方式启动
+        if is_frozen:
+            # 打包环境：使用多进程直接运行 FastAPI
+            self._start_embedded_service(port)
+        else:
+            # 源码环境：使用 uvicorn 命令行方式启动
+            self._start_uvicorn_service(port)
+    
+    def _start_embedded_service(self, port: int):
+        """在打包环境中启动嵌入式 FastAPI 服务（线程模式）"""
+        from app.api_main import app
+        
+        def run_server_thread():
+            """在后台线程中运行服务器"""
+            try:
+                # 配置 uvicorn，禁用默认日志配置以避免打包环境的配置错误
+                config = uvicorn.Config(
+                    app=app,
+                    host="127.0.0.1",
+                    port=port,
+                    log_level="error",  # 降低日志级别
+                    access_log=False,   # 禁用访问日志
+                    log_config=None     # 禁用日志配置文件
+                )
+                server = uvicorn.Server(config)
+                
+                # 保存 server 实例以便后续停止
+                self.uvicorn_server = server
+                
+                # 运行服务器（阻塞调用）
+                server.run()
+            except OSError as e:
+                # 处理端口占用等网络错误
+                if e.errno == 10048:  # Windows: 地址已在使用中
+                    error_msg = f"端口 {port} 已被占用，请选择其他端口"
+                else:
+                    error_msg = f"网络错误: {e}"
+                self.logger.error(error_msg)
+                self.log_queue.put(f"ERROR: {error_msg}")
+                # 标记服务未运行
+                self.service_running = False
+            except Exception as e:
+                error_msg = f"服务器错误: {e}"
+                self.logger.error(error_msg)
+                self.log_queue.put(f"ERROR: {error_msg}")
+                self.service_running = False
+        
+        # 使用线程启动服务（避免多进程的序列化问题）
+        self.service_thread = threading.Thread(target=run_server_thread, daemon=True)
+        self.service_thread.start()
+        
+        # 标记为线程模式（用于停止时判断）
+        self.service_process = None  # 没有进程对象
+        
+        self.logger.info(f"嵌入式服务已启动（线程模式）")
+        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 嵌入式服务已启动（线程模式）")
+        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务地址: http://127.0.0.1:{port}")
+        self._append_to_info(f"[{time.strftime('%H:%M:%S')}] API 文档: http://127.0.0.1:{port}/docs")
+    
+    def _start_uvicorn_service(self, port: int):
+        """在源码环境中使用 uvicorn 命令行方式启动服务"""
+        # 获取项目根目录
+        project_root = Path(__file__).parent.parent.parent.resolve()
+        
+        # 验证 api_main.py 是否存在
+        api_main_path = project_root / "app" / "api_main.py"
+        if not api_main_path.exists():
+            error_msg = f"找不到 API 主文件: {api_main_path}"
+            self.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+        
+        # 构建启动命令
+        python_exe = sys.executable
+        
         cmd = [
             python_exe,
             "-m", "uvicorn",
@@ -549,34 +668,46 @@ class LocalServiceTab(BaseTab):
         ]
         
         self.logger.info(f"启动命令: {' '.join(cmd)}")
+        self.logger.info(f"项目根目录: {project_root}")
         
-        # 启动子进程，捕获输出
+        # 启动子进程
         self.service_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # 将stderr重定向到stdout
-            text=True,  # 文本模式
-            bufsize=1,  # 行缓冲
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
             encoding='utf-8',
-            errors='replace'  # 替换无法解码的字符
+            errors='replace',
+            cwd=str(project_root)  # 设置工作目录
         )
         
         self.logger.info(f"服务进程已启动，PID: {self.service_process.pid}")
     
     def _start_log_processing(self):
-        """启动日志处理（读取子进程输出）"""
-        # 启动日志读取线程
-        self.log_reader_thread = threading.Thread(
-            target=self._read_process_output, 
-            daemon=True
-        )
-        self.log_reader_thread.start()
+        """启动日志处理
+        
+        只在源码环境中读取子进程输出
+        打包环境的 Process 不支持 stdout 捕获
+        """
+        is_frozen = getattr(sys, 'frozen', False)
+        
+        if not is_frozen:
+            # 只在源码环境启动日志读取线程
+            self.log_reader_thread = threading.Thread(
+                target=self._read_process_output, 
+                daemon=True
+            )
+            self.log_reader_thread.start()
         
         # 启动日志显示更新
         self._update_log_display()
     
     def _read_process_output(self):
-        """读取子进程输出（在后台线程中运行）"""
+        """读取子进程输出（仅源码环境，在后台线程中运行）"""
+        if not hasattr(self.service_process, 'stdout') or self.service_process.stdout is None:
+            return
+            
         try:
             for line in iter(self.service_process.stdout.readline, ''):
                 if not line:
