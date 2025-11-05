@@ -150,7 +150,7 @@ class MainWindow:
         # 创建本地服务标签页（端插件）
         local_service_tab = LocalServiceTab(self.notebook, log_callback=self._on_log_message)
         self.tabs.append(local_service_tab)
-        self._add_tooltip(2, "使用 cozepy SDK 监听 Coze Bot 事件\n需要配置 Coze Token 和 Bot ID")
+        self._add_tooltip(2, "使用 cozepy SDK 监听 Coze Workflow 事件\n需要配置 Coze Token 和 Workflow ID")
         
         # 创建示例标签页（演示扩展性）
         example_tab = ExampleTab(self.notebook)

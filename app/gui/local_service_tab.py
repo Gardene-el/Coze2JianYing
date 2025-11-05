@@ -57,7 +57,7 @@ class LocalServiceTab(BaseTab):
         # Coze API 配置（端插件必需）
         self.coze_api_token = None
         self.coze_base_url = COZE_CN_BASE_URL
-        self.coze_bot_id = None
+        self.coze_workflow_id = None
         self.coze_client = None
 
         # 调用父类初始化
@@ -69,7 +69,7 @@ class LocalServiceTab(BaseTab):
         self.info_label_frame = ttk.LabelFrame(self.frame, text="端插件说明", padding="10")
         self.info_label = ttk.Label(
             self.info_label_frame,
-            text="端插件模式：使用 cozepy SDK 连接 Coze Bot，监听 SSE 事件并在本地执行操作。\n需要配置 Coze API Token 和 Bot ID。本地应用无需公网 IP。",
+            text="端插件模式：使用 cozepy SDK 连接 Coze Workflow，监听 SSE 事件并在本地执行操作。\n需要配置 Coze API Token 和 Workflow ID。本地应用无需公网 IP。",
             justify=tk.LEFT,
             foreground="blue"
         )
@@ -100,10 +100,10 @@ class LocalServiceTab(BaseTab):
             command=self._toggle_token_visibility
         )
         
-        # Bot ID 输入
-        self.bot_id_label = ttk.Label(self.coze_frame, text="Bot ID:")
-        self.bot_id_var = tk.StringVar(value="")
-        self.bot_id_entry = ttk.Entry(self.coze_frame, textvariable=self.bot_id_var, width=50)
+        # Workflow ID 输入
+        self.workflow_id_label = ttk.Label(self.coze_frame, text="Workflow ID:")
+        self.workflow_id_var = tk.StringVar(value="")
+        self.workflow_id_entry = ttk.Entry(self.coze_frame, textvariable=self.workflow_id_var, width=50)
         
         # Base URL 选择
         self.base_url_label = ttk.Label(self.coze_frame, text="服务地址:")
@@ -126,7 +126,7 @@ class LocalServiceTab(BaseTab):
         self.feature_frame = ttk.LabelFrame(self.frame, text="功能开发中", padding="10")
         self.feature_label = ttk.Label(
             self.feature_frame,
-            text="端插件功能正在开发中。\n\n此模式适用于需要访问本地资源的场景（如本地文件读写、设备控制等）。\n本地应用将使用 cozepy SDK 监听 Coze Bot 的 SSE 事件流，\n接收工具调用请求并在本地执行，然后将结果提交回 Bot。\n\n如需使用 FastAPI 云端服务模式，请切换到\"云端服务\"标签页。",
+            text="端插件功能正在开发中。\n\n此模式适用于需要访问本地资源的场景（如本地文件读写、设备控制等）。\n本地应用将使用 cozepy SDK 监听 Coze Workflow 的 SSE 事件流，\n接收工具调用请求并在本地执行，然后将结果提交回 Workflow。\n\n如需使用 FastAPI 云端服务模式，请切换到\"云端服务\"标签页。",
             justify=tk.LEFT,
             wraplength=600
         )
@@ -161,9 +161,9 @@ class LocalServiceTab(BaseTab):
         self.token_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5), pady=(0, 5))
         self.show_token_btn.grid(row=0, column=2, padx=(0, 5), pady=(0, 5))
         
-        # Bot ID 输入行
-        self.bot_id_label.grid(row=1, column=0, sticky=tk.W, padx=(0, 5), pady=(0, 5))
-        self.bot_id_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(0, 5), pady=(0, 5))
+        # Workflow ID 输入行
+        self.workflow_id_label.grid(row=1, column=0, sticky=tk.W, padx=(0, 5), pady=(0, 5))
+        self.workflow_id_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(0, 5), pady=(0, 5))
         
         # Base URL 选择行
         self.base_url_label.grid(row=2, column=0, sticky=tk.W, padx=(0, 5), pady=(0, 5))
@@ -226,16 +226,16 @@ class LocalServiceTab(BaseTab):
             return
 
         token = self.token_var.get().strip()
-        bot_id = self.bot_id_var.get().strip()
+        workflow_id = self.workflow_id_var.get().strip()
         
         if not token:
             messagebox.showwarning("警告", "请先输入 API Token")
             self.logger.warning("尝试测试连接但未输入 API Token")
             return
         
-        if not bot_id:
-            messagebox.showwarning("警告", "请先输入 Bot ID")
-            self.logger.warning("尝试测试连接但未输入 Bot ID")
+        if not workflow_id:
+            messagebox.showwarning("警告", "请先输入 Workflow ID")
+            self.logger.warning("尝试测试连接但未输入 Workflow ID")
             return
 
         base_url = self.base_url_var.get()
@@ -249,10 +249,10 @@ class LocalServiceTab(BaseTab):
             from cozepy import Coze, TokenAuth
             test_client = Coze(auth=TokenAuth(token), base_url=base_url)
             
-            # 存储配置（包括 Bot ID）
+            # 存储配置（包括 Workflow ID）
             self.coze_api_token = token
             self.coze_base_url = base_url
-            self.coze_bot_id = bot_id
+            self.coze_workflow_id = workflow_id
             self.coze_client = test_client
             
             # 更新状态
@@ -262,14 +262,14 @@ class LocalServiceTab(BaseTab):
             
             messagebox.showinfo(
                 "连接成功", 
-                f"Coze API 配置成功!\n\nAPI Token: {'*' * (len(token) - 4) + token[-4:]}\nBot ID: {bot_id}\nBase URL: {base_url}"
+                f"Coze API 配置成功!\n\nAPI Token: {'*' * (len(token) - 4) + token[-4:]}\nWorkflow ID: {workflow_id}\nBase URL: {base_url}"
             )
             
         except Exception as e:
             self.coze_status_label.config(text="状态: 连接失败 ✗", foreground="red")
             self.status_var.set("Coze API 连接失败")
             self.logger.error(f"Coze API 连接测试失败: {e}", exc_info=True)
-            messagebox.showerror("连接失败", f"无法连接到 Coze API:\n\n{str(e)}\n\n请检查:\n1. API Token 是否正确\n2. Bot ID 是否正确\n3. 网络连接是否正常\n4. Base URL 是否正确")
+            messagebox.showerror("连接失败", f"无法连接到 Coze API:\n\n{str(e)}\n\n请检查:\n1. API Token 是否正确\n2. Workflow ID 是否正确\n3. 网络连接是否正常\n4. Base URL 是否正确")
 
     def _get_coze_client(self):
         """获取配置好的 Coze 客户端
@@ -279,13 +279,13 @@ class LocalServiceTab(BaseTab):
         """
         if self.coze_client is None:
             token = self.token_var.get().strip()
-            bot_id = self.bot_id_var.get().strip()
-            if token and bot_id and COZEPY_AVAILABLE:
+            workflow_id = self.workflow_id_var.get().strip()
+            if token and workflow_id and COZEPY_AVAILABLE:
                 try:
                     from cozepy import Coze, TokenAuth
                     self.coze_api_token = token
                     self.coze_base_url = self.base_url_var.get()
-                    self.coze_bot_id = bot_id
+                    self.coze_workflow_id = workflow_id
                     self.coze_client = Coze(
                         auth=TokenAuth(self.coze_api_token),
                         base_url=self.coze_base_url
@@ -305,5 +305,5 @@ class LocalServiceTab(BaseTab):
         
         # 清理 Coze API 相关资源
         self.coze_api_token = None
-        self.coze_bot_id = None
+        self.coze_workflow_id = None
         self.coze_client = None
