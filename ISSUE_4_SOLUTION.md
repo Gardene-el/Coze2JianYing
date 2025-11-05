@@ -2,6 +2,8 @@
 
 本文档总结了 Issue #4 "接口设计和实现" 的解决方案。
 
+**重要说明**：本解决方案专注于**流式命令处理的 API 服务模式**（云端服务和本地服务），不涉及手动草稿生成模式（coze_plugin 工具导出完整 JSON 的方式）。
+
 ## 问题回顾
 
 Issue #4 提出了三个核心问题：
@@ -10,22 +12,22 @@ Issue #4 提出了三个核心问题：
 **问题描述**：Coze 产出的素材只有下载链接形式，所有涉及素材的函数调用都需要先等素材下载完毕，再用下载好的素材的地址来调用 pyJianYingDraft。
 
 **痛点**：
-- 如何在两种通信方案（API 服务和 Coze IDE 插件）中分别实现素材下载？
+- 如何在 API 服务中实现素材下载？
 - 下载过程如何与主流程协调？
-- 如何处理下载失败的情况？
+- 如何支持流式命令，无需等待完整数据？
 
 ### 2. 变量作用域问题
 **问题描述**：以 pyJianYingDraft 的 demo.py 为例，`script` 经历了被创建和被使用，但在通信中存在作用域问题。`create_draft` 一定会是一个单独的指令，为 `script` 调用 `add_track` 也会是一个单独的指令，与在 pyJianYingDraft 里的同一个作用域相反。
 
 **痛点**：
 - 调用了 `create_draft` 之后应当如何拿出 draft（或者说得到固定的索引）并再给他调用 `add_track`？
-- 是否需要写一个数据管理的架构？
+- 如何支持增量、流式添加内容？
 
 ### 3. 指令设计问题
-**问题描述**：pyJianYingDraft 中重要的两种情况是创建一个东西和为他调用函数。应当如何为两种类别设计 API 和接口等规范（和实际例子）？
+**问题描述**：pyJianYingDraft 中重要的两种情况是创建一个东西和为他调用函数。应当如何为流式 API 设计接口规范？
 
 **痛点**：
-- 如何统一两种通信方式的接口设计？
+- 如何设计增量命令处理的 API？
 - 如何保证接口的一致性和易用性？
 
 ## 解决方案
@@ -39,7 +41,7 @@ Issue #4 提出了三个核心问题：
 # app/utils/draft_state_manager.py
 class DraftStateManager:
     def add_track(self, draft_id, track_type, segments):
-        # 记录素材 URL 到配置中
+        # 记录素材 URL 到配置中（不立即下载）
         for segment in segments:
             if "material_url" in segment:
                 material_entry = {
@@ -54,24 +56,25 @@ class DraftStateManager:
         pass
 ```
 
-#### 工作流程
+#### 流式 API 服务工作流程
 
-**方案一：Coze IDE 插件（手动模式）**
 ```
-1. Coze 工作流调用插件工具
-2. 插件记录素材 URL 到草稿配置（不下载）
-3. 用户复制 JSON 到草稿生成器
-4. 草稿生成器下载素材并生成草稿
+Coze 工作流（流式生成内容）
+      ↓
+HTTP API 调用（增量发送命令）
+      ↓
+DraftStateManager（记录素材 URL，不阻塞）
+      ↓
+后台异步下载队列（待实现）
+      ↓
+generate API（等待下载完成，生成草稿）
 ```
 
-**方案二：API 服务（自动模式）**
-```
-1. Coze 调用 API 端点添加素材
-2. API 记录素材 URL 到草稿配置
-3. 后台异步下载队列开始下载（计划实现）
-4. 下载完成后更新状态
-5. 用户调用生成接口生成草稿
-```
+**关键特性**：
+- ✅ **流式处理**：无需等待完整数据，边生成边发送
+- ✅ **增量添加**：可以多次调用 add-* 端点
+- ✅ **异步下载**：素材下载不阻塞命令处理
+- ⏳ **下载队列**：待实现完整的异步下载机制
 
 #### 实现状态
 - ✅ 基础框架（DraftStateManager）
@@ -84,19 +87,17 @@ class DraftStateManager:
 
 #### UUID 管理系统
 
-**核心思想**：使用 UUID 作为草稿的唯一标识符，避免 Coze 工作流的变量索引干扰。
+**核心思想**：使用 UUID 作为草稿的唯一标识符，支持跨调用的状态持久化，实现流式命令处理。
 
 **实现架构**：
 ```
 用户输入 → create_draft → UUID
                              ↓
-                       add_videos(UUID, ...)
-                       add_audios(UUID, ...)
-                       add_captions(UUID, ...)
+                       add_videos(UUID, videos)   ← 流式添加
+                       add_audios(UUID, audios)   ← 流式添加
+                       add_captions(UUID, captions) ← 流式添加
                              ↓
-                       export_drafts(UUID)
-                             ↓
-                       完整JSON数据
+                       generate(UUID)  ← 最终生成草稿
 ```
 
 **代码实现**：

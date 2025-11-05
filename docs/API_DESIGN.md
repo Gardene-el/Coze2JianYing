@@ -2,33 +2,77 @@
 
 ## 概述
 
-本文档详细说明 Coze 与草稿生成器之间的通信接口设计，解决以下核心问题：
+本文档详细说明 Coze 与草稿生成器之间的**流式命令处理**接口设计，解决以下核心问题：
 
 1. **素材下载管理**：Coze 传递的是网络链接，本地需要先下载素材再调用 pyJianYingDraft
 2. **变量作用域问题**：通过 UUID 系统管理草稿状态，避免 Coze 工作流的变量索引干扰
-3. **接口规范统一**：为两种通信方式（Coze IDE 插件和 API 服务）提供统一的设计规范
+3. **增量命令处理**：支持 Coze 流式发送指令，无需等待完整草稿数据
+
+## 重要说明
+
+本设计专注于**云端服务和本地服务的流式 API 模式**，允许 Coze 工作流以增量方式发送命令（创建草稿 → 添加素材 → 添加更多内容 → 生成）。
+
+**注意**：本文档不涉及手动草稿生成模式（即 coze_plugin 工具导出完整 JSON 后手动粘贴到 GUI 的方式）。手动模式由现有的 coze_plugin/tools/ 中的工具函数支持，不在本次设计范围内。
 
 ## 架构设计
 
-### 工作流程
+### 流式处理工作流程
 
 ```
-┌──────────┐    ┌──────────────┐    ┌─────────────────┐    ┌─────────────┐
-│  Coze    │───▶│  插件/API    │───▶│  草稿生成器     │───▶│   剪映      │
-│  工作流  │    │  接口层      │    │  (后端处理)     │    │             │
-└──────────┘    └──────────────┘    └─────────────────┘    └─────────────┘
-     │                 │                      │
-     │                 │                      │
-  传递指令          UUID + 参数           素材下载 +
-  + 参数            + 素材链接            pyJianYingDraft
+┌──────────────────────────────────────────────────────────┐
+│                    Coze 工作流                            │
+│                                                           │
+│  1. 生成素材 → 2. 调用 API → 3. 继续生成 → 4. 再调用 API │
+│                                                           │
+└──────────────────────┬───────────────────────────────────┘
+                       │ HTTP API 调用（增量命令）
+                       ▼
+┌──────────────────────────────────────────────────────────┐
+│              云端/本地 API 服务（FastAPI）                 │
+│                                                           │
+│  /api/draft/create          创建草稿 → 返回 UUID          │
+│  /api/draft/{id}/add-videos  添加视频（流式）             │
+│  /api/draft/{id}/add-audios  添加音频（流式）             │
+│  /api/draft/{id}/add-images  添加图片（流式）             │
+│  /api/draft/{id}/add-captions 添加字幕（流式）            │
+│  /api/draft/{id}/detail      查询当前状态                 │
+│  /api/draft/{id}/generate    最终生成草稿文件             │
+│                                                           │
+└──────────────────────┬───────────────────────────────────┘
+                       ▼
+┌──────────────────────────────────────────────────────────┐
+│           DraftStateManager（UUID 状态管理）               │
+│                                                           │
+│  - 基于 UUID 存储草稿配置                                  │
+│  - 追踪每个素材的下载状态                                  │
+│  - 支持增量添加轨道和片段                                  │
+│                                                           │
+└──────────────────────┬───────────────────────────────────┘
+                       ▼
+┌──────────────────────────────────────────────────────────┐
+│              MaterialManager（素材管理）                   │
+│                                                           │
+│  - 异步下载素材文件                                        │
+│  - 更新下载状态                                            │
+│                                                           │
+└──────────────────────┬───────────────────────────────────┘
+                       ▼
+┌──────────────────────────────────────────────────────────┐
+│         DraftGenerator + pyJianYingDraft                  │
+│                                                           │
+│  - 从 UUID 配置生成剪映草稿                                │
+│                                                           │
+└──────────────────────┬───────────────────────────────────┘
+                       ▼
+              剪映草稿文件（JianYing Projects）
 ```
 
 ### 核心设计原则
 
-1. **UUID 索引**：所有草稿操作使用 UUID 作为唯一标识符
-2. **异步下载**：素材链接传递给后端，由后端负责下载和管理
-3. **无状态接口**：每次 API 调用都是独立的，状态通过 UUID 查询
-4. **统一格式**：Coze IDE 插件和 API 服务使用相同的数据格式
+1. **流式命令处理**：Coze 可以逐步发送命令，无需等待完整数据
+2. **UUID 状态管理**：所有草稿操作使用 UUID 作为唯一标识符，解决变量作用域问题
+3. **异步素材下载**：素材链接记录后异步下载，不阻塞命令处理
+4. **无状态 API**：每次 API 调用都是独立的，状态通过 UUID 持久化存储
 
 ## API 接口设计
 
@@ -346,48 +390,54 @@ class MaterialManager:
 
 ### UUID 管理系统
 
-**问题**：Coze 工作流中，每次函数调用都会产生新的变量索引
+**问题**：Coze 工作流中，每次函数调用都会产生新的变量索引，无法在不同调用间共享草稿对象
 
-**解决方案**：使用 UUID 作为草稿的唯一标识符
+**解决方案**：使用 UUID 作为草稿的唯一标识符，实现跨调用的状态持久化
 
 ```
 用户输入参数 → create_draft → UUID
                                   ↓
-                            add_videos(UUID, videos)
-                            add_audios(UUID, audios)
-                            add_captions(UUID, captions)
+                            add_videos(UUID, videos)   ← 流式添加
+                            add_audios(UUID, audios)   ← 流式添加
+                            add_captions(UUID, captions) ← 流式添加
                                   ↓
-                            export_drafts([UUID])
-                                  ↓
-                            完整JSON数据
+                            generate(UUID)  ← 最终生成草稿文件
 ```
 
 ### 状态存储
 
-**临时存储** (当前实现):
+**文件系统存储** (当前实现):
 - 位置：`/tmp/jianying_assistant/drafts/{uuid}/`
 - 结构：每个草稿一个文件夹，包含 `draft_config.json`
-- 生命周期：工作流执行期间
+- 生命周期：持久化存储，支持跨会话访问
+- 优点：简单、无需数据库依赖
 
-**持久化存储** (建议):
-- 位置：数据库或文件系统
-- 支持草稿历史记录
-- 支持跨会话访问
+**持久化存储** (未来扩展):
+- 位置：数据库（SQLite/PostgreSQL）
+- 支持草稿历史记录和版本管理
+- 支持更复杂的查询和统计
 
-## 两种通信方式的实现
+## 流式 API 服务实现
 
-### 方式一：Coze IDE 插件（云侧插件 - 手动模式）
+### API 服务模式（重点）
 
 **特点**：
-- 用户在 Coze IDE 中部署工具函数
-- 工具函数处理参数并生成 JSON
-- 用户手动复制 JSON 到草稿生成器
+- Coze 工作流通过 HTTP API 直接调用本地/云端服务
+- 支持增量、流式发送命令
+- 无需等待完整数据，边生成边处理
+- 完全自动化，无需人工干预
 
-**实现位置**：`coze_plugin/tools/`
+**实现位置**：`app/api/material_routes.py`
 
 **工作流**：
 ```
-Coze 工作流 → 调用插件工具 → 生成JSON → 用户复制 → 草稿生成器GUI
+Coze 工作流 → HTTP API 调用（增量）→ FastAPI 服务 → DraftStateManager
+                                                          ↓
+                                                    素材异步下载
+                                                          ↓
+                                                    pyJianYingDraft
+                                                          ↓
+                                                    剪映草稿文件
 ```
 
 **示例**：
@@ -397,75 +447,65 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
     draft_id = args.input.draft_id
     videos = args.input.videos
     
-    # 加载草稿配置
-    config = load_draft_config(draft_id)
-    
-    # 添加视频信息（仅记录链接，不下载）
-    config['tracks'].append({
-        'type': 'video',
-        'segments': videos
-    })
-    
-    # 保存配置
-    save_draft_config(draft_id, config)
-    
-    return {
-        'success': True,
-        'message': f'成功添加 {len(videos)} 个视频'
-    }
-```
-
-### 方式二：API 服务（基于服务的插件 - 自动模式）
-
-**特点**：
-- 草稿生成器启动 FastAPI 服务
-- Coze 工作流自动调用 API
-- 完全自动化的端到端流程
-
-**实现位置**：`app/api/`
-
-**工作流**：
-```
-Coze 工作流 → HTTP请求 → FastAPI服务 → 草稿生成器后端 → 自动完成
-```
-
-**API 实现示例**：
 ```python
-# app/api/draft_routes.py
+# app/api/material_routes.py
 @router.post("/draft/{draft_id}/add-videos")
 async def add_videos(
     draft_id: str,
-    videos: List[VideoSegmentConfig]
+    request: AddVideosRequest
 ):
-    # 1. 验证 draft_id
-    # 2. 添加下载任务
-    # 3. 创建视频轨道
+    # 1. 验证 draft_id 是否存在
+    config = draft_manager.get_draft_config(draft_id)
+    if not config:
+        raise HTTPException(status_code=404, detail="草稿不存在")
+    
+    # 2. 转换并添加视频片段（记录素材 URL）
+    segments = [video.dict() for video in request.videos]
+    draft_manager.add_track(draft_id, "video", segments)
+    
+    # 3. 素材将在后台异步下载（或在 generate 时下载）
+    
     # 4. 返回结果
-    pass
+    return {
+        "success": True,
+        "message": f"成功添加 {len(segments)} 个视频片段",
+        "segments_added": len(segments)
+    }
 ```
 
-**OpenAPI 配置**（用于 Coze 插件配置）：
-```yaml
-openapi: 3.0.0
-info:
-  title: Coze剪映草稿生成器 API
-  version: 1.0.0
-paths:
-  /api/draft/create:
-    post:
-      summary: 创建草稿
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateDraftRequest'
+**在 Coze 中配置 API 插件**：
+
+1. 创建"云侧插件 - 基于已有服务创建"
+2. 配置服务地址：`http://localhost:8000` 或远程地址
+3. 导入 OpenAPI 规范（从 `/openapi.json` 获取）
+4. 在工作流中直接调用 API 端点
+
+## 远程部署支持
+
+### 本地服务模式
+
+**场景**：草稿生成器在本地运行，Coze 通过内网穿透访问
+
+**步骤**：
+1. 启动本地 API 服务：`python start_api.py`
+2. 使用内网穿透工具（ngrok、frp）暴露端口
+3. 在 Coze 中配置穿透后的公网 URL
+
+**示例（ngrok）**：
+```bash
+# 启动 API 服务
+python start_api.py  # 运行在 localhost:8000
+
+# 在另一个终端启动 ngrok
+ngrok http 8000
+
+# 获得公网 URL: https://xxxx.ngrok.io
+# 在 Coze 中配置此 URL
 ```
 
-## SSH/远程调用支持
+### 云端服务模式
 
-### 远程 API 部署
-
-**场景**：草稿生成器部署在远程服务器，Coze 通过网络调用
+**场景**：草稿生成器部署在云服务器，Coze 直接访问
 
 **配置**：
 1. 在服务器上启动 FastAPI 服务
@@ -507,51 +547,9 @@ async def create_draft(
 
 ## 完整使用示例
 
-### 示例1：通过 Coze IDE 插件手动模式
+### 流式 API 调用示例（推荐）
 
-```python
-# 在 Coze 工作流中的步骤
-
-# 步骤1：创建草稿
-create_result = call_tool('create_draft', {
-    'draft_name': '我的视频项目',
-    'width': 1920,
-    'height': 1080,
-    'fps': 30
-})
-draft_id = create_result['draft_id']
-
-# 步骤2：添加视频
-add_videos_result = call_tool('add_videos', {
-    'draft_id': draft_id,
-    'videos': [
-        {
-            'material_url': 'https://example.com/video1.mp4',
-            'time_range': {'start': 0, 'end': 5000}
-        }
-    ]
-})
-
-# 步骤3：添加音频
-add_audios_result = call_tool('add_audios', {
-    'draft_id': draft_id,
-    'audios': [
-        {
-            'material_url': 'https://example.com/audio1.mp3',
-            'time_range': {'start': 0, 'end': 5000}
-        }
-    ]
-})
-
-# 步骤4：导出草稿
-export_result = call_tool('export_drafts', {
-    'draft_ids': draft_id
-})
-
-# 步骤5：用户复制 export_result['draft_data'] 到草稿生成器
-```
-
-### 示例2：通过 API 服务自动模式
+这是本项目的核心使用方式，支持 Coze 工作流增量发送命令。
 
 ```python
 # 在 Coze 工作流中配置 HTTP 请求
@@ -564,46 +562,106 @@ Body: {
     "height": 1080,
     "fps": 30
 }
-Response: {"draft_id": "uuid"}
+Response: {"draft_id": "uuid", "success": true}
 
-# 步骤2：添加视频
+# 步骤2：添加第一批视频（流式）
 POST https://your-server.com/api/draft/{draft_id}/add-videos
 Body: {
-    "videos": [...]
+    "draft_id": "{draft_id}",
+    "videos": [{
+        "material_url": "https://example.com/video1.mp4",
+        "time_range": {"start": 0, "end": 5000}
+    }]
 }
+Response: {"success": true, "segments_added": 1}
 
-# 步骤3：添加音频
+# 步骤3：继续添加音频（流式，无需等待视频下载完成）
 POST https://your-server.com/api/draft/{draft_id}/add-audios
 Body: {
-    "audios": [...]
+    "draft_id": "{draft_id}",
+    "audios": [{
+        "material_url": "https://example.com/audio1.mp3",
+        "time_range": {"start": 0, "end": 5000},
+        "volume": 0.8
+    }]
+}
+Response: {"success": true, "segments_added": 1}
+
+# 步骤4：添加更多视频（流式，Coze 可以继续生成内容）
+POST https://your-server.com/api/draft/{draft_id}/add-videos
+Body: {
+    "draft_id": "{draft_id}",
+    "videos": [{
+        "material_url": "https://example.com/video2.mp4",
+        "time_range": {"start": 5000, "end": 10000}
+    }]
 }
 
-# 步骤4：生成草稿（自动下载素材并生成）
+# 步骤5：添加字幕
+POST https://your-server.com/api/draft/{draft_id}/add-captions
+Body: {
+    "draft_id": "{draft_id}",
+    "captions": [{
+        "text": "欢迎观看",
+        "time_range": {"start": 0, "end": 2000}
+    }]
+}
+
+# 步骤6：查询当前状态
+GET https://your-server.com/api/draft/{draft_id}/detail
+Response: {
+    "draft_id": "uuid",
+    "tracks_count": 3,
+    "materials_count": 3,
+    "download_status": {
+        "total": 3,
+        "completed": 2,
+        "pending": 1,
+        "failed": 0
+    }
+}
+
+# 步骤7：生成草稿文件（待实现）
 POST https://your-server.com/api/draft/{draft_id}/generate
 Response: {"folder_path": "本地路径", "success": true}
 ```
 
+**关键特性**：
+- ✅ **流式处理**：无需等待完整数据，Coze 可以边生成边发送
+- ✅ **增量添加**：可以多次调用 add-* 端点添加内容
+- ✅ **异步下载**：素材在后台下载，不阻塞命令处理
+- ✅ **状态查询**：随时查询草稿状态和下载进度
+
 ## 开发路线图
 
-### 阶段一：完善 API 端点（当前任务）
-- [ ] 实现 `add_videos` API 端点
-- [ ] 实现 `add_audios` API 端点
-- [ ] 实现 `add_images` API 端点
-- [ ] 实现 `add_captions` API 端点
-- [ ] 实现草稿状态查询接口
+### 阶段一：核心流式 API（已完成 ✅）
+- [x] 实现 `create_draft` API 端点
+- [x] 实现 `add_videos` API 端点
+- [x] 实现 `add_audios` API 端点
+- [x] 实现 `add_images` API 端点
+- [x] 实现 `add_captions` API 端点
+- [x] 实现草稿状态查询接口 (`detail`)
+- [x] UUID 状态管理系统
 
-### 阶段二：素材下载管理
+### 阶段二：素材下载管理（待实现）
 - [ ] 实现异步下载队列
 - [ ] 扩展 MaterialManager 支持异步下载
-- [ ] 实现下载状态查询
+- [ ] 实现下载状态实时更新
 - [ ] 添加下载失败重试机制
 
-### 阶段三：OpenAPI 文档生成
-- [ ] 生成完整的 OpenAPI 规范文件
-- [ ] 提供 Swagger UI 界面
-- [ ] 为 Coze 插件配置提供导出功能
+### 阶段三：草稿生成（待实现）
+- [ ] 实现 `generate` API 端点
+- [ ] 集成 DraftGenerator 和 pyJianYingDraft
+- [ ] 支持从 UUID 配置生成草稿文件
+- [ ] 等待所有素材下载完成后生成
 
-### 阶段四：认证和安全
+### 阶段四：OpenAPI 和文档
+- [x] FastAPI 自动生成 OpenAPI 规范
+- [x] Swagger UI 界面 (`/docs`)
+- [ ] 为 Coze 插件配置提供 OpenAPI 导出
+- [ ] 完善 API 文档和示例
+
+### 阶段五：认证和安全
 - [ ] 实现 API Key 认证
 - [ ] 添加请求限流
 - [ ] 实现 HTTPS 支持
