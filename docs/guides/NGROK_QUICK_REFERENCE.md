@@ -77,6 +77,22 @@ in - 印度
   • 手动预安装: python -c "from pyngrok import ngrok; ngrok.install_ngrok()"
 ```
 
+### 问题: 监控或停止时出现超时错误
+```
+错误信息:
+  TimeoutError: timed out
+  PyngrokNgrokURLError: ngrok client exception, URLError: timed out
+
+原因: ngrok API 响应缓慢或网络不稳定
+
+解决:
+  • 本项目已改进超时处理 (v1.2.0+)
+  • 监控线程会自动重试，允许 3 次错误
+  • 停止失败时会自动清理本地状态
+  • 如需强制清理：重启应用或结束 ngrok.exe 进程
+  • 改善网络连接或更换 ngrok 区域
+```
+
 ### 问题: ngrok 启动失败
 ```
 ✓ 检查清单:

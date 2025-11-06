@@ -162,25 +162,32 @@ class NgrokManager:
             self.logger.warning("ngrok 隧道未运行")
             return
         
-        try:
-            # 停止监控线程
-            self._stop_monitor.set()
-            if self._monitor_thread and self._monitor_thread.is_alive():
-                self._monitor_thread.join(timeout=3)
-            
-            # 关闭隧道
-            if self.tunnel:
+        # 停止监控线程
+        self._stop_monitor.set()
+        if self._monitor_thread and self._monitor_thread.is_alive():
+            self._monitor_thread.join(timeout=3)
+        
+        # 尝试关闭隧道，即使失败也要清理本地状态
+        tunnel_closed = False
+        if self.tunnel:
+            try:
                 ngrok.disconnect(self.tunnel.public_url)
                 self.logger.info(f"ngrok 隧道已关闭: {self.public_url}")
-            
-            # 重置状态
-            self.tunnel = None
-            self.public_url = None
-            self.is_running = False
-            self._stop_monitor.clear()
-            
-        except Exception as e:
-            self.logger.error(f"停止 ngrok 隧道时发生错误: {e}", exc_info=True)
+                tunnel_closed = True
+            except Exception as e:
+                # 记录错误但继续清理本地状态
+                self.logger.warning(f"关闭 ngrok 隧道时出错（可能是超时），将强制清理本地状态: {e}")
+        
+        # 无论隧道是否成功关闭，都重置本地状态
+        self.tunnel = None
+        self.public_url = None
+        self.is_running = False
+        self._stop_monitor.clear()
+        
+        if tunnel_closed:
+            self.logger.info("ngrok 隧道已完全停止")
+        else:
+            self.logger.info("ngrok 本地状态已清理（隧道可能仍在远程运行）")
     
     def get_status(self) -> Dict[str, Any]:
         """
@@ -233,18 +240,27 @@ class NgrokManager:
             return []
     
     def kill_all(self):
-        """终止所有 ngrok 进程"""
+        """终止所有 ngrok 进程（强制清理）"""
         if not PYNGROK_AVAILABLE:
             return
         
+        # 先停止监控线程
+        self._stop_monitor.set()
+        if self._monitor_thread and self._monitor_thread.is_alive():
+            self._monitor_thread.join(timeout=2)
+        
         try:
+            # 尝试终止所有 ngrok 进程
             ngrok.kill()
+            self.logger.info("所有 ngrok 进程已终止")
+        except Exception as e:
+            self.logger.warning(f"终止 ngrok 进程时出错: {e}")
+        finally:
+            # 无论如何都清理本地状态
             self.tunnel = None
             self.public_url = None
             self.is_running = False
-            self.logger.info("所有 ngrok 进程已终止")
-        except Exception as e:
-            self.logger.error(f"终止 ngrok 进程失败: {e}")
+            self._stop_monitor.clear()
     
     def _start_monitor(self):
         """启动监控线程"""
@@ -257,6 +273,9 @@ class NgrokManager:
     
     def _monitor_tunnel(self):
         """监控隧道状态（在后台线程中运行）"""
+        consecutive_errors = 0
+        max_consecutive_errors = 3  # 允许连续3次错误后才停止监控
+        
         while not self._stop_monitor.is_set():
             try:
                 if self.is_running and self.tunnel:
@@ -270,12 +289,23 @@ class NgrokManager:
                         self.logger.warning("ngrok 隧道意外断开")
                         self.is_running = False
                         break
+                    
+                    # 重置错误计数
+                    consecutive_errors = 0
                 
                 time.sleep(5)  # 每5秒检查一次
                 
             except Exception as e:
-                self.logger.error(f"监控隧道时发生错误: {e}")
-                break
+                consecutive_errors += 1
+                self.logger.warning(f"监控隧道时发生错误 ({consecutive_errors}/{max_consecutive_errors}): {e}")
+                
+                # 如果连续错误次数超过阈值，停止监控但不标记隧道为停止
+                if consecutive_errors >= max_consecutive_errors:
+                    self.logger.error(f"监控线程遇到 {consecutive_errors} 次连续错误，停止监控")
+                    break
+                
+                # 等待较长时间后重试
+                time.sleep(10)
     
     def __del__(self):
         """析构函数：确保资源清理"""

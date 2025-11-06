@@ -127,6 +127,27 @@ PyngrokNgrokInstallError: An error occurred while downloading ngrok
    python -c "from pyngrok import ngrok; ngrok.install_ngrok()"
    ```
 
+#### 监控或停止隧道时出现超时错误
+如果看到以下错误：
+```
+TimeoutError: timed out
+PyngrokNgrokURLError: ngrok client exception, URLError: timed out
+```
+
+**原因**：ngrok API 响应缓慢或网络不稳定导致 HTTP 请求超时。
+
+**解决方法**：
+1. 本项目已改进超时处理（v1.2.0+）：
+   - 监控线程允许连续 3 次错误后才停止
+   - 停止隧道时即使 API 超时也会清理本地状态
+2. 如果隧道仍在运行但无法停止：
+   - 重启应用会自动清理
+   - 或使用任务管理器结束 ngrok.exe 进程
+3. 网络稳定性问题建议：
+   - 检查网络连接
+   - 尝试更换 ngrok 区域
+   - 升级到付费版获得更好的稳定性
+
 #### ngrok 启动失败
 1. 检查 pyngrok 是否正确安装
 2. 确认 FastAPI 服务已启动
