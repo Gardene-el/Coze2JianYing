@@ -175,5 +175,4 @@ subtitle_path = str(assets_dir / "subtitles.srt")
 
 ---
 
-**最后更新**: 2024-11-06  
 **维护者**: Coze2JianYing 项目团队
