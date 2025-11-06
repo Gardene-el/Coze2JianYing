@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Coze2JianYing - 开源的Coze剪映小助手，完全免费，数据安全可控">
+    <meta name="keywords" content="Coze, 剪映, JianYing, 视频编辑, AI, 自动化">
+    <meta name="author" content="Gardene-el">
+    <title>Coze2JianYing - 开源的Coze剪映小助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 3rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: #764ba2;
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #50c878;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #45b369;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(80, 200, 120, 0.4);
+        }
+
+        .note {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .note strong {
+            color: #856404;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e1e8ed;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 2rem;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Coze2JianYing</h1>
+        <p class="subtitle">开源的Coze剪映小助手</p>
+        
+        <p class="description">
+            将 Coze 工作流生成的内容自动转换为剪映草稿文件。<br>
+            完全开源 · 永久免费 · 数据安全可控
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📖</div>
+                <div class="feature-title">完全开源</div>
+                <p>GPL-3.0 许可证</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">永久免费</div>
+                <p>无广告无收费</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-title">数据安全</div>
+                <p>本地托管可控</p>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <a href="https://github.com/Gardene-el/Coze2JianYing" class="btn btn-primary" target="_blank">
+                查看 GitHub 仓库
+            </a>
+            <a href="https://github.com/Gardene-el/Coze2JianYing/releases" class="btn btn-secondary" target="_blank">
+                下载应用程序
+            </a>
+        </div>
+
+        <div class="note">
+            <strong>💡 提示：</strong>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>如需访问完整网页界面，请启动 API 服务器：<code>python start_api.py</code></li>
+                <li>服务器启动后访问：<a href="http://localhost:8000" target="_blank">http://localhost:8000</a></li>
+                <li>API 文档：<a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>
+                Licensed under GPL-3.0 |
+                Made with ❤️ by <a href="https://github.com/Gardene-el" target="_blank">Gardene-el</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
