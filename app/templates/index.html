@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Coze2JianYing - 开源的Coze剪映小助手，完全免费，数据安全可控">
+    <title>Coze2JianYing - 开源的Coze剪映小助手</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">
+                    <h1>🎬 Coze2JianYing</h1>
+                    <p class="subtitle">开源的Coze剪映小助手</p>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#features">功能特点</a></li>
+                    <li><a href="#quickstart">快速开始</a></li>
+                    <li><a href="#api">API 文档</a></li>
+                    <li><a href="https://github.com/Gardene-el/Coze2JianYing" target="_blank">GitHub</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h2>完全开源 · 永久免费 · 数据安全</h2>
+                <p class="hero-description">
+                    将 Coze 工作流生成的内容自动转换为剪映草稿文件
+                </p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/Gardene-el/Coze2JianYing/releases" class="btn btn-primary">下载应用</a>
+                    <a href="/docs" class="btn btn-secondary">查看 API 文档</a>
+                </div>
+                <div class="badges">
+                    <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License">
+                    <img src="https://img.shields.io/badge/Python-3.8+-green.svg" alt="Python">
+                    <img src="https://img.shields.io/badge/Platform-Windows-lightgrey.svg" alt="Platform">
+                </div>
+            </div>
+        </section>
+
+        <!-- Workflow Section -->
+        <section class="workflow">
+            <div class="container">
+                <h2>🔄 工作流程</h2>
+                <div class="workflow-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Coze 工作流</h3>
+                        <p>在 Coze 平台创建 AI 工作流，生成素材和参数</p>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Coze 插件</h3>
+                        <p>调用工具函数，处理参数并导出 JSON 数据</p>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>草稿生成器</h3>
+                        <p>将 JSON 转换为剪映草稿，下载素材</p>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>剪映编辑</h3>
+                        <p>在剪映中打开草稿，进行最终编辑</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="container">
+                <h2>✨ 核心优势</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📖</div>
+                        <h3>完全开源</h3>
+                        <p>遵循 GPL-3.0 许可证，代码透明可审查，支持自主部署和二次开发</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>永久免费</h3>
+                        <p>无广告、无收费、无使用限制，不限制生成次数和素材数量</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>数据安全</h3>
+                        <p>素材本地托管，不上传第三方，隐私完全保护，数据自主可控</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>简单易用</h3>
+                        <p>提供 GUI 图形界面和 API 接口，支持手动和自动两种模式</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>功能丰富</h3>
+                        <p>支持图片、音频、字幕等多种轨道，提供完整的参数配置</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔌</div>
+                        <h3>灵活集成</h3>
+                        <p>支持 Coze 插件和 API 两种集成方式，适应不同使用场景</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Start Section -->
+        <section id="quickstart" class="quickstart">
+            <div class="container">
+                <h2>🚀 快速开始</h2>
+                <div class="quickstart-content">
+                    <div class="quickstart-step">
+                        <h3>1. 收藏 Coze 插件</h3>
+                        <p>访问并收藏本项目发布的 Coze 插件：</p>
+                        <a href="https://www.coze.cn/store/plugin/7565396538596818950?from=plugin_card" target="_blank" class="link">
+                            Coze2JianYing 插件
+                        </a>
+                    </div>
+                    <div class="quickstart-step">
+                        <h3>2. 下载草稿生成器</h3>
+                        <p>前往 Releases 页面下载最新版本：</p>
+                        <a href="https://github.com/Gardene-el/Coze2JianYing/releases" target="_blank" class="link">
+                            下载 CozeJianYingDraftGenerator.exe
+                        </a>
+                    </div>
+                    <div class="quickstart-step">
+                        <h3>3. 导入工作流示例</h3>
+                        <p>下载并在 Coze 平台中导入工作流示例文件</p>
+                    </div>
+                    <div class="quickstart-step">
+                        <h3>4. 试运行工作流</h3>
+                        <p>在 Coze 中运行工作流，将输出的 JSON 复制到草稿生成器</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Section -->
+        <section id="api" class="api-section">
+            <div class="container">
+                <h2>🔌 API 接口</h2>
+                <p class="section-description">
+                    提供完整的 REST API，支持 Coze 工作流自动调用
+                </p>
+                <div class="api-links">
+                    <a href="/docs" class="api-link">
+                        <div class="api-link-icon">📚</div>
+                        <h3>Swagger UI</h3>
+                        <p>交互式 API 文档和测试工具</p>
+                    </a>
+                    <a href="/redoc" class="api-link">
+                        <div class="api-link-icon">📖</div>
+                        <h3>ReDoc</h3>
+                        <p>美观的 API 参考文档</p>
+                    </a>
+                </div>
+                <div class="api-example">
+                    <h3>API 使用示例</h3>
+                    <pre><code class="language-python"># 创建草稿
+import requests
+
+response = requests.post("http://localhost:8000/api/draft/create", json={
+    "draft_name": "我的视频",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+})
+
+draft_id = response.json()["draft_id"]
+print(f"草稿 ID: {draft_id}")
+
+# 添加图片
+response = requests.post(
+    f"http://localhost:8000/api/draft/{draft_id}/add-images",
+    json={
+        "draft_id": draft_id,
+        "images": [{
+            "material_url": "https://example.com/image.jpg",
+            "time_range": {"start": 0, "end": 3000}
+        }]
+    }
+)
+
+print(response.json())</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Section -->
+        <section class="status">
+            <div class="container">
+                <h2>⚠️ 项目状态</h2>
+                <div class="status-content">
+                    <div class="status-card status-completed">
+                        <h3>✅ 已完成功能</h3>
+                        <ul>
+                            <li>UUID 草稿管理系统</li>
+                            <li>图片、音频、字幕轨道添加</li>
+                            <li>网络媒体时长分析</li>
+                            <li>GUI 应用和 API 后端</li>
+                            <li>素材下载和管理</li>
+                            <li>完整的测试体系</li>
+                        </ul>
+                    </div>
+                    <div class="status-card status-todo">
+                        <h3>🔧 待完善功能</h3>
+                        <ul>
+                            <li>视频轨道功能增强</li>
+                            <li>关键帧动画支持</li>
+                            <li>更多高级特效和滤镜</li>
+                            <li>异步素材下载队列</li>
+                            <li>WebSocket 实时推送</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="status-note">
+                    💡 项目处于早期阶段，欢迎在 <a href="https://github.com/Gardene-el/Coze2JianYing/issues" target="_blank">Issues</a> 中提出问题和建议
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于项目</h3>
+                    <p>Coze2JianYing 是一个开源的 Coze 到剪映工作流工具，旨在简化视频创作流程。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="https://github.com/Gardene-el/Coze2JianYing">GitHub 仓库</a></li>
+                        <li><a href="https://github.com/Gardene-el/Coze2JianYing/releases">下载应用</a></li>
+                        <li><a href="https://github.com/Gardene-el/Coze2JianYing/issues">问题反馈</a></li>
+                        <li><a href="/docs">API 文档</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>致谢</h3>
+                    <ul>
+                        <li><a href="https://github.com/GuanYixuan/pyJianYingDraft">pyJianYingDraft</a></li>
+                        <li><a href="https://www.coze.cn/">Coze 平台</a></li>
+                        <li><a href="https://www.capcut.cn/">剪映</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Coze2JianYing. Licensed under GPL-3.0. Made with ❤️ by <a href="https://github.com/Gardene-el">Gardene-el</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
