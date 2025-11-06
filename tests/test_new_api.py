@@ -54,19 +54,37 @@ def test_old_routes_removed():
         if hasattr(route, 'path'):
             routes.append(route.path)
     
-    # 检查旧端点是否不存在
-    old_endpoints = [
+    # 检查旧的 material_routes 端点是否不存在
+    old_material_endpoints = [
         "/api/draft/{draft_id}/add-videos",
         "/api/draft/{draft_id}/add-audios",
         "/api/draft/{draft_id}/add-images",
         "/api/draft/{draft_id}/add-captions",
     ]
     
-    for endpoint in old_endpoints:
+    # 检查旧的 draft_routes 端点是否不存在
+    old_draft_endpoints = [
+        "/api/draft/generate",
+        "/api/draft/list",
+        "/api/draft/health",
+        "/api/draft/clear",
+    ]
+    
+    # 检查旧的 example_routes 端点是否不存在
+    old_example_endpoints = [
+        "/api/example/health",
+        "/api/example/items",
+        "/api/example/upload",
+        "/api/example/download",
+    ]
+    
+    all_old_endpoints = old_material_endpoints + old_draft_endpoints + old_example_endpoints
+    
+    for endpoint in all_old_endpoints:
         assert endpoint not in routes, f"旧端点 {endpoint} 仍然存在"
         print(f"  ✅ {endpoint} 已移除")
     
-    print("✅ 旧路由移除测试通过\n")
+    print("✅ 旧路由移除测试通过（material_routes, draft_routes, example_routes）\n")
     return True
 
 
