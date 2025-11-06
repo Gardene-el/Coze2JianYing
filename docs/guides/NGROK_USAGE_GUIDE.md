@@ -137,8 +137,9 @@ PyngrokNgrokURLError: ngrok client exception, URLError: timed out
 **原因**：ngrok API 响应缓慢或网络不稳定导致 HTTP 请求超时。
 
 **解决方法**：
-1. 本项目已改进超时处理（v1.2.0+）：
-   - 监控线程允许连续 3 次错误后才停止
+1. 本项目已改进超时处理（v1.3.0+）：
+   - 监控线程**永不停止**，会持续重试
+   - 监控成功恢复时会记录日志
    - 停止隧道时即使 API 超时也会清理本地状态
 2. 如果隧道仍在运行但无法停止：
    - 重启应用会自动清理
@@ -147,6 +148,8 @@ PyngrokNgrokURLError: ngrok client exception, URLError: timed out
    - 检查网络连接
    - 尝试更换 ngrok 区域
    - 升级到付费版获得更好的稳定性
+
+**注意**：监控线程遇到错误时会持续重试，不会停止。这确保即使网络暂时不稳定，监控也会自动恢复。
 
 #### ngrok 启动失败
 1. 检查 pyngrok 是否正确安装

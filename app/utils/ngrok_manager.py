@@ -272,9 +272,8 @@ class NgrokManager:
         self._monitor_thread.start()
     
     def _monitor_tunnel(self):
-        """监控隧道状态（在后台线程中运行）"""
+        """监控隧道状态（在后台线程中运行）- 永久监控模式"""
         consecutive_errors = 0
-        max_consecutive_errors = 3  # 允许连续3次错误后才停止监控
         
         while not self._stop_monitor.is_set():
             try:
@@ -290,20 +289,18 @@ class NgrokManager:
                         self.is_running = False
                         break
                     
-                    # 重置错误计数
-                    consecutive_errors = 0
+                    # 重置错误计数（成功时）
+                    if consecutive_errors > 0:
+                        self.logger.info("ngrok 监控恢复正常")
+                        consecutive_errors = 0
                 
                 time.sleep(5)  # 每5秒检查一次
                 
             except Exception as e:
                 consecutive_errors += 1
-                self.logger.warning(f"监控隧道时发生错误 ({consecutive_errors}/{max_consecutive_errors}): {e}")
+                self.logger.warning(f"监控隧道时发生错误 (已连续 {consecutive_errors} 次): {e}")
                 
-                # 如果连续错误次数超过阈值，停止监控但不标记隧道为停止
-                if consecutive_errors >= max_consecutive_errors:
-                    self.logger.error(f"监控线程遇到 {consecutive_errors} 次连续错误，停止监控")
-                    break
-                
+                # 永不停止监控，持续重试
                 # 等待较长时间后重试
                 time.sleep(10)
     
