@@ -3,12 +3,10 @@ FastAPI 服务主入口
 独立于 GUI，专门用于运行 API 服务
 """
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime
-from pathlib import Path
 
 from app.api.router import api_router
 
@@ -30,13 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 挂载静态文件目录
-static_path = Path(__file__).parent / "static"
-templates_path = Path(__file__).parent / "templates"
-
-if static_path.exists():
-    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
-
 
 # 全局异常处理
 @app.exception_handler(Exception)
@@ -51,49 +42,17 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# 根路径 - 返回网页
-@app.get("/", tags=["根路径"], response_class=HTMLResponse)
+# 根路径
+@app.get("/", tags=["根路径"])
 async def root():
     """
-    API 根路径 - 返回项目主页
-    """
-    index_file = templates_path / "index.html"
-    if index_file.exists():
-        return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
-    else:
-        # 如果模板文件不存在，返回 JSON 信息
-        return JSONResponse(content={
-            "message": "Welcome to Coze剪映草稿生成器 API",
-            "docs": "/docs",
-            "redoc": "/redoc",
-            "version": "1.0.0",
-            "timestamp": datetime.now().isoformat()
-        })
-
-
-# API 信息端点
-@app.get("/api", tags=["根路径"])
-async def api_info():
-    """
-    API 信息端点
+    API 根路径
     """
     return {
         "message": "Welcome to Coze剪映草稿生成器 API",
         "docs": "/docs",
         "redoc": "/redoc",
         "version": "1.0.0",
-        "timestamp": datetime.now().isoformat()
-    }
-
-
-# 健康检查端点
-@app.get("/api/health", tags=["根路径"])
-async def health_check():
-    """
-    健康检查端点
-    """
-    return {
-        "status": "healthy",
         "timestamp": datetime.now().isoformat()
     }
 
