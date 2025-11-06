@@ -10,7 +10,6 @@ from app.utils.logger import get_logger
 from app.utils.coze_parser import CozeOutputParser
 from app.utils.converter import DraftInterfaceConverter
 from app.utils.material_manager import MaterialManager, create_material_manager
-from app.utils.draft_meta_manager import DraftMetaManager, create_draft_meta_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
@@ -322,38 +321,6 @@ class DraftGenerator:
         except Exception as e:
             self.logger.error(f"  ❌ 创建轨道失败: {e}")
             return False
-    
-    def generate_root_meta_info(self, folder_path: Optional[str] = None):
-        """
-        生成 root_meta_info.json 文件
-        扫描指定文件夹中的所有草稿并生成元信息文件
-        
-        Args:
-            folder_path: 草稿文件夹路径（可选，默认使用 output_base_dir）
-        """
-        try:
-            # 确定要扫描的文件夹
-            target_folder = folder_path if folder_path else self.output_base_dir
-            
-            self.logger.info(f"开始生成 root_meta_info.json...")
-            self.logger.info(f"目标文件夹: {target_folder}")
-            
-            # 创建元信息管理器
-            meta_manager = create_draft_meta_manager()
-            
-            # 扫描草稿文件夹并生成元信息
-            root_meta_info = meta_manager.scan_and_generate_meta_info(target_folder)
-            
-            # 保存到输出文件夹
-            meta_info_path = os.path.join(target_folder, "root_meta_info.json")
-            meta_manager.save_root_meta_info(root_meta_info, meta_info_path)
-            
-            self.logger.info("✅ root_meta_info.json 生成完成")
-            return meta_info_path
-            
-        except Exception as e:
-            self.logger.error(f"生成 root_meta_info.json 失败: {e}")
-            raise
     
     def _process_segment(
         self,
