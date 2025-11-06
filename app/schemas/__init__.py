@@ -4,6 +4,7 @@ Pydantic Schemas 模块
 """
 from app.schemas.example_schemas import *
 from app.schemas.draft_schemas import *
+from app.schemas.segment_schemas import *
 
 __all__ = [
     # Example schemas
@@ -27,4 +28,19 @@ __all__ = [
     "DraftInfo",
     "ErrorResponse",
     "HealthCheckResponse",
+    # Segment schemas (新增)
+    "CreateAudioSegmentRequest",
+    "CreateVideoSegmentRequest",
+    "CreateTextSegmentRequest",
+    "CreateStickerSegmentRequest",
+    "CreateSegmentResponse",
+    "AddSegmentToDraftRequest",
+    "AddSegmentToDraftResponse",
+    "CreateDraftRequest",
+    "CreateDraftResponse",
+    "AddTrackRequest",
+    "AddTrackResponse",
+    "SaveDraftResponse",
+    "DraftStatusResponse",
+    "SegmentDetailResponse",
 ]
