@@ -1,17 +1,18 @@
-# API 使用示例
+# API 使用示例（已更新）
 
-本文档提供 Coze2JianYing API 的完整使用示例，展示如何通过两种方式（Coze IDE 插件和 API 服务）与草稿生成器通信。
+> **📢 重要更新**
+>
+> 本文档已更新以反映新的 API 设计（符合 [API_ENDPOINTS_REFERENCE.md](API_ENDPOINTS_REFERENCE.md)）。
+>
+> 旧版 API 端点（`add-videos`, `add-audios`, `add-images`, `add-captions`）已被移除。
+> 
+> 新版 API 采用 Segment 创建和组装的方式，更接近 pyJianYingDraft 的原生 API。
+
+本文档提供 Coze2JianYing API 的完整使用示例，展示如何通过新的 API 架构与草稿生成器通信。
 
 ## 前置准备
 
-### 方式一：Coze IDE 插件（手动模式）
-
-1. 在 Coze 平台创建云侧插件
-2. 复制 `coze_plugin/tools/` 中的工具函数代码
-3. 在 Coze 工作流中调用工具函数
-4. 手动复制输出的 JSON 到草稿生成器
-
-### 方式二：API 服务（自动模式）
+### 启动 API 服务
 
 1. 启动草稿生成器的 API 服务：
 ```bash
@@ -24,11 +25,22 @@ python start_api.py
    - Swagger UI: `http://localhost:8000/docs`
    - ReDoc: `http://localhost:8000/redoc`
 
+## 新版 API 工作流程
+
+新版 API 采用以下工作流程：
+
+1. **创建草稿** - 使用 `POST /api/draft/create`
+2. **添加轨道（可选）** - 使用 `POST /api/draft/{draft_id}/add_track`
+3. **创建 Segment** - 使用 `POST /api/segment/{type}/create`
+4. **为 Segment 添加效果（可选）** - 使用 `POST /api/segment/{type}/{segment_id}/add_*`
+5. **将 Segment 添加到草稿** - 使用 `POST /api/draft/{draft_id}/add_segment`
+6. **保存草稿** - 使用 `POST /api/draft/{draft_id}/save`
+
 ## 完整工作流示例
 
-### 示例 1：创建简单的图片+音频视频
+### 示例 1：创建简单的图片+音频视频（新版 API）
 
-这个示例展示如何创建一个包含背景音乐和图片的简单视频。
+这个示例展示如何使用新版 API 创建一个包含背景音乐和图片的简单视频。
 
 #### 使用 Python 请求 API
 
@@ -37,47 +49,275 @@ import requests
 import json
 
 # API 基础地址
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8000/api"
 
-# 步骤 1: 创建草稿
+# ===== 步骤 1: 创建草稿 =====
 print("步骤 1: 创建草稿")
 create_response = requests.post(
-    f"{API_BASE}/api/draft/create",
+    f"{API_BASE}/draft/create",
     json={
         "draft_name": "我的图片视频",
         "width": 1920,
         "height": 1080,
-        "fps": 30
+        "fps": 30,
+        "allow_replace": True
     }
 )
 create_data = create_response.json()
 draft_id = create_data["draft_id"]
 print(f"草稿 ID: {draft_id}")
 
-# 步骤 2: 添加背景音乐
-print("\n步骤 2: 添加背景音乐")
+# ===== 步骤 2: 添加轨道 =====
+print("\n步骤 2: 添加轨道")
+# 添加音频轨道
+requests.post(
+    f"{API_BASE}/draft/{draft_id}/add_track",
+    json={"track_type": "audio", "track_name": "背景音乐"}
+)
+# 添加视频轨道（用于图片）
+requests.post(
+    f"{API_BASE}/draft/{draft_id}/add_track",
+    json={"track_type": "video", "track_name": "图片序列"}
+)
+print("轨道添加完成")
+
+# ===== 步骤 3: 创建音频 Segment =====
+print("\n步骤 3: 创建音频片段")
 audio_response = requests.post(
-    f"{API_BASE}/api/draft/{draft_id}/add-audios",
+    f"{API_BASE}/segment/audio/create",
     json={
-        "draft_id": draft_id,
-        "audios": [
-            {
-                "material_url": "https://example.com/background-music.mp3",
-                "time_range": {"start": 0, "end": 15000},  # 15秒
-                "volume": 0.8,
-                "fade_in": 1000,
-                "fade_out": 1000
-            }
-        ]
+        "material_url": "https://example.com/background-music.mp3",
+        "target_timerange": {
+            "start": 0,
+            "duration": 15000000  # 15秒（微秒）
+        },
+        "volume": 0.8
     }
 )
-print(f"音频添加结果: {audio_response.json()['message']}")
+audio_seg_id = audio_response.json()["segment_id"]
+print(f"音频片段 ID: {audio_seg_id}")
 
-# 步骤 3: 添加图片序列
-print("\n步骤 3: 添加图片序列")
-images = [
-    {
-        "material_url": "https://example.com/image1.jpg",
+# 为音频添加淡入淡出
+requests.post(
+    f"{API_BASE}/segment/audio/{audio_seg_id}/add_fade",
+    json={
+        "in_duration": "1s",
+        "out_duration": "1s"
+    }
+)
+print("音频淡入淡出添加完成")
+
+# ===== 步骤 4: 创建图片 Segments =====
+print("\n步骤 4: 创建图片片段")
+image_urls = [
+    "https://example.com/image1.jpg",
+    "https://example.com/image2.jpg",
+    "https://example.com/image3.jpg"
+]
+
+image_seg_ids = []
+for i, url in enumerate(image_urls):
+    # 每张图片显示 5 秒
+    start_time = i * 5000000  # 微秒
+    duration = 5000000  # 5秒
+    
+    response = requests.post(
+        f"{API_BASE}/segment/video/create",  # 图片作为 VideoSegment
+        json={
+            "material_url": url,
+            "target_timerange": {
+                "start": start_time,
+                "duration": duration
+            }
+        }
+    )
+    seg_id = response.json()["segment_id"]
+    image_seg_ids.append(seg_id)
+    print(f"图片 {i+1} 片段 ID: {seg_id}")
+
+# ===== 步骤 5: 将 Segments 添加到草稿 =====
+print("\n步骤 5: 将片段添加到草稿")
+
+# 添加音频片段
+requests.post(
+    f"{API_BASE}/draft/{draft_id}/add_segment",
+    json={"segment_id": audio_seg_id}
+)
+print("音频片段已添加到草稿")
+
+# 添加图片片段
+for seg_id in image_seg_ids:
+    requests.post(
+        f"{API_BASE}/draft/{draft_id}/add_segment",
+        json={"segment_id": seg_id}
+    )
+print("所有图片片段已添加到草稿")
+
+# ===== 步骤 6: 查询草稿状态 =====
+print("\n步骤 6: 查询草稿状态")
+status_response = requests.get(f"{API_BASE}/draft/{draft_id}/status")
+status_data = status_response.json()
+print(f"轨道数量: {len(status_data['tracks'])}")
+print(f"片段数量: {len(status_data['segments'])}")
+print(f"下载状态: {status_data['download_status']}")
+
+# ===== 步骤 7: 保存草稿 =====
+print("\n步骤 7: 保存草稿")
+save_response = requests.post(f"{API_BASE}/draft/{draft_id}/save")
+save_data = save_response.json()
+print(f"草稿已保存到: {save_data['draft_path']}")
+```
+
+### 示例 2: 创建包含文本和特效的视频（新版 API）
+
+```python
+import requests
+
+API_BASE = "http://localhost:8000/api"
+
+# 1. 创建草稿
+draft_response = requests.post(
+    f"{API_BASE}/draft/create",
+    json={
+        "draft_name": "特效视频",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+    }
+)
+draft_id = draft_response.json()["draft_id"]
+
+# 2. 创建视频 Segment
+video_response = requests.post(
+    f"{API_BASE}/segment/video/create",
+    json={
+        "material_url": "https://example.com/video.mp4",
+        "target_timerange": {"start": 0, "duration": 10000000}  # 10秒
+    }
+)
+video_seg_id = video_response.json()["segment_id"]
+
+# 3. 为视频添加滤镜
+requests.post(
+    f"{API_BASE}/segment/video/{video_seg_id}/add_filter",
+    json={
+        "filter_type": "FilterType.XXX",
+        "intensity": 80.0
+    }
+)
+
+# 4. 为视频添加转场
+requests.post(
+    f"{API_BASE}/segment/video/{video_seg_id}/add_transition",
+    json={
+        "transition_type": "TransitionType.XXX",
+        "duration": "1s"
+    }
+)
+
+# 5. 创建文本 Segment
+text_response = requests.post(
+    f"{API_BASE}/segment/text/create",
+    json={
+        "text_content": "欢迎观看",
+        "target_timerange": {"start": 0, "duration": 3000000},  # 3秒
+        "font_size": 48.0,
+        "color": "#FFFFFF"
+    }
+)
+text_seg_id = text_response.json()["segment_id"]
+
+# 6. 为文本添加动画
+requests.post(
+    f"{API_BASE}/segment/text/{text_seg_id}/add_animation",
+    json={
+        "animation_type": "TextIntro.XXX",
+        "duration": "1s"
+    }
+)
+
+# 7. 将所有片段添加到草稿
+requests.post(f"{API_BASE}/draft/{draft_id}/add_segment", json={"segment_id": video_seg_id})
+requests.post(f"{API_BASE}/draft/{draft_id}/add_segment", json={"segment_id": text_seg_id})
+
+# 8. 保存草稿
+save_response = requests.post(f"{API_BASE}/draft/{draft_id}/save")
+print(f"草稿已保存: {save_response.json()['draft_path']}")
+```
+
+## curl 命令示例
+
+### 创建草稿
+```bash
+curl -X POST "http://localhost:8000/api/draft/create" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "draft_name": "测试项目",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  }'
+```
+
+### 创建音频片段
+```bash
+curl -X POST "http://localhost:8000/api/segment/audio/create" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "material_url": "https://example.com/audio.mp3",
+    "target_timerange": {
+      "start": 0,
+      "duration": 5000000
+    },
+    "volume": 1.0
+  }'
+```
+
+### 添加片段到草稿
+```bash
+DRAFT_ID="your-draft-id"
+SEGMENT_ID="your-segment-id"
+
+curl -X POST "http://localhost:8000/api/draft/${DRAFT_ID}/add_segment" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"segment_id\": \"${SEGMENT_ID}\"
+  }"
+```
+
+## Postman 集合
+
+您可以使用以下 Postman 集合测试 API：
+
+### 集合结构
+
+```
+Coze2JianYing API (New)
+├── Draft Management
+│   ├── POST /api/draft/create
+│   ├── POST /api/draft/{draft_id}/add_track
+│   ├── POST /api/draft/{draft_id}/add_segment
+│   ├── POST /api/draft/{draft_id}/save
+│   └── GET /api/draft/{draft_id}/status
+├── Segment Creation
+│   ├── POST /api/segment/audio/create
+│   ├── POST /api/segment/video/create
+│   ├── POST /api/segment/text/create
+│   └── POST /api/segment/sticker/create
+├── Audio Segment Operations
+│   ├── POST /api/segment/audio/{segment_id}/add_effect
+│   ├── POST /api/segment/audio/{segment_id}/add_fade
+│   └── POST /api/segment/audio/{segment_id}/add_keyframe
+├── Video Segment Operations
+│   ├── POST /api/segment/video/{segment_id}/add_filter
+│   ├── POST /api/segment/video/{segment_id}/add_transition
+│   └── POST /api/segment/video/{segment_id}/add_keyframe
+└── Text Segment Operations
+    ├── POST /api/segment/text/{segment_id}/add_animation
+    └── POST /api/segment/text/{segment_id}/add_effect
+```
+
+## 完整 Python 客户端示例
         "time_range": {"start": 0, "end": 3000},
         "fit_mode": "fill",
         "background_color": "#000000"
@@ -542,3 +782,16 @@ A: 支持。启动时绑定到 `0.0.0.0`，配置防火墙规则即可远程访�
 - [API 参考文档](http://localhost:8000/docs)
 - [项目 README](../README.md)
 - [开发路线图](./guides/DEVELOPMENT_ROADMAP.md)
+
+## 旧版 API 示例（已废弃）
+
+文档中后续的旧版 API 示例（使用 `add-videos`, `add-audios`, `add-images`, `add-captions` 端点）已被弃用。
+
+请使用上述新版 API 示例，这些示例遵循 [API_ENDPOINTS_REFERENCE.md](API_ENDPOINTS_REFERENCE.md) 中描述的设计。
+
+主要变化：
+- 使用 `/api/segment/{type}/create` 创建片段
+- 使用 `/api/draft/{draft_id}/add_segment` 将片段添加到草稿
+- 支持对片段进行各种操作（特效、滤镜、动画等）
+- 更灵活、更接近 pyJianYingDraft 的原生 API
+

@@ -1,37 +1,72 @@
-# API 实现路线图
+# API 实现路线图（旧版）
 
-本文档详细说明 API 接口的实现计划和待完成任务。
+> **⚠️ 注意：本文档已被弃用**
+>
+> 本文档描述的旧版 API 实现计划已被新的设计替代。
+> 
+> **请参考最新的 API 设计：[API_ENDPOINTS_REFERENCE.md](API_ENDPOINTS_REFERENCE.md)**
+>
+> 新实现包括：
+> - Segment 创建和操作端点（`app/api/segment_routes.py`）
+> - Draft 操作端点（`app/api/new_draft_routes.py`）
+> - Segment 状态管理（`app/utils/segment_manager.py`）
+> - 完整的 Segment 数据模型（`app/schemas/segment_schemas.py`）
+>
+> 本文档仅作为历史参考保留。
 
-## 当前状态
+---
+
+## 当前状态（历史）
 
 ### 已完成 ✅
 
-#### 1. 核心架构设计
-- [x] 完整的 API 设计文档 (`docs/API_DESIGN.md`)
-- [x] 数据模型定义 (`app/schemas/material_schemas.py`)
-- [x] 草稿状态管理器 (`app/utils/draft_state_manager.py`)
-- [x] API 路由实现 (`app/api/material_routes.py`)
+#### 1. 核心架构设计（旧版）
+- [x] 完整的 API 设计文档 (`docs/API_DESIGN.md`) - 已弃用
+- [x] 数据模型定义 (`app/schemas/material_schemas.py.old`) - 已移除
+- [x] 草稿状态管理器 (`app/utils/draft_state_manager.py`) - 仍在使用
+- [x] API 路由实现 (`app/api/material_routes.py.old`) - 已移除
 
-#### 2. API 端点实现
-- [x] `POST /api/draft/create` - 创建草稿
-- [x] `POST /api/draft/{draft_id}/add-videos` - 添加视频
-- [x] `POST /api/draft/{draft_id}/add-audios` - 添加音频
-- [x] `POST /api/draft/{draft_id}/add-images` - 添加图片
-- [x] `POST /api/draft/{draft_id}/add-captions` - 添加字幕
-- [x] `GET /api/draft/{draft_id}/detail` - 查询草稿详情
+#### 2. API 端点实现（旧版 - 已移除）
+- [x] ~~`POST /api/draft/create` - 创建草稿~~ - 已被新实现替代
+- [x] ~~`POST /api/draft/{draft_id}/add-videos` - 添加视频~~ - 已移除
+- [x] ~~`POST /api/draft/{draft_id}/add-audios` - 添加音频~~ - 已移除
+- [x] ~~`POST /api/draft/{draft_id}/add-images` - 添加图片~~ - 已移除
+- [x] ~~`POST /api/draft/{draft_id}/add-captions` - 添加字幕~~ - 已移除
+- [x] ~~`GET /api/draft/{draft_id}/detail` - 查询草稿详情~~ - 已移除
 
-#### 3. 数据验证
-- [x] Pydantic 模型验证
-- [x] 时间范围验证
-- [x] 参数范围验证（音量、速度等）
-- [x] UUID 格式验证
+### 新版实现 ✅
 
-#### 4. 文档
-- [x] API 设计文档
-- [x] API 使用示例文档
-- [x] 数据模型注释
+请查看 [API_ENDPOINTS_REFERENCE.md](API_ENDPOINTS_REFERENCE.md) 了解新版 API 的完整实现。
 
-### 进行中 🚧
+#### 已实现的新版端点
+
+**Segment 创建**：
+- `POST /api/segment/audio/create`
+- `POST /api/segment/video/create`
+- `POST /api/segment/text/create`
+- `POST /api/segment/sticker/create`
+
+**Segment 操作**：
+- AudioSegment: `add_effect`, `add_fade`, `add_keyframe`
+- VideoSegment: `add_animation`, `add_effect`, `add_fade`, `add_filter`, `add_mask`, `add_transition`, `add_background_filling`, `add_keyframe`
+- TextSegment: `add_animation`, `add_bubble`, `add_effect`, `add_keyframe`
+- StickerSegment: `add_keyframe`
+
+**Draft 操作**：
+- `POST /api/draft/create`
+- `POST /api/draft/{draft_id}/add_track`
+- `POST /api/draft/{draft_id}/add_segment`
+- `POST /api/draft/{draft_id}/add_effect`
+- `POST /api/draft/{draft_id}/add_filter`
+- `POST /api/draft/{draft_id}/save`
+- `GET /api/draft/{draft_id}/status`
+
+**查询**：
+- `GET /api/segment/{segment_type}/{segment_id}`
+
+---
+
+## 旧版待完成任务（已废弃）
 
 #### 1. 素材下载管理
 当前状态：基础框架已完成，待实现异步下载功能

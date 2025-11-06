@@ -1,14 +1,29 @@
-# Coze2JianYing API 接口设计文档
+# Coze2JianYing API 接口设计文档（旧版）
 
-## 概述
+> **⚠️ 注意：本文档已被弃用**
+>
+> 本文档中描述的 `add-videos`, `add-audios`, `add-images`, `add-captions` API 设计已被废弃。
+> 
+> **请参考最新的 API 设计：[API_ENDPOINTS_REFERENCE.md](API_ENDPOINTS_REFERENCE.md)**
+>
+> 新设计采用了更符合 pyJianYingDraft 原生 API 的架构：
+> - 使用 `/api/segment/{type}/create` 创建片段
+> - 使用 `/api/draft/{draft_id}/add_segment` 将片段添加到草稿
+> - 使用 `/api/segment/{type}/{segment_id}/...` 对片段进行操作
+>
+> 本文档仅作为历史参考保留。
 
-本文档详细说明 Coze 与草稿生成器之间的**流式命令处理**接口设计，解决以下核心问题：
+---
+
+## 概述（历史）
+
+本文档详细说明 Coze 与草稿生成器之间的**流式命令处理**接口设计（旧版），解决以下核心问题：
 
 1. **素材下载管理**：Coze 传递的是网络链接，本地需要先下载素材再调用 pyJianYingDraft
 2. **变量作用域问题**：通过 UUID 系统管理草稿状态，避免 Coze 工作流的变量索引干扰
 3. **增量命令处理**：支持 Coze 流式发送指令，无需等待完整草稿数据
 
-## 重要说明
+## 重要说明（历史）
 
 本设计专注于**云端服务和本地服务的流式 API 模式**，允许 Coze 工作流以增量方式发送命令（创建草稿 → 添加素材 → 添加更多内容 → 生成）。
 

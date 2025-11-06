@@ -2,29 +2,47 @@
 Pydantic Schemas 模块
 包含所有 API 请求/响应数据模型定义
 """
-from app.schemas.example_schemas import *
-from app.schemas.draft_schemas import *
+from app.schemas.segment_schemas import *
 
 __all__ = [
-    # Example schemas
-    "ItemBase",
-    "ItemCreate",
-    "ItemUpdate",
-    "ItemResponse",
-    "MessageResponse",
-    "HealthResponse",
-    "FileUploadResponse",
-    "QueryParams",
-    "BatchItemsCreate",
-    "BatchItemsResponse",
-    # Draft schemas
-    "DraftStatus",
-    "DraftGenerateRequest",
-    "DraftGenerateResponse",
+    # Segment schemas
+    "CreateAudioSegmentRequest",
+    "CreateVideoSegmentRequest",
+    "CreateTextSegmentRequest",
+    "CreateStickerSegmentRequest",
+    "CreateSegmentResponse",
+    "AddSegmentToDraftRequest",
+    "AddSegmentToDraftResponse",
+    "CreateDraftRequest",
+    "CreateDraftResponse",
+    "AddTrackRequest",
+    "AddTrackResponse",
+    "SaveDraftResponse",
     "DraftStatusResponse",
-    "DraftListResponse",
-    "DraftListItem",
-    "DraftInfo",
-    "ErrorResponse",
-    "HealthCheckResponse",
+    "SegmentDetailResponse",
+    # All other segment operation schemas
+    "AddEffectRequest",
+    "AddEffectResponse",
+    "AddFadeRequest",
+    "AddFadeResponse",
+    "AddKeyframeRequest",
+    "AddKeyframeResponse",
+    "AddAnimationRequest",
+    "AddAnimationResponse",
+    "AddFilterRequest",
+    "AddFilterResponse",
+    "AddMaskRequest",
+    "AddMaskResponse",
+    "AddTransitionRequest",
+    "AddTransitionResponse",
+    "AddBackgroundFillingRequest",
+    "AddBackgroundFillingResponse",
+    "AddBubbleRequest",
+    "AddBubbleResponse",
+    "AddTextEffectRequest",
+    "AddTextEffectResponse",
+    "AddGlobalEffectRequest",
+    "AddGlobalEffectResponse",
+    "AddGlobalFilterRequest",
+    "AddGlobalFilterResponse",
 ]
