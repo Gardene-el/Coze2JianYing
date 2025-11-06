@@ -110,6 +110,23 @@ pip install -r requirements.txt
 
 ### 故障排除
 
+#### 首次启动时出现下载错误
+如果在首次启动 ngrok 时看到类似以下错误：
+```
+AttributeError: 'NoneType' object has no attribute 'write'
+PyngrokNgrokInstallError: An error occurred while downloading ngrok
+```
+
+**原因**：pyngrok 在首次运行时需要下载 ngrok 二进制文件，在 GUI 应用中可能遇到输出流问题。
+
+**解决方法**：
+1. 本项目已自动处理此问题（v1.1.0+）
+2. 如果仍然遇到问题，请更新到最新版本
+3. 或者手动预安装 ngrok：
+   ```bash
+   python -c "from pyngrok import ngrok; ngrok.install_ngrok()"
+   ```
+
 #### ngrok 启动失败
 1. 检查 pyngrok 是否正确安装
 2. 确认 FastAPI 服务已启动

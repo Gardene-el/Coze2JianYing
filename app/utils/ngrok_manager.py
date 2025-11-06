@@ -5,8 +5,11 @@ ngrok 管理器模块
 """
 import threading
 import time
+import sys
+import os
 from typing import Optional, Dict, Any
 import logging
+from contextlib import contextmanager
 
 try:
     from pyngrok import ngrok, conf
@@ -14,6 +17,28 @@ try:
     PYNGROK_AVAILABLE = True
 except ImportError:
     PYNGROK_AVAILABLE = False
+
+
+@contextmanager
+def suppress_stdout_stderr():
+    """上下文管理器：临时抑制 stdout 和 stderr 输出
+    
+    用于在 GUI 应用中避免 pyngrok 安装时的输出问题
+    """
+    # 保存原始的 stdout 和 stderr
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    
+    try:
+        # 将 stdout 和 stderr 重定向到 devnull
+        with open(os.devnull, 'w') as devnull:
+            sys.stdout = devnull
+            sys.stderr = devnull
+            yield
+    finally:
+        # 恢复原始的 stdout 和 stderr
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
 
 class NgrokManager:
@@ -58,7 +83,9 @@ class NgrokManager:
             return False
         
         try:
-            ngrok.set_auth_token(authtoken)
+            # 使用 suppress_stdout_stderr 避免 GUI 应用中的输出问题
+            with suppress_stdout_stderr():
+                ngrok.set_auth_token(authtoken)
             self.logger.info("ngrok authtoken 设置成功")
             return True
         except Exception as e:
@@ -102,11 +129,15 @@ class NgrokManager:
             
             # 启动隧道
             self.logger.info(f"启动 ngrok 隧道: port={port}, region={region}, protocol={protocol}")
-            self.tunnel = ngrok.connect(
-                port, 
-                protocol,
-                bind_tls=True  # 强制使用 HTTPS
-            )
+            
+            # 使用 suppress_stdout_stderr 避免 GUI 应用中的输出问题
+            # 这在首次运行时下载 ngrok 二进制文件时特别重要
+            with suppress_stdout_stderr():
+                self.tunnel = ngrok.connect(
+                    port, 
+                    protocol,
+                    bind_tls=True  # 强制使用 HTTPS
+                )
             
             self.public_url = self.tunnel.public_url
             self.is_running = True

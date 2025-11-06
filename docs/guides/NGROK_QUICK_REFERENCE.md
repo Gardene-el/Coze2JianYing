@@ -63,6 +63,20 @@ in - 印度
 
 ## 常见问题快速解决
 
+### 问题: 首次启动出现下载错误
+```
+错误信息:
+  AttributeError: 'NoneType' object has no attribute 'write'
+  PyngrokNgrokInstallError: An error occurred while downloading ngrok
+
+原因: GUI 应用中 pyngrok 下载二进制文件时的输出问题
+
+解决:
+  • 本项目已自动处理 (v1.1.0+)
+  • 重启应用，问题已修复
+  • 手动预安装: python -c "from pyngrok import ngrok; ngrok.install_ngrok()"
+```
+
 ### 问题: ngrok 启动失败
 ```
 ✓ 检查清单:
