@@ -71,6 +71,43 @@ python scripts/test_coze_json_formatter.py
 - 自定义输出文件名
 - 与 DraftGenerator 集成
 
+### test_api_demo.py
+
+**功能**: DraftStateManager 和 SegmentManager 综合测试
+
+完全仿照 pyJianYingDraft 的 demo.py 工作流，通过直接调用 API 函数（非 HTTP 请求）生成完整的视频草稿项目。使用 GitHub Pages 托管的网络素材 URL。
+
+**使用方法**:
+
+```bash
+python scripts/test_api_demo.py
+```
+
+**测试流程**:
+1. ✅ 创建草稿 (1920x1080, 30fps)
+2. ✅ 添加音频、视频和文本轨道
+3. ✅ 创建音频片段（带淡入效果）
+4. ✅ 创建视频片段（带入场动画）
+5. ✅ 创建贴纸片段（GIF，带模糊背景）
+6. ✅ 添加转场效果
+7. ✅ 创建文本片段（带气泡、花字、动画效果）
+8. ✅ 将所有片段添加到相应轨道
+9. ✅ 保存草稿
+10. ✅ 查询草稿状态
+
+**使用的素材 URL**:
+- 音频: https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3
+- 视频: https://gardene-el.github.io/Coze2JianYing/assets/video.mp4
+- 贴纸: https://gardene-el.github.io/Coze2JianYing/assets/sticker.gif
+- 字幕: https://gardene-el.github.io/Coze2JianYing/assets/subtitles.srt
+
+**主要功能**:
+- ✅ 测试 DraftStateManager 所有核心功能
+- ✅ 测试 SegmentManager 所有核心功能
+- ✅ 验证草稿创建、轨道添加、片段创建、操作记录
+- ✅ 验证状态管理和配置持久化
+- ✅ 提供详细的测试日志和进度输出
+
 ### generate_tool_doc.py
 
 **功能**: 工具文档生成器

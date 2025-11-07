@@ -18,6 +18,7 @@ from app.schemas.segment_schemas import (
 )
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
+from app.utils.draft_saver import get_draft_saver
 from app.utils.logger import get_logger
 
 router = APIRouter(prefix="/api/draft", tags=["草稿操作"])
@@ -442,8 +443,7 @@ async def save_draft(draft_id: str):
     script.save()
     ```
     
-    注意：实际的草稿保存逻辑需要调用 pyJianYingDraft 库
-    目前仅更新状态，实际实现待完成
+    实际实现: 将 DraftStateManager 和 SegmentManager 的数据转换为 pyJianYingDraft 调用并保存
     """
     logger.info(f"保存草稿: {draft_id}")
     
@@ -457,24 +457,13 @@ async def save_draft(draft_id: str):
                 detail=f"草稿 {draft_id} 不存在"
             )
         
+        # 使用 DraftSaver 保存草稿
+        draft_saver = get_draft_saver()
+        draft_path = draft_saver.save_draft(draft_id)
+        
         # 更新状态为已保存
         config["status"] = "saved"
-        
-        # 保存配置
-        success = draft_manager.update_draft_config(draft_id, config)
-        
-        if not success:
-            logger.error("保存草稿失败")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="保存草稿失败"
-            )
-        
-        # TODO: 实际调用 pyJianYingDraft 保存逻辑
-        # 这里需要将配置转换为 pyJianYingDraft 的调用序列
-        
-        # 构造草稿路径（实际路径取决于保存位置）
-        draft_path = f"/tmp/jianying_drafts/{draft_id}"
+        draft_manager.update_draft_config(draft_id, config)
         
         logger.info(f"草稿保存成功: {draft_path}")
         
