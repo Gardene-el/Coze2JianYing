@@ -1,0 +1,14 @@
+{
+  "draft_id": "0a3c6cbb-8165-4b6c-b82c-f3c5d7f9bee1",
+  "project": {
+    "name": "测试项目",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  },
+  "media_resources": [],
+  "tracks": [],
+  "created_timestamp": 1762519911.009145,
+  "last_modified": 1762519911.009145,
+  "status": "created"
+}
