@@ -142,6 +142,38 @@ class CreateStickerSegmentRequest(BaseModel):
         }
 
 
+class CreateEffectSegmentRequest(BaseModel):
+    """创建特效片段请求"""
+    effect_type: str = Field(..., description="特效类型（VideoSceneEffectType 或 VideoCharacterEffectType）")
+    target_timerange: TimeRange = Field(..., description="在轨道上的时间范围")
+    params: Optional[List[float]] = Field(None, description="特效参数列表（范围 0-100）")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "effect_type": "VideoSceneEffectType.XXX",
+                "target_timerange": {"start": 0, "duration": 5000000},
+                "params": [50.0, 75.0]
+            }
+        }
+
+
+class CreateFilterSegmentRequest(BaseModel):
+    """创建滤镜片段请求"""
+    filter_type: str = Field(..., description="滤镜类型（FilterType）")
+    target_timerange: TimeRange = Field(..., description="在轨道上的时间范围")
+    intensity: float = Field(100.0, description="滤镜强度 0-100", ge=0, le=100)
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "filter_type": "FilterType.XXX",
+                "target_timerange": {"start": 0, "duration": 5000000},
+                "intensity": 100.0
+            }
+        }
+
+
 # ========== Segment 创建响应模型 ==========
 
 class CreateSegmentResponse(BaseModel):

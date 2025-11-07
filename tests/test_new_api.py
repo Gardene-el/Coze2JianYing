@@ -32,6 +32,8 @@ def test_segment_routes_registered():
         "/api/segment/video/create",
         "/api/segment/text/create",
         "/api/segment/sticker/create",
+        "/api/segment/effect/create",
+        "/api/segment/filter/create",
         "/api/draft/{draft_id}/add_segment",
         "/api/draft/{draft_id}/add_track",
     ]

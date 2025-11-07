@@ -43,7 +43,7 @@ class SegmentManager:
         创建新的片段
         
         Args:
-            segment_type: 片段类型 (audio/video/text/sticker)
+            segment_type: 片段类型 (audio/video/text/sticker/effect/filter)
             config: 片段配置
             
         Returns:
