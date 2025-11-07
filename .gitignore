@@ -156,3 +156,6 @@ Desktop.ini
 # Testing
 temp/
 *.db
+
+# Windows storage directories (created during tests)
+C:\Users\*/
