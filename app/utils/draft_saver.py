@@ -98,8 +98,8 @@ class DraftSaver:
         self.logger.info(f"项目: {draft_name}, {width}x{height}@{fps}fps")
         
         # 创建素材目录 - 使用配置系统的assets目录下的draft_id子目录
-        config = get_config()
-        temp_assets_dir = os.path.join(config.assets_dir, draft_id)
+        app_config = get_config()
+        temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
         os.makedirs(temp_assets_dir, exist_ok=True)
         
         # 创建 DraftFolder 和 Script
