@@ -10,7 +10,6 @@ from app.utils.logger import get_logger
 from app.utils.coze_parser import CozeOutputParser
 from app.utils.converter import DraftInterfaceConverter
 from app.utils.material_manager import MaterialManager, create_material_manager
-from app.core.storage_config import get_storage_config
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
@@ -18,48 +17,47 @@ from pyJianYingDraft import ScriptFile
 class DraftGenerator:
     """剪映草稿生成器 - 从Coze输出到剪映草稿的完整转换"""
     
-    def __init__(self, output_base_dir: Optional[str] = None):
+    # 默认剪映草稿路径
+    DEFAULT_DRAFT_PATHS = [
+        r"C:\Users\{username}\AppData\Local\JianyingPro\User Data\Projects\com.lveditor.draft",
+        r"C:\Users\{username}\AppData\Roaming\JianyingPro\User Data\Projects\com.lveditor.draft",
+    ]
+    
+    def __init__(self, output_base_dir: str = "./JianyingProjects"):
         """
         初始化草稿生成器
         
         Args:
             output_base_dir: 输出根目录(存放所有草稿项目)
-                           如果为 None，则使用存储配置中的默认路径
         """
         self.logger = get_logger(__name__)
         self.logger.info("初始化草稿生成器")
         
-        # 获取存储配置
-        self.storage_config = get_storage_config()
-        
-        # 使用指定路径或配置的默认路径
-        if output_base_dir:
-            self.output_base_dir = output_base_dir
-        else:
-            self.output_base_dir = str(self.storage_config.drafts_base_dir)
-        
+        self.output_base_dir = output_base_dir
         self.parser = CozeOutputParser()
         self.material_managers: Dict[str, MaterialManager] = {}
         
         # 确保输出目录存在
-        os.makedirs(self.output_base_dir, exist_ok=True)
-        self.logger.info(f"输出目录: {self.output_base_dir}")
+        os.makedirs(output_base_dir, exist_ok=True)
+        self.logger.info(f"输出目录: {output_base_dir}")
     
     def detect_default_draft_folder(self) -> Optional[str]:
         """
         自动检测剪映草稿文件夹
         
-        使用存储配置的检测功能
-        
         Returns:
             检测到的文件夹路径，如果未检测到则返回None
         """
-        detected = self.storage_config.detect_jianying_draft_folder()
-        if detected:
-            self.logger.info(f"检测到剪映草稿文件夹: {detected}")
-        else:
-            self.logger.warning("未能检测到剪映草稿文件夹")
-        return detected
+        username = os.getenv('USERNAME') or os.getenv('USER')
+        
+        for path_template in self.DEFAULT_DRAFT_PATHS:
+            path = path_template.format(username=username)
+            if os.path.exists(path) and os.path.isdir(path):
+                self.logger.info(f"检测到剪映草稿文件夹: {path}")
+                return path
+        
+        self.logger.warning("未能检测到剪映草稿文件夹")
+        return None
     
     def generate(self, content: str, output_folder: Optional[str] = None) -> List[str]:
         """

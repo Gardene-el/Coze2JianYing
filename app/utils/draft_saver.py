@@ -3,7 +3,7 @@
 将 DraftStateManager 和 SegmentManager 的数据转换为 pyJianYingDraft 调用并保存
 """
 import os
-import tempfile
+import shutil
 import requests
 from pathlib import Path
 from typing import Dict, Any, Optional
@@ -13,35 +13,63 @@ from pyJianYingDraft import IntroType, TransitionType, trange, tim, TextOutro
 from app.utils.logger import get_logger
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
+from app.core.storage_config import get_storage_config
 
 
 class DraftSaver:
     """将 DraftStateManager/SegmentManager 数据转换为 pyJianYingDraft 并保存"""
     
-    def __init__(self, output_dir: str = None):
+    def __init__(self, output_dir: Optional[str] = None, jianying_draft_path: Optional[str] = None):
         """
         初始化草稿保存器
         
         Args:
-            output_dir: 输出目录，如果为None则使用临时目录
+            output_dir: 输出目录，如果为None则使用 storage_config 的 drafts 目录
+            jianying_draft_path: 剪映草稿路径，如果指定则在生成后复制草稿到该路径
         """
         self.logger = get_logger(__name__)
-        self.output_dir = output_dir or tempfile.mkdtemp(prefix="jianying_draft_")
+        
+        # 获取存储配置
+        storage_config = get_storage_config()
+        
+        # 使用配置的 drafts 目录
+        if output_dir is None:
+            self.output_dir = str(storage_config.get_drafts_dir())
+        else:
+            self.output_dir = output_dir
+        
         os.makedirs(self.output_dir, exist_ok=True)
+        
+        # 素材目录使用配置的 assets 目录
+        self.assets_dir = str(storage_config.get_assets_dir())
+        os.makedirs(self.assets_dir, exist_ok=True)
+        
+        # 剪映草稿路径（可选）
+        self.jianying_draft_path = jianying_draft_path
+        
         self.draft_manager = get_draft_state_manager()
         self.segment_manager = get_segment_manager()
         
-    def download_material(self, url: str, save_dir: str) -> str:
+        self.logger.info(f"草稿保存器已初始化")
+        self.logger.info(f"  草稿输出目录: {self.output_dir}")
+        self.logger.info(f"  素材目录: {self.assets_dir}")
+        if self.jianying_draft_path:
+            self.logger.info(f"  剪映草稿路径: {self.jianying_draft_path}")
+        
+    def download_material(self, url: str, save_dir: Optional[str] = None) -> str:
         """
         下载素材文件
         
         Args:
             url: 素材URL
-            save_dir: 保存目录
+            save_dir: 保存目录，如果为None则使用配置的 assets 目录
             
         Returns:
             本地文件路径
         """
+        if save_dir is None:
+            save_dir = self.assets_dir
+        
         filename = url.split('/')[-1]
         save_path = os.path.join(save_dir, filename)
         
@@ -89,9 +117,6 @@ class DraftSaver:
         
         self.logger.info(f"项目: {draft_name}, {width}x{height}@{fps}fps")
         
-        # 创建临时素材目录
-        temp_assets_dir = tempfile.mkdtemp(prefix="jianying_assets_")
-        
         # 创建 DraftFolder 和 Script
         draft_folder = draft.DraftFolder(self.output_dir)
         script = draft_folder.create_draft(draft_name, width, height, fps, allow_replace=True)
@@ -128,7 +153,7 @@ class DraftSaver:
                 operations = segment.get("operations", [])
                 
                 # 创建片段
-                seg = self._create_segment(segment_type, config_data, temp_assets_dir)
+                seg = self._create_segment(segment_type, config_data, self.assets_dir)
                 if seg:
                     # 应用操作
                     self._apply_operations(seg, operations)
@@ -141,6 +166,21 @@ class DraftSaver:
         draft_path = os.path.join(self.output_dir, draft_name)
         
         self.logger.info(f"草稿保存成功: {draft_path}")
+        
+        # 如果指定了剪映草稿路径，复制一份过去
+        if self.jianying_draft_path:
+            try:
+                target_path = os.path.join(self.jianying_draft_path, draft_name)
+                if os.path.exists(target_path):
+                    self.logger.warning(f"目标路径已存在，将被覆盖: {target_path}")
+                    shutil.rmtree(target_path)
+                
+                shutil.copytree(draft_path, target_path)
+                self.logger.info(f"草稿已复制到剪映目录: {target_path}")
+            except Exception as e:
+                self.logger.error(f"复制草稿到剪映目录失败: {e}")
+                # 不抛出异常，因为本地草稿已经保存成功
+        
         return draft_path
     
     def _create_segment(self, segment_type: str, config: Dict[str, Any], assets_dir: str):
@@ -293,6 +333,12 @@ class DraftSaver:
                 self.logger.error(f"应用操作失败 {op_type}: {e}")
 
 
-def get_draft_saver(output_dir: str = None) -> DraftSaver:
-    """获取草稿保存器实例"""
-    return DraftSaver(output_dir)
+def get_draft_saver(output_dir: Optional[str] = None, jianying_draft_path: Optional[str] = None) -> DraftSaver:
+    """
+    获取草稿保存器实例
+    
+    Args:
+        output_dir: 输出目录，如果为None则使用 storage_config 的 drafts 目录
+        jianying_draft_path: 剪映草稿路径，如果指定则在生成后复制草稿到该路径
+    """
+    return DraftSaver(output_dir, jianying_draft_path)
