@@ -10,6 +10,7 @@
 import os
 import json
 import platform
+import tempfile
 from pathlib import Path
 from typing import Optional, Dict, Any
 from app.utils.logger import get_logger
@@ -189,7 +190,6 @@ class StorageConfig:
         Returns:
             默认临时目录路径
         """
-        import tempfile
         return Path(tempfile.gettempdir()) / "coze2jianying"
     
     def _ensure_directories(self):
@@ -221,7 +221,6 @@ class StorageConfig:
             检测到的文件夹路径，如果未检测到则返回 None
         """
         system = platform.system()
-        username = os.getenv('USERNAME') or os.getenv('USER')
         
         # Windows 路径
         if system == "Windows":
