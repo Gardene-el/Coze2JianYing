@@ -9,7 +9,6 @@ import uvicorn
 from datetime import datetime
 
 from app.api.router import api_router
-from app.config import get_config
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -54,21 +53,6 @@ async def root():
         "docs": "/docs",
         "redoc": "/redoc",
         "version": "1.0.0",
-        "timestamp": datetime.now().isoformat()
-    }
-
-
-# 配置信息查询
-@app.get("/api/config", tags=["系统配置"])
-async def get_system_config():
-    """
-    获取当前系统配置信息
-    
-    返回当前应用使用的路径配置
-    """
-    config = get_config()
-    return {
-        "config": config.to_dict(),
         "timestamp": datetime.now().isoformat()
     }
 

@@ -55,11 +55,6 @@ set JIANYING_ASSETS_DIR=D:\MyData\assets
 
 ## 查看当前配置
 
-### 通过 API
-```bash
-curl http://localhost:8000/api/config
-```
-
 ### 通过 Python
 ```python
 from app.config import get_config

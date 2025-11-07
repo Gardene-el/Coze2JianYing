@@ -149,10 +149,10 @@ def test_segment_manager():
     print("\n✅ 片段管理器测试全部通过")
 
 
-def test_api_config_endpoint():
-    """测试 API 配置端点"""
+def test_config_dict():
+    """测试配置字典输出"""
     print("\n" + "=" * 60)
-    print("Test 4: API 配置端点")
+    print("Test 4: 配置字典输出")
     print("=" * 60)
     
     from app.config import get_config, reset_config
@@ -171,9 +171,9 @@ def test_api_config_endpoint():
     assert "cache_dir" in config_dict, "配置缺少 cache_dir 字段"
     assert "drafts_dir" in config_dict, "配置缺少 drafts_dir 字段"
     assert "assets_dir" in config_dict, "配置缺少 assets_dir 字段"
-    print(f"  ✅ 配置端点测试通过")
+    print(f"  ✅ 配置字典测试通过")
     
-    print("\n✅ API 配置端点测试全部通过")
+    print("\n✅ 配置字典输出测试全部通过")
 
 
 def run_all_tests():
@@ -186,7 +186,7 @@ def run_all_tests():
         test_app_configuration()
         test_draft_state_manager()
         test_segment_manager()
-        test_api_config_endpoint()
+        test_config_dict()
         
         print("\n" + "=" * 60)
         print("✅ 所有测试通过!")
