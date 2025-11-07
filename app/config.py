@@ -8,9 +8,9 @@
 """
 import os
 import platform
+import tempfile
 from pathlib import Path
 from typing import Optional
-import tempfile
 
 
 class AppConfig:
@@ -131,7 +131,6 @@ class AppConfig:
                 os.makedirs(directory, exist_ok=True)
             except PermissionError:
                 # 如果没有权限创建目录，尝试使用临时目录
-                import tempfile
                 temp_base = os.path.join(tempfile.gettempdir(), "jianying_assistant")
                 
                 # 重新设置所有路径到临时目录
