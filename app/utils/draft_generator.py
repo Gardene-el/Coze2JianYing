@@ -10,6 +10,7 @@ from app.utils.logger import get_logger
 from app.utils.coze_parser import CozeOutputParser
 from app.utils.converter import DraftInterfaceConverter
 from app.utils.material_manager import MaterialManager, create_material_manager
+from app.config import get_config
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
@@ -17,21 +18,20 @@ from pyJianYingDraft import ScriptFile
 class DraftGenerator:
     """剪映草稿生成器 - 从Coze输出到剪映草稿的完整转换"""
     
-    # 默认剪映草稿路径
-    DEFAULT_DRAFT_PATHS = [
-        r"C:\Users\{username}\AppData\Local\JianyingPro\User Data\Projects\com.lveditor.draft",
-        r"C:\Users\{username}\AppData\Roaming\JianyingPro\User Data\Projects\com.lveditor.draft",
-    ]
-    
-    def __init__(self, output_base_dir: str = "./JianyingProjects"):
+    def __init__(self, output_base_dir: Optional[str] = None):
         """
         初始化草稿生成器
         
         Args:
-            output_base_dir: 输出根目录(存放所有草稿项目)
+            output_base_dir: 输出根目录(存放所有草稿项目)，如果为 None 则使用配置系统的默认路径
         """
         self.logger = get_logger(__name__)
         self.logger.info("初始化草稿生成器")
+        
+        # 如果没有指定 output_base_dir，使用配置系统的默认路径
+        if output_base_dir is None:
+            config = get_config()
+            output_base_dir = config.output_dir
         
         self.output_base_dir = output_base_dir
         self.parser = CozeOutputParser()
@@ -48,10 +48,11 @@ class DraftGenerator:
         Returns:
             检测到的文件夹路径，如果未检测到则返回None
         """
-        username = os.getenv('USERNAME') or os.getenv('USER')
+        # 使用配置系统获取可能的剪映路径
+        config = get_config()
+        draft_paths = config.get_default_jianying_draft_paths()
         
-        for path_template in self.DEFAULT_DRAFT_PATHS:
-            path = path_template.format(username=username)
+        for path in draft_paths:
             if os.path.exists(path) and os.path.isdir(path):
                 self.logger.info(f"检测到剪映草稿文件夹: {path}")
                 return path
