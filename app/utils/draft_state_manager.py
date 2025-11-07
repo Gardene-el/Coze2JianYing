@@ -29,14 +29,15 @@ class DraftStateManager:
         初始化草稿状态管理器
         
         Args:
-            base_dir: 草稿存储的基础目录，如果为 None 则使用配置系统的默认路径
+            base_dir: 草稿存储的基础目录，如果为 None 则使用配置系统的 cache 目录
         """
         self.logger = get_logger(__name__)
         
-        # 如果没有指定 base_dir，使用配置系统的默认路径
+        # 如果没有指定 base_dir，使用配置系统的 cache 目录
+        # draft_config.json 是内部状态管理文件，应该存储在 cache 中
         if base_dir is None:
             config = get_config()
-            base_dir = config.drafts_dir
+            base_dir = config.cache_dir
         
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)

@@ -10,10 +10,19 @@
 
 ```
 C:\Users\<username>\AppData\Local\coze2jianying_data\
-├── cache\      # 缓存文件（替代 C:\tmp\jianying_assistant）
-├── drafts\     # 草稿文件（替代 Temp\jianying_draft_*）
-├── assets\     # 素材文件（替代 Temp\jianying_assets_*）
-└── logs\       # 日志文件
+├── cache\              # 内部状态管理文件
+│   └── {draft_id}\    # 草稿状态和片段配置
+│       └── draft_config.json  # 草稿配置（内部使用）
+├── drafts\             # 剪映草稿文件
+│   └── {draft_name}\  # 草稿名称
+│       ├── draft_content.json      # 剪映草稿内容
+│       └── draft_meta_info.json    # 剪映草稿元数据
+├── assets\             # 素材文件
+│   └── {draft_id}\    # 按草稿 ID 分类的素材
+│       ├── video.mp4
+│       ├── audio.mp3
+│       └── ...
+└── logs\              # 日志文件
 ```
 
 ## 配置方式
@@ -39,19 +48,26 @@ set JIANYING_ASSETS_DIR=D:\MyData\assets
 ## 目录说明
 
 ### cache 目录
-- **用途**: 存储缓存数据和临时处理文件
+- **用途**: 存储内部状态管理文件
 - **替代**: `C:\tmp\jianying_assistant`
-- **内容**: draft state manager 的状态文件
+- **内容**: 
+  - `draft_config.json` - 草稿配置和状态（由 draft_state_manager 管理）
+  - 片段配置 JSON（由 segment_manager 管理）
+- **说明**: 这些是应用内部使用的文件，不是剪映草稿文件
 
 ### drafts 目录
-- **用途**: 存储草稿文件
+- **用途**: 存储真实的剪映草稿文件
 - **替代**: `C:\Users\<username>\AppData\Local\Temp\jianying_draft_*`
-- **内容**: 生成的剪映草稿项目
+- **内容**: 
+  - `draft_content.json` - 剪映草稿内容
+  - `draft_meta_info.json` - 剪映草稿元数据
+- **说明**: 这些文件可以直接复制到剪映的草稿目录打开
 
 ### assets 目录
-- **用途**: 存储素材文件
+- **用途**: 存储下载的素材文件
 - **替代**: `C:\Users\<username>\AppData\Local\Temp\jianying_assets_*`
-- **内容**: 下载的媒体文件和素材缓存
+- **内容**: 按 draft_id 分类的视频、音频、图片等媒体文件
+- **说明**: 素材按草稿 ID 组织，便于管理和清理
 
 ## 查看当前配置
 
