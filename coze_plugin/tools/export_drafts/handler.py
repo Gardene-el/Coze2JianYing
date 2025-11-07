@@ -1,8 +1,13 @@
 """
 导出草稿工具处理器
 
-从 /tmp 存储导出草稿数据以供草稿生成器使用。
+从可配置存储导出草稿数据以供草稿生成器使用。
 支持单个草稿或批量导出，可选择清理临时文件。
+
+环境变量配置：
+- JIANYING_COZE_DRAFTS_DIR: 指定草稿存储目录
+- JIANYING_COZE_DATA_DIR: 指定数据根目录  
+- JIANYING_DATA_ROOT: 通用数据根目录
 """
 
 import os
@@ -10,6 +15,21 @@ import json
 import shutil
 from typing import NamedTuple, Union, List, Dict, Any
 from runtime import Args
+
+# 导入 Coze 配置辅助模块
+import sys
+from pathlib import Path
+# 添加 base_tools 到路径以导入 coze_config
+base_tools_path = Path(__file__).parent.parent / "base_tools"
+if str(base_tools_path) not in sys.path:
+    sys.path.insert(0, str(base_tools_path))
+
+try:
+    from coze_config import get_coze_drafts_dir
+except ImportError:
+    # 如果导入失败，使用硬编码的默认值（向后兼容）
+    def get_coze_drafts_dir():
+        return os.path.join("/tmp", "jianying_assistant", "drafts")
 
 
 # Input/Output 类型定义（每个 Coze 工具都需要）
@@ -72,7 +92,8 @@ def load_draft_config(draft_id: str) -> tuple[bool, dict, str]:
     Returns:
         Tuple of (success, config_dict, error_message)
     """
-    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
+    drafts_base_dir = get_coze_drafts_dir()
+    draft_folder = os.path.join(drafts_base_dir, draft_id)
     config_file = os.path.join(draft_folder, "draft_config.json")
     
     # Check if draft folder exists
@@ -130,7 +151,7 @@ def discover_all_drafts() -> List[str]:
     Returns:
         List of draft UUID strings found in the directory
     """
-    drafts_dir = os.path.join("/tmp", "jianying_assistant", "drafts")
+    drafts_dir = get_coze_drafts_dir()
     
     if not os.path.exists(drafts_dir):
         return []
@@ -155,7 +176,7 @@ def discover_all_drafts() -> List[str]:
 
 def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
     """
-    Remove draft files from /tmp/jianying_assistant/drafts/ directory
+    Remove draft files from configured drafts directory
     
     Args:
         draft_id: UUID string for the draft
@@ -163,7 +184,8 @@ def cleanup_draft_files(draft_id: str) -> tuple[bool, str]:
     Returns:
         Tuple of (success, error_message)
     """
-    draft_folder = os.path.join("/tmp", "jianying_assistant", "drafts", draft_id)
+    drafts_base_dir = get_coze_drafts_dir()
+    draft_folder = os.path.join(drafts_base_dir, draft_id)
     
     if not os.path.exists(draft_folder):
         return True, ""  # Already doesn't exist
