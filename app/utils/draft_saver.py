@@ -13,6 +13,7 @@ from pyJianYingDraft import IntroType, TransitionType, trange, tim, TextOutro
 from app.utils.logger import get_logger
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
+from app.config import get_config
 
 
 class DraftSaver:
@@ -23,10 +24,17 @@ class DraftSaver:
         初始化草稿保存器
         
         Args:
-            output_dir: 输出目录，如果为None则使用临时目录
+            output_dir: 输出目录，如果为None则使用配置系统的drafts目录
         """
         self.logger = get_logger(__name__)
-        self.output_dir = output_dir or tempfile.mkdtemp(prefix="jianying_draft_")
+        
+        # 如果没有指定输出目录，使用配置系统的drafts目录
+        if output_dir is None:
+            config = get_config()
+            self.output_dir = config.drafts_dir
+        else:
+            self.output_dir = output_dir
+            
         os.makedirs(self.output_dir, exist_ok=True)
         self.draft_manager = get_draft_state_manager()
         self.segment_manager = get_segment_manager()
@@ -89,8 +97,10 @@ class DraftSaver:
         
         self.logger.info(f"项目: {draft_name}, {width}x{height}@{fps}fps")
         
-        # 创建临时素材目录
-        temp_assets_dir = tempfile.mkdtemp(prefix="jianying_assets_")
+        # 创建素材目录 - 使用配置系统的assets目录下的draft_id子目录
+        app_config = get_config()
+        temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
+        os.makedirs(temp_assets_dir, exist_ok=True)
         
         # 创建 DraftFolder 和 Script
         draft_folder = draft.DraftFolder(self.output_dir)

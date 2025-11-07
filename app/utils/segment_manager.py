@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from app.utils.logger import get_logger
+from app.config import get_config
 
 
 class SegmentManager:
@@ -22,14 +23,20 @@ class SegmentManager:
     4. 追踪片段的下载和处理状态
     """
     
-    def __init__(self, base_dir: str = "/tmp/jianying_assistant/segments"):
+    def __init__(self, base_dir: Optional[str] = None):
         """
         初始化片段状态管理器
         
         Args:
-            base_dir: 片段存储的基础目录
+            base_dir: 片段存储的基础目录，如果为 None 则使用配置系统的默认路径
         """
         self.logger = get_logger(__name__)
+        
+        # 如果没有指定 base_dir，使用配置系统的默认路径
+        if base_dir is None:
+            config = get_config()
+            base_dir = config.segments_dir
+        
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
         

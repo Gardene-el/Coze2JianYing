@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from app.utils.logger import get_logger
+from app.config import get_config
 
 
 class DraftStateManager:
@@ -23,14 +24,21 @@ class DraftStateManager:
     4. 追踪素材下载状态
     """
     
-    def __init__(self, base_dir: str = "/tmp/jianying_assistant/drafts"):
+    def __init__(self, base_dir: Optional[str] = None):
         """
         初始化草稿状态管理器
         
         Args:
-            base_dir: 草稿存储的基础目录
+            base_dir: 草稿存储的基础目录，如果为 None 则使用配置系统的 cache 目录
         """
         self.logger = get_logger(__name__)
+        
+        # 如果没有指定 base_dir，使用配置系统的 cache 目录
+        # draft_config.json 是内部状态管理文件，应该存储在 cache 中
+        if base_dir is None:
+            config = get_config()
+            base_dir = config.cache_dir
+        
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
         self.logger.info(f"草稿状态管理器已初始化: {self.base_dir}")
@@ -367,12 +375,12 @@ class DraftStateManager:
 _draft_state_manager: Optional[DraftStateManager] = None
 
 
-def get_draft_state_manager(base_dir: str = "/tmp/jianying_assistant/drafts") -> DraftStateManager:
+def get_draft_state_manager(base_dir: Optional[str] = None) -> DraftStateManager:
     """
     获取全局草稿状态管理器实例（单例模式）
     
     Args:
-        base_dir: 草稿存储的基础目录
+        base_dir: 草稿存储的基础目录，如果为 None 则使用配置系统的默认路径
         
     Returns:
         DraftStateManager 实例
