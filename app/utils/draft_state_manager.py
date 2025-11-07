@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from app.utils.logger import get_logger
+from app.core.storage_config import get_storage_config
 
 
 class DraftStateManager:
@@ -18,20 +19,30 @@ class DraftStateManager:
     
     功能:
     1. 创建和管理基于 UUID 的草稿配置
-    2. 存储草稿状态到文件系统（/tmp 或指定目录）
+    2. 存储草稿状态到文件系统
     3. 支持草稿的增删改查操作
     4. 追踪素材下载状态
     """
     
-    def __init__(self, base_dir: str = "/tmp/jianying_assistant/drafts"):
+    def __init__(self, base_dir: Optional[str] = None):
         """
         初始化草稿状态管理器
         
         Args:
             base_dir: 草稿存储的基础目录
+                     如果为 None，则使用存储配置中的默认路径
         """
         self.logger = get_logger(__name__)
-        self.base_dir = Path(base_dir)
+        
+        # 获取存储配置
+        storage_config = get_storage_config()
+        
+        # 使用指定路径或配置的默认路径
+        if base_dir:
+            self.base_dir = Path(base_dir)
+        else:
+            self.base_dir = storage_config.state_base_dir
+        
         self.base_dir.mkdir(parents=True, exist_ok=True)
         self.logger.info(f"草稿状态管理器已初始化: {self.base_dir}")
     
@@ -367,12 +378,13 @@ class DraftStateManager:
 _draft_state_manager: Optional[DraftStateManager] = None
 
 
-def get_draft_state_manager(base_dir: str = "/tmp/jianying_assistant/drafts") -> DraftStateManager:
+def get_draft_state_manager(base_dir: Optional[str] = None) -> DraftStateManager:
     """
     获取全局草稿状态管理器实例（单例模式）
     
     Args:
         base_dir: 草稿存储的基础目录
+                 如果为 None，则使用存储配置中的默认路径
         
     Returns:
         DraftStateManager 实例
