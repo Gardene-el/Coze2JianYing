@@ -29,3 +29,6 @@ fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.0.0
 python-multipart>=0.0.6  # Required for file uploads and form data in FastAPI
+
+# Network tunneling for public access
+pyngrok>=6.0.0  # ngrok integration for exposing local server

@@ -19,6 +19,7 @@ import atexit
 
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
+from app.utils.ngrok_manager import NgrokManager
 
 
 class CloudServiceTab(BaseTab):
@@ -54,6 +55,11 @@ class CloudServiceTab(BaseTab):
         self.log_reader_thread = None  # 日志读取线程
         self.stop_event = threading.Event()
         
+        # ngrok 隧道管理
+        self.ngrok_manager = None
+        self.ngrok_running = False
+        self.ngrok_public_url = None
+        
         # 注册清理函数,确保应用退出时停止服务
         atexit.register(self._cleanup_on_exit)
 
@@ -63,6 +69,8 @@ class CloudServiceTab(BaseTab):
     def _cleanup_on_exit(self):
         """应用退出时的清理函数"""
         try:
+            if self.ngrok_running and self.ngrok_manager:
+                self.ngrok_manager.stop_tunnel()
             if self.service_running:
                 self._stop_service()
         except:
@@ -71,6 +79,8 @@ class CloudServiceTab(BaseTab):
     def __del__(self):
         """析构函数：确保在对象销毁时停止服务"""
         try:
+            if self.ngrok_running and self.ngrok_manager:
+                self.ngrok_manager.stop_tunnel()
             if self.service_running:
                 self._stop_service()
         except:
@@ -143,6 +153,68 @@ class CloudServiceTab(BaseTab):
         # 清空日志按钮
         self.clear_log_btn = ttk.Button(self.info_frame, text="清空日志", command=self._clear_log)
 
+        # ngrok 内网穿透管理区域
+        self.ngrok_frame = ttk.LabelFrame(self.frame, text="ngrok 内网穿透", padding="10")
+        
+        # ngrok 配置
+        self.ngrok_config_frame = ttk.Frame(self.ngrok_frame)
+        
+        # Authtoken 输入
+        self.ngrok_token_label = ttk.Label(self.ngrok_config_frame, text="Authtoken:")
+        self.ngrok_token_var = tk.StringVar(value="")
+        self.ngrok_token_entry = ttk.Entry(self.ngrok_config_frame, textvariable=self.ngrok_token_var, show="*", width=40)
+        self.show_ngrok_token_var = tk.BooleanVar(value=False)
+        self.show_ngrok_token_btn = ttk.Checkbutton(
+            self.ngrok_config_frame, 
+            text="显示", 
+            variable=self.show_ngrok_token_var,
+            command=self._toggle_ngrok_token_visibility
+        )
+        
+        # Region 选择
+        self.ngrok_region_label = ttk.Label(self.ngrok_config_frame, text="区域:")
+        self.ngrok_region_var = tk.StringVar(value="us")
+        self.ngrok_region_combo = ttk.Combobox(
+            self.ngrok_config_frame,
+            textvariable=self.ngrok_region_var,
+            values=["us", "eu", "ap", "au", "sa", "jp", "in"],
+            state="readonly",
+            width=10
+        )
+        
+        # ngrok 状态显示
+        self.ngrok_status_frame = ttk.Frame(self.ngrok_frame)
+        self.ngrok_status_label = ttk.Label(self.ngrok_status_frame, text="ngrok 状态: 未启动", font=("Arial", 10, "bold"))
+        self.ngrok_status_indicator = tk.Canvas(self.ngrok_status_frame, width=20, height=20, highlightthickness=0)
+        self._update_ngrok_status_indicator(False)
+        
+        # ngrok 公网 URL 显示
+        self.ngrok_url_frame = ttk.Frame(self.ngrok_frame)
+        self.ngrok_url_label = ttk.Label(self.ngrok_url_frame, text="公网地址:")
+        self.ngrok_url_var = tk.StringVar(value="未启动")
+        self.ngrok_url_entry = ttk.Entry(self.ngrok_url_frame, textvariable=self.ngrok_url_var, state="readonly", width=50)
+        self.copy_ngrok_url_btn = ttk.Button(self.ngrok_url_frame, text="复制", command=self._copy_ngrok_url, state=tk.DISABLED)
+        
+        # ngrok 控制按钮
+        self.ngrok_control_frame = ttk.Frame(self.ngrok_frame)
+        self.start_ngrok_btn = ttk.Button(self.ngrok_control_frame, text="启动 ngrok", command=self._start_ngrok, state=tk.DISABLED)
+        self.stop_ngrok_btn = ttk.Button(self.ngrok_control_frame, text="停止 ngrok", command=self._stop_ngrok, state=tk.DISABLED)
+        
+        # ngrok 日志显示
+        self.ngrok_log_frame = ttk.LabelFrame(self.ngrok_frame, text="ngrok 日志", padding="5")
+        self.ngrok_log_text = tk.Text(
+            self.ngrok_log_frame,
+            height=6,
+            wrap=tk.WORD,
+            font=("Consolas", 9),
+            state=tk.DISABLED,
+            bg="#1e1e1e",
+            fg="#d4d4d4"
+        )
+        self.ngrok_log_scrollbar = ttk.Scrollbar(self.ngrok_log_frame, orient=tk.VERTICAL, command=self.ngrok_log_text.yview)
+        self.ngrok_log_text.config(yscrollcommand=self.ngrok_log_scrollbar.set)
+        self.clear_ngrok_log_btn = ttk.Button(self.ngrok_log_frame, text="清空日志", command=self._clear_ngrok_log)
+
         # 底部状态栏
         self.status_var = tk.StringVar(value="就绪")
         self.status_bar = ttk.Label(self.frame, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
@@ -201,8 +273,44 @@ class CloudServiceTab(BaseTab):
         
         self.clear_log_btn.pack(side=tk.RIGHT)
 
+        # ngrok 内网穿透区域
+        self.ngrok_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        # ngrok 配置
+        self.ngrok_config_frame.pack(fill=tk.X, pady=(0, 10))
+        self.ngrok_token_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
+        self.ngrok_token_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
+        self.show_ngrok_token_btn.grid(row=0, column=2, padx=(0, 5))
+        self.ngrok_region_label.grid(row=0, column=3, sticky=tk.W, padx=(10, 5))
+        self.ngrok_region_combo.grid(row=0, column=4)
+        self.ngrok_config_frame.columnconfigure(1, weight=1)
+        
+        # ngrok 状态
+        self.ngrok_status_frame.pack(fill=tk.X, pady=(0, 10))
+        self.ngrok_status_indicator.pack(side=tk.LEFT, padx=(0, 10))
+        self.ngrok_status_label.pack(side=tk.LEFT)
+        
+        # ngrok URL
+        self.ngrok_url_frame.pack(fill=tk.X, pady=(0, 10))
+        self.ngrok_url_label.pack(side=tk.LEFT, padx=(0, 5))
+        self.ngrok_url_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        self.copy_ngrok_url_btn.pack(side=tk.LEFT)
+        
+        # ngrok 控制按钮
+        self.ngrok_control_frame.pack(fill=tk.X, pady=(0, 10))
+        self.start_ngrok_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.stop_ngrok_btn.pack(side=tk.LEFT)
+        
+        # ngrok 日志
+        self.ngrok_log_frame.pack(fill=tk.BOTH, expand=True)
+        ngrok_log_content_frame = ttk.Frame(self.ngrok_log_frame)
+        ngrok_log_content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
+        self.ngrok_log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, in_=ngrok_log_content_frame)
+        self.ngrok_log_scrollbar.pack(side=tk.RIGHT, fill=tk.Y, in_=ngrok_log_content_frame)
+        self.clear_ngrok_log_btn.pack(side=tk.RIGHT)
+
         # 底部状态栏
-        self.status_bar.grid(row=3, column=0, sticky=(tk.W, tk.E))
+        self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
 
     def _select_output_folder(self):
         """选择输出文件夹"""
@@ -358,6 +466,9 @@ class CloudServiceTab(BaseTab):
         
         # 启动日志处理
         self._start_log_processing()
+        
+        # 启用 ngrok 按钮
+        self.start_ngrok_btn.config(state=tk.NORMAL)
 
     def _stop_service(self):
         """停止FastAPI服务"""
@@ -422,6 +533,13 @@ class CloudServiceTab(BaseTab):
         self.status_var.set("就绪")
 
         self._append_to_info(f"[{time.strftime('%H:%M:%S')}] 服务已停止")
+        
+        # 如果 ngrok 正在运行，也停止它
+        if self.ngrok_running:
+            self._stop_ngrok()
+        
+        # 禁用 ngrok 按钮
+        self.start_ngrok_btn.config(state=tk.DISABLED)
 
     def _start_service_process(self, port: int):
         """启动FastAPI服务（根据运行环境选择方式）"""
@@ -559,8 +677,189 @@ class CloudServiceTab(BaseTab):
         except Exception as e:
             self.logger.error(f"更新日志显示时出错: {e}", exc_info=True)
 
+    # ==================== ngrok 相关方法 ====================
+    
+    def _toggle_ngrok_token_visibility(self):
+        """切换 ngrok token 的显示/隐藏"""
+        if self.show_ngrok_token_var.get():
+            self.ngrok_token_entry.config(show="")
+        else:
+            self.ngrok_token_entry.config(show="*")
+    
+    def _update_ngrok_status_indicator(self, running: bool):
+        """更新 ngrok 状态指示器"""
+        self.ngrok_status_indicator.delete("all")
+        color = "green" if running else "red"
+        self.ngrok_status_indicator.create_oval(2, 2, 18, 18, fill=color, outline=color)
+    
+    def _append_to_ngrok_log(self, message: str):
+        """添加信息到 ngrok 日志文本框"""
+        self.ngrok_log_text.config(state=tk.NORMAL)
+        self.ngrok_log_text.insert(tk.END, message + "\n")
+        self.ngrok_log_text.see(tk.END)
+        self.ngrok_log_text.config(state=tk.DISABLED)
+    
+    def _clear_ngrok_log(self):
+        """清空 ngrok 日志显示"""
+        self.ngrok_log_text.config(state=tk.NORMAL)
+        self.ngrok_log_text.delete(1.0, tk.END)
+        self.ngrok_log_text.config(state=tk.DISABLED)
+        self.logger.info("ngrok 日志已清空")
+    
+    def _copy_ngrok_url(self):
+        """复制 ngrok 公网 URL 到剪贴板"""
+        if self.ngrok_public_url:
+            self.frame.clipboard_clear()
+            self.frame.clipboard_append(self.ngrok_public_url)
+            self.frame.update()
+            messagebox.showinfo("复制成功", f"已复制到剪贴板:\n{self.ngrok_public_url}")
+            self.logger.info(f"已复制 ngrok URL: {self.ngrok_public_url}")
+        else:
+            messagebox.showwarning("警告", "ngrok 未启动或未获取到公网地址")
+    
+    def _start_ngrok(self):
+        """启动 ngrok 隧道"""
+        if not self.service_running:
+            messagebox.showwarning("警告", "请先启动 FastAPI 服务！")
+            return
+        
+        if self.ngrok_running:
+            messagebox.showwarning("警告", "ngrok 已在运行中！")
+            return
+        
+        # 初始化 ngrok 管理器（如果还没有）
+        if self.ngrok_manager is None:
+            self.ngrok_manager = NgrokManager(logger=self.logger)
+        
+        # 检查 ngrok 是否可用
+        if not self.ngrok_manager.is_ngrok_available():
+            messagebox.showerror(
+                "ngrok 不可用", 
+                "pyngrok 库未安装或不可用。\n\n请运行以下命令安装:\npip install pyngrok"
+            )
+            self.logger.error("pyngrok 不可用")
+            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 错误: pyngrok 库未安装")
+            return
+        
+        authtoken = self.ngrok_token_var.get().strip()
+        region = self.ngrok_region_var.get()
+        port = self.service_port
+        
+        self.logger.info(f"启动 ngrok 隧道: port={port}, region={region}")
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 正在启动 ngrok 隧道...")
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 端口: {port}, 区域: {region}")
+        
+        # 在后台线程中启动 ngrok
+        def start_ngrok_thread():
+            try:
+                public_url = self.ngrok_manager.start_tunnel(
+                    port=port,
+                    authtoken=authtoken if authtoken else None,
+                    region=region
+                )
+                
+                if public_url:
+                    # 在主线程中更新 UI
+                    self.frame.after(0, lambda: self._on_ngrok_started(public_url))
+                else:
+                    self.frame.after(0, self._on_ngrok_start_failed)
+                    
+            except Exception as e:
+                self.logger.error(f"启动 ngrok 失败: {e}", exc_info=True)
+                self.frame.after(0, lambda: self._on_ngrok_start_failed(str(e)))
+        
+        thread = threading.Thread(target=start_ngrok_thread, daemon=True)
+        thread.start()
+    
+    def _on_ngrok_started(self, public_url: str):
+        """ngrok 启动成功的回调"""
+        self.ngrok_running = True
+        self.ngrok_public_url = public_url
+        
+        # 更新 UI
+        self._update_ngrok_status_indicator(True)
+        self.ngrok_status_label.config(text="ngrok 状态: 运行中")
+        self.ngrok_url_var.set(public_url)
+        self.start_ngrok_btn.config(state=tk.DISABLED)
+        self.stop_ngrok_btn.config(state=tk.NORMAL)
+        self.copy_ngrok_url_btn.config(state=tk.NORMAL)
+        self.ngrok_token_entry.config(state=tk.DISABLED)
+        self.ngrok_region_combo.config(state=tk.DISABLED)
+        
+        # 更新日志
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] ngrok 隧道已启动")
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 公网地址: {public_url}")
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] API 文档: {public_url}/docs")
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] " + "-" * 60)
+        
+        self.status_var.set(f"ngrok 运行中 - {public_url}")
+        self.logger.info(f"ngrok 启动成功: {public_url}")
+        
+        messagebox.showinfo(
+            "ngrok 启动成功",
+            f"ngrok 隧道已启动！\n\n公网地址: {public_url}\nAPI 文档: {public_url}/docs\n\n请使用此地址配置 Coze 插件。"
+        )
+    
+    def _on_ngrok_start_failed(self, error_msg: str = ""):
+        """ngrok 启动失败的回调"""
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 启动失败: {error_msg}")
+        self.logger.error(f"ngrok 启动失败: {error_msg}")
+        
+        error_text = f"无法启动 ngrok 隧道"
+        if error_msg:
+            error_text += f":\n\n{error_msg}"
+        else:
+            error_text += "。\n\n可能的原因:\n1. authtoken 未设置或无效\n2. 网络连接问题\n3. ngrok 服务不可用"
+        
+        messagebox.showerror("启动失败", error_text)
+    
+    def _stop_ngrok(self):
+        """停止 ngrok 隧道"""
+        if not self.ngrok_running:
+            messagebox.showwarning("警告", "ngrok 未运行！")
+            return
+        
+        self.logger.info("停止 ngrok 隧道")
+        self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 正在停止 ngrok 隧道...")
+        
+        try:
+            if self.ngrok_manager:
+                self.ngrok_manager.stop_tunnel()
+            
+            # 更新 UI
+            self.ngrok_running = False
+            self.ngrok_public_url = None
+            self._update_ngrok_status_indicator(False)
+            self.ngrok_status_label.config(text="ngrok 状态: 未启动")
+            self.ngrok_url_var.set("未启动")
+            self.start_ngrok_btn.config(state=tk.NORMAL if self.service_running else tk.DISABLED)
+            self.stop_ngrok_btn.config(state=tk.DISABLED)
+            self.copy_ngrok_url_btn.config(state=tk.DISABLED)
+            self.ngrok_token_entry.config(state=tk.NORMAL)
+            self.ngrok_region_combo.config(state="readonly")
+            
+            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] ngrok 隧道已停止")
+            self.status_var.set("就绪")
+            self.logger.info("ngrok 隧道已停止")
+            
+        except Exception as e:
+            self.logger.error(f"停止 ngrok 时出错: {e}", exc_info=True)
+            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 停止时出错: {e}")
+            messagebox.showerror("错误", f"停止 ngrok 时出错:\n{e}")
+
+    # ==================== 资源清理方法 ====================
+
     def cleanup(self):
         """清理标签页资源"""
+        # 先停止 ngrok
+        if self.ngrok_running and self.ngrok_manager:
+            self.logger.info("清理时停止 ngrok")
+            try:
+                self.ngrok_manager.stop_tunnel()
+            except Exception as e:
+                self.logger.warning(f"清理时停止 ngrok 出错: {e}")
+        
+        # 停止 FastAPI 服务
         if self.service_running:
             self.logger.info("清理时停止FastAPI服务")
             self.service_running = False
@@ -586,3 +885,6 @@ class CloudServiceTab(BaseTab):
         self.service_process = None
         self.log_reader_thread = None
         self.stop_event.clear()
+        self.ngrok_manager = None
+        self.ngrok_running = False
+        self.ngrok_public_url = None
