@@ -2,7 +2,7 @@
 """
 配置系统集成测试
 
-测试应用配置和 Coze 插件配置的各种场景
+测试应用配置系统（仅 Windows）
 """
 import os
 import sys
@@ -18,7 +18,7 @@ if str(project_root) not in sys.path:
 def test_app_configuration():
     """测试应用配置系统"""
     print("=" * 60)
-    print("Test 1: 应用配置系统")
+    print("Test 1: 应用配置系统 (Windows)")
     print("=" * 60)
     
     from app.config import get_config, reset_config
@@ -29,16 +29,28 @@ def test_app_configuration():
     config = get_config()
     print(f"  Platform: {config.to_dict()['platform']}")
     print(f"  Data root: {config.data_root}")
+    print(f"  Cache dir: {config.cache_dir}")
     print(f"  Drafts dir: {config.drafts_dir}")
+    print(f"  Assets dir: {config.assets_dir}")
+    
+    # 验证目录结构
+    assert "coze2jianying_data" in config.data_root, "数据根目录应包含 coze2jianying_data"
+    assert config.cache_dir.endswith("cache"), "cache 目录应以 cache 结尾"
+    assert config.drafts_dir.endswith("drafts"), "drafts 目录应以 drafts 结尾"
+    assert config.assets_dir.endswith("assets"), "assets 目录应以 assets 结尾"
+    
     print(f"  ✅ 默认配置测试通过")
     
     # 测试自定义配置
     print("\n1.2 测试自定义配置")
-    os.environ["JIANYING_DATA_ROOT"] = "/tmp/test_custom"
+    test_root = os.path.join(tempfile.gettempdir(), "test_custom_coze")
+    os.environ["JIANYING_DATA_ROOT"] = test_root
     reset_config()
     config = get_config()
-    assert config.data_root == "/tmp/test_custom", "自定义根目录失败"
-    assert config.drafts_dir == "/tmp/test_custom/drafts", "自定义草稿目录失败"
+    assert config.data_root == test_root, "自定义根目录失败"
+    assert config.cache_dir == os.path.join(test_root, "cache"), "自定义 cache 目录失败"
+    assert config.drafts_dir == os.path.join(test_root, "drafts"), "自定义 drafts 目录失败"
+    assert config.assets_dir == os.path.join(test_root, "assets"), "自定义 assets 目录失败"
     print(f"  Custom data root: {config.data_root}")
     print(f"  ✅ 自定义配置测试通过")
     
@@ -137,60 +149,15 @@ def test_segment_manager():
     print("\n✅ 片段管理器测试全部通过")
 
 
-def test_coze_configuration():
-    """测试 Coze 插件配置"""
-    print("\n" + "=" * 60)
-    print("Test 4: Coze 插件配置")
-    print("=" * 60)
-    
-    # 添加 Coze base_tools 到路径
-    base_tools_path = project_root / "coze_plugin" / "base_tools"
-    if str(base_tools_path) not in sys.path:
-        sys.path.insert(0, str(base_tools_path))
-    
-    import coze_config
-    from coze_config import get_coze_base_dir, get_coze_drafts_dir
-    
-    print("\n4.1 测试默认配置")
-    base_dir = get_coze_base_dir()
-    drafts_dir = get_coze_drafts_dir()
-    print(f"  Base dir: {base_dir}")
-    print(f"  Drafts dir: {drafts_dir}")
-    # 验证路径结构而不是具体值
-    assert drafts_dir.endswith("drafts"), "草稿目录应该以 'drafts' 结尾"
-    assert drafts_dir.startswith(base_dir), "草稿目录应该在基础目录下"
-    print(f"  ✅ 默认配置正确")
-    
-    print("\n4.2 测试自定义配置")
-    os.environ["JIANYING_COZE_DATA_DIR"] = "/tmp/coze_custom"
-    # 需要重新导入以获取新的环境变量
-    import importlib
-    importlib.reload(coze_config)
-    from coze_config import get_coze_base_dir, get_coze_drafts_dir
-    
-    base_dir = get_coze_base_dir()
-    drafts_dir = get_coze_drafts_dir()
-    print(f"  Custom base dir: {base_dir}")
-    print(f"  Custom drafts dir: {drafts_dir}")
-    assert base_dir == "/tmp/coze_custom", "自定义基础目录不正确"
-    assert drafts_dir == "/tmp/coze_custom/drafts", "自定义草稿目录不正确"
-    print(f"  ✅ 自定义配置正确")
-    
-    # 清理环境变量
-    del os.environ["JIANYING_COZE_DATA_DIR"]
-    
-    print("\n✅ Coze 插件配置测试全部通过")
-
-
 def test_api_config_endpoint():
     """测试 API 配置端点"""
     print("\n" + "=" * 60)
-    print("Test 5: API 配置端点")
+    print("Test 4: API 配置端点")
     print("=" * 60)
     
     from app.config import get_config, reset_config
     
-    print("\n5.1 获取配置信息")
+    print("\n4.1 获取配置信息")
     reset_config()
     config = get_config()
     config_dict = config.to_dict()
@@ -201,6 +168,9 @@ def test_api_config_endpoint():
     
     assert "platform" in config_dict, "配置缺少 platform 字段"
     assert "data_root" in config_dict, "配置缺少 data_root 字段"
+    assert "cache_dir" in config_dict, "配置缺少 cache_dir 字段"
+    assert "drafts_dir" in config_dict, "配置缺少 drafts_dir 字段"
+    assert "assets_dir" in config_dict, "配置缺少 assets_dir 字段"
     print(f"  ✅ 配置端点测试通过")
     
     print("\n✅ API 配置端点测试全部通过")
@@ -216,7 +186,6 @@ def run_all_tests():
         test_app_configuration()
         test_draft_state_manager()
         test_segment_manager()
-        test_coze_configuration()
         test_api_config_endpoint()
         
         print("\n" + "=" * 60)

@@ -2,12 +2,7 @@
 创建草稿工具处理器
 
 创建具有基本项目设置的新草稿并返回 UUID 以供将来参考。
-草稿数据存储在可配置的目录中（默认 /tmp），以 UUID 作为文件夹名称。
-
-环境变量配置：
-- JIANYING_COZE_DRAFTS_DIR: 指定草稿存储目录
-- JIANYING_COZE_DATA_DIR: 指定数据根目录
-- JIANYING_DATA_ROOT: 通用数据根目录
+草稿数据存储在 /tmp 目录中，以 UUID 作为文件夹名称。
 """
 
 import os
@@ -16,25 +11,6 @@ import uuid
 import time
 from typing import NamedTuple, Dict, Any
 from runtime import Args
-
-# 导入 Coze 配置辅助模块
-import sys
-from pathlib import Path
-# 添加 base_tools 到路径以导入 coze_config
-base_tools_path = Path(__file__).parent.parent / "base_tools"
-if str(base_tools_path) not in sys.path:
-    sys.path.insert(0, str(base_tools_path))
-
-try:
-    from coze_config import get_coze_drafts_dir, ensure_dir_exists
-except ImportError:
-    # 如果导入失败，使用硬编码的默认值（向后兼容）
-    def get_coze_drafts_dir():
-        return os.path.join("/tmp", "jianying_assistant", "drafts")
-    
-    def ensure_dir_exists(path):
-        os.makedirs(path, exist_ok=True)
-        return path
 
 
 # Input/Output 类型定义（每个 Coze 工具都需要）
@@ -76,10 +52,7 @@ def validate_input_parameters(input_data: Input) -> tuple[bool, str]:
 
 def create_draft_folder(draft_id: str) -> str:
     """
-    创建草稿文件夹
-    
-    使用可配置的目录路径（通过环境变量）
-    默认：/tmp/jianying_assistant/drafts/
+    Create draft folder in /tmp/jianying_assistant/drafts/ directory
     
     Args:
         draft_id: UUID string for the draft
@@ -90,13 +63,13 @@ def create_draft_folder(draft_id: str) -> str:
     Raises:
         Exception: If folder creation fails
     """
-    # 获取配置的草稿目录
-    base_dir = get_coze_drafts_dir()
+    # Create the base directory structure
+    base_dir = os.path.join("/tmp", "jianying_assistant", "drafts")
     draft_folder = os.path.join(base_dir, draft_id)
     
     try:
         # Create the full directory structure including parents
-        ensure_dir_exists(draft_folder)
+        os.makedirs(draft_folder, exist_ok=True)
         return draft_folder
     except Exception as e:
         raise Exception(f"Failed to create draft folder: {str(e)}")
