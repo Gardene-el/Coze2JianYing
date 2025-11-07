@@ -242,8 +242,8 @@ async def main():
         if os.path.exists(draft_content_path) and os.path.exists(draft_meta_path):
             print(f"\n✅ 验证通过: 剪映草稿文件已成功生成！")
             print(f"✅ 通过 API 使用 DraftStateManager 和 SegmentManager 能够生成草稿")
-            print(f"\n📁 可以将草稿文件夹复制到剪映草稿目录来打开:")
-            print(f"   Windows: C:\\Users\\<用户名>\\AppData\\Local\\JianyingPro\\User Data\\Projects\\com.lveditor.draft")
+            print(f"\n📁 可以将草稿文件夹复制到剪映草稿目录来打开")
+            print(f"   提示: 使用存储配置系统自动检测剪映路径，详见文档 docs/STORAGE_CONFIG_GUIDE.md")
             return True
         else:
             print(f"\n❌ 验证失败: 草稿文件生成不完整")

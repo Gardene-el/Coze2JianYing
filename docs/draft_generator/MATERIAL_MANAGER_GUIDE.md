@@ -1,5 +1,9 @@
 # MaterialManager 使用文档
 
+> **📌 注意**: 从 v2.0 开始，Coze2JianYing 使用集中式存储配置系统。
+> MaterialManager 现在使用 `{drafts_base_dir}/CozeJianYingAssistantAssets/` 作为统一的素材存储位置。
+> 详见 [存储配置指南](../STORAGE_CONFIG_GUIDE.md)。
+
 ## 📋 概述
 
 `MaterialManager` 是专门用于管理剪映草稿素材的工具类，主要功能：
@@ -10,6 +14,32 @@
 4. ✅ **素材缓存机制** - 避免重复下载同一 URL 的素材
 5. ✅ **批量处理** - 支持批量下载多个素材
 6. ✅ **素材管理** - 查看、统计、清理素材
+
+## 🗂️ 新版存储结构
+
+**v2.0 新特性：统一素材文件夹**
+
+```
+{drafts_base_dir}/                          # 草稿根目录（可配置）
+├── 扣子2剪映：{uuid-1}/                    # 项目1
+│   ├── draft_content.json
+│   └── draft_meta_info.json
+├── 扣子2剪映：{uuid-2}/                    # 项目2
+│   ├── draft_content.json
+│   └── draft_meta_info.json
+└── CozeJianYingAssistantAssets/           # 统一素材文件夹 ✨
+    ├── {uuid-1}/                          # 项目1的素材
+    │   ├── video1.mp4
+    │   └── audio1.mp3
+    └── {uuid-2}/                          # 项目2的素材
+        └── image1.jpg
+```
+
+**优势:**
+- ✅ 所有项目共享统一素材文件夹
+- ✅ 按项目 UUID 隔离，避免冲突
+- ✅ 便于统一管理和备份
+- ✅ 减少磁盘空间占用（避免重复）
 
 ## 🎯 核心问题解答
 
