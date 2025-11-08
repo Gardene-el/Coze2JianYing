@@ -70,7 +70,8 @@ class CloudServiceTab(BaseTab):
         """应用退出时的清理函数"""
         try:
             if self.ngrok_running and self.ngrok_manager:
-                self.ngrok_manager.stop_tunnel()
+                # 使用异步模式，快速退出
+                self.ngrok_manager.stop_tunnel(async_mode=True)
             if self.service_running:
                 self._stop_service()
         except:
@@ -80,7 +81,8 @@ class CloudServiceTab(BaseTab):
         """析构函数：确保在对象销毁时停止服务"""
         try:
             if self.ngrok_running and self.ngrok_manager:
-                self.ngrok_manager.stop_tunnel()
+                # 使用异步模式，快速退出
+                self.ngrok_manager.stop_tunnel(async_mode=True)
             if self.service_running:
                 self._stop_service()
         except:
@@ -822,40 +824,60 @@ class CloudServiceTab(BaseTab):
         self.logger.info("停止 ngrok 隧道")
         self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 正在停止 ngrok 隧道...")
         
+        # 立即更新 UI 状态，让用户感觉响应迅速
+        self.ngrok_running = False
+        self.ngrok_public_url = None
+        self._update_ngrok_status_indicator(False)
+        self.ngrok_status_label.config(text="ngrok 状态: 停止中...")
+        self.ngrok_url_var.set("停止中...")
+        self.start_ngrok_btn.config(state=tk.DISABLED)  # 临时禁用，等停止完成后再启用
+        self.stop_ngrok_btn.config(state=tk.DISABLED)
+        self.copy_ngrok_url_btn.config(state=tk.DISABLED)
+        self.ngrok_token_entry.config(state=tk.NORMAL)
+        self.ngrok_region_combo.config(state="readonly")
+        self.status_var.set("正在停止 ngrok...")
+        
+        # 定义停止完成的回调函数
+        def on_stop_complete():
+            # 在主线程中更新 UI
+            self.frame.after(0, self._on_ngrok_stopped)
+        
         try:
             if self.ngrok_manager:
-                self.ngrok_manager.stop_tunnel()
-            
-            # 更新 UI
-            self.ngrok_running = False
-            self.ngrok_public_url = None
-            self._update_ngrok_status_indicator(False)
-            self.ngrok_status_label.config(text="ngrok 状态: 未启动")
-            self.ngrok_url_var.set("未启动")
-            self.start_ngrok_btn.config(state=tk.NORMAL if self.service_running else tk.DISABLED)
-            self.stop_ngrok_btn.config(state=tk.DISABLED)
-            self.copy_ngrok_url_btn.config(state=tk.DISABLED)
-            self.ngrok_token_entry.config(state=tk.NORMAL)
-            self.ngrok_region_combo.config(state="readonly")
-            
-            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] ngrok 隧道已停止")
-            self.status_var.set("就绪")
-            self.logger.info("ngrok 隧道已停止")
+                # 使用异步模式停止，避免阻塞 GUI
+                self.ngrok_manager.stop_tunnel(async_mode=True, callback=on_stop_complete)
+            else:
+                # 如果没有管理器，直接完成
+                self._on_ngrok_stopped()
             
         except Exception as e:
             self.logger.error(f"停止 ngrok 时出错: {e}", exc_info=True)
             self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 停止时出错: {e}")
-            messagebox.showerror("错误", f"停止 ngrok 时出错:\n{e}")
+            self._on_ngrok_stopped(error_msg=str(e))
+    
+    def _on_ngrok_stopped(self, error_msg: str = ""):
+        """ngrok 停止完成的回调"""
+        if error_msg:
+            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 停止时出错: {error_msg}")
+            self.ngrok_status_label.config(text="ngrok 状态: 停止失败")
+        else:
+            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] ngrok 隧道已停止")
+            self.ngrok_status_label.config(text="ngrok 状态: 未启动")
+            self.logger.info("ngrok 隧道已停止")
+        
+        self.ngrok_url_var.set("未启动")
+        self.start_ngrok_btn.config(state=tk.NORMAL if self.service_running else tk.DISABLED)
+        self.status_var.set("就绪")
 
     # ==================== 资源清理方法 ====================
 
     def cleanup(self):
         """清理标签页资源"""
-        # 先停止 ngrok
+        # 先停止 ngrok（使用异步模式，快速退出）
         if self.ngrok_running and self.ngrok_manager:
             self.logger.info("清理时停止 ngrok")
             try:
-                self.ngrok_manager.stop_tunnel()
+                self.ngrok_manager.stop_tunnel(async_mode=True)
             except Exception as e:
                 self.logger.warning(f"清理时停止 ngrok 出错: {e}")
         
