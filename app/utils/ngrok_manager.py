@@ -359,6 +359,7 @@ class NgrokManager:
         """析构函数：确保资源清理"""
         try:
             if self.is_running:
-                self.stop_tunnel()
+                # 使用异步模式快速清理，避免阻塞程序退出
+                self.stop_tunnel(async_mode=True)
         except:
             pass
