@@ -807,11 +807,36 @@ class CloudServiceTab(BaseTab):
         self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 启动失败: {error_msg}")
         self.logger.error(f"ngrok 启动失败: {error_msg}")
         
-        error_text = f"无法启动 ngrok 隧道"
-        if error_msg:
-            error_text += f":\n\n{error_msg}"
+        # 根据错误类型提供不同的提示
+        if "timed out" in error_msg.lower() or "timeout" in error_msg.lower():
+            error_text = "启动 ngrok 隧道超时。\n\n可能的原因:\n"
+            error_text += "1. 上一个 ngrok 进程未完全终止\n"
+            error_text += "2. 网络连接不稳定\n"
+            error_text += "3. ngrok 服务器响应缓慢\n\n"
+            error_text += "建议:\n"
+            error_text += "- 等待几秒后再次尝试\n"
+            error_text += "- 检查网络连接\n"
+            error_text += "- 尝试更换区域（region）设置"
+        elif "connection" in error_msg.lower() and ("reset" in error_msg.lower() or "refused" in error_msg.lower()):
+            error_text = "连接被重置或拒绝。\n\n可能的原因:\n"
+            error_text += "1. 陈旧的 ngrok 进程残留\n"
+            error_text += "2. 端口冲突\n"
+            error_text += "3. 防火墙阻止连接\n\n"
+            error_text += "建议:\n"
+            error_text += "- 已自动尝试清理，请重启应用后再试\n"
+            error_text += "- 检查防火墙设置\n"
+            error_text += "- 确认本地服务正在运行"
+        elif error_msg:
+            error_text = f"无法启动 ngrok 隧道:\n\n{error_msg}"
         else:
-            error_text += "。\n\n可能的原因:\n1. authtoken 未设置或无效\n2. 网络连接问题\n3. ngrok 服务不可用"
+            error_text = "无法启动 ngrok 隧道。\n\n可能的原因:\n"
+            error_text += "1. authtoken 未设置或无效\n"
+            error_text += "2. 网络连接问题\n"
+            error_text += "3. ngrok 服务不可用\n\n"
+            error_text += "建议:\n"
+            error_text += "- 检查 authtoken 是否正确\n"
+            error_text += "- 检查网络连接\n"
+            error_text += "- 访问 https://ngrok.com 确认服务状态"
         
         messagebox.showerror("启动失败", error_text)
     

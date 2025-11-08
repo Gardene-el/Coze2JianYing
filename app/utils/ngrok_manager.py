@@ -13,7 +13,12 @@ from contextlib import contextmanager
 
 try:
     from pyngrok import ngrok, conf
-    from pyngrok.exception import PyngrokError, PyngrokNgrokError
+    from pyngrok.exception import (
+        PyngrokError, 
+        PyngrokNgrokError, 
+        PyngrokNgrokURLError,
+        PyngrokNgrokHTTPError
+    )
     PYNGROK_AVAILABLE = True
 except ImportError:
     PYNGROK_AVAILABLE = False
@@ -119,42 +124,76 @@ class NgrokManager:
             self.logger.warning("ngrok 隧道已在运行")
             return self.public_url
         
-        try:
-            # 设置 authtoken（如果提供）
-            if authtoken:
-                self.set_authtoken(authtoken)
-            
-            # 配置 ngrok
-            conf.get_default().region = region
-            
-            # 启动隧道
-            self.logger.info(f"启动 ngrok 隧道: port={port}, region={region}, protocol={protocol}")
-            
-            # 使用 suppress_stdout_stderr 避免 GUI 应用中的输出问题
-            # 这在首次运行时下载 ngrok 二进制文件时特别重要
-            with suppress_stdout_stderr():
-                self.tunnel = ngrok.connect(
-                    port, 
-                    protocol,
-                    bind_tls=True  # 强制使用 HTTPS
-                )
-            
-            self.public_url = self.tunnel.public_url
-            self.is_running = True
-            
-            self.logger.info(f"ngrok 隧道已启动: {self.public_url}")
-            
-            # 启动监控线程
-            self._start_monitor()
-            
-            return self.public_url
-            
-        except PyngrokNgrokError as e:
-            self.logger.error(f"ngrok 启动失败: {e}")
-            return None
-        except Exception as e:
-            self.logger.error(f"启动 ngrok 隧道时发生错误: {e}", exc_info=True)
-            return None
+        # 清理可能存在的陈旧 ngrok 进程和连接
+        # 这解决了快速重启时的连接问题
+        self._cleanup_stale_ngrok_processes()
+        
+        max_retries = 2
+        retry_count = 0
+        
+        while retry_count <= max_retries:
+            try:
+                # 设置 authtoken（如果提供）
+                if authtoken:
+                    self.set_authtoken(authtoken)
+                
+                # 配置 ngrok
+                conf.get_default().region = region
+                
+                # 启动隧道
+                if retry_count > 0:
+                    self.logger.info(f"重试启动 ngrok 隧道 (尝试 {retry_count + 1}/{max_retries + 1})")
+                else:
+                    self.logger.info(f"启动 ngrok 隧道: port={port}, region={region}, protocol={protocol}")
+                
+                # 使用 suppress_stdout_stderr 避免 GUI 应用中的输出问题
+                # 这在首次运行时下载 ngrok 二进制文件时特别重要
+                with suppress_stdout_stderr():
+                    self.tunnel = ngrok.connect(
+                        port, 
+                        protocol,
+                        bind_tls=True  # 强制使用 HTTPS
+                    )
+                
+                self.public_url = self.tunnel.public_url
+                self.is_running = True
+                
+                self.logger.info(f"ngrok 隧道已启动: {self.public_url}")
+                
+                # 启动监控线程
+                self._start_monitor()
+                
+                return self.public_url
+                
+            except (PyngrokNgrokURLError, ConnectionResetError, ConnectionError, OSError) as e:
+                # 连接错误，可能是陈旧进程导致，尝试清理并重试
+                error_msg = str(e)
+                self.logger.warning(f"ngrok 连接错误 (尝试 {retry_count + 1}/{max_retries + 1}): {error_msg}")
+                
+                retry_count += 1
+                if retry_count <= max_retries:
+                    # 强制终止所有 ngrok 进程后重试
+                    self.logger.info("强制清理所有 ngrok 进程后重试")
+                    try:
+                        with suppress_stdout_stderr():
+                            ngrok.kill()
+                    except:
+                        pass
+                    
+                    # 等待一小段时间让进程完全终止
+                    time.sleep(1)
+                else:
+                    self.logger.error(f"ngrok 启动失败，已重试 {max_retries} 次: {error_msg}")
+                    return None
+                    
+            except PyngrokNgrokError as e:
+                self.logger.error(f"ngrok 启动失败: {e}")
+                return None
+            except Exception as e:
+                self.logger.error(f"启动 ngrok 隧道时发生错误: {e}", exc_info=True)
+                return None
+        
+        return None
     
     def stop_tunnel(self, async_mode: bool = False, callback=None):
         """停止 ngrok 隧道
@@ -312,6 +351,49 @@ class NgrokManager:
             # 等待监控线程结束（最多1秒）
             if self._monitor_thread and self._monitor_thread.is_alive():
                 self._monitor_thread.join(timeout=1)
+    
+    def _cleanup_stale_ngrok_processes(self):
+        """清理陈旧的 ngrok 进程和连接
+        
+        在启动新隧道前调用，确保没有残留的 ngrok 进程或连接
+        这解决了快速重启时的超时和连接重置错误
+        """
+        if not PYNGROK_AVAILABLE:
+            return
+        
+        try:
+            # 检查是否有活动的隧道
+            existing_tunnels = ngrok.get_tunnels()
+            if existing_tunnels:
+                self.logger.info(f"检测到 {len(existing_tunnels)} 个现有隧道，正在清理...")
+                # 断开所有现有隧道
+                for tunnel in existing_tunnels:
+                    try:
+                        with suppress_stdout_stderr():
+                            ngrok.disconnect(tunnel.public_url)
+                        self.logger.info(f"已断开隧道: {tunnel.public_url}")
+                    except Exception as e:
+                        self.logger.warning(f"断开隧道时出错: {e}")
+                
+                # 给一点时间让连接完全关闭
+                time.sleep(0.5)
+        except Exception as e:
+            # 如果检查失败（例如 ngrok 进程不存在或连接错误）
+            # 尝试强制终止所有 ngrok 进程
+            self.logger.warning(f"检查现有隧道时出错，尝试强制清理: {e}")
+            try:
+                with suppress_stdout_stderr():
+                    ngrok.kill()
+                self.logger.info("已强制终止所有 ngrok 进程")
+                # 等待进程完全终止
+                time.sleep(1)
+            except Exception as kill_error:
+                self.logger.warning(f"强制终止 ngrok 进程时出错: {kill_error}")
+        
+        # 清理本地状态
+        self.tunnel = None
+        self.public_url = None
+        self.is_running = False
     
     def _start_monitor(self):
         """启动监控线程"""
