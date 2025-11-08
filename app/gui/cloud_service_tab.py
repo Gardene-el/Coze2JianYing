@@ -158,19 +158,38 @@ class CloudServiceTab(BaseTab):
         # ngrok 内网穿透管理区域
         self.ngrok_frame = ttk.LabelFrame(self.frame, text="ngrok 内网穿透", padding="10")
         
+        # ngrok 说明文字
+        self.ngrok_info_label = ttk.Label(
+            self.ngrok_frame,
+            text="💡 提示：无需注册即可使用 ngrok，Authtoken 为可选项。点击 '?' 查看详情。",
+            justify=tk.LEFT,
+            foreground="blue",
+            font=("Arial", 9)
+        )
+        
         # ngrok 配置
         self.ngrok_config_frame = ttk.Frame(self.ngrok_frame)
         
         # Authtoken 输入
-        self.ngrok_token_label = ttk.Label(self.ngrok_config_frame, text="Authtoken:")
+        self.ngrok_token_label = ttk.Label(self.ngrok_config_frame, text="Authtoken (可选):")
         self.ngrok_token_var = tk.StringVar(value="")
         self.ngrok_token_entry = ttk.Entry(self.ngrok_config_frame, textvariable=self.ngrok_token_var, show="*", width=40)
+        self.ngrok_token_entry.configure(foreground="gray")  # 使用灰色表示可选
+        
         self.show_ngrok_token_var = tk.BooleanVar(value=False)
         self.show_ngrok_token_btn = ttk.Checkbutton(
             self.ngrok_config_frame, 
             text="显示", 
             variable=self.show_ngrok_token_var,
             command=self._toggle_ngrok_token_visibility
+        )
+        
+        # 添加帮助按钮
+        self.ngrok_token_help_btn = ttk.Button(
+            self.ngrok_config_frame,
+            text="?",
+            width=3,
+            command=self._show_authtoken_help
         )
         
         # Region 选择
@@ -278,13 +297,17 @@ class CloudServiceTab(BaseTab):
         # ngrok 内网穿透区域
         self.ngrok_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
+        # ngrok 说明文字
+        self.ngrok_info_label.pack(fill=tk.X, pady=(0, 10))
+        
         # ngrok 配置
         self.ngrok_config_frame.pack(fill=tk.X, pady=(0, 10))
         self.ngrok_token_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
         self.ngrok_token_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
         self.show_ngrok_token_btn.grid(row=0, column=2, padx=(0, 5))
-        self.ngrok_region_label.grid(row=0, column=3, sticky=tk.W, padx=(10, 5))
-        self.ngrok_region_combo.grid(row=0, column=4)
+        self.ngrok_token_help_btn.grid(row=0, column=3, padx=(0, 5))
+        self.ngrok_region_label.grid(row=0, column=4, sticky=tk.W, padx=(10, 5))
+        self.ngrok_region_combo.grid(row=0, column=5)
         self.ngrok_config_frame.columnconfigure(1, weight=1)
         
         # ngrok 状态
@@ -680,6 +703,39 @@ class CloudServiceTab(BaseTab):
             self.logger.error(f"更新日志显示时出错: {e}", exc_info=True)
 
     # ==================== ngrok 相关方法 ====================
+    
+    def _show_authtoken_help(self):
+        """显示 Authtoken 帮助信息"""
+        help_text = """ngrok Authtoken 说明
+
+✅ 免费使用（无需注册）
+• 无需 authtoken 即可使用 ngrok
+• 每次启动会生成随机的公网 URL
+• 适合临时测试和开发使用
+
+⚠️ 免费版限制
+• URL 每次都不同（无法固定）
+• 有带宽和连接数限制
+• 会话可能不够稳定
+
+🎯 注册后的优势（可选）
+• 可以使用固定的自定义域名
+• 更高的带宽和连接数配额
+• 更稳定的连接质量
+• 可以同时运行多个隧道
+
+📝 如何获取 Authtoken（可选）
+1. 访问 https://ngrok.com/
+2. 免费注册账号
+3. 在 Dashboard 中获取 Authtoken
+4. 将 Authtoken 填入输入框
+
+💡 建议
+• 测试阶段可以不填写 authtoken
+• 正式使用建议注册获取 authtoken
+• Authtoken 请妥善保管，不要泄露"""
+        
+        messagebox.showinfo("Authtoken 帮助", help_text)
     
     def _toggle_ngrok_token_visibility(self):
         """切换 ngrok token 的显示/隐藏"""

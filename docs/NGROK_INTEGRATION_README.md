@@ -4,6 +4,8 @@
 
 本项目已完整集成 ngrok 内网穿透功能，允许将本地 FastAPI 服务暴露到公网，以便 Coze 平台可以访问和调用。
 
+**✨ 重要特性：无需注册 ngrok 账号即可免费使用！Authtoken 为可选配置项。**
+
 ## 📦 包含内容
 
 ### 核心功能模块
@@ -20,22 +22,35 @@
 
 ## 🚀 快速开始
 
-### 1. 安装依赖
+### 方式一：无需注册，立即使用（推荐快速测试）
 
-```bash
-pip install -r requirements.txt
-```
+1. **安装依赖**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-这将自动安装 `pyngrok>=6.0.0` 及其他依赖。
+2. **启动应用**
+   ```bash
+   python app/main.py
+   ```
 
-### 2. 启动应用
+3. **启动服务和 ngrok**
+   - 在"云端服务"标签页点击"启动服务"
+   - 直接点击"启动 ngrok"（**无需填写 Authtoken**）
+   - 复制生成的公网 URL 到 Coze 配置
 
-运行 GUI 应用：
-```bash
-python app/main.py
-```
+**就这么简单！无需注册，无需 Authtoken，立即开始使用！**
 
-### 3. 使用 ngrok
+### 方式二：注册 ngrok 获取更多功能（可选）
+
+如果你需要固定域名、更高配额等高级功能：
+
+1. 访问 https://ngrok.com/ 注册账号
+2. 获取 Authtoken
+3. 在 GUI 中填入 Authtoken
+4. 享受更稳定、功能更全的服务
+
+### 详细使用步骤
 
 在"云端服务"标签页中：
 
@@ -43,9 +58,10 @@ python app/main.py
    - 点击"启动服务"按钮
    - 等待服务启动（绿色指示器）
 
-2. **配置 ngrok（可选）**
-   - 输入 Authtoken（提高稳定性）
-   - 选择合适的区域（建议选择最近的）
+2. **配置 ngrok（均为可选）**
+   - ⭕ Authtoken 可以留空
+   - ✅ 选择合适的区域（建议选择最近的）
+   - 💡 点击 "?" 查看详细说明
 
 3. **启动 ngrok 隧道**
    - 点击"启动 ngrok"按钮
