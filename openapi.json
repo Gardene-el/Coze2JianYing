@@ -1,0 +1,3318 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Coze剪映草稿生成器 API",
+    "description": "示例 API 接口，演示 FastAPI 的各种通讯方法",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "根路径"
+        ],
+        "summary": "Root",
+        "description": "API 根路径",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/audio/create": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "创建音频片段",
+        "description": "创建音频片段并返回 UUID",
+        "operationId": "create_audio_segment_api_segment_audio_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAudioSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSegmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/create": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "创建视频片段",
+        "description": "创建视频片段并返回 UUID",
+        "operationId": "create_video_segment_api_segment_video_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVideoSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSegmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/text/create": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "创建文本片段",
+        "description": "创建文本片段并返回 UUID",
+        "operationId": "create_text_segment_api_segment_text_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTextSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSegmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/sticker/create": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "创建贴纸片段",
+        "description": "创建贴纸片段并返回 UUID",
+        "operationId": "create_sticker_segment_api_segment_sticker_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStickerSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSegmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/effect/create": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "创建特效片段",
+        "description": "创建特效片段并返回 UUID",
+        "operationId": "create_effect_segment_api_segment_effect_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEffectSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSegmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/filter/create": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "创建滤镜片段",
+        "description": "创建滤镜片段并返回 UUID",
+        "operationId": "create_filter_segment_api_segment_filter_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFilterSegmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSegmentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/audio/{segment_id}/add_effect": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加音频特效",
+        "description": "向音频片段添加特效",
+        "operationId": "add_audio_effect_api_segment_audio__segment_id__add_effect_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddEffectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddEffectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/audio/{segment_id}/add_fade": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加淡入淡出",
+        "description": "向音频片段添加淡入淡出",
+        "operationId": "add_audio_fade_api_segment_audio__segment_id__add_fade_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFadeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddFadeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/audio/{segment_id}/add_keyframe": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加音量关键帧",
+        "description": "向音频片段添加音量关键帧",
+        "operationId": "add_audio_keyframe_api_segment_audio__segment_id__add_keyframe_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddKeyframeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddKeyframeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_animation": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加动画",
+        "description": "向视频片段添加动画",
+        "operationId": "add_video_animation_api_segment_video__segment_id__add_animation_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAnimationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAnimationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_effect": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加视频特效",
+        "description": "向视频片段添加特效",
+        "operationId": "add_video_effect_api_segment_video__segment_id__add_effect_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddEffectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddEffectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_fade": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加淡入淡出",
+        "description": "向视频片段添加淡入淡出",
+        "operationId": "add_video_fade_api_segment_video__segment_id__add_fade_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFadeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddFadeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_filter": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加滤镜",
+        "description": "向视频片段添加滤镜",
+        "operationId": "add_video_filter_api_segment_video__segment_id__add_filter_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFilterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddFilterResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_mask": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加蒙版",
+        "description": "向视频片段添加蒙版",
+        "operationId": "add_video_mask_api_segment_video__segment_id__add_mask_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddMaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_transition": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加转场",
+        "description": "向视频片段添加转场",
+        "operationId": "add_video_transition_api_segment_video__segment_id__add_transition_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTransitionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddTransitionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_background_filling": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加背景填充",
+        "description": "向视频片段添加背景填充",
+        "operationId": "add_video_background_filling_api_segment_video__segment_id__add_background_filling_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBackgroundFillingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddBackgroundFillingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/video/{segment_id}/add_keyframe": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加视觉属性关键帧",
+        "description": "向视频片段添加视觉属性关键帧",
+        "operationId": "add_video_keyframe_api_segment_video__segment_id__add_keyframe_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddKeyframeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddKeyframeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/sticker/{segment_id}/add_keyframe": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加视觉属性关键帧",
+        "description": "向贴纸片段添加视觉属性关键帧",
+        "operationId": "add_sticker_keyframe_api_segment_sticker__segment_id__add_keyframe_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddKeyframeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddKeyframeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/text/{segment_id}/add_animation": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加文字动画",
+        "description": "向文本片段添加文字动画",
+        "operationId": "add_text_animation_api_segment_text__segment_id__add_animation_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAnimationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAnimationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/text/{segment_id}/add_bubble": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加气泡",
+        "description": "向文本片段添加气泡",
+        "operationId": "add_text_bubble_api_segment_text__segment_id__add_bubble_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBubbleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddBubbleResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/text/{segment_id}/add_effect": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加花字特效",
+        "description": "向文本片段添加花字特效",
+        "operationId": "add_text_effect_api_segment_text__segment_id__add_effect_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTextEffectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddTextEffectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/text/{segment_id}/add_keyframe": {
+      "post": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "添加视觉属性关键帧",
+        "description": "向文本片段添加视觉属性关键帧",
+        "operationId": "add_text_keyframe_api_segment_text__segment_id__add_keyframe_post",
+        "parameters": [
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddKeyframeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddKeyframeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/segment/{segment_type}/{segment_id}": {
+      "get": {
+        "tags": [
+          "片段管理"
+        ],
+        "summary": "查询 Segment 详情",
+        "description": "根据 segment_id 和 segment_type 查询片段的详细信息",
+        "operationId": "get_segment_detail_api_segment__segment_type___segment_id__get",
+        "parameters": [
+          {
+            "name": "segment_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Type"
+            }
+          },
+          {
+            "name": "segment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Segment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SegmentDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/create": {
+      "post": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "创建草稿",
+        "description": "创建新的剪映草稿项目并返回 UUID",
+        "operationId": "create_draft_api_draft_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDraftResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/{draft_id}/add_track": {
+      "post": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "添加轨道",
+        "description": "向草稿添加指定类型的轨道",
+        "operationId": "add_track_api_draft__draft_id__add_track_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTrackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddTrackResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/{draft_id}/add_segment": {
+      "post": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "添加片段到草稿",
+        "description": "将已创建的 segment 添加到草稿中",
+        "operationId": "add_segment_api_draft__draft_id__add_segment_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSegmentToDraftRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddSegmentToDraftResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/{draft_id}/add_effect": {
+      "post": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "添加全局特效",
+        "description": "向草稿添加全局特效",
+        "operationId": "add_global_effect_api_draft__draft_id__add_effect_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddGlobalEffectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddGlobalEffectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/{draft_id}/add_filter": {
+      "post": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "添加全局滤镜",
+        "description": "向草稿添加全局滤镜",
+        "operationId": "add_global_filter_api_draft__draft_id__add_filter_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddGlobalFilterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddGlobalFilterResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/{draft_id}/save": {
+      "post": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "保存草稿",
+        "description": "保存并完成草稿编辑，生成剪映草稿文件",
+        "operationId": "save_draft_api_draft__draft_id__save_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveDraftResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/draft/{draft_id}/status": {
+      "get": {
+        "tags": [
+          "草稿操作"
+        ],
+        "summary": "查询草稿状态",
+        "description": "根据草稿ID查询草稿的详细状态和信息",
+        "operationId": "get_draft_status_api_draft__draft_id__status_get",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddAnimationRequest": {
+        "properties": {
+          "animation_type": {
+            "type": "string",
+            "title": "Animation Type",
+            "description": "动画类型"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "description": "动画时长",
+            "default": "1s"
+          }
+        },
+        "type": "object",
+        "required": [
+          "animation_type"
+        ],
+        "title": "AddAnimationRequest",
+        "description": "添加动画请求（用于 VideoSegment/TextSegment）",
+        "example": {
+          "animation_type": "IntroType.XXX",
+          "duration": "1s"
+        }
+      },
+      "AddAnimationResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "animation_id": {
+            "type": "string",
+            "title": "Animation Id",
+            "description": "动画 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "animation_id",
+          "message"
+        ],
+        "title": "AddAnimationResponse",
+        "description": "添加动画响应"
+      },
+      "AddBackgroundFillingRequest": {
+        "properties": {
+          "fill_type": {
+            "type": "string",
+            "title": "Fill Type",
+            "description": "填充类型: blur 或 color"
+          },
+          "blur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blur",
+            "description": "模糊程度（fill_type=blur 时）",
+            "default": 0.0625
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color",
+            "description": "填充颜色（fill_type=color 时）",
+            "default": "#00000000"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fill_type"
+        ],
+        "title": "AddBackgroundFillingRequest",
+        "description": "添加背景填充请求（用于 VideoSegment）",
+        "example": {
+          "blur": 0.0625,
+          "fill_type": "blur"
+        }
+      },
+      "AddBackgroundFillingResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "title": "AddBackgroundFillingResponse",
+        "description": "添加背景填充响应"
+      },
+      "AddBubbleRequest": {
+        "properties": {
+          "effect_id": {
+            "type": "string",
+            "title": "Effect Id",
+            "description": "气泡特效 ID"
+          },
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id",
+            "description": "资源 ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effect_id",
+          "resource_id"
+        ],
+        "title": "AddBubbleRequest",
+        "description": "添加气泡请求（用于 TextSegment）",
+        "example": {
+          "effect_id": "bubble_effect_123",
+          "resource_id": "resource_456"
+        }
+      },
+      "AddBubbleResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "bubble_id": {
+            "type": "string",
+            "title": "Bubble Id",
+            "description": "气泡 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "bubble_id",
+          "message"
+        ],
+        "title": "AddBubbleResponse",
+        "description": "添加气泡响应"
+      },
+      "AddEffectRequest": {
+        "properties": {
+          "effect_type": {
+            "type": "string",
+            "title": "Effect Type",
+            "description": "特效类型"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Params",
+            "description": "特效参数列表（范围 0-100）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effect_type"
+        ],
+        "title": "AddEffectRequest",
+        "description": "添加特效请求（用于 AudioSegment/VideoSegment）",
+        "example": {
+          "effect_type": "AudioSceneEffectType.XXX",
+          "params": [
+            50.0,
+            75.0
+          ]
+        }
+      },
+      "AddEffectResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "effect_id": {
+            "type": "string",
+            "title": "Effect Id",
+            "description": "特效 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "effect_id",
+          "message"
+        ],
+        "title": "AddEffectResponse",
+        "description": "添加特效响应"
+      },
+      "AddFadeRequest": {
+        "properties": {
+          "in_duration": {
+            "type": "string",
+            "title": "In Duration",
+            "description": "淡入时长（字符串如 '1s' 或微秒数）"
+          },
+          "out_duration": {
+            "type": "string",
+            "title": "Out Duration",
+            "description": "淡出时长"
+          }
+        },
+        "type": "object",
+        "required": [
+          "in_duration",
+          "out_duration"
+        ],
+        "title": "AddFadeRequest",
+        "description": "添加淡入淡出请求（用于 AudioSegment/VideoSegment）",
+        "example": {
+          "in_duration": "1s",
+          "out_duration": "0s"
+        }
+      },
+      "AddFadeResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "title": "AddFadeResponse",
+        "description": "添加淡入淡出响应"
+      },
+      "AddFilterRequest": {
+        "properties": {
+          "filter_type": {
+            "type": "string",
+            "title": "Filter Type",
+            "description": "滤镜类型"
+          },
+          "intensity": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Intensity",
+            "description": "滤镜强度 0-100",
+            "default": 100.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "filter_type"
+        ],
+        "title": "AddFilterRequest",
+        "description": "添加滤镜请求（用于 VideoSegment）",
+        "example": {
+          "filter_type": "FilterType.XXX",
+          "intensity": 100.0
+        }
+      },
+      "AddFilterResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "filter_id": {
+            "type": "string",
+            "title": "Filter Id",
+            "description": "滤镜 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "filter_id",
+          "message"
+        ],
+        "title": "AddFilterResponse",
+        "description": "添加滤镜响应"
+      },
+      "AddGlobalEffectRequest": {
+        "properties": {
+          "effect_type": {
+            "type": "string",
+            "title": "Effect Type",
+            "description": "特效类型"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "时间范围"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Params",
+            "description": "特效参数列表"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effect_type",
+          "target_timerange"
+        ],
+        "title": "AddGlobalEffectRequest",
+        "description": "添加全局特效请求",
+        "example": {
+          "effect_type": "VideoSceneEffectType.XXX",
+          "params": [
+            0.5,
+            1.0
+          ],
+          "target_timerange": {
+            "duration": 5000000,
+            "start": 0
+          }
+        }
+      },
+      "AddGlobalEffectResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "effect_id": {
+            "type": "string",
+            "title": "Effect Id",
+            "description": "特效 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "effect_id",
+          "message"
+        ],
+        "title": "AddGlobalEffectResponse",
+        "description": "添加全局特效响应"
+      },
+      "AddGlobalFilterRequest": {
+        "properties": {
+          "filter_type": {
+            "type": "string",
+            "title": "Filter Type",
+            "description": "滤镜类型"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "时间范围"
+          },
+          "intensity": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Intensity",
+            "description": "滤镜强度 0-100",
+            "default": 100.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "filter_type",
+          "target_timerange"
+        ],
+        "title": "AddGlobalFilterRequest",
+        "description": "添加全局滤镜请求",
+        "example": {
+          "filter_type": "FilterType.XXX",
+          "intensity": 100.0,
+          "target_timerange": {
+            "duration": 5000000,
+            "start": 0
+          }
+        }
+      },
+      "AddGlobalFilterResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "filter_id": {
+            "type": "string",
+            "title": "Filter Id",
+            "description": "滤镜 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "filter_id",
+          "message"
+        ],
+        "title": "AddGlobalFilterResponse",
+        "description": "添加全局滤镜响应"
+      },
+      "AddKeyframeRequest": {
+        "properties": {
+          "time_offset": {
+            "title": "Time Offset",
+            "description": "时间偏移量（微秒或字符串如 '2s'）"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value",
+            "description": "关键帧值"
+          },
+          "property": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Property",
+            "description": "属性名称（VideoSegment 需要）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "time_offset",
+          "value"
+        ],
+        "title": "AddKeyframeRequest",
+        "description": "添加关键帧请求",
+        "example": {
+          "property": "position_x",
+          "time_offset": "2s",
+          "value": 0.8
+        }
+      },
+      "AddKeyframeResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "keyframe_id": {
+            "type": "string",
+            "title": "Keyframe Id",
+            "description": "关键帧 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "keyframe_id",
+          "message"
+        ],
+        "title": "AddKeyframeResponse",
+        "description": "添加关键帧响应"
+      },
+      "AddMaskRequest": {
+        "properties": {
+          "mask_type": {
+            "type": "string",
+            "title": "Mask Type",
+            "description": "蒙版类型"
+          },
+          "center_x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Center X",
+            "description": "蒙版中心 X 坐标",
+            "default": 0.0
+          },
+          "center_y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Center Y",
+            "description": "蒙版中心 Y 坐标",
+            "default": 0.0
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size",
+            "description": "蒙版大小",
+            "default": 0.5
+          },
+          "feather": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feather",
+            "description": "羽化程度 0-1",
+            "default": 0.0
+          },
+          "invert": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invert",
+            "description": "是否反转",
+            "default": false
+          },
+          "rotation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rotation",
+            "description": "旋转角度",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "mask_type"
+        ],
+        "title": "AddMaskRequest",
+        "description": "添加蒙版请求（用于 VideoSegment）",
+        "example": {
+          "center_x": 0.0,
+          "center_y": 0.0,
+          "feather": 0.0,
+          "invert": false,
+          "mask_type": "MaskType.XXX",
+          "rotation": 0.0,
+          "size": 0.5
+        }
+      },
+      "AddMaskResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "mask_id": {
+            "type": "string",
+            "title": "Mask Id",
+            "description": "蒙版 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "mask_id",
+          "message"
+        ],
+        "title": "AddMaskResponse",
+        "description": "添加蒙版响应"
+      },
+      "AddSegmentToDraftRequest": {
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "title": "Segment Id",
+            "description": "Segment UUID"
+          },
+          "track_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Track Index",
+            "description": "目标轨道索引，None 则自动选择"
+          }
+        },
+        "type": "object",
+        "required": [
+          "segment_id"
+        ],
+        "title": "AddSegmentToDraftRequest",
+        "description": "添加片段到草稿请求",
+        "example": {
+          "segment_id": "87654321-4321-4321-4321-cba987654321",
+          "track_index": 0
+        }
+      },
+      "AddSegmentToDraftResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "操作时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "message"
+        ],
+        "title": "AddSegmentToDraftResponse",
+        "description": "添加片段到草稿响应"
+      },
+      "AddTextEffectRequest": {
+        "properties": {
+          "effect_id": {
+            "type": "string",
+            "title": "Effect Id",
+            "description": "花字特效 ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effect_id"
+        ],
+        "title": "AddTextEffectRequest",
+        "description": "添加花字特效请求（用于 TextSegment）",
+        "example": {
+          "effect_id": "7296357486490144036"
+        }
+      },
+      "AddTextEffectResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "effect_id": {
+            "type": "string",
+            "title": "Effect Id",
+            "description": "特效 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "effect_id",
+          "message"
+        ],
+        "title": "AddTextEffectResponse",
+        "description": "添加花字特效响应"
+      },
+      "AddTrackRequest": {
+        "properties": {
+          "track_type": {
+            "type": "string",
+            "title": "Track Type",
+            "description": "轨道类型: audio/video/text/sticker/effect/filter"
+          },
+          "track_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Track Name",
+            "description": "轨道名称"
+          }
+        },
+        "type": "object",
+        "required": [
+          "track_type"
+        ],
+        "title": "AddTrackRequest",
+        "description": "添加轨道请求",
+        "example": {
+          "track_name": "背景音乐",
+          "track_type": "audio"
+        }
+      },
+      "AddTrackResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "track_index": {
+            "type": "integer",
+            "title": "Track Index",
+            "description": "轨道索引"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "track_index",
+          "message"
+        ],
+        "title": "AddTrackResponse",
+        "description": "添加轨道响应"
+      },
+      "AddTransitionRequest": {
+        "properties": {
+          "transition_type": {
+            "type": "string",
+            "title": "Transition Type",
+            "description": "转场类型"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "description": "转场时长",
+            "default": "1s"
+          }
+        },
+        "type": "object",
+        "required": [
+          "transition_type"
+        ],
+        "title": "AddTransitionRequest",
+        "description": "添加转场请求（用于 VideoSegment）",
+        "example": {
+          "duration": "1s",
+          "transition_type": "TransitionType.XXX"
+        }
+      },
+      "AddTransitionResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "transition_id": {
+            "type": "string",
+            "title": "Transition Id",
+            "description": "转场 UUID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "transition_id",
+          "message"
+        ],
+        "title": "AddTransitionResponse",
+        "description": "添加转场响应"
+      },
+      "ClipSettings": {
+        "properties": {
+          "brightness": {
+            "type": "number",
+            "title": "Brightness",
+            "description": "亮度 -1.0 到 1.0",
+            "default": 0.0
+          },
+          "contrast": {
+            "type": "number",
+            "title": "Contrast",
+            "description": "对比度 -1.0 到 1.0",
+            "default": 0.0
+          },
+          "saturation": {
+            "type": "number",
+            "title": "Saturation",
+            "description": "饱和度 -1.0 到 1.0",
+            "default": 0.0
+          },
+          "temperature": {
+            "type": "number",
+            "title": "Temperature",
+            "description": "色温 -1.0 到 1.0",
+            "default": 0.0
+          },
+          "hue": {
+            "type": "number",
+            "title": "Hue",
+            "description": "色相 -1.0 到 1.0",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "ClipSettings",
+        "description": "图像调节设置"
+      },
+      "CreateAudioSegmentRequest": {
+        "properties": {
+          "material_url": {
+            "type": "string",
+            "title": "Material Url",
+            "description": "音频素材 URL"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "在轨道上的时间范围"
+          },
+          "source_timerange": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "素材裁剪范围"
+          },
+          "speed": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Speed",
+            "description": "播放速度",
+            "default": 1.0
+          },
+          "volume": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Volume",
+            "description": "音量 0-2",
+            "default": 1.0
+          },
+          "change_pitch": {
+            "type": "boolean",
+            "title": "Change Pitch",
+            "description": "是否跟随变速改变音调",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "material_url",
+          "target_timerange"
+        ],
+        "title": "CreateAudioSegmentRequest",
+        "description": "创建音频片段请求",
+        "example": {
+          "change_pitch": false,
+          "material_url": "https://example.com/audio.mp3",
+          "source_timerange": {
+            "duration": 5000000,
+            "start": 0
+          },
+          "speed": 1.0,
+          "target_timerange": {
+            "duration": 5000000,
+            "start": 0
+          },
+          "volume": 0.6
+        }
+      },
+      "CreateDraftRequest": {
+        "properties": {
+          "draft_name": {
+            "type": "string",
+            "title": "Draft Name",
+            "description": "项目名称",
+            "default": "Coze剪映项目"
+          },
+          "width": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Width",
+            "description": "视频宽度（像素）",
+            "default": 1920
+          },
+          "height": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Height",
+            "description": "视频高度（像素）",
+            "default": 1080
+          },
+          "fps": {
+            "type": "integer",
+            "maximum": 120.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Fps",
+            "description": "帧率",
+            "default": 30
+          },
+          "allow_replace": {
+            "type": "boolean",
+            "title": "Allow Replace",
+            "description": "是否允许替换同名草稿",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "CreateDraftRequest",
+        "description": "创建草稿请求",
+        "example": {
+          "allow_replace": true,
+          "draft_name": "我的视频项目",
+          "fps": 30,
+          "height": 1080,
+          "width": 1920
+        }
+      },
+      "CreateDraftResponse": {
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "title": "Draft Id",
+            "description": "草稿 UUID"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "创建时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "draft_id",
+          "success",
+          "message"
+        ],
+        "title": "CreateDraftResponse",
+        "description": "创建草稿响应",
+        "example": {
+          "draft_id": "12345678-1234-1234-1234-123456789abc",
+          "message": "草稿创建成功",
+          "success": true,
+          "timestamp": "2025-11-06T10:00:00"
+        }
+      },
+      "CreateEffectSegmentRequest": {
+        "properties": {
+          "effect_type": {
+            "type": "string",
+            "title": "Effect Type",
+            "description": "特效类型（VideoSceneEffectType 或 VideoCharacterEffectType）"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "在轨道上的时间范围"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Params",
+            "description": "特效参数列表（范围 0-100）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "effect_type",
+          "target_timerange"
+        ],
+        "title": "CreateEffectSegmentRequest",
+        "description": "创建特效片段请求",
+        "example": {
+          "effect_type": "VideoSceneEffectType.XXX",
+          "params": [
+            50.0,
+            75.0
+          ],
+          "target_timerange": {
+            "duration": 5000000,
+            "start": 0
+          }
+        }
+      },
+      "CreateFilterSegmentRequest": {
+        "properties": {
+          "filter_type": {
+            "type": "string",
+            "title": "Filter Type",
+            "description": "滤镜类型（FilterType）"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "在轨道上的时间范围"
+          },
+          "intensity": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Intensity",
+            "description": "滤镜强度 0-100",
+            "default": 100.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "filter_type",
+          "target_timerange"
+        ],
+        "title": "CreateFilterSegmentRequest",
+        "description": "创建滤镜片段请求",
+        "example": {
+          "filter_type": "FilterType.XXX",
+          "intensity": 100.0,
+          "target_timerange": {
+            "duration": 5000000,
+            "start": 0
+          }
+        }
+      },
+      "CreateSegmentResponse": {
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "title": "Segment Id",
+            "description": "Segment UUID"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "创建时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "segment_id",
+          "success",
+          "message"
+        ],
+        "title": "CreateSegmentResponse",
+        "description": "创建片段响应",
+        "example": {
+          "message": "音频片段创建成功",
+          "segment_id": "87654321-4321-4321-4321-cba987654321",
+          "success": true,
+          "timestamp": "2025-11-06T10:00:00"
+        }
+      },
+      "CreateStickerSegmentRequest": {
+        "properties": {
+          "material_url": {
+            "type": "string",
+            "title": "Material Url",
+            "description": "贴纸素材 URL"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "在轨道上的时间范围"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "位置"
+          },
+          "scale": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale",
+            "description": "缩放比例",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "material_url",
+          "target_timerange"
+        ],
+        "title": "CreateStickerSegmentRequest",
+        "description": "创建贴纸片段请求",
+        "example": {
+          "material_url": "https://example.com/sticker.png",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "scale": 1.0,
+          "target_timerange": {
+            "duration": 3000000,
+            "start": 0
+          }
+        }
+      },
+      "CreateTextSegmentRequest": {
+        "properties": {
+          "text_content": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text Content",
+            "description": "文本内容"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "在轨道上的时间范围"
+          },
+          "font_family": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Font Family",
+            "description": "字体名称",
+            "default": "黑体"
+          },
+          "font_size": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Font Size",
+            "description": "字体大小",
+            "default": 24.0
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color",
+            "description": "文字颜色（十六进制）",
+            "default": "#FFFFFF"
+          },
+          "text_style": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TextStyle"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "文本样式"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "位置"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text_content",
+          "target_timerange"
+        ],
+        "title": "CreateTextSegmentRequest",
+        "description": "创建文本片段请求",
+        "example": {
+          "color": "#FFFFFF",
+          "font_family": "黑体",
+          "font_size": 24.0,
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "target_timerange": {
+            "duration": 3000000,
+            "start": 0
+          },
+          "text_content": "Hello World",
+          "text_style": {
+            "bold": false,
+            "italic": false,
+            "underline": false
+          }
+        }
+      },
+      "CreateVideoSegmentRequest": {
+        "properties": {
+          "material_url": {
+            "type": "string",
+            "title": "Material Url",
+            "description": "视频素材 URL"
+          },
+          "target_timerange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": "在轨道上的时间范围"
+          },
+          "source_timerange": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "素材裁剪范围"
+          },
+          "speed": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Speed",
+            "description": "播放速度",
+            "default": 1.0
+          },
+          "volume": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Volume",
+            "description": "音量 0-2",
+            "default": 1.0
+          },
+          "change_pitch": {
+            "type": "boolean",
+            "title": "Change Pitch",
+            "description": "是否跟随变速改变音调",
+            "default": false
+          },
+          "clip_settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClipSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "图像调节设置"
+          }
+        },
+        "type": "object",
+        "required": [
+          "material_url",
+          "target_timerange"
+        ],
+        "title": "CreateVideoSegmentRequest",
+        "description": "创建视频片段请求",
+        "example": {
+          "change_pitch": false,
+          "clip_settings": {
+            "brightness": 0.0,
+            "contrast": 0.0,
+            "hue": 0.0,
+            "saturation": 0.0,
+            "temperature": 0.0
+          },
+          "material_url": "https://example.com/video.mp4",
+          "source_timerange": {
+            "duration": 5000000,
+            "start": 0
+          },
+          "speed": 1.0,
+          "target_timerange": {
+            "duration": 5000000,
+            "start": 0
+          },
+          "volume": 1.0
+        }
+      },
+      "DownloadStatusInfo": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "总数量"
+          },
+          "completed": {
+            "type": "integer",
+            "title": "Completed",
+            "description": "已完成数量"
+          },
+          "pending": {
+            "type": "integer",
+            "title": "Pending",
+            "description": "待处理数量"
+          },
+          "failed": {
+            "type": "integer",
+            "title": "Failed",
+            "description": "失败数量"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "completed",
+          "pending",
+          "failed"
+        ],
+        "title": "DownloadStatusInfo",
+        "description": "下载状态信息"
+      },
+      "DraftStatusResponse": {
+        "properties": {
+          "draft_id": {
+            "type": "string",
+            "title": "Draft Id",
+            "description": "草稿 UUID"
+          },
+          "draft_name": {
+            "type": "string",
+            "title": "Draft Name",
+            "description": "项目名称"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/TrackInfo"
+            },
+            "type": "array",
+            "title": "Tracks",
+            "description": "轨道列表"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/SegmentInfo"
+            },
+            "type": "array",
+            "title": "Segments",
+            "description": "片段列表"
+          },
+          "download_status": {
+            "$ref": "#/components/schemas/DownloadStatusInfo",
+            "description": "下载状态"
+          }
+        },
+        "type": "object",
+        "required": [
+          "draft_id",
+          "draft_name",
+          "tracks",
+          "segments",
+          "download_status"
+        ],
+        "title": "DraftStatusResponse",
+        "description": "草稿状态响应"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Position": {
+        "properties": {
+          "x": {
+            "type": "number",
+            "title": "X",
+            "description": "X 坐标",
+            "default": 0.0
+          },
+          "y": {
+            "type": "number",
+            "title": "Y",
+            "description": "Y 坐标",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "Position",
+        "description": "位置信息"
+      },
+      "SaveDraftResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "是否成功"
+          },
+          "draft_path": {
+            "type": "string",
+            "title": "Draft Path",
+            "description": "草稿文件夹路径"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "draft_path",
+          "message"
+        ],
+        "title": "SaveDraftResponse",
+        "description": "保存草稿响应",
+        "example": {
+          "draft_path": "/path/to/draft/folder",
+          "message": "草稿保存成功",
+          "success": true
+        }
+      },
+      "SegmentDetailResponse": {
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "title": "Segment Id",
+            "description": "Segment UUID"
+          },
+          "segment_type": {
+            "type": "string",
+            "title": "Segment Type",
+            "description": "片段类型"
+          },
+          "material_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material Url",
+            "description": "素材 URL"
+          },
+          "download_status": {
+            "type": "string",
+            "title": "Download Status",
+            "description": "下载状态"
+          },
+          "local_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local Path",
+            "description": "本地路径"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Properties",
+            "description": "片段属性"
+          }
+        },
+        "type": "object",
+        "required": [
+          "segment_id",
+          "segment_type",
+          "download_status",
+          "properties"
+        ],
+        "title": "SegmentDetailResponse",
+        "description": "片段详情响应"
+      },
+      "SegmentInfo": {
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "title": "Segment Id",
+            "description": "Segment UUID"
+          },
+          "segment_type": {
+            "type": "string",
+            "title": "Segment Type",
+            "description": "片段类型"
+          },
+          "material_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material Url",
+            "description": "素材 URL"
+          },
+          "download_status": {
+            "type": "string",
+            "title": "Download Status",
+            "description": "下载状态: pending/downloading/completed/failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "segment_id",
+          "segment_type",
+          "download_status"
+        ],
+        "title": "SegmentInfo",
+        "description": "片段信息"
+      },
+      "TextStyle": {
+        "properties": {
+          "bold": {
+            "type": "boolean",
+            "title": "Bold",
+            "description": "是否加粗",
+            "default": false
+          },
+          "italic": {
+            "type": "boolean",
+            "title": "Italic",
+            "description": "是否斜体",
+            "default": false
+          },
+          "underline": {
+            "type": "boolean",
+            "title": "Underline",
+            "description": "是否下划线",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "TextStyle",
+        "description": "文本样式"
+      },
+      "TimeRange": {
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Start",
+            "description": "开始时间（微秒）"
+          },
+          "duration": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Duration",
+            "description": "持续时长（微秒）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "duration"
+        ],
+        "title": "TimeRange",
+        "description": "时间范围模型（微秒）"
+      },
+      "TrackInfo": {
+        "properties": {
+          "track_type": {
+            "type": "string",
+            "title": "Track Type",
+            "description": "轨道类型"
+          },
+          "track_index": {
+            "type": "integer",
+            "title": "Track Index",
+            "description": "轨道索引"
+          },
+          "segment_count": {
+            "type": "integer",
+            "title": "Segment Count",
+            "description": "片段数量"
+          }
+        },
+        "type": "object",
+        "required": [
+          "track_type",
+          "track_index",
+          "segment_count"
+        ],
+        "title": "TrackInfo",
+        "description": "轨道信息"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
