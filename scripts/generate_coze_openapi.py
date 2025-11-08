@@ -305,8 +305,15 @@ def main():
     # 保存文件
     output_path = args.output
     if args.format == 'yaml':
+        # 使用自定义 Dumper 禁用 YAML 锚点和别名
+        # Coze 平台可能无法正确解析带锚点的 YAML
+        class NoAliasDumper(yaml.SafeDumper):
+            def ignore_aliases(self, data):
+                return True
+        
         with open(output_path, 'w', encoding='utf-8') as f:
-            yaml.dump(coze_schema, f, allow_unicode=True, sort_keys=False, 
+            yaml.dump(coze_schema, f, Dumper=NoAliasDumper, 
+                     allow_unicode=True, sort_keys=False, 
                      default_flow_style=False, indent=4)
         print(f"✅ YAML 文件已生成: {output_path}")
     else:
