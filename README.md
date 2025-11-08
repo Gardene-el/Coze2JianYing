@@ -432,6 +432,87 @@ graph LR
 
 ---
 
+## 🔌 API 服务与 Coze 集成
+
+Coze2JianYing 提供了完整的 FastAPI 服务，支持通过 API 方式与 Coze 平台集成。
+
+### ✨ 两种集成方式
+
+#### 1️⃣ 云侧插件（Coze IDE 创建）
+
+在 Coze IDE 中创建工具函数，用户手动复制 JSON 到草稿生成器。
+
+**优势**：
+- ✅ 不需要额外的服务器
+- ✅ 所有逻辑在 Coze 云端运行
+- ✅ 适合简单场景和快速原型
+
+#### 2️⃣ 基于已有服务创建（FastAPI + OpenAPI）
+
+将本项目的 API 服务导入到 Coze 作为插件，实现完全自动化。
+
+**优势**：
+- ✅ 完全自动化，无需手动复制 JSON
+- ✅ 支持更复杂的业务逻辑
+- ✅ 可以访问本地文件系统
+- ✅ 更好的性能和可扩展性
+
+### 🚀 快速开始 - API 集成
+
+1. **启动 API 服务**
+
+```bash
+# 方式 1: 直接运行
+python start_api.py
+
+# 方式 2: 在 GUI 中启动
+# 打开草稿生成器 -> "本地服务"标签页 -> 点击"启动服务"
+```
+
+2. **生成 Coze 兼容的 OpenAPI 文件**
+
+```bash
+# 生成带 ngrok URL 的配置（推荐）
+python scripts/generate_coze_openapi.py --server-url https://your-ngrok-url.ngrok-free.app
+
+# 或生成本地测试配置
+python scripts/generate_coze_openapi.py
+```
+
+3. **导入到 Coze 平台**
+
+- 登录 Coze 平台
+- 创建插件 → 选择"基于已有服务创建"
+- 上传生成的 `coze_openapi.yaml` 文件
+- 测试并发布插件
+
+### 📚 详细文档
+
+- [Coze OpenAPI 导入完整指南](docs/COZE_OPENAPI_IMPORT_GUIDE.md)
+- [Issue #2 完整解答](ISSUE_2_SOLUTION.md)
+
+### 🔑 核心特性
+
+- **✅ FastAPI 完全兼容 OpenAPI 3.0/3.1**
+- **✅ 自动生成交互式 API 文档** (`/docs` 和 `/redoc`)
+- **✅ 内置 ngrok 支持**，一键暴露本地服务到公网
+- **✅ 完整的请求/响应验证**
+- **✅ 支持 CORS**，可跨域访问
+
+### 📡 主要 API 端点
+
+| 端点 | 功能 | 说明 |
+|------|------|------|
+| `POST /api/draft/create` | 创建草稿 | 创建新的剪映项目 |
+| `POST /api/segment/audio/create` | 创建音频片段 | 添加音频素材 |
+| `POST /api/segment/video/create` | 创建视频片段 | 添加视频素材 |
+| `POST /api/segment/audio/{id}/add_effect` | 添加音频特效 | 为音频添加特效 |
+| `POST /api/draft/{id}/save` | 保存草稿 | 生成最终草稿文件 |
+
+完整的 API 文档在服务启动后访问 `http://localhost:8000/docs`
+
+---
+
 ## 🤝 贡献机制
 
 <div align="center">
