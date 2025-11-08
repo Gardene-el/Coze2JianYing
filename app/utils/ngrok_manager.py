@@ -156,33 +156,62 @@ class NgrokManager:
             self.logger.error(f"启动 ngrok 隧道时发生错误: {e}", exc_info=True)
             return None
     
-    def stop_tunnel(self):
-        """停止 ngrok 隧道"""
+    def stop_tunnel(self, async_mode: bool = False, callback=None):
+        """停止 ngrok 隧道
+        
+        Args:
+            async_mode: 是否在后台线程异步执行停止操作
+            callback: 异步模式下，停止完成后的回调函数
+        """
         if not self.is_running:
             self.logger.warning("ngrok 隧道未运行")
             return
         
-        # 停止监控线程
-        self._stop_monitor.set()
-        if self._monitor_thread and self._monitor_thread.is_alive():
-            self._monitor_thread.join(timeout=3)
+        if async_mode:
+            # 异步模式：在后台线程执行停止操作
+            def async_stop():
+                self._do_stop_tunnel()
+                if callback:
+                    try:
+                        callback()
+                    except Exception as e:
+                        self.logger.error(f"执行停止回调时出错: {e}")
+            
+            stop_thread = threading.Thread(target=async_stop, daemon=True)
+            stop_thread.start()
+        else:
+            # 同步模式：直接执行
+            self._do_stop_tunnel()
+    
+    def _do_stop_tunnel(self):
+        """执行实际的停止操作（内部方法）"""
+        # 立即标记为非运行状态，防止重复调用
+        self.is_running = False
         
-        # 尝试关闭隧道，即使失败也要清理本地状态
+        # 停止监控线程（不等待，让它自然结束）
+        self._stop_monitor.set()
+        
+        # 尝试关闭隧道，设置较短的超时
         tunnel_closed = False
         if self.tunnel:
             try:
-                ngrok.disconnect(self.tunnel.public_url)
+                # 使用 suppress_stdout_stderr 避免输出干扰
+                with suppress_stdout_stderr():
+                    ngrok.disconnect(self.tunnel.public_url)
                 self.logger.info(f"ngrok 隧道已关闭: {self.public_url}")
                 tunnel_closed = True
             except Exception as e:
                 # 记录错误但继续清理本地状态
                 self.logger.warning(f"关闭 ngrok 隧道时出错（可能是超时），将强制清理本地状态: {e}")
         
-        # 无论隧道是否成功关闭，都重置本地状态
+        # 清理本地状态
         self.tunnel = None
         self.public_url = None
-        self.is_running = False
         self._stop_monitor.clear()
+        
+        # 等待监控线程结束（最多1秒）
+        if self._monitor_thread and self._monitor_thread.is_alive():
+            self._monitor_thread.join(timeout=1)
         
         if tunnel_closed:
             self.logger.info("ngrok 隧道已完全停止")
@@ -239,28 +268,50 @@ class NgrokManager:
             self.logger.error(f"获取隧道列表失败: {e}")
             return []
     
-    def kill_all(self):
-        """终止所有 ngrok 进程（强制清理）"""
+    def kill_all(self, async_mode: bool = False):
+        """终止所有 ngrok 进程（强制清理）
+        
+        Args:
+            async_mode: 是否在后台线程异步执行
+        """
+        # 立即标记为非运行状态
+        self.is_running = False
+        
         if not PYNGROK_AVAILABLE:
             return
         
-        # 先停止监控线程
+        if async_mode:
+            # 异步模式：在后台线程执行
+            def async_kill():
+                self._do_kill_all()
+            
+            kill_thread = threading.Thread(target=async_kill, daemon=True)
+            kill_thread.start()
+        else:
+            # 同步模式：直接执行
+            self._do_kill_all()
+    
+    def _do_kill_all(self):
+        """执行实际的强制终止操作（内部方法）"""
+        # 停止监控线程（不等待）
         self._stop_monitor.set()
-        if self._monitor_thread and self._monitor_thread.is_alive():
-            self._monitor_thread.join(timeout=2)
         
         try:
             # 尝试终止所有 ngrok 进程
-            ngrok.kill()
+            with suppress_stdout_stderr():
+                ngrok.kill()
             self.logger.info("所有 ngrok 进程已终止")
         except Exception as e:
             self.logger.warning(f"终止 ngrok 进程时出错: {e}")
         finally:
-            # 无论如何都清理本地状态
+            # 清理本地状态
             self.tunnel = None
             self.public_url = None
-            self.is_running = False
             self._stop_monitor.clear()
+            
+            # 等待监控线程结束（最多1秒）
+            if self._monitor_thread and self._monitor_thread.is_alive():
+                self._monitor_thread.join(timeout=1)
     
     def _start_monitor(self):
         """启动监控线程"""
