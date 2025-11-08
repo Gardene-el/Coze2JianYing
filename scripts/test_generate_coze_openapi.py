@@ -170,6 +170,72 @@ def test_server_url_customization():
         return False
 
 
+def test_openapi_3_0_compatibility():
+    """测试 OpenAPI 3.0.1 兼容性（exclusiveMinimum/Maximum 转换）"""
+    print("\n" + "=" * 60)
+    print("测试 5: OpenAPI 3.0.1 兼容性")
+    print("=" * 60)
+    
+    try:
+        schema = create_coze_openapi_spec("https://example.com")
+        
+        # 检查 schemas 中是否有 exclusiveMinimum 字段，并验证其为布尔值
+        schemas = schema.get('components', {}).get('schemas', {})
+        
+        def check_exclusive_fields(obj, path=""):
+            """递归检查 exclusiveMinimum 和 exclusiveMaximum 字段"""
+            issues = []
+            if isinstance(obj, dict):
+                # 检查 exclusiveMinimum
+                if 'exclusiveMinimum' in obj:
+                    value = obj['exclusiveMinimum']
+                    if not isinstance(value, bool):
+                        issues.append(f"在 {path}: exclusiveMinimum 应该是布尔值，实际是 {type(value).__name__}")
+                    else:
+                        # 如果是布尔值，应该有对应的 minimum 字段
+                        if value and 'minimum' not in obj:
+                            issues.append(f"在 {path}: exclusiveMinimum 为 true 但缺少 minimum 字段")
+                
+                # 检查 exclusiveMaximum
+                if 'exclusiveMaximum' in obj:
+                    value = obj['exclusiveMaximum']
+                    if not isinstance(value, bool):
+                        issues.append(f"在 {path}: exclusiveMaximum 应该是布尔值，实际是 {type(value).__name__}")
+                    else:
+                        # 如果是布尔值，应该有对应的 maximum 字段
+                        if value and 'maximum' not in obj:
+                            issues.append(f"在 {path}: exclusiveMaximum 为 true 但缺少 maximum 字段")
+                
+                # 递归检查子对象
+                for key, value in obj.items():
+                    check_exclusive_fields(value, f"{path}.{key}" if path else key)
+            
+            elif isinstance(obj, list):
+                for i, item in enumerate(obj):
+                    check_exclusive_fields(item, f"{path}[{i}]")
+            
+            return issues
+        
+        issues = check_exclusive_fields(schemas, "schemas")
+        
+        if issues:
+            print("❌ 发现 OpenAPI 3.0.1 兼容性问题:")
+            for issue in issues[:5]:  # 只显示前5个问题
+                print(f"   - {issue}")
+            return False
+        
+        print("✅ OpenAPI 3.0.1 兼容性测试通过")
+        print("   - 所有 exclusiveMinimum/exclusiveMaximum 字段均为布尔值")
+        print("   - 数值限制正确使用 minimum/maximum 字段")
+        return True
+        
+    except Exception as e:
+        print(f"❌ OpenAPI 3.0.1 兼容性测试失败: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 def main():
     """运行所有测试"""
     print("\n" + "=" * 60)
@@ -181,6 +247,7 @@ def main():
         test_json_generation,
         test_schema_structure,
         test_server_url_customization,
+        test_openapi_3_0_compatibility,  # 新增的测试
     ]
     
     results = []

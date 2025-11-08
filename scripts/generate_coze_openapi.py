@@ -81,6 +81,41 @@ def simplify_operation_id(operation_id: str) -> str:
         return operation_id
 
 
+def convert_schema_to_openapi_3_0(schema: Any) -> Any:
+    """
+    将 OpenAPI 3.1.0 schema 转换为 OpenAPI 3.0.1 兼容格式
+    
+    主要变化：
+    1. exclusiveMinimum/exclusiveMaximum 从数值改为布尔值
+    2. 使用 minimum/maximum + exclusiveMinimum/exclusiveMaximum(boolean)
+    """
+    if isinstance(schema, dict):
+        converted = {}
+        for key, value in schema.items():
+            # 处理 exclusiveMinimum (OpenAPI 3.1: number, OpenAPI 3.0: boolean)
+            if key == 'exclusiveMinimum' and isinstance(value, (int, float)):
+                # 在 3.0.1 中，exclusiveMinimum 是布尔值，最小值用 minimum 表示
+                converted['minimum'] = value
+                converted['exclusiveMinimum'] = True
+                continue
+            
+            # 处理 exclusiveMaximum (OpenAPI 3.1: number, OpenAPI 3.0: boolean)
+            if key == 'exclusiveMaximum' and isinstance(value, (int, float)):
+                # 在 3.0.1 中，exclusiveMaximum 是布尔值，最大值用 maximum 表示
+                converted['maximum'] = value
+                converted['exclusiveMaximum'] = True
+                continue
+            
+            # 递归处理嵌套的对象和数组
+            converted[key] = convert_schema_to_openapi_3_0(value)
+        
+        return converted
+    elif isinstance(schema, list):
+        return [convert_schema_to_openapi_3_0(item) for item in schema]
+    else:
+        return schema
+
+
 def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[str, Any]:
     """
     创建适配 Coze 平台的 OpenAPI 规范
@@ -93,6 +128,10 @@ def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[
     """
     # 获取原始 OpenAPI schema
     original_schema = app.openapi()
+    
+    # 转换所有 schemas 为 OpenAPI 3.0.1 格式
+    original_schemas = original_schema.get('components', {}).get('schemas', {})
+    converted_schemas = convert_schema_to_openapi_3_0(original_schemas)
     
     # 创建 Coze 格式的 schema
     coze_schema = {
@@ -108,7 +147,7 @@ def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[
         'paths': {},
         'components': {
             'examples': {},
-            'schemas': original_schema.get('components', {}).get('schemas', {})
+            'schemas': converted_schemas
         }
     }
     
