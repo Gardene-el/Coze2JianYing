@@ -88,9 +88,46 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
     主要变化：
     1. exclusiveMinimum/exclusiveMaximum 从数值改为布尔值
     2. 使用 minimum/maximum + exclusiveMinimum/exclusiveMaximum(boolean)
+    3. type: 'null' 转换为 nullable: true
+    4. anyOf: [type: X, type: 'null'] 转换为 type: X, nullable: true
     """
     if isinstance(schema, dict):
         converted = {}
+        
+        # 处理 anyOf 中的 null 类型（OpenAPI 3.1 -> 3.0.1）
+        if 'anyOf' in schema:
+            any_of_list = schema['anyOf']
+            # 检查是否是 [type: X, type: 'null'] 模式
+            if isinstance(any_of_list, list) and len(any_of_list) == 2:
+                non_null = None
+                has_null = False
+                
+                for item in any_of_list:
+                    if isinstance(item, dict):
+                        if item.get('type') == 'null':
+                            has_null = True
+                        else:
+                            non_null = item
+                
+                # 如果是 [type: X, type: 'null'] 模式，转换为 type: X, nullable: true
+                if has_null and non_null:
+                    # 递归转换非 null 部分
+                    converted = convert_schema_to_openapi_3_0(non_null)
+                    if isinstance(converted, dict):
+                        converted['nullable'] = True
+                    # 保留其他字段（如 title, description）
+                    for key, value in schema.items():
+                        if key not in ['anyOf'] and key not in converted:
+                            converted[key] = convert_schema_to_openapi_3_0(value)
+                    return converted
+        
+        # 处理单独的 type: 'null'（罕见情况）
+        if schema.get('type') == 'null':
+            # 在 OpenAPI 3.0.1 中，使用 nullable: true 而不是 type: 'null'
+            # 但单独的 type: 'null' 比较特殊，通常不应该出现
+            # 我们将其转换为一个空的 schema 并标记为 nullable
+            return {'nullable': True}
+        
         for key, value in schema.items():
             # 处理 exclusiveMinimum (OpenAPI 3.1: number, OpenAPI 3.0: boolean)
             if key == 'exclusiveMinimum' and isinstance(value, (int, float)):

@@ -171,7 +171,7 @@ def test_server_url_customization():
 
 
 def test_openapi_3_0_compatibility():
-    """测试 OpenAPI 3.0.1 兼容性（exclusiveMinimum/Maximum 转换）"""
+    """测试 OpenAPI 3.0.1 兼容性（exclusiveMinimum/Maximum 和 nullable 转换）"""
     print("\n" + "=" * 60)
     print("测试 5: OpenAPI 3.0.1 兼容性")
     print("=" * 60)
@@ -182,8 +182,8 @@ def test_openapi_3_0_compatibility():
         # 检查 schemas 中是否有 exclusiveMinimum 字段，并验证其为布尔值
         schemas = schema.get('components', {}).get('schemas', {})
         
-        def check_exclusive_fields(obj, path=""):
-            """递归检查 exclusiveMinimum 和 exclusiveMaximum 字段"""
+        def check_openapi_3_0_compatibility(obj, path=""):
+            """递归检查 OpenAPI 3.0.1 兼容性"""
             issues = []
             if isinstance(obj, dict):
                 # 检查 exclusiveMinimum
@@ -206,17 +206,27 @@ def test_openapi_3_0_compatibility():
                         if value and 'maximum' not in obj:
                             issues.append(f"在 {path}: exclusiveMaximum 为 true 但缺少 maximum 字段")
                 
+                # 检查 type: 'null' (不应该存在于 OpenAPI 3.0.1)
+                if obj.get('type') == 'null':
+                    issues.append(f"在 {path}: 不应该使用 type: 'null'，应该使用 nullable: true")
+                
+                # 检查 nullable 字段（应该是布尔值）
+                if 'nullable' in obj:
+                    nullable_value = obj['nullable']
+                    if not isinstance(nullable_value, bool):
+                        issues.append(f"在 {path}: nullable 应该是布尔值，实际是 {type(nullable_value).__name__}")
+                
                 # 递归检查子对象
                 for key, value in obj.items():
-                    check_exclusive_fields(value, f"{path}.{key}" if path else key)
+                    issues.extend(check_openapi_3_0_compatibility(value, f"{path}.{key}" if path else key))
             
             elif isinstance(obj, list):
                 for i, item in enumerate(obj):
-                    check_exclusive_fields(item, f"{path}[{i}]")
+                    issues.extend(check_openapi_3_0_compatibility(item, f"{path}[{i}]"))
             
             return issues
         
-        issues = check_exclusive_fields(schemas, "schemas")
+        issues = check_openapi_3_0_compatibility(schemas, "schemas")
         
         if issues:
             print("❌ 发现 OpenAPI 3.0.1 兼容性问题:")
@@ -227,6 +237,7 @@ def test_openapi_3_0_compatibility():
         print("✅ OpenAPI 3.0.1 兼容性测试通过")
         print("   - 所有 exclusiveMinimum/exclusiveMaximum 字段均为布尔值")
         print("   - 数值限制正确使用 minimum/maximum 字段")
+        print("   - 没有使用 type: 'null'，正确使用 nullable: true")
         return True
         
     except Exception as e:
