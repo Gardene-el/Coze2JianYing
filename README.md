@@ -126,6 +126,10 @@ graph LR
 
 🔗 [Coze2JianYing 插件](https://www.coze.cn/store/plugin/7565396538596818950?from=plugin_card)
 
+> 💡 **进阶**: 你也可以基于本项目的 API 服务创建自己的插件！
+> 
+> 查看指南：[如何使用 OpenAPI 规范创建 Coze 插件](docs/guides/API_COLLECTION_PROTOCOLS_GUIDE.md)
+
 **2. 下载草稿生成器**
 
 前往 [Releases 页面](https://github.com/Gardene-el/Coze2JianYing/releases) 下载最新版本的 `CozeJianYingDraftGenerator.exe`

@@ -156,3 +156,6 @@ Desktop.ini
 # Testing
 temp/
 *.db
+
+# API Specs (generated files - regenerate with: python scripts/export_api_specs.py)
+api_specs/

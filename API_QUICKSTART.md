@@ -33,6 +33,23 @@ python start_api.py
 打开浏览器访问：
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+- OpenAPI JSON: http://localhost:8000/openapi.json
+
+### 2.5. 导出 API 规范文件（可选）
+
+如需将 API 集成到 Coze 或其他工具，可以导出标准协议文件：
+
+```bash
+# 生成 OpenAPI、Swagger 和 Postman Collection 文件
+python scripts/export_api_specs.py
+```
+
+生成的文件位于 `api_specs/` 目录，可用于：
+- 在 Coze 创建"基于已有服务"的云侧插件
+- 导入 Postman 进行 API 测试
+- 生成客户端 SDK
+
+详细说明：[API 集合协议文件指南](docs/guides/API_COLLECTION_PROTOCOLS_GUIDE.md)
 
 ### 3. 测试 API
 
