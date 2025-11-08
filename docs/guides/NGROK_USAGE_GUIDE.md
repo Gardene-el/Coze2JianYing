@@ -4,7 +4,10 @@
 
 本项目集成了 ngrok 内网穿透功能，允许将本地运行的 FastAPI 服务暴露到公网，以便 Coze 平台可以访问和调用。
 
-**✅ 重要提示：无需注册即可免费使用 ngrok！Authtoken 为可选配置项。**
+**⚠️ 重要更新：ngrok 政策变更**
+- **ngrok 现在要求所有用户注册账号并配置 Authtoken**
+- 注册是免费的，但已经不再支持匿名使用
+- 本文档已更新以反映最新的 ngrok 使用要求
 
 ## 功能特性
 
@@ -13,7 +16,7 @@
 位于 `app/utils/ngrok_manager.py`，提供完整的 ngrok 隧道管理功能：
 
 - **隧道管理**: 启动、停止、监控 ngrok 隧道
-- **配置选项**: 支持可选的 authtoken 设置和区域选择
+- **配置选项**: 支持 authtoken 设置和区域选择
 - **状态监控**: 实时监控隧道状态和连接
 - **自动清理**: 应用退出时自动清理资源
 
@@ -22,9 +25,9 @@
 在 GUI 的"云端服务"标签页中提供完整的 ngrok 控制界面：
 
 #### ngrok 配置区域
-- **Authtoken 输入 (可选)**: 
-  - 无需 authtoken 即可使用 ngrok
-  - 输入 authtoken 可解锁更多功能（固定域名、更高配额等）
+- **Authtoken 输入 (必需)**: 
+  - ngrok 现在要求必须配置 Authtoken
+  - 注册是免费的
   - 支持显示/隐藏敏感信息
   - 点击 "?" 查看详细说明
 - **区域选择**: 支持多个 ngrok 服务器区域
@@ -63,29 +66,29 @@ pip install pyngrok
 pip install -r requirements.txt
 ```
 
-### 2. 获取 ngrok Authtoken（完全可选）
+### 2. 获取 ngrok Authtoken（必需）
 
-**💡 重要说明：此步骤完全可选！你可以直接跳到步骤 3 开始使用 ngrok。**
+**⚠️ 重要：此步骤现在是必需的！ngrok 不再支持匿名使用。**
 
-#### 免费使用（无需注册）
-- ✅ 无需 authtoken 即可使用
-- ✅ 每次启动自动生成公网 URL
+#### 免费注册并获取 Authtoken
+1. 访问 [ngrok 官网](https://ngrok.com/)
+2. 点击 "Sign up" 免费注册账号（需要邮箱验证）
+3. 登录后访问：https://dashboard.ngrok.com/get-started/your-authtoken
+4. 复制显示的 Authtoken
+5. 将 Authtoken 填入 GUI 配置区域
+
+#### 免费账号功能
+- ✅ 每次启动会生成随机的公网 URL
 - ✅ 适合临时测试和开发
 - ⚠️ URL 每次都不同（无法固定）
 - ⚠️ 有带宽和连接数限制
 
-#### 注册后的优势（可选）
-如果需要以下功能，可以考虑注册：
+#### 付费账号优势
+如果需要以下功能，可以考虑升级：
 - 🎯 可以使用固定的自定义域名
 - 🎯 更高的带宽和连接数配额
 - 🎯 更稳定的连接质量
 - 🎯 可以同时运行多个隧道
-
-**获取 Authtoken 的步骤：**
-1. 访问 [ngrok 官网](https://ngrok.com/)
-2. 注册并登录账号
-3. 在 Dashboard 中获取 Authtoken
-4. 将 Authtoken 填入 GUI 配置区域
 
 ### 3. 启动服务
 
@@ -94,19 +97,15 @@ pip install -r requirements.txt
    - 配置端口（默认 8000）
    - 点击"启动服务"按钮
 
-2. **配置 ngrok（均为可选）**:
-   - ⭕ **Authtoken**: 可以留空，无需填写即可使用
+2. **配置 ngrok（必需）**:
+   - ⚠️ **Authtoken**: 必须填写（ngrok 不再支持匿名使用）
    - ✅ **区域选择**: 建议选择距离最近的区域以获得更好性能
 
 3. **启动 ngrok**:
+   - 确保已填写 Authtoken
    - 点击"启动 ngrok"按钮
    - 等待连接建立（首次使用会自动下载 ngrok）
    - 复制生成的公网 URL
-
-4. **无需 Authtoken 的快速开始**:
-   ```
-   直接点击"启动 ngrok" → 等待连接 → 复制 URL → 完成！
-   ```
 
 ### 4. 配置 Coze 插件
 

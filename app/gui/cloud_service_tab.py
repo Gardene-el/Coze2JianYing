@@ -161,9 +161,9 @@ class CloudServiceTab(BaseTab):
         # ngrok 说明文字
         self.ngrok_info_label = ttk.Label(
             self.ngrok_frame,
-            text="💡 提示：无需注册即可使用 ngrok，Authtoken 为可选项。点击 '?' 查看详情。",
+            text="⚠️ 注意：ngrok 现在需要免费注册账号并配置 Authtoken 才能使用。点击 '?' 查看详情。",
             justify=tk.LEFT,
-            foreground="blue",
+            foreground="red",
             font=("Arial", 9)
         )
         
@@ -171,10 +171,9 @@ class CloudServiceTab(BaseTab):
         self.ngrok_config_frame = ttk.Frame(self.ngrok_frame)
         
         # Authtoken 输入
-        self.ngrok_token_label = ttk.Label(self.ngrok_config_frame, text="Authtoken (可选):")
+        self.ngrok_token_label = ttk.Label(self.ngrok_config_frame, text="Authtoken (必需):")
         self.ngrok_token_var = tk.StringVar(value="")
         self.ngrok_token_entry = ttk.Entry(self.ngrok_config_frame, textvariable=self.ngrok_token_var, show="*", width=40)
-        self.ngrok_token_entry.configure(foreground="gray")  # 使用灰色表示可选
         
         self.show_ngrok_token_var = tk.BooleanVar(value=False)
         self.show_ngrok_token_btn = ttk.Checkbutton(
@@ -708,32 +707,34 @@ class CloudServiceTab(BaseTab):
         """显示 Authtoken 帮助信息"""
         help_text = """ngrok Authtoken 说明
 
-✅ 免费使用（无需注册）
-• 无需 authtoken 即可使用 ngrok
+⚠️ 重要更新：ngrok 政策变更
+• ngrok 现在要求所有用户注册账号
+• 必须配置 Authtoken 才能使用
+• 注册是免费的，但已经不再支持匿名使用
+
+📝 如何获取 Authtoken（必需）
+1. 访问 https://ngrok.com/
+2. 免费注册账号（需要邮箱验证）
+3. 登录后在 Dashboard 中获取 Authtoken
+   网址：https://dashboard.ngrok.com/get-started/your-authtoken
+4. 将 Authtoken 复制并填入上方输入框
+5. 点击"启动 ngrok"即可使用
+
+✅ 免费账号功能
 • 每次启动会生成随机的公网 URL
 • 适合临时测试和开发使用
-
-⚠️ 免费版限制
-• URL 每次都不同（无法固定）
 • 有带宽和连接数限制
-• 会话可能不够稳定
 
-🎯 注册后的优势（可选）
+🎯 付费账号优势
 • 可以使用固定的自定义域名
 • 更高的带宽和连接数配额
 • 更稳定的连接质量
 • 可以同时运行多个隧道
 
-📝 如何获取 Authtoken（可选）
-1. 访问 https://ngrok.com/
-2. 免费注册账号
-3. 在 Dashboard 中获取 Authtoken
-4. 将 Authtoken 填入输入框
-
-💡 建议
-• 测试阶段可以不填写 authtoken
-• 正式使用建议注册获取 authtoken
-• Authtoken 请妥善保管，不要泄露"""
+💡 安全提示
+• Authtoken 是敏感信息，请妥善保管
+• 不要在公开场合分享你的 Authtoken
+• 如果泄露，请立即在 ngrok 网站重置"""
         
         messagebox.showinfo("Authtoken 帮助", help_text)
     
@@ -802,6 +803,22 @@ class CloudServiceTab(BaseTab):
         authtoken = self.ngrok_token_var.get().strip()
         region = self.ngrok_region_var.get()
         port = self.service_port
+        
+        # 验证 authtoken 是否已填写（ngrok 现在要求必须提供）
+        if not authtoken:
+            messagebox.showerror(
+                "需要 Authtoken",
+                "ngrok 现在要求必须配置 Authtoken 才能使用。\n\n"
+                "请执行以下步骤：\n"
+                "1. 访问 https://ngrok.com/ 免费注册账号\n"
+                "2. 在 Dashboard 获取 Authtoken\n"
+                "3. 将 Authtoken 填入上方输入框\n"
+                "4. 点击 '?' 按钮查看详细说明\n\n"
+                "注册是免费的，但已经不再支持匿名使用。"
+            )
+            self.logger.warning("启动 ngrok 失败: 未提供 authtoken")
+            self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 错误: 需要配置 Authtoken")
+            return
         
         self.logger.info(f"启动 ngrok 隧道: port={port}, region={region}")
         self._append_to_ngrok_log(f"[{time.strftime('%H:%M:%S')}] 正在启动 ngrok 隧道...")
