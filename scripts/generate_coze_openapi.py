@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-生成适配 Coze 平台的 OpenAPI 规范文件 (重新设计版本)
+生成适配 Coze 平台的 OpenAPI 规范文件
 
-根据用户要求：
-1. 不生成 components/schemas
-2. 不生成 components/examples (由 Coze 测试后自动生成)
-3. 只生成 paths，schema 内联展开
-4. 自动扫描 new_draft_routes.py 和 segment_routes.py 中的所有路由
+该脚本从 FastAPI 应用生成的 OpenAPI schema 中提取关键端点，
+并转换为 Coze 平台所需的格式，包括：
+1. 添加完整的 examples 部分（ReqExample 和 RespExample）
+2. 简化 operationId
+3. 设置适当的服务器 URL（支持 ngrok）
+4. 确保 OpenAPI 3.0.1 兼容性
 """
 
 import sys
 import os
 import json
 import yaml
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -21,26 +22,63 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app.api_main import app
 
 
-def remove_title_fields(schema: Any) -> Any:
-    """
-    移除 schema 中的所有 title 字段
+def get_example_for_schema(schema_ref: str, definitions: Dict[str, Any]) -> Dict[str, Any]:
+    """从 schema 定义中提取示例数据"""
+    if not schema_ref or not schema_ref.startswith('#/components/schemas/'):
+        return {}
     
-    Coze 平台不接受 title 字段，会导致解析错误
-    """
-    if isinstance(schema, dict):
-        # 创建新字典，排除 title 字段
-        cleaned = {}
-        for key, value in schema.items():
-            if key == 'title':
-                # 跳过 title 字段
-                continue
-            # 递归处理嵌套的对象和数组
-            cleaned[key] = remove_title_fields(value)
-        return cleaned
-    elif isinstance(schema, list):
-        return [remove_title_fields(item) for item in schema]
-    else:
-        return schema
+    schema_name = schema_ref.split('/')[-1]
+    schema = definitions.get(schema_name, {})
+    
+    # 如果有 example，直接返回
+    if 'example' in schema:
+        return schema['example']
+    
+    # 如果有 examples，返回第一个
+    if 'examples' in schema:
+        examples = schema['examples']
+        if isinstance(examples, dict) and examples:
+            return list(examples.values())[0].get('value', {})
+    
+    # 从 properties 构建基本示例
+    if 'properties' in schema:
+        example = {}
+        for prop_name, prop_def in schema['properties'].items():
+            if 'example' in prop_def:
+                example[prop_name] = prop_def['example']
+            elif 'default' in prop_def:
+                example[prop_name] = prop_def['default']
+            elif prop_def.get('type') == 'string':
+                example[prop_name] = prop_def.get('description', f'example_{prop_name}')
+            elif prop_def.get('type') == 'integer':
+                example[prop_name] = 0
+            elif prop_def.get('type') == 'number':
+                example[prop_name] = 0.0
+            elif prop_def.get('type') == 'boolean':
+                example[prop_name] = False
+            elif prop_def.get('type') == 'array':
+                example[prop_name] = []
+            elif prop_def.get('type') == 'object':
+                example[prop_name] = {}
+        return example
+    
+    return {}
+
+
+def simplify_operation_id(operation_id: str) -> str:
+    """简化 operationId，使其更简洁"""
+    # FastAPI 生成的 operationId 格式: create_audio_segment_api_segment_audio_create_post
+    # 简化为: create_audio_segment
+    parts = operation_id.split('_')
+    
+    # 查找 'api' 关键字位置
+    try:
+        api_index = parts.index('api')
+        # 返回 'api' 之前的部分
+        return '_'.join(parts[:api_index])
+    except ValueError:
+        # 如果没有 'api'，返回原始值
+        return operation_id
 
 
 def convert_schema_to_openapi_3_0(schema: Any) -> Any:
@@ -50,57 +88,31 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
     主要变化：
     1. exclusiveMinimum/exclusiveMaximum 从数值改为布尔值
     2. 使用 minimum/maximum + exclusiveMinimum/exclusiveMaximum(boolean)
-    3. type: 'null' 转换为 nullable: true
-    4. anyOf: [type: X, type: 'null'] 转换为 type: X, nullable: true
-    5. 移除所有 title 字段（Coze 不支持）
+    3. 移除 title 字段 (Coze 不支持，会导致解析错误)
+    
+    特别说明：
+    - Coze 的 YAML 解析器无法正确处理 schema 中的 title 字段
+    - 当存在名为 "properties" 的字段时，title 会导致类型混淆错误：
+      "cannot unmarshal bool into Go struct field Schema.paths.post.requestBody.content.schema.properties.properties.title"
+    - Issue #156 中的示例也没有 title 字段
     """
     if isinstance(schema, dict):
         converted = {}
-        
-        # 处理 anyOf 中的 null 类型（OpenAPI 3.1 -> 3.0.1）
-        if 'anyOf' in schema:
-            any_of_list = schema['anyOf']
-            # 检查是否是 [type: X, type: 'null'] 模式
-            if isinstance(any_of_list, list) and len(any_of_list) == 2:
-                non_null = None
-                has_null = False
-                
-                for item in any_of_list:
-                    if isinstance(item, dict):
-                        if item.get('type') == 'null':
-                            has_null = True
-                        else:
-                            non_null = item
-                
-                # 如果是 [type: X, type: 'null'] 模式，转换为 type: X, nullable: true
-                if has_null and non_null:
-                    # 递归转换非 null 部分
-                    converted = convert_schema_to_openapi_3_0(non_null)
-                    if isinstance(converted, dict):
-                        converted['nullable'] = True
-                    # 保留其他字段（除了 title, anyOf）
-                    for key, value in schema.items():
-                        if key not in ['anyOf', 'title'] and key not in converted:
-                            converted[key] = convert_schema_to_openapi_3_0(value)
-                    return converted
-        
-        # 处理单独的 type: 'null'（罕见情况）
-        if schema.get('type') == 'null':
-            return {'nullable': True}
-        
         for key, value in schema.items():
-            # 跳过 title 字段
+            # 跳过 title 字段 (Coze 不支持)
             if key == 'title':
                 continue
             
             # 处理 exclusiveMinimum (OpenAPI 3.1: number, OpenAPI 3.0: boolean)
             if key == 'exclusiveMinimum' and isinstance(value, (int, float)):
+                # 在 3.0.1 中，exclusiveMinimum 是布尔值，最小值用 minimum 表示
                 converted['minimum'] = value
                 converted['exclusiveMinimum'] = True
                 continue
             
             # 处理 exclusiveMaximum (OpenAPI 3.1: number, OpenAPI 3.0: boolean)
             if key == 'exclusiveMaximum' and isinstance(value, (int, float)):
+                # 在 3.0.1 中，exclusiveMaximum 是布尔值，最大值用 maximum 表示
                 converted['maximum'] = value
                 converted['exclusiveMaximum'] = True
                 continue
@@ -115,60 +127,24 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
         return schema
 
 
-def resolve_schema_ref(schema: Dict[str, Any], definitions: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    解析并展开 schema 引用，将 $ref 替换为实际的 schema 定义
-    """
-    if not isinstance(schema, dict):
-        return schema
-    
-    # 如果有 $ref，解析它
-    if '$ref' in schema:
-        ref_path = schema['$ref']
-        if ref_path.startswith('#/components/schemas/'):
-            schema_name = ref_path.split('/')[-1]
-            if schema_name in definitions:
-                # 递归解析引用的 schema
-                resolved = resolve_schema_ref(definitions[schema_name].copy(), definitions)
-                return resolved
-        return schema
-    
-    # 递归处理所有嵌套的对象
-    resolved = {}
-    for key, value in schema.items():
-        if isinstance(value, dict):
-            resolved[key] = resolve_schema_ref(value, definitions)
-        elif isinstance(value, list):
-            resolved[key] = [resolve_schema_ref(item, definitions) if isinstance(item, dict) else item for item in value]
-        else:
-            resolved[key] = value
-    
-    return resolved
-
-
-def simplify_operation_id(operation_id: str) -> str:
-    """简化 operationId"""
-    parts = operation_id.split('_')
-    try:
-        api_index = parts.index('api')
-        return '_'.join(parts[:api_index])
-    except ValueError:
-        return operation_id
-
-
 def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[str, Any]:
     """
     创建适配 Coze 平台的 OpenAPI 规范
     
-    根据用户要求：
-    - 不包含 components/schemas
-    - 不包含 components/examples  
-    - 只包含 paths，schema 内联
+    Args:
+        server_url: 服务器 URL，默认为本地地址
+    
+    Returns:
+        Coze 兼容的 OpenAPI 规范字典
     """
     # 获取原始 OpenAPI schema
     original_schema = app.openapi()
     
-    # 创建 Coze 格式的 schema (只有基本信息和 paths)
+    # 转换所有 schemas 为 OpenAPI 3.0.1 格式
+    original_schemas = original_schema.get('components', {}).get('schemas', {})
+    converted_schemas = convert_schema_to_openapi_3_0(original_schemas)
+    
+    # 创建 Coze 格式的 schema
     coze_schema = {
         'openapi': '3.0.1',  # Coze 要求 3.0.1
         'info': {
@@ -179,15 +155,26 @@ def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[
         'servers': [
             {'url': server_url}
         ],
-        'paths': {}
+        'paths': {},
+        'components': {
+            'examples': {},
+            'schemas': converted_schemas
+        }
     }
+    
+    # 选择关键端点添加到 Coze schema
+    key_endpoints = [
+        '/api/draft/create',
+        '/api/segment/audio/create',
+        '/api/segment/video/create',
+        '/api/segment/audio/{segment_id}/add_effect',
+    ]
     
     definitions = original_schema.get('components', {}).get('schemas', {})
     
-    # 处理所有路径
     for path, path_item in original_schema.get('paths', {}).items():
-        # 只处理 /api/draft/ 和 /api/segment/ 开头的路径
-        if not (path.startswith('/api/draft/') or path.startswith('/api/segment/')):
+        # 只处理关键端点
+        if path not in key_endpoints:
             continue
         
         coze_path_item = {}
@@ -200,70 +187,55 @@ def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[
             original_op_id = operation.get('operationId', '')
             simplified_op_id = simplify_operation_id(original_op_id)
             
-            # 创建 operation
+            # 获取请求和响应示例
+            req_example = {}
+            resp_example = {}
+            
+            # 从 requestBody 提取示例
+            if 'requestBody' in operation:
+                content = operation['requestBody'].get('content', {})
+                json_content = content.get('application/json', {})
+                if 'schema' in json_content:
+                    schema_ref = json_content['schema'].get('$ref', '')
+                    req_example = get_example_for_schema(schema_ref, definitions)
+            
+            # 从 responses 提取示例
+            if 'responses' in operation:
+                success_responses = [code for code in operation['responses'].keys() 
+                                   if code.startswith('2')]
+                if success_responses:
+                    success_response = operation['responses'][success_responses[0]]
+                    content = success_response.get('content', {})
+                    json_content = content.get('application/json', {})
+                    if 'schema' in json_content:
+                        schema_ref = json_content['schema'].get('$ref', '')
+                        resp_example = get_example_for_schema(schema_ref, definitions)
+            
+            # 添加到 components/examples
+            if simplified_op_id:
+                coze_schema['components']['examples'][simplified_op_id] = {
+                    'value': {
+                        'ReqExample': req_example,
+                        'RespExample': resp_example
+                    }
+                }
+            
+            # 创建简化的 operation
             coze_operation = {
                 'operationId': simplified_op_id,
                 'summary': operation.get('summary', ''),
                 'description': operation.get('description', ''),
+                'requestBody': operation.get('requestBody'),
+                'responses': operation.get('responses', {
+                    'default': {'description': ''}
+                }),
+                'parameters': operation.get('parameters', [])
             }
             
-            # 处理 parameters (路径参数等)
-            if 'parameters' in operation:
-                params = []
-                for param in operation['parameters']:
-                    param_copy = param.copy()
-                    # 解析 schema 中的引用
-                    if 'schema' in param_copy:
-                        param_copy['schema'] = resolve_schema_ref(param_copy['schema'], definitions)
-                        # 转换为 OpenAPI 3.0.1
-                        param_copy['schema'] = convert_schema_to_openapi_3_0(param_copy['schema'])
-                    params.append(param_copy)
-                coze_operation['parameters'] = params
+            # 移除 422 验证错误响应（Coze 不需要）
+            if '422' in coze_operation['responses']:
+                del coze_operation['responses']['422']
             
-            # 处理 requestBody
-            if 'requestBody' in operation:
-                request_body = operation['requestBody'].copy()
-                if 'content' in request_body:
-                    content_copy = {}
-                    for content_type, content_data in request_body['content'].items():
-                        content_data_copy = content_data.copy()
-                        if 'schema' in content_data_copy:
-                            # 解析并内联 schema
-                            schema_resolved = resolve_schema_ref(content_data_copy['schema'], definitions)
-                            # 转换为 OpenAPI 3.0.1
-                            schema_converted = convert_schema_to_openapi_3_0(schema_resolved)
-                            content_data_copy['schema'] = schema_converted
-                        content_copy[content_type] = content_data_copy
-                    request_body['content'] = content_copy
-                coze_operation['requestBody'] = request_body
-            
-            # 处理 responses
-            responses = {}
-            for status_code, response in operation.get('responses', {}).items():
-                # 跳过 422 验证错误
-                if status_code == '422':
-                    continue
-                
-                response_copy = response.copy()
-                if 'content' in response_copy:
-                    content_copy = {}
-                    for content_type, content_data in response_copy['content'].items():
-                        content_data_copy = content_data.copy()
-                        if 'schema' in content_data_copy:
-                            # 解析并内联 schema
-                            schema_resolved = resolve_schema_ref(content_data_copy['schema'], definitions)
-                            # 转换为 OpenAPI 3.0.1
-                            schema_converted = convert_schema_to_openapi_3_0(schema_resolved)
-                            content_data_copy['schema'] = schema_converted
-                        content_copy[content_type] = content_data_copy
-                    response_copy['content'] = content_copy
-                responses[status_code] = response_copy
-            
-            # 如果没有响应，添加默认响应
-            if not responses:
-                responses['default'] = {'description': ''}
-            
-            coze_operation['responses'] = responses
             coze_path_item[method] = coze_operation
         
         if coze_path_item:
@@ -307,14 +279,8 @@ def main():
     # 保存文件
     output_path = args.output
     if args.format == 'yaml':
-        # 使用自定义 Dumper 禁用 YAML 锚点和别名
-        class NoAliasDumper(yaml.SafeDumper):
-            def ignore_aliases(self, data):
-                return True
-        
         with open(output_path, 'w', encoding='utf-8') as f:
-            yaml.dump(coze_schema, f, Dumper=NoAliasDumper,
-                     allow_unicode=True, sort_keys=False, 
+            yaml.dump(coze_schema, f, allow_unicode=True, sort_keys=False, 
                      default_flow_style=False, indent=4)
         print(f"✅ YAML 文件已生成: {output_path}")
     else:
@@ -325,12 +291,13 @@ def main():
     # 统计信息
     print(f"\n📊 生成统计:")
     print(f"  - 端点数量: {len(coze_schema['paths'])}")
-    print(f"  - 注意：components/examples 将由 Coze 测试后自动生成")
+    print(f"  - 示例数量: {len(coze_schema['components']['examples'])}")
+    print(f"  - Schema 数量: {len(coze_schema['components']['schemas'])}")
     
     print(f"\n💡 使用提示:")
-    print(f"  1. 将生成的 {output_path} 文件导入到 Coze 平台")
-    print(f"  2. 在 Coze 中测试各个端点")
-    print(f"  3. Coze 会自动生成 examples")
+    print(f"  1. 如需使用 ngrok，请先启动 API 服务: python start_api.py")
+    print(f"  2. 获取 ngrok URL 后重新运行: python scripts/generate_coze_openapi.py --server-url https://your-ngrok-url.ngrok-free.app")
+    print(f"  3. 将生成的 {output_path} 文件导入到 Coze 平台")
 
 
 if __name__ == '__main__':
