@@ -156,3 +156,10 @@ Desktop.ini
 # Testing
 temp/
 *.db
+
+# Generated OpenAPI files (can be regenerated with scripts/generate_coze_openapi.py)
+openapi.json
+openapi.yaml
+coze_openapi.yaml
+coze_openapi.json
+debug_nested.yaml
