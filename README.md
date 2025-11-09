@@ -141,6 +141,33 @@ graph LR
 - 打开工作流，点击试运行
 - 在输入框中输入几句话，让 AI 生成内容
 
+### 🆕 端插件模式（无需公网 IP）
+
+**适合个人用户**：无需配置 ngrok 或云服务器，一键启动本地服务。
+
+**快速使用**：
+```bash
+# 1. 安装依赖
+pip install cozepy
+
+# 2. 设置环境变量
+export COZE_API_TOKEN="your-token"
+export COZE_BOT_ID="your-bot-id"
+
+# 3. 运行端插件服务
+python examples/local_plugin_bot_example.py
+
+# 4. 在 Coze 平台与 Bot 对话，自动生成草稿！
+```
+
+**优势**：
+- ✅ 无需公网 IP 地址
+- ✅ 不需要 ngrok 内网穿透
+- ✅ 本地应用主动连接云端
+- ✅ 开箱即用，适合个人使用
+
+**详细文档**：[端插件使用指南](docs/guides/LOCAL_PLUGIN_USAGE_GUIDE.md)
+
 ---
 
 ## 🔨 从源码开始构建 Coze2JianYing
