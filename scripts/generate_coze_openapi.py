@@ -21,6 +21,28 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app.api_main import app
 
 
+def remove_title_fields(schema: Any) -> Any:
+    """
+    移除 schema 中的所有 title 字段
+    
+    Coze 平台不接受 title 字段，会导致解析错误
+    """
+    if isinstance(schema, dict):
+        # 创建新字典，排除 title 字段
+        cleaned = {}
+        for key, value in schema.items():
+            if key == 'title':
+                # 跳过 title 字段
+                continue
+            # 递归处理嵌套的对象和数组
+            cleaned[key] = remove_title_fields(value)
+        return cleaned
+    elif isinstance(schema, list):
+        return [remove_title_fields(item) for item in schema]
+    else:
+        return schema
+
+
 def convert_schema_to_openapi_3_0(schema: Any) -> Any:
     """
     将 OpenAPI 3.1.0 schema 转换为 OpenAPI 3.0.1 兼容格式
@@ -30,6 +52,7 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
     2. 使用 minimum/maximum + exclusiveMinimum/exclusiveMaximum(boolean)
     3. type: 'null' 转换为 nullable: true
     4. anyOf: [type: X, type: 'null'] 转换为 type: X, nullable: true
+    5. 移除所有 title 字段（Coze 不支持）
     """
     if isinstance(schema, dict):
         converted = {}
@@ -55,9 +78,9 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
                     converted = convert_schema_to_openapi_3_0(non_null)
                     if isinstance(converted, dict):
                         converted['nullable'] = True
-                    # 保留其他字段（如 title, description）
+                    # 保留其他字段（除了 title, anyOf）
                     for key, value in schema.items():
-                        if key not in ['anyOf'] and key not in converted:
+                        if key not in ['anyOf', 'title'] and key not in converted:
                             converted[key] = convert_schema_to_openapi_3_0(value)
                     return converted
         
@@ -66,6 +89,10 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
             return {'nullable': True}
         
         for key, value in schema.items():
+            # 跳过 title 字段
+            if key == 'title':
+                continue
+            
             # 处理 exclusiveMinimum (OpenAPI 3.1: number, OpenAPI 3.0: boolean)
             if key == 'exclusiveMinimum' and isinstance(value, (int, float)):
                 converted['minimum'] = value
