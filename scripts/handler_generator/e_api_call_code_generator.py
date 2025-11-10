@@ -42,8 +42,10 @@ class APICallCodeGenerator:
         # 生成 API 调用代码
         api_call_params = []
         if target_id_name:
-            # 直接使用输入参数，不创建新变量
-            api_call_params.append(f"{{args.input.{target_id_name}}}")
+            # 使用变量引用：对于使用已有 ID 的函数，通过变量名引用之前创建的对象
+            # 例如：segment_{args.input.segment_id} 引用之前创建的 segment
+            object_type = target_id_name.replace('_id', '')  # draft_id -> draft, segment_id -> segment
+            api_call_params.append(f"{object_type}_{{args.input.{target_id_name}}}")
         if endpoint.request_model:
             api_call_params.append(f"req_{{generated_uuid}}")
         
@@ -52,9 +54,6 @@ class APICallCodeGenerator:
 # API 调用: {endpoint.func_name}
 # 时间: {{time.strftime('%Y-%m-%d %H:%M:%S')}}
 """
-        
-        # 不再生成 draft_id_{uuid} = "{uuid}" 这样的赋值
-        # 直接在 API 调用中使用 args.input 的值
         
         if request_construction:
             api_call_code += request_construction
@@ -69,16 +68,21 @@ resp_{{generated_uuid}} = await {endpoint.func_name}()
 """
         
         # 检查 output 是否包含 draft_id 或 segment_id
+        # 如果是 create 类型的函数，需要保存创建的对象ID以便后续引用
         has_output_draft_id = any(f['name'] == 'draft_id' for f in output_fields)
         has_output_segment_id = any(f['name'] == 'segment_id' for f in output_fields)
         
         if has_output_draft_id:
+            # 保存为 draft_{uuid} 而不是 draft_id_{uuid}
+            # 这样后续函数可以通过 draft_{uuid} 引用这个草稿
             api_call_code += f"""
-draft_id_{{generated_uuid}} = resp_{{generated_uuid}}.draft_id
+draft_{{generated_uuid}} = resp_{{generated_uuid}}.draft_id
 """
         if has_output_segment_id:
+            # 保存为 segment_{uuid} 而不是 segment_id_{uuid}
+            # 这样后续函数可以通过 segment_{uuid} 引用这个片段
             api_call_code += f"""
-segment_id_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
+segment_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
 """
         
         api_call_code += '''\"\"\"

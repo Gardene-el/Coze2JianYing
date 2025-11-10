@@ -26,14 +26,16 @@ class HandlerFunctionGenerator:
         return_values = []
         for field in output_fields:
             field_name = field['name']
+            # 对于 draft_id 和 segment_id，返回纯 UUID
+            # 这样在后续调用中可以通过 draft_{uuid} 或 segment_{uuid} 引用
             if field_name == 'draft_id' and target_id_type == 'draft_id':
-                return_values.append(f'        "{field_name}": f"draft_{{generated_uuid}}"')
+                return_values.append(f'        "{field_name}": f"{{generated_uuid}}"')
             elif field_name == 'segment_id' and target_id_type == 'segment_id':
-                return_values.append(f'        "{field_name}": f"segment_{{generated_uuid}}"')
+                return_values.append(f'        "{field_name}": f"{{generated_uuid}}"')
             elif field_name == 'draft_id':
-                return_values.append(f'        "{field_name}": f"draft_{{generated_uuid}}"')
+                return_values.append(f'        "{field_name}": f"{{generated_uuid}}"')
             elif field_name == 'segment_id':
-                return_values.append(f'        "{field_name}": f"segment_{{generated_uuid}}"')
+                return_values.append(f'        "{field_name}": f"{{generated_uuid}}"')
             elif field_name == 'success':
                 return_values.append(f'        "{field_name}": True')
             elif field_name == 'message':
