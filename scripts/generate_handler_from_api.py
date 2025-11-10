@@ -31,6 +31,9 @@ def generate_complete_handler(endpoint, input_output_gen, api_call_gen, handler_
     # C 脚本：获取 Output 字段
     output_fields = input_output_gen.get_output_fields(endpoint)
     
+    # C 脚本：生成 Output 类
+    output_class = input_output_gen.generate_output_class(endpoint, output_fields)
+    
     # E 脚本：生成 API 调用代码
     api_call_code = api_call_gen.generate_api_call_code(endpoint, output_fields)
     
@@ -57,8 +60,8 @@ from runtime import Args
 {input_class}
 
 
-# Output 现在返回 Dict[str, Any] 而不是 NamedTuple
-# 这确保了在 Coze 平台中正确的 JSON 对象序列化
+# Output 类型定义
+{output_class}
 
 
 def ensure_coze2jianying_file() -> str:

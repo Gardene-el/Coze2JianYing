@@ -65,3 +65,53 @@ class InputOutputGenerator:
         if endpoint.response_model:
             return self.schema_extractor.get_schema_fields(endpoint.response_model)
         return []
+    
+    def generate_output_class(self, endpoint: APIEndpointInfo, output_fields: List[Dict[str, Any]]) -> str:
+        """生成 Output 类"""
+        if not output_fields:
+            # 如果没有输出字段，使用基本的 success 和 message
+            output_fields = [
+                {'name': 'success', 'type': 'bool', 'default': 'True'},
+                {'name': 'message', 'type': 'str', 'default': '"操作成功"'}
+            ]
+        
+        fields = []
+        for field in output_fields:
+            field_name = field['name']
+            field_type = field['type']
+            
+            # 简化复杂类型
+            if '[' in field_type:
+                if 'Optional' in field_type:
+                    field_type = 'Optional[Any]'
+                elif 'List' in field_type:
+                    field_type = 'List[Any]'
+                else:
+                    field_type = 'Any'
+            
+            # 所有字段都设置为可选，带默认值
+            if 'Optional' not in field_type:
+                field_type = f'Optional[{field_type}]'
+            
+            # 设置合理的默认值
+            default = field.get('default', 'None')
+            if default == '...' or default == 'Ellipsis':
+                # 根据字段类型设置合理的默认值
+                if 'int' in field_type.lower():
+                    default = '0'
+                elif 'str' in field_type.lower():
+                    default = '""'
+                elif 'bool' in field_type.lower():
+                    default = 'False'
+                elif 'list' in field_type.lower():
+                    default = '[]'
+                else:
+                    default = 'None'
+            
+            fields.append(f"    {field_name}: {field_type} = {default}")
+        
+        class_def = f"class Output(NamedTuple):\n"
+        class_def += f'    """{endpoint.func_name} 工具的输出参数"""\n'
+        class_def += '\n'.join(fields)
+        
+        return class_def

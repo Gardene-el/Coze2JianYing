@@ -59,11 +59,30 @@ class HandlerFunctionGenerator:
                 return_values.append(f'        "{field_name}": {default}')
         
         if not return_values:
-            return_values.append('        "success": True')
+            return_values.append('success=True')
+            return_values.append('message="操作成功"')
         
-        return_dict = ",\n".join(return_values)
+        # 生成 Output() 构造调用，使用关键字参数
+        output_params = []
+        for val in return_values:
+            # 将 "field": value 格式转换为 field=value 格式
+            if '": ' in val:
+                # 移除前导空格和引号
+                val = val.strip()
+                if val.startswith('"'):
+                    # 格式: "field": value
+                    parts = val.split('": ', 1)
+                    field_name = parts[0].strip('"')
+                    field_value = parts[1]
+                    output_params.append(f"{field_name}={field_value}")
+                else:
+                    output_params.append(val)
+            else:
+                output_params.append(val)
         
-        handler_function = f'''def handler(args: Args[Input]) -> Dict[str, Any]:
+        output_construction = ", ".join(output_params)
+        
+        handler_function = f'''def handler(args: Args[Input]) -> Output:
     """
     {endpoint.func_name} 的主处理函数
     
@@ -71,7 +90,7 @@ class HandlerFunctionGenerator:
         args: Input arguments
         
     Returns:
-        Dict containing response data
+        Output NamedTuple containing response data
     """
     logger = getattr(args, 'logger', None)
     
@@ -90,9 +109,7 @@ class HandlerFunctionGenerator:
         if logger:
             logger.info(f"{endpoint.func_name} 调用成功")
         
-        return {{
-{return_dict}
-        }}
+        return Output({output_construction})
         
     except Exception as e:
         error_msg = f"调用 {endpoint.func_name} 时发生错误: {{str(e)}}"
@@ -101,10 +118,7 @@ class HandlerFunctionGenerator:
             import traceback
             logger.error(f"Traceback: {{traceback.format_exc()}}")
         
-        return {{
-            "success": False,
-            "message": error_msg
-        }}
+        return Output(success=False, message=error_msg)
 '''
         
         return handler_function
