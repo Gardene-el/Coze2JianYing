@@ -1,0 +1,129 @@
+"""
+create_draft 工具处理器
+
+自动从 API 端点生成: /create
+源文件: /home/runner/work/Coze2JianYing/Coze2JianYing/app/api/draft_routes.py
+"""
+
+import os
+import json
+import uuid
+import time
+from typing import NamedTuple, Dict, Any, Optional, List
+from runtime import Args
+
+
+# Input 类型定义
+class Input(NamedTuple):
+    """create_draft 工具的输入参数"""
+    draft_name: Optional[str] = "Coze剪映项目"
+    width: Optional[int] = 1920
+    height: Optional[int] = 1080
+    fps: Optional[int] = 30
+    allow_replace: Optional[bool] = True
+
+
+# Output 现在返回 Dict[str, Any] 而不是 NamedTuple
+# 这确保了在 Coze 平台中正确的 JSON 对象序列化
+
+
+def ensure_coze2jianying_file() -> str:
+    """
+    确保 /tmp 目录下存在 coze2jianying.py 文件
+    
+    Returns:
+        coze2jianying.py 文件的完整路径
+    """
+    file_path = "/tmp/coze2jianying.py"
+    
+    if not os.path.exists(file_path):
+        # 创建初始文件内容
+        initial_content = """# Coze2JianYing API 调用记录
+# 此文件由 Coze 工具自动生成和更新
+# 记录所有通过 Coze 工具调用的 API 操作
+
+import asyncio
+from app.schemas.segment_schemas import *
+
+# API 调用记录将追加在下方
+"""
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(initial_content)
+    
+    return file_path
+
+
+def append_api_call_to_file(file_path: str, api_call_code: str):
+    """
+    将 API 调用代码追加到 coze2jianying.py 文件
+    
+    Args:
+        file_path: coze2jianying.py 文件路径
+        api_call_code: 要追加的 API 调用代码
+    """
+    with open(file_path, 'a', encoding='utf-8') as f:
+        f.write("\n" + api_call_code + "\n")
+
+
+def handler(args: Args[Input]) -> Dict[str, Any]:
+    """
+    create_draft 的主处理函数
+    
+    Args:
+        args: Input arguments
+        
+    Returns:
+        Dict containing response data
+    """
+    logger = getattr(args, 'logger', None)
+    
+    if logger:
+        logger.info(f"调用 create_draft，参数: {args.input}")
+    
+    try:
+        # 生成唯一 UUID
+        generated_uuid = str(uuid.uuid4())
+        
+        if logger:
+            logger.info(f"生成 UUID: {generated_uuid}")
+
+    # 生成 API 调用代码
+    api_call = f"""
+# API 调用: create_draft
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+    # 构造 request 对象
+    req_{generated_uuid} = CreateDraftRequest(draft_name=args.input.draft_name, width=args.input.width, height=args.input.height, fps=args.input.fps, allow_replace=args.input.allow_replace)
+
+resp_{generated_uuid} = await create_draft(req_{generated_uuid})
+
+draft_id_{generated_uuid} = resp_{generated_uuid}.draft_id
+"""
+    
+    # 写入 API 调用到文件
+    coze_file = ensure_coze2jianying_file()
+    append_api_call_to_file(coze_file, api_call)
+
+        
+        if logger:
+            logger.info(f"create_draft 调用成功")
+        
+        return {
+        "draft_id": f"draft_{generated_uuid}",
+        "success": True,
+        "message": "操作成功",
+        "timestamp": None
+        }
+        
+    except Exception as e:
+        error_msg = f"调用 create_draft 时发生错误: {str(e)}"
+        if logger:
+            logger.error(error_msg)
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        return {
+            "success": False,
+            "message": error_msg
+        }
+
