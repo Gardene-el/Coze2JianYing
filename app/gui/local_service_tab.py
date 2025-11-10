@@ -122,81 +122,28 @@ class LocalServiceTab(BaseTab):
         # 测试连接按钮
         self.test_coze_btn = ttk.Button(self.coze_frame, text="测试连接", command=self._test_coze_connection)
 
-        # 端插件服务管理区域
-        self.plugin_frame = ttk.LabelFrame(self.frame, text="端插件服务管理", padding="10")
-        
-        # 运行模式选择
-        self.mode_frame = ttk.Frame(self.plugin_frame)
-        self.mode_label = ttk.Label(self.mode_frame, text="运行模式:")
-        self.mode_var = tk.StringVar(value="bot")
-        self.mode_bot_radio = ttk.Radiobutton(
-            self.mode_frame, 
-            text="Bot 模式（对话驱动）", 
-            variable=self.mode_var, 
-            value="bot"
+        # 功能说明区域
+        self.feature_frame = ttk.LabelFrame(self.frame, text="本地服务不可用", padding="10")
+        self.feature_label = ttk.Label(
+            self.feature_frame,
+            text="经过详细调查，端侧插件（Local Plugin）无法在 Coze 工作流中使用。\n\n"
+                 "调查结果：\n"
+                 "• Bot Chat 模式：✅ 支持端侧插件，有完整的 API（chat.stream + REQUIRES_ACTION 事件）\n"
+                 "• Workflow 模式：❌ 不支持端侧插件，没有工具调用机制\n\n"
+                 "技术原因：\n"
+                 "1. Workflow 没有 REQUIRES_ACTION 事件，只有 MESSAGE、ERROR、DONE、INTERRUPT\n"
+                 "2. INTERRUPT 事件用于用户交互（如问答节点），不是工具调用\n"
+                 "3. Workflow 缺少类似 submit_tool_outputs() 的工具结果提交方法\n"
+                 "4. cozepy SDK 文档和示例中只有 Bot Chat 的端侧插件用法\n\n"
+                 "建议方案：\n"
+                 "• 使用 Bot Chat 代替工作流（Bot 可以配置工作流且支持端侧插件）\n"
+                 "• 使用云端服务模式（FastAPI + 公网访问），切换到\"云端服务\"标签页\n"
+                 "• 将本地功能封装为 HTTP 服务，通过工作流的 API 节点调用\n\n"
+                 "详细调查报告：docs/analysis/LOCAL_PLUGIN_NOT_SUPPORTED.md",
+            justify=tk.LEFT,
+            wraplength=650,
+            foreground="red"
         )
-        self.mode_workflow_radio = ttk.Radiobutton(
-            self.mode_frame, 
-            text="Workflow 模式（流程驱动）", 
-            variable=self.mode_var, 
-            value="workflow"
-        )
-        
-        # Bot ID / Workflow ID 输入（根据模式切换）
-        self.target_id_frame = ttk.Frame(self.plugin_frame)
-        self.target_id_label = ttk.Label(self.target_id_frame, text="Bot ID:")
-        self.target_id_var = tk.StringVar(value="")
-        self.target_id_entry = ttk.Entry(self.target_id_frame, textvariable=self.target_id_var, width=40)
-        
-        # 绑定模式切换事件
-        self.mode_var.trace_add('write', self._on_mode_changed)
-        
-        # 服务状态显示
-        self.plugin_status_frame = ttk.Frame(self.plugin_frame)
-        self.plugin_status_label = ttk.Label(self.plugin_status_frame, text="服务状态: 未启动", font=("Arial", 10, "bold"))
-        self.plugin_status_indicator = tk.Canvas(self.plugin_status_frame, width=20, height=20, highlightthickness=0)
-        self._update_plugin_status_indicator(False)
-        
-        # 服务控制按钮
-        self.plugin_control_frame = ttk.Frame(self.plugin_frame)
-        self.start_plugin_btn = ttk.Button(
-            self.plugin_control_frame, 
-            text="启动端插件服务", 
-            command=self._start_plugin_service
-        )
-        self.stop_plugin_btn = ttk.Button(
-            self.plugin_control_frame, 
-            text="停止服务", 
-            command=self._stop_plugin_service, 
-            state=tk.DISABLED
-        )
-        
-        # 服务日志显示
-        self.plugin_log_frame = ttk.LabelFrame(self.plugin_frame, text="服务日志", padding="5")
-        self.plugin_log_text = tk.Text(
-            self.plugin_log_frame,
-            height=10,
-            wrap=tk.WORD,
-            font=("Consolas", 9),
-            state=tk.DISABLED,
-            bg="#1e1e1e",
-            fg="#d4d4d4"
-        )
-        self.plugin_log_scrollbar = ttk.Scrollbar(
-            self.plugin_log_frame, 
-            orient=tk.VERTICAL, 
-            command=self.plugin_log_text.yview
-        )
-        self.plugin_log_text.config(yscrollcommand=self.plugin_log_scrollbar.set)
-        self.clear_plugin_log_btn = ttk.Button(
-            self.plugin_log_frame, 
-            text="清空日志", 
-            command=self._clear_plugin_log
-        )
-        
-        # 端插件服务实例
-        self.plugin_service = None
-        self.plugin_service_running = False
 
         # 底部状态栏
         self.status_var = tk.StringVar(value="就绪")
@@ -242,37 +189,9 @@ class LocalServiceTab(BaseTab):
         
         self.coze_frame.columnconfigure(1, weight=1)
 
-        # 端插件服务管理区域
-        self.plugin_frame.grid(row=3, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
-        
-        # 运行模式
-        self.mode_frame.pack(fill=tk.X, pady=(0, 10))
-        self.mode_label.pack(side=tk.LEFT, padx=(0, 10))
-        self.mode_bot_radio.pack(side=tk.LEFT, padx=(0, 10))
-        self.mode_workflow_radio.pack(side=tk.LEFT)
-        
-        # Target ID
-        self.target_id_frame.pack(fill=tk.X, pady=(0, 10))
-        self.target_id_label.pack(side=tk.LEFT, padx=(0, 5))
-        self.target_id_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        # 服务状态
-        self.plugin_status_frame.pack(fill=tk.X, pady=(0, 10))
-        self.plugin_status_indicator.pack(side=tk.LEFT, padx=(0, 10))
-        self.plugin_status_label.pack(side=tk.LEFT)
-        
-        # 服务控制按钮
-        self.plugin_control_frame.pack(fill=tk.X, pady=(0, 10))
-        self.start_plugin_btn.pack(side=tk.LEFT, padx=(0, 5))
-        self.stop_plugin_btn.pack(side=tk.LEFT)
-        
-        # 服务日志
-        self.plugin_log_frame.pack(fill=tk.BOTH, expand=True)
-        log_content_frame = ttk.Frame(self.plugin_log_frame)
-        log_content_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
-        self.plugin_log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, in_=log_content_frame)
-        self.plugin_log_scrollbar.pack(side=tk.RIGHT, fill=tk.Y, in_=log_content_frame)
-        self.clear_plugin_log_btn.pack(side=tk.RIGHT)
+        # 功能说明区域
+        self.feature_frame.grid(row=3, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        self.feature_label.pack(fill=tk.BOTH, expand=True)
 
         # 底部状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
@@ -312,157 +231,6 @@ class LocalServiceTab(BaseTab):
             self.token_entry.config(show="")
         else:
             self.token_entry.config(show="*")
-    
-    def _on_mode_changed(self, *args):
-        """模式切换事件处理"""
-        mode = self.mode_var.get()
-        if mode == "bot":
-            self.target_id_label.config(text="Bot ID:")
-        else:
-            self.target_id_label.config(text="Workflow ID:")
-    
-    def _update_plugin_status_indicator(self, running: bool):
-        """更新端插件服务状态指示器"""
-        self.plugin_status_indicator.delete("all")
-        color = "green" if running else "red"
-        self.plugin_status_indicator.create_oval(2, 2, 18, 18, fill=color, outline=color)
-    
-    def _append_to_plugin_log(self, message: str):
-        """添加信息到端插件日志"""
-        self.plugin_log_text.config(state=tk.NORMAL)
-        self.plugin_log_text.insert(tk.END, message + "\n")
-        self.plugin_log_text.see(tk.END)
-        self.plugin_log_text.config(state=tk.DISABLED)
-    
-    def _clear_plugin_log(self):
-        """清空端插件日志"""
-        self.plugin_log_text.config(state=tk.NORMAL)
-        self.plugin_log_text.delete(1.0, tk.END)
-        self.plugin_log_text.config(state=tk.DISABLED)
-        self.logger.info("端插件日志已清空")
-    
-    def _start_plugin_service(self):
-        """启动端插件服务"""
-        if self.plugin_service_running:
-            messagebox.showwarning("警告", "服务已在运行中！")
-            return
-        
-        # 检查 cozepy 是否可用
-        if not COZEPY_AVAILABLE:
-            messagebox.showerror(
-                "错误", 
-                "cozepy SDK 未安装。\n\n请运行: pip install cozepy"
-            )
-            self.logger.error("cozepy SDK 未安装")
-            return
-        
-        # 检查配置
-        token = self.token_var.get().strip()
-        if not token:
-            messagebox.showwarning("警告", "请先输入 API Token")
-            return
-        
-        target_id = self.target_id_var.get().strip()
-        if not target_id:
-            mode_name = "Bot ID" if self.mode_var.get() == "bot" else "Workflow ID"
-            messagebox.showwarning("警告", f"请先输入 {mode_name}")
-            return
-        
-        base_url = self.base_url_var.get()
-        mode = self.mode_var.get()
-        
-        self.logger.info(f"启动端插件服务 ({mode} 模式)...")
-        self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 正在启动端插件服务...")
-        self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 模式: {mode}")
-        self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] Target ID: {target_id}")
-        
-        try:
-            # 导入端插件服务
-            from app.services.local_plugin_service import (
-                LocalPluginService, 
-                create_draft_tool_handler
-            )
-            
-            # 创建服务实例
-            self.plugin_service = LocalPluginService(
-                coze_token=token,
-                base_url=base_url,
-                logger=self.logger
-            )
-            
-            # 注册草稿生成工具
-            draft_handler = create_draft_tool_handler(self.draft_generator)
-            self.plugin_service.register_tool("generate_draft", draft_handler)
-            
-            self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 已注册工具: generate_draft")
-            
-            # 根据模式启动服务
-            success = False
-            if mode == "bot":
-                success = self.plugin_service.start_bot_mode(
-                    bot_id=target_id,
-                    user_id="local-user"
-                )
-            else:  # workflow
-                success = self.plugin_service.start_workflow_mode(
-                    workflow_id=target_id,
-                    parameters={}
-                )
-            
-            if success:
-                self.plugin_service_running = True
-                self._update_plugin_status_indicator(True)
-                self.plugin_status_label.config(text=f"服务状态: 运行中 ({mode} 模式)")
-                self.start_plugin_btn.config(state=tk.DISABLED)
-                self.stop_plugin_btn.config(state=tk.NORMAL)
-                
-                self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] ✓ 服务已启动")
-                self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] " + "=" * 60)
-                
-                if mode == "bot":
-                    self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 💡 请在 Coze 平台与 Bot 对话")
-                    self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 当 Bot 调用工具时，本地会自动执行")
-                else:
-                    self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 💡 Workflow 将自动执行")
-                    self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 完成后服务将自动停止")
-                
-                self.status_var.set(f"端插件服务运行中 ({mode} 模式)")
-                self.logger.info("端插件服务启动成功")
-            else:
-                self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] ✗ 服务启动失败")
-                messagebox.showerror("启动失败", "无法启动端插件服务")
-        
-        except Exception as e:
-            self.logger.error(f"启动端插件服务失败: {e}", exc_info=True)
-            self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] ✗ 错误: {e}")
-            messagebox.showerror("启动失败", f"无法启动端插件服务:\n{e}")
-    
-    def _stop_plugin_service(self):
-        """停止端插件服务"""
-        if not self.plugin_service_running:
-            messagebox.showwarning("警告", "服务未运行！")
-            return
-        
-        self.logger.info("停止端插件服务...")
-        self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] 正在停止服务...")
-        
-        try:
-            if self.plugin_service:
-                self.plugin_service.stop()
-            
-            self.plugin_service_running = False
-            self._update_plugin_status_indicator(False)
-            self.plugin_status_label.config(text="服务状态: 未启动")
-            self.start_plugin_btn.config(state=tk.NORMAL)
-            self.stop_plugin_btn.config(state=tk.DISABLED)
-            
-            self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] ✓ 服务已停止")
-            self.status_var.set("就绪")
-            self.logger.info("端插件服务已停止")
-        
-        except Exception as e:
-            self.logger.error(f"停止端插件服务时出错: {e}", exc_info=True)
-            self._append_to_plugin_log(f"[{time.strftime('%H:%M:%S')}] ✗ 停止时出错: {e}")
 
     def _test_coze_connection(self):
         """测试 Coze API 连接（端插件模式）"""
@@ -544,14 +312,6 @@ class LocalServiceTab(BaseTab):
 
     def cleanup(self):
         """清理标签页资源"""
-        # 停止端插件服务
-        if self.plugin_service_running and self.plugin_service:
-            self.logger.info("清理时停止端插件服务")
-            try:
-                self.plugin_service.stop()
-            except Exception as e:
-                self.logger.warning(f"清理时停止端插件服务出错: {e}")
-        
         super().cleanup()
         # 清理标签页特定的资源
         self.output_folder = None
@@ -561,7 +321,3 @@ class LocalServiceTab(BaseTab):
         self.coze_api_token = None
         self.coze_workflow_id = None
         self.coze_client = None
-        
-        # 清理端插件服务
-        self.plugin_service = None
-        self.plugin_service_running = False
