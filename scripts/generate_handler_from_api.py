@@ -394,8 +394,8 @@ def append_api_call_to_file(file_path: str, api_call_code: str):
                 params.append(f"{field['name']}=args.input.{field['name']}")
             
             request_construction = f"""
-    # 构造 request 对象
-    req_{{generated_uuid}} = {endpoint.request_model}({', '.join(params)})
+        # 构造 request 对象
+        req_{{generated_uuid}} = {endpoint.request_model}({', '.join(params)})
 """
         
         # 生成 API 调用代码
@@ -405,9 +405,8 @@ def append_api_call_to_file(file_path: str, api_call_code: str):
         if endpoint.request_model:
             api_call_params.append(f"req_{{generated_uuid}}")
         
-        api_call_code = f"""
-    # 生成 API 调用代码
-    api_call = f\"\"\"
+        api_call_code = f"""        # 生成 API 调用代码
+        api_call = f\"\"\"
 # API 调用: {endpoint.func_name}
 # 时间: {{time.strftime('%Y-%m-%d %H:%M:%S')}}
 """
@@ -443,10 +442,10 @@ segment_id_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
 """
         
         api_call_code += '''\"\"\"
-    
-    # 写入 API 调用到文件
-    coze_file = ensure_coze2jianying_file()
-    append_api_call_to_file(coze_file, api_call)
+        
+        # 写入 API 调用到文件
+        coze_file = ensure_coze2jianying_file()
+        append_api_call_to_file(coze_file, api_call)
 '''
         
         # 生成返回值
@@ -511,6 +510,7 @@ segment_id_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
         
         if logger:
             logger.info(f"生成 UUID: {{generated_uuid}}")
+        
 {api_call_code}
         
         if logger:

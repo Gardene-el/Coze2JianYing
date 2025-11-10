@@ -82,9 +82,9 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         
         if logger:
             logger.info(f"生成 UUID: {generated_uuid}")
-
-    # 生成 API 调用代码
-    api_call = f"""
+        
+        # 生成 API 调用代码
+        api_call = f"""
 # API 调用: save_draft
 # 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
@@ -92,10 +92,10 @@ draft_id_{generated_uuid} = "{generated_uuid}"
 
 resp_{generated_uuid} = await save_draft(draft_id_{generated_uuid})
 """
-    
-    # 写入 API 调用到文件
-    coze_file = ensure_coze2jianying_file()
-    append_api_call_to_file(coze_file, api_call)
+        
+        # 写入 API 调用到文件
+        coze_file = ensure_coze2jianying_file()
+        append_api_call_to_file(coze_file, api_call)
 
         
         if logger:

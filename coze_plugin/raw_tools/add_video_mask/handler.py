@@ -89,23 +89,23 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         
         if logger:
             logger.info(f"生成 UUID: {generated_uuid}")
-
-    # 生成 API 调用代码
-    api_call = f"""
+        
+        # 生成 API 调用代码
+        api_call = f"""
 # API 调用: add_video_mask
 # 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
 segment_id_{generated_uuid} = "{generated_uuid}"
 
-    # 构造 request 对象
-    req_{generated_uuid} = AddMaskRequest(mask_type=args.input.mask_type, center_x=args.input.center_x, center_y=args.input.center_y, size=args.input.size, feather=args.input.feather, invert=args.input.invert, rotation=args.input.rotation)
+        # 构造 request 对象
+        req_{generated_uuid} = AddMaskRequest(mask_type=args.input.mask_type, center_x=args.input.center_x, center_y=args.input.center_y, size=args.input.size, feather=args.input.feather, invert=args.input.invert, rotation=args.input.rotation)
 
 resp_{generated_uuid} = await add_video_mask(segment_id_{generated_uuid}, req_{generated_uuid})
 """
-    
-    # 写入 API 调用到文件
-    coze_file = ensure_coze2jianying_file()
-    append_api_call_to_file(coze_file, api_call)
+        
+        # 写入 API 调用到文件
+        coze_file = ensure_coze2jianying_file()
+        append_api_call_to_file(coze_file, api_call)
 
         
         if logger:

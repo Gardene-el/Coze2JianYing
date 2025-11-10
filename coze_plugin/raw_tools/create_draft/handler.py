@@ -86,23 +86,23 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         
         if logger:
             logger.info(f"生成 UUID: {generated_uuid}")
-
-    # 生成 API 调用代码
-    api_call = f"""
+        
+        # 生成 API 调用代码
+        api_call = f"""
 # API 调用: create_draft
 # 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
-    # 构造 request 对象
-    req_{generated_uuid} = CreateDraftRequest(draft_name=args.input.draft_name, width=args.input.width, height=args.input.height, fps=args.input.fps, allow_replace=args.input.allow_replace)
+        # 构造 request 对象
+        req_{generated_uuid} = CreateDraftRequest(draft_name=args.input.draft_name, width=args.input.width, height=args.input.height, fps=args.input.fps, allow_replace=args.input.allow_replace)
 
 resp_{generated_uuid} = await create_draft(req_{generated_uuid})
 
 draft_id_{generated_uuid} = resp_{generated_uuid}.draft_id
 """
-    
-    # 写入 API 调用到文件
-    coze_file = ensure_coze2jianying_file()
-    append_api_call_to_file(coze_file, api_call)
+        
+        # 写入 API 调用到文件
+        coze_file = ensure_coze2jianying_file()
+        append_api_call_to_file(coze_file, api_call)
 
         
         if logger:

@@ -84,23 +84,23 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         
         if logger:
             logger.info(f"生成 UUID: {generated_uuid}")
-
-    # 生成 API 调用代码
-    api_call = f"""
+        
+        # 生成 API 调用代码
+        api_call = f"""
 # API 调用: add_video_filter
 # 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
 segment_id_{generated_uuid} = "{generated_uuid}"
 
-    # 构造 request 对象
-    req_{generated_uuid} = AddFilterRequest(filter_type=args.input.filter_type, intensity=args.input.intensity)
+        # 构造 request 对象
+        req_{generated_uuid} = AddFilterRequest(filter_type=args.input.filter_type, intensity=args.input.intensity)
 
 resp_{generated_uuid} = await add_video_filter(segment_id_{generated_uuid}, req_{generated_uuid})
 """
-    
-    # 写入 API 调用到文件
-    coze_file = ensure_coze2jianying_file()
-    append_api_call_to_file(coze_file, api_call)
+        
+        # 写入 API 调用到文件
+        coze_file = ensure_coze2jianying_file()
+        append_api_call_to_file(coze_file, api_call)
 
         
         if logger:

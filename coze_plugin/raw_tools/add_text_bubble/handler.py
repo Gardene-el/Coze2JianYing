@@ -84,23 +84,23 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
         
         if logger:
             logger.info(f"生成 UUID: {generated_uuid}")
-
-    # 生成 API 调用代码
-    api_call = f"""
+        
+        # 生成 API 调用代码
+        api_call = f"""
 # API 调用: add_text_bubble
 # 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
 segment_id_{generated_uuid} = "{generated_uuid}"
 
-    # 构造 request 对象
-    req_{generated_uuid} = AddBubbleRequest(effect_id=args.input.effect_id, resource_id=args.input.resource_id)
+        # 构造 request 对象
+        req_{generated_uuid} = AddBubbleRequest(effect_id=args.input.effect_id, resource_id=args.input.resource_id)
 
 resp_{generated_uuid} = await add_text_bubble(segment_id_{generated_uuid}, req_{generated_uuid})
 """
-    
-    # 写入 API 调用到文件
-    coze_file = ensure_coze2jianying_file()
-    append_api_call_to_file(coze_file, api_call)
+        
+        # 写入 API 调用到文件
+        coze_file = ensure_coze2jianying_file()
+        append_api_call_to_file(coze_file, api_call)
 
         
         if logger:
