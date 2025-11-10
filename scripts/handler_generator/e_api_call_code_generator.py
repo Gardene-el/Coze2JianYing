@@ -31,7 +31,8 @@ class APICallCodeGenerator:
             request_fields = self.schema_extractor.get_schema_fields(endpoint.request_model)
             params = []
             for field in request_fields:
-                params.append(f"{field['name']}=args.input.{field['name']}")
+                # 使用 {{args.input.field}} 来在生成的 f-string 中正确引用值
+                params.append(f"{field['name']}={{args.input.{field['name']}}}")
             
             request_construction = f"""
         # 构造 request 对象
@@ -41,7 +42,8 @@ class APICallCodeGenerator:
         # 生成 API 调用代码
         api_call_params = []
         if target_id_name:
-            api_call_params.append(f"{target_id_name}_{{generated_uuid}}")
+            # 直接使用输入参数，不创建新变量
+            api_call_params.append(f"{{args.input.{target_id_name}}}")
         if endpoint.request_model:
             api_call_params.append(f"req_{{generated_uuid}}")
         
@@ -51,10 +53,8 @@ class APICallCodeGenerator:
 # 时间: {{time.strftime('%Y-%m-%d %H:%M:%S')}}
 """
         
-        if target_id_name:
-            api_call_code += f"""
-{target_id_name}_{{generated_uuid}} = "{{generated_uuid}}"
-"""
+        # 不再生成 draft_id_{uuid} = "{uuid}" 这样的赋值
+        # 直接在 API 调用中使用 args.input 的值
         
         if request_construction:
             api_call_code += request_construction
