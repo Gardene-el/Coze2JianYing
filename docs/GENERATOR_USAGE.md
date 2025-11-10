@@ -2,10 +2,11 @@
 
 ## 概述
 
-`generate_handler_from_api.py` 是一个自动化工具，用于从 FastAPI 端点生成 Coze 平台兼容的 handler.py 文件。该工具实现了 Issue #162 中提出的 A-E 脚本逻辑。
+`generate_handler_from_api.py` 是一个模块化的自动化工具，用于从 FastAPI 端点生成 Coze 平台兼容的 handler.py 文件。该工具实现了 Issue #162 中提出的 A-E 脚本逻辑。
 
 ## 功能特点
 
+- **模块化设计**: A-E 脚本分别实现在独立模块中，便于管理和维护
 - **自动扫描**: 自动扫描 `/app/api` 目录下所有 POST API 端点
 - **智能解析**: 解析 Pydantic schemas，提取请求和响应模型
 - **完整生成**: 为每个 API 端点生成完整的 Coze handler.py 和 README.md
@@ -14,7 +15,24 @@
 
 ## 目录结构
 
-生成的工具保存在以下目录：
+### 脚本模块结构
+
+```
+scripts/
+├── generate_handler_from_api.py      # 主程序
+└── handler_generator/                # 生成器模块包
+    ├── __init__.py                   # 包初始化
+    ├── README.md                     # 模块文档
+    ├── api_endpoint_info.py          # 数据模型
+    ├── a_api_scanner.py              # A脚本：扫描API
+    ├── b_folder_creator.py           # B脚本：创建文件夹
+    ├── c_input_output_generator.py   # C脚本：生成Input/Output
+    ├── d_handler_function_generator.py # D脚本：生成handler函数
+    ├── e_api_call_code_generator.py  # E脚本：生成API调用代码
+    └── schema_extractor.py           # 辅助：Schema提取器
+```
+
+### 生成的工具目录
 
 ```
 coze_plugin/
@@ -51,33 +69,51 @@ python scripts/test_generated_handlers.py
 
 ## 生成器逻辑说明
 
-根据 Issue #162 中的 A-E 脚本逻辑实现：
+根据 Issue #162 中的 A-E 脚本逻辑实现，现已模块化为独立文件：
 
-### A 脚本: 扫描 API 端点
+### A 脚本: 扫描 API 端点 (`a_api_scanner.py`)
 - 扫描 `/app/api` 下所有 `*_routes.py` 文件
 - 识别使用 `@router.post` 装饰器的异步函数
 - 提取端点路径、请求/响应模型、路径参数等信息
+- **主要类**: `APIScanner`
 
-### B 脚本: 创建工具文件夹
+### B 脚本: 创建工具文件夹 (`b_folder_creator.py`)
 - 在 `coze_plugin/raw_tools/` 下创建与函数名同名的文件夹
 - 生成 `handler.py` 和 `README.md` 文件
+- **主要类**: `FolderCreator`
 
-### C 脚本: 定义 Input/Output 类型
+### C 脚本: 定义 Input/Output 类型 (`c_input_output_generator.py`)
 - **Input**: 包含路径参数（draft_id/segment_id）+ Request 模型的所有字段
 - **Output**: 返回 `Dict[str, Any]` 类型（确保 Coze 平台正确序列化）
+- **主要类**: `InputOutputGenerator`
 
-### D 脚本: 定义 handler 函数
+### D 脚本: 定义 handler 函数 (`d_handler_function_generator.py`)
 1. 接收 `Args[Input]` 类型参数
 2. 调用 `ensure_coze2jianying_file()` 确保文件存在
 3. 生成唯一 UUID
 4. 执行 E 脚本逻辑
 5. 返回 Output 类型数据，ID 字段使用生成的 UUID
+- **主要类**: `HandlerFunctionGenerator`
 
-### E 脚本: 写入 API 调用记录
+### E 脚本: 写入 API 调用记录 (`e_api_call_code_generator.py`)
 生成的代码会追加以下内容到 `/tmp/coze2jianying.py`：
 1. 创建 request 对象: `req_{uuid} = RequestModel(...)`
 2. 调用 API 函数: `resp_{uuid} = await api_function(...)`
 3. 提取结果ID: `draft_id_{uuid} = resp_{uuid}.draft_id`
+- **主要类**: `APICallCodeGenerator`
+
+### 辅助模块: Schema 提取器 (`schema_extractor.py`)
+- 解析 Pydantic BaseModel 类定义
+- 提取字段名、类型、默认值、描述
+- 供 C/D/E 脚本使用
+- **主要类**: `SchemaExtractor`
+
+## 模块化设计优势
+
+1. **易于维护**: 每个脚本职责单一，修改某个功能只需编辑对应文件
+2. **易于测试**: 可以为每个模块编写独立的单元测试
+3. **易于扩展**: 添加新功能时不影响其他模块
+4. **易于理解**: 模块边界清晰，符合 A-E 脚本的原始设计思路
 
 ## 生成的 Handler 结构
 
