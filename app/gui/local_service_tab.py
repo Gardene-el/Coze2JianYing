@@ -123,12 +123,26 @@ class LocalServiceTab(BaseTab):
         self.test_coze_btn = ttk.Button(self.coze_frame, text="测试连接", command=self._test_coze_connection)
 
         # 功能说明区域
-        self.feature_frame = ttk.LabelFrame(self.frame, text="功能开发中", padding="10")
+        self.feature_frame = ttk.LabelFrame(self.frame, text="本地服务不可用", padding="10")
         self.feature_label = ttk.Label(
             self.feature_frame,
-            text="端插件功能正在开发中。\n\n此模式适用于需要访问本地资源的场景（如本地文件读写、设备控制等）。\n本地应用将使用 cozepy SDK 监听 Coze Workflow 的 SSE 事件流，\n接收工具调用请求并在本地执行，然后将结果提交回 Workflow。\n\n如需使用 FastAPI 云端服务模式，请切换到\"云端服务\"标签页。",
+            text="经过详细调查，端侧插件（Local Plugin）无法在 Coze 工作流中使用。\n\n"
+                 "调查结果：\n"
+                 "• Bot Chat 模式：✅ 支持端侧插件，有完整的 API（chat.stream + REQUIRES_ACTION 事件）\n"
+                 "• Workflow 模式：❌ 不支持端侧插件，没有工具调用机制\n\n"
+                 "技术原因：\n"
+                 "1. Workflow 没有 REQUIRES_ACTION 事件，只有 MESSAGE、ERROR、DONE、INTERRUPT\n"
+                 "2. INTERRUPT 事件用于用户交互（如问答节点），不是工具调用\n"
+                 "3. Workflow 缺少类似 submit_tool_outputs() 的工具结果提交方法\n"
+                 "4. cozepy SDK 文档和示例中只有 Bot Chat 的端侧插件用法\n\n"
+                 "建议方案：\n"
+                 "• 使用 Bot Chat 代替工作流（Bot 可以配置工作流且支持端侧插件）\n"
+                 "• 使用云端服务模式（FastAPI + 公网访问），切换到\"云端服务\"标签页\n"
+                 "• 将本地功能封装为 HTTP 服务，通过工作流的 API 节点调用\n\n"
+                 "详细调查报告：docs/analysis/LOCAL_PLUGIN_NOT_SUPPORTED.md",
             justify=tk.LEFT,
-            wraplength=600
+            wraplength=650,
+            foreground="red"
         )
 
         # 底部状态栏
