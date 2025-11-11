@@ -24,7 +24,7 @@ from handler_generator import (
 
 
 def generate_complete_handler(
-    endpoint, input_output_gen, api_call_gen, handler_func_gen
+    endpoint, input_output_gen, api_call_gen, handler_func_gen, schema_extractor
 ):
     """生成完整的 handler.py 内容"""
 
@@ -45,6 +45,24 @@ def generate_complete_handler(
         endpoint, output_fields, api_call_code
     )
 
+    # 收集所有自定义类型依赖
+    custom_types = set()
+    custom_types.update(input_output_gen.get_custom_types_from_input(endpoint))
+    custom_types.update(input_output_gen.get_custom_types_from_output(endpoint))
+
+    # 生成自定义类型的定义（复制到文件中，而不是import）
+    custom_type_definitions = ""
+    if custom_types:
+        sorted_types = sorted(custom_types)
+        type_defs = schema_extractor.get_multiple_class_sources(sorted_types)
+        if type_defs:
+            custom_type_definitions = (
+                "\n# ========== 自定义类型定义 ==========\n"
+                "# 以下类型定义从 segment_schemas.py 复制而来\n"
+                "# Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义\n\n"
+                f"{type_defs}\n\n"
+            )
+
     # 组合完整内容
     # 将 Windows 路径的反斜杠替换为正斜杠，避免字符串转义问题
     source_file_path = str(endpoint.source_file).replace("\\", "/")
@@ -63,7 +81,7 @@ import time
 from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
 
-
+{custom_type_definitions}
 # Input 类型定义
 {input_class}
 
@@ -174,7 +192,11 @@ def main():
         try:
             # 生成完整的 handler 内容
             handler_content = generate_complete_handler(
-                endpoint, input_output_gen, api_call_gen, handler_func_gen
+                endpoint,
+                input_output_gen,
+                api_call_gen,
+                handler_func_gen,
+                schema_extractor,
             )
 
             # B 脚本：生成 README 内容
