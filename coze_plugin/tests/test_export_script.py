@@ -47,7 +47,7 @@ def test_export_script_basic():
     print("\n=== Testing basic export (clear_content=False) ===")
     
     # Add the handler directory to the path
-    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tools', 'export_script')
+    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'export_script')
     sys.path.insert(0, handler_dir)
     
     from handler import handler, Input
@@ -85,7 +85,7 @@ def test_export_script_with_clear():
     print("\n=== Testing export with clear (clear_content=True) ===")
     
     # Add the handler directory to the path (if not already added)
-    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tools', 'export_script')
+    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'export_script')
     if handler_dir not in sys.path:
         sys.path.insert(0, handler_dir)
     
@@ -137,7 +137,7 @@ def test_export_script_missing_file():
         print(f"Removed test file: {script_path}")
     
     # Add the handler directory to the path (if not already added)
-    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tools', 'export_script')
+    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'export_script')
     if handler_dir not in sys.path:
         sys.path.insert(0, handler_dir)
     
@@ -173,7 +173,7 @@ def test_helper_functions():
     print("\n=== Testing helper functions ===")
     
     # Add the handler directory to the path
-    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tools', 'export_script')
+    handler_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'export_script')
     sys.path.insert(0, handler_dir)
     
     from handler import read_script_file, clear_file_content
