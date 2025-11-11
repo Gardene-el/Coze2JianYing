@@ -77,12 +77,23 @@ class SchemaExtractor:
         elif isinstance(annotation, ast.Constant):
             return str(annotation.value)
         elif isinstance(annotation, ast.Subscript):
-            # 处理 Optional[T], List[T] 等
+            # 处理 Optional[T], List[T], Optional[List[T]] 等泛型类型
             if isinstance(annotation.value, ast.Name):
                 base_type = annotation.value.id
+                # 递归处理内层类型
                 if isinstance(annotation.slice, ast.Name):
+                    # 简单类型: Optional[str], List[int]
                     inner_type = annotation.slice.id
                     return f"{base_type}[{inner_type}]"
+                elif isinstance(annotation.slice, ast.Subscript):
+                    # 嵌套泛型: Optional[List[float]], Dict[str, int]
+                    inner_type = self._get_type_string(annotation.slice)
+                    return f"{base_type}[{inner_type}]"
+                else:
+                    # 其他情况，尝试递归处理
+                    inner_type = self._get_type_string(annotation.slice)
+                    if inner_type and inner_type != "Any":
+                        return f"{base_type}[{inner_type}]"
                 return base_type
         return "Any"
 
