@@ -21,9 +21,9 @@ class InputOutputGenerator:
 
         # 添加路径参数
         if endpoint.has_draft_id:
-            fields.append("    draft_id: str")
+            fields.append("    draft_id: str  # 草稿ID")
         if endpoint.has_segment_id:
-            fields.append("    segment_id: str")
+            fields.append("    segment_id: str  # 片段ID")
 
         # 添加 request model 的字段
         if endpoint.request_model:
@@ -34,14 +34,24 @@ class InputOutputGenerator:
                 # 保持原始类型，不进行简化
                 field_type = field["type"]
                 default = field["default"]
+                description = field.get("description", "")
+
+                # 构建字段定义
+                field_def = f"    {field['name']}: {field_type}"
 
                 # 判断是否为必需字段（默认值为 Ellipsis）
                 if default == "Ellipsis" or default == "...":
                     # 必需字段，不添加默认值
-                    fields.append(f"    {field['name']}: {field_type}")
+                    pass
                 else:
                     # 可选字段，保持原类型和默认值
-                    fields.append(f"    {field['name']}: {field_type} = {default}")
+                    field_def += f" = {default}"
+
+                # 添加描述注释
+                if description:
+                    field_def += f"  # {description}"
+
+                fields.append(field_def)
 
         # 如果没有字段，添加一个占位符
         if not fields:
@@ -79,8 +89,18 @@ class InputOutputGenerator:
         if not output_fields:
             # 如果没有输出字段，使用基本的 success 和 message
             output_fields = [
-                {"name": "success", "type": "bool", "default": "False"},
-                {"name": "message", "type": "str", "default": '""'},
+                {
+                    "name": "success",
+                    "type": "bool",
+                    "default": "False",
+                    "description": "操作是否成功",
+                },
+                {
+                    "name": "message",
+                    "type": "str",
+                    "default": '""',
+                    "description": "返回消息",
+                },
             ]
 
         fields = []
@@ -88,6 +108,7 @@ class InputOutputGenerator:
             field_name = field["name"]
             field_type = field["type"]
             default = field.get("default", "None")
+            description = field.get("description", "")
 
             # 处理默认值
             if default == "Ellipsis" or default == "...":
@@ -108,7 +129,14 @@ class InputOutputGenerator:
                 # 如果原本不是Optional且默认值是None，包装为Optional
                 field_type = f"Optional[{field_type}]"
 
-            fields.append(f"    {field_name}: {field_type} = {default}")
+            # 构建字段定义
+            field_def = f"    {field_name}: {field_type} = {default}"
+
+            # 添加描述注释
+            if description:
+                field_def += f"  # {description}"
+
+            fields.append(field_def)
 
         class_def = f"class Output(NamedTuple):\n"
         class_def += f'    """{endpoint.func_name} 工具的输出参数"""\n'
