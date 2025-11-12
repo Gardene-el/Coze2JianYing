@@ -305,14 +305,18 @@ class ScriptExecutorTab(BaseTab):
                 create_audio_segment, create_video_segment,
                 create_text_segment, create_sticker_segment,
                 create_effect_segment, create_filter_segment,
-                add_effect, add_fade, add_keyframe,
-                add_animation, add_filter, add_mask,
-                add_transition, add_background_filling,
-                add_bubble, add_text_effect,
-                # Segment 特定函数
-                add_audio_fade, add_audio_volume_change,
-                add_video_fade, add_video_animation,
-                add_video_keyframe, add_video_clip_settings,
+                # Audio segment operations
+                add_audio_effect, add_audio_fade, add_audio_keyframe,
+                # Video segment operations
+                add_video_animation, add_video_effect, add_video_fade,
+                add_video_filter, add_video_mask, add_video_transition,
+                add_video_background_filling, add_video_keyframe,
+                # Text segment operations
+                add_text_animation, add_text_bubble, add_text_effect,
+                add_text_keyframe,
+                # Sticker segment operations
+                add_sticker_keyframe,
+                # Query
                 get_segment_detail,
             )
         except ImportError as e:
@@ -381,25 +385,29 @@ class ScriptExecutorTab(BaseTab):
             'create_effect_segment': create_effect_segment,
             'create_filter_segment': create_filter_segment,
             
-            # Segment 操作 API 函数 (通用)
-            'add_effect': add_effect,
-            'add_fade': add_fade,
-            'add_keyframe': add_keyframe,
-            'add_animation': add_animation,
-            'add_filter': add_filter,
-            'add_mask': add_mask,
-            'add_transition': add_transition,
-            'add_background_filling': add_background_filling,
-            'add_bubble': add_bubble,
-            'add_text_effect': add_text_effect,
-            
-            # Segment 特定操作 API 函数
+            # Audio Segment 操作 API 函数
+            'add_audio_effect': add_audio_effect,
             'add_audio_fade': add_audio_fade,
-            'add_audio_volume_change': add_audio_volume_change,
-            'add_video_fade': add_video_fade,
+            'add_audio_keyframe': add_audio_keyframe,
+            
+            # Video Segment 操作 API 函数
             'add_video_animation': add_video_animation,
+            'add_video_effect': add_video_effect,
+            'add_video_fade': add_video_fade,
+            'add_video_filter': add_video_filter,
+            'add_video_mask': add_video_mask,
+            'add_video_transition': add_video_transition,
+            'add_video_background_filling': add_video_background_filling,
             'add_video_keyframe': add_video_keyframe,
-            'add_video_clip_settings': add_video_clip_settings,
+            
+            # Text Segment 操作 API 函数
+            'add_text_animation': add_text_animation,
+            'add_text_bubble': add_text_bubble,
+            'add_text_effect': add_text_effect,
+            'add_text_keyframe': add_text_keyframe,
+            
+            # Sticker Segment 操作 API 函数
+            'add_sticker_keyframe': add_sticker_keyframe,
             
             # 查询 API 函数
             'get_segment_detail': get_segment_detail,
