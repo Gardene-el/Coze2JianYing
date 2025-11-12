@@ -52,11 +52,13 @@ class APICallCodeGenerator:
                     if is_optional or default_value != '...':
                         params_building_code.append(f"""
         if args.input.{field_name} is not None:
-            params.append(f"{field_name}={{json.dumps(args.input.{field_name})}}")""")
+            param_str = f'{field_name}={{{{json.dumps(args.input.{field_name})}}}}'
+            params.append(param_str)""")
                     else:
                         # 必需字符串字段
                         params_building_code.append(f"""
-        params.append(f"{field_name}={{json.dumps(args.input.{field_name})}}")""")
+        param_str = f'{field_name}={{{{json.dumps(args.input.{field_name})}}}}'
+        params.append(param_str)""")
                         
                 elif is_complex_object:
                     # 复杂对象（如TimeRange）：转换CustomNamespace并生成构造调用
@@ -67,34 +69,41 @@ class APICallCodeGenerator:
             # 转换 CustomNamespace 为 {base_type}
             obj = args.input.{field_name}
             if hasattr(obj, '__dict__'):
-                obj_params = ', '.join(f"{{{{k}}}}={{{{v}}}}" for k, v in vars(obj).items())
+                obj_params = ', '.join(f'{{{{k}}}}={{{{v}}}}' for k, v in vars(obj).items())
+                param_str = f'{field_name}={base_type}({{{{obj_params}}}})' 
             else:
-                obj_params = str(obj)
-            params.append(f"{field_name}={base_type}({{{{obj_params}}}})") """)
+                param_str = f'{field_name}={{{{str(obj)}}}}'
+            params.append(param_str)""")
                     else:
                         # 必需复杂对象
                         params_building_code.append(f"""
         obj = args.input.{field_name}
         if hasattr(obj, '__dict__'):
-            obj_params = ', '.join(f"{{{{k}}}}={{{{v}}}}" for k, v in vars(obj).items())
+            obj_params = ', '.join(f'{{{{k}}}}={{{{v}}}}' for k, v in vars(obj).items())
+            param_str = f'{field_name}={base_type}({{{{obj_params}}}})' 
         else:
-            obj_params = str(obj)
-        params.append(f"{field_name}={base_type}({{{{obj_params}}}})") """)
+            param_str = f'{field_name}={{{{str(obj)}}}}'
+        params.append(param_str)""")
                         
                 else:
                     # 基本类型（int, float, bool）
                     if is_optional or default_value != '...':
                         params_building_code.append(f"""
         if args.input.{field_name} is not None:
-            params.append(f"{field_name}={{args.input.{field_name}}}")""")
+            param_str = f'{field_name}={{{{args.input.{field_name}}}}}'
+            params.append(param_str)""")
                     else:
                         # 必需基本类型
                         params_building_code.append(f"""
-        params.append(f"{field_name}={{args.input.{field_name}}}")""")
+        param_str = f'{field_name}={{{{args.input.{field_name}}}}}'
+        params.append(param_str)""")
 
             request_construction = f"""
         # 构造 request 对象参数列表
         params = []{"".join(params_building_code)}
+        
+        # 生成 request 构造代码
+        params_str = ', '.join(params)
 """
 
         # 生成 API 调用代码
@@ -119,7 +128,7 @@ class APICallCodeGenerator:
             api_call_code += request_construction
             api_call_code += f"""
 # 构造 request 对象
-req_{{{{generated_uuid}}}} = {endpoint.request_model}({{{{", ".join(params)}}}})
+req_{{{{generated_uuid}}}} = {endpoint.request_model}({{{{params_str}}}})
 """
 
         if api_call_params:
