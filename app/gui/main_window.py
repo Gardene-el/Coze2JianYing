@@ -12,6 +12,7 @@ from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.draft_generator_tab import DraftGeneratorTab
 from app.gui.example_tab import ExampleTab
 from app.gui.local_service_tab import LocalServiceTab
+from app.gui.script_executor_tab import ScriptExecutorTab
 from app.gui.log_window import LogWindow
 from app.utils.logger import get_logger, set_gui_log_callback
 
@@ -153,10 +154,17 @@ class MainWindow:
             "使用 cozepy SDK 监听 Coze Workflow 事件\n需要配置 Coze Token 和 Workflow ID",
         )
 
+        # 创建脚本执行标签页（方案三：脚本生成执行）
+        script_executor_tab = ScriptExecutorTab(
+            self.notebook, log_callback=self._on_log_message
+        )
+        self.tabs.append(script_executor_tab)
+        self._add_tooltip(3, "执行从Coze导出的Python脚本生成草稿")
+
         # 创建示例标签页（演示扩展性）
         example_tab = ExampleTab(self.notebook)
         self.tabs.append(example_tab)
-        self._add_tooltip(3, "示例标签页")
+        self._add_tooltip(4, "示例标签页")
 
         self.logger.info(f"已创建 {len(self.tabs)} 个标签页")
 
