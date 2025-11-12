@@ -35,8 +35,20 @@ class APICallCodeGenerator:
             )
             params = []
             for field in request_fields:
-                # 使用 {{args.input.field}} 来在生成的 f-string 中正确引用值
-                params.append(f"{field['name']}={{args.input.{field['name']}}}")
+                field_name = field['name']
+                field_type = field.get('type', 'Any')
+                
+                # 判断字段类型是否需要引号
+                # str 类型需要引号，但如果是 Optional[str] 或其他包含 str 的复合类型也需要
+                needs_quotes = self._field_needs_quotes(field_type)
+                
+                if needs_quotes:
+                    # 对于字符串类型，在生成的代码中添加引号
+                    # 使用 repr() 来自动处理引号转义
+                    params.append(f'{field_name}={{repr(args.input.{field_name}) if args.input.{field_name} is not None else None}}')
+                else:
+                    # 对于其他类型（数字、布尔等），直接使用值
+                    params.append(f"{field_name}={{args.input.{field_name}}}")
 
             request_construction = f"""
 # 构造 request 对象
@@ -99,3 +111,26 @@ segment_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
 """
 
         return api_call_code
+    
+    def _field_needs_quotes(self, field_type: str) -> bool:
+        """
+        判断字段类型是否需要在生成的代码中使用引号
+        
+        Args:
+            field_type: 字段类型字符串，如 "str", "int", "Optional[str]", "TimeRange" 等
+            
+        Returns:
+            True 如果需要引号，False 否则
+        """
+        # 基本类型中只有 str 需要引号
+        # 数字类型 (int, float) 和布尔类型 (bool) 不需要引号
+        # None 不需要引号
+        # 自定义类型（如 TimeRange, ClipSettings）也不需要引号，因为它们是对象构造
+        
+        # 如果类型包含 "str"，则需要引号
+        # 这包括 "str", "Optional[str]", "List[str]" 等
+        if 'str' in field_type:
+            return True
+        
+        # 其他类型不需要引号
+        return False
