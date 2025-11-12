@@ -44,7 +44,7 @@ resp_e7009ab6_f365_47a1_bd98_ae2becd31bea = await add_track(draft_f71ad170_a32e_
 # 时间: 2025-11-12 04:41:29
 
 # 构造 request 对象
-req_bf1ca35b_9410_495d_96ce_97c37a1a9339 = CreateAudioSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3", target_timerange=CustomNamespace(start=0, duration=5000000), source_timerange=None, speed=1, volume=1, change_pitch=False)
+req_bf1ca35b_9410_495d_96ce_97c37a1a9339 = CreateAudioSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3", target_timerange=TimeRange(start=0, duration=5000000), source_timerange=None, speed=1, volume=1, change_pitch=False)
 
 resp_bf1ca35b_9410_495d_96ce_97c37a1a9339 = await create_audio_segment(req_bf1ca35b_9410_495d_96ce_97c37a1a9339)
 
@@ -66,7 +66,7 @@ resp_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = await add_video_fade(segment_bf1ca35
 # 时间: 2025-11-12 04:49:13
 
 # 构造 request 对象
-req_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = CreateAudioSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4", target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None)
+req_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = CreateAudioSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4", target_timerange=TimeRange(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None)
 
 resp_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = await create_audio_segment(req_b2c423d0_dc7b_4c06_86a0_de0e7d84500c)
 
@@ -78,7 +78,7 @@ segment_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = resp_b2c423d0_dc7b_4c06_86a0_de0e
 # 时间: 2025-11-12 04:51:27
 
 # 构造 request 对象
-req_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = CreateVideoSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4", target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None, clip_settings=None)
+req_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = CreateVideoSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4", target_timerange=TimeRange(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None, clip_settings=None)
 
 resp_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = await create_video_segment(req_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900)
 

@@ -267,6 +267,8 @@ class ScriptExecutorTab(BaseTab):
         try:
             # 导入所有需要的 API schemas
             from app.schemas.segment_schemas import (
+                # 基础模型
+                TimeRange,
                 # Draft 操作
                 CreateDraftRequest, CreateDraftResponse,
                 AddTrackRequest, AddTrackResponse,
@@ -338,8 +340,11 @@ class ScriptExecutorTab(BaseTab):
             # 异步支持
             'asyncio': asyncio,
             
-            # SimpleNamespace for CustomNamespace-like objects
+            # SimpleNamespace for CustomNamespace-like objects (deprecated, use TimeRange)
             'CustomNamespace': SimpleNamespace,
+            
+            # 基础模型类
+            'TimeRange': TimeRange,
             
             # Draft 操作请求类
             'CreateDraftRequest': CreateDraftRequest,

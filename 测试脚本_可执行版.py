@@ -27,7 +27,7 @@ print(f"✓ Added video track")
 # API 调用: create_audio_segment
 req_segment = CreateAudioSegmentRequest(
     material_url="https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3",
-    target_timerange=CustomNamespace(start=0, duration=5000000),
+    target_timerange=TimeRange(start=0, duration=5000000),
     source_timerange=None,
     speed=1,
     volume=1,
