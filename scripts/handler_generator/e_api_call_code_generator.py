@@ -98,11 +98,12 @@ class APICallCodeGenerator:
         param_str = f'{field_name}={{{{args.input.{field_name}}}}}'
         params.append(param_str)""")
 
+            # 构建参数列表的执行代码（在 api_call f-string 之前执行）
             request_construction = f"""
         # 构造 request 对象参数列表
         params = []{"".join(params_building_code)}
         
-        # 生成 request 构造代码
+        # 生成 request 构造代码字符串
         params_str = ', '.join(params)
 """
 
@@ -118,26 +119,31 @@ class APICallCodeGenerator:
         if endpoint.request_model:
             api_call_params.append(f"req_{{{{generated_uuid}}}}")
 
-        api_call_code = f"""        # 生成 API 调用代码
+        # 先执行参数构建代码（如果需要）
+        api_call_code = ""
+        if request_construction:
+            api_call_code += request_construction
+        
+        # 然后生成 API 调用字符串
+        api_call_code += f"""
+        # 生成 API 调用代码字符串
         api_call = f\"\"\"
 # API 调用: {endpoint.func_name}
 # 时间: {{{{time.strftime('%Y-%m-%d %H:%M:%S')}}}}
+
 """
 
-        if request_construction:
-            api_call_code += request_construction
-            api_call_code += f"""
-# 构造 request 对象
+        if endpoint.request_model:
+            api_call_code += f"""# 构造 request 对象
 req_{{{{generated_uuid}}}} = {endpoint.request_model}({{{{params_str}}}})
+
 """
 
         if api_call_params:
-            api_call_code += f"""
-resp_{{{{generated_uuid}}}} = await {endpoint.func_name}({", ".join(api_call_params)})
+            api_call_code += f"""resp_{{{{generated_uuid}}}} = await {endpoint.func_name}({", ".join(api_call_params)})
 """
         else:
-            api_call_code += f"""
-resp_{{{{generated_uuid}}}} = await {endpoint.func_name}()
+            api_call_code += f"""resp_{{{{generated_uuid}}}} = await {endpoint.func_name}()
 """
 
         # 检查 output 是否包含 draft_id 或 segment_id
@@ -148,16 +154,15 @@ resp_{{{{generated_uuid}}}} = await {endpoint.func_name}()
         if has_output_draft_id:
             # 保存为 draft_{uuid} 而不是 draft_id_{uuid}
             # 这样后续函数可以通过 draft_{uuid} 引用这个草稿
-            api_call_code += f"""
-draft_{{generated_uuid}} = resp_{{generated_uuid}}.draft_id
+            api_call_code += f"""draft_{{{{generated_uuid}}}} = resp_{{{{generated_uuid}}}}.draft_id
 """
         if has_output_segment_id:
             # 保存为 segment_{uuid} 而不是 segment_id_{uuid}
             # 这样后续函数可以通过 segment_{uuid} 引用这个片段
-            api_call_code += f"""
-segment_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
+            api_call_code += f"""segment_{{{{generated_uuid}}}} = resp_{{{{generated_uuid}}}}.segment_id
 """
 
+        # 关闭 api_call f-string
         api_call_code += """\"\"\"
 
         # 写入 API 调用到文件
