@@ -78,17 +78,26 @@ def test_generated_code_has_quotes():
     
     print("生成的代码片段:")
     print("-" * 60)
-    print(code[:500])  # 显示前500个字符
+    print(code[:800])  # 显示前800个字符
     print("-" * 60)
     
-    # 检查代码中是否包含 repr()
-    # repr() 用于为字符串值添加引号
-    if "repr(args.input." in code:
-        print("✅ 代码包含 repr() 调用，字符串值将被正确引号")
-        return True
+    # 检查代码中是否包含 json.dumps()
+    # json.dumps() 用于为字符串值添加双引号
+    if "json.dumps(args.input." in code:
+        print("✅ 代码包含 json.dumps() 调用，字符串值将使用双引号")
+        success = True
     else:
-        print("❌ 代码未包含 repr() 调用")
-        return False
+        print("❌ 代码未包含 json.dumps() 调用")
+        success = False
+    
+    # 检查是否有条件逻辑（跳过None值）
+    if "if args.input." in code and "is not None:" in code:
+        print("✅ 代码包含条件判断，可选参数为None时将被跳过")
+    else:
+        print("❌ 代码未包含条件判断")
+        success = False
+    
+    return success
 
 
 def test_compare_with_old_output():
@@ -98,14 +107,28 @@ def test_compare_with_old_output():
     print("=" * 60)
     
     print("\n修复前（错误）:")
-    print("req_xxx = CreateDraftRequest(draft_name={args.input.draft_name}, width=1920)")
-    print("→ 展开后: req_xxx = CreateDraftRequest(draft_name=demo, width=1920)")
-    print("   ❌ draft_name=demo 缺少引号，导致语法错误")
+    print("req_xxx = CreateDraftRequest(draft_name={args.input.draft_name}, track_name=None)")
+    print("→ 展开后: req_xxx = CreateDraftRequest(draft_name=demo, track_name=None)")
+    print("   ❌ 问题1: draft_name=demo 缺少引号")
+    print("   ❌ 问题2: track_name=None 显式传递None导致验证失败")
     
     print("\n修复后（正确）:")
-    print("req_xxx = CreateDraftRequest(draft_name={repr(args.input.draft_name)}, width=1920)")
-    print("→ 展开后: req_xxx = CreateDraftRequest(draft_name='demo', width=1920)")
-    print("   ✅ draft_name='demo' 有引号，语法正确")
+    print("# 动态构建参数列表")
+    print("params = []")
+    print('if args.input.draft_name is not None:')
+    print('    params.append(f"draft_name={json.dumps(args.input.draft_name)}")')
+    print('if args.input.track_name is not None:')
+    print('    params.append(f"track_name={json.dumps(args.input.track_name)}")')
+    print('req_xxx = CreateDraftRequest({", ".join(params)})')
+    print("\n→ 当 draft_name='demo', track_name=None 时展开为:")
+    print('   req_xxx = CreateDraftRequest(draft_name="demo")')
+    print("   ✅ 使用双引号")
+    print("   ✅ track_name=None 被跳过（不显式传递）")
+    
+    print("\n对于复杂对象（TimeRange）:")
+    print("→ CustomNamespace(start=0, duration=5000000) 将被转换为:")
+    print('   TimeRange(start=0, duration=5000000)')
+    print("   ✅ 使用正确的类型名")
     
     return True
 

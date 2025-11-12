@@ -33,26 +33,68 @@ class APICallCodeGenerator:
             request_fields = self.schema_extractor.get_schema_fields(
                 endpoint.request_model
             )
-            params = []
+            
+            # 生成动态参数构建逻辑
+            params_building_code = []
             for field in request_fields:
                 field_name = field['name']
                 field_type = field.get('type', 'Any')
+                default_value = field.get('default', '...')
                 
-                # 判断字段类型是否需要引号
-                # str 类型需要引号，但如果是 Optional[str] 或其他包含 str 的复合类型也需要
+                # 判断字段类型
                 needs_quotes = self._field_needs_quotes(field_type)
+                is_optional = 'Optional' in field_type
+                is_complex_object = self._is_complex_object_type(field_type)
                 
+                # 为每个字段生成条件添加逻辑
                 if needs_quotes:
-                    # 对于字符串类型，在生成的代码中添加引号
-                    # 使用 repr() 来自动处理引号转义
-                    params.append(f'{field_name}={{repr(args.input.{field_name}) if args.input.{field_name} is not None else None}}')
+                    # 字符串类型：使用 json.dumps 获得双引号，并处理None
+                    if is_optional or default_value != '...':
+                        params_building_code.append(f"""
+        if args.input.{field_name} is not None:
+            params.append(f"{field_name}={{json.dumps(args.input.{field_name})}}")""")
+                    else:
+                        # 必需字符串字段
+                        params_building_code.append(f"""
+        params.append(f"{field_name}={{json.dumps(args.input.{field_name})}}")""")
+                        
+                elif is_complex_object:
+                    # 复杂对象（如TimeRange）：转换CustomNamespace并生成构造调用
+                    base_type = self._extract_base_type(field_type)
+                    if is_optional or default_value != '...':
+                        params_building_code.append(f"""
+        if args.input.{field_name} is not None:
+            # 转换 CustomNamespace 为 {base_type}
+            obj = args.input.{field_name}
+            if hasattr(obj, '__dict__'):
+                obj_params = ', '.join(f"{{k}}={{v}}" for k, v in vars(obj).items())
+            else:
+                obj_params = str(obj)
+            params.append(f"{field_name}={base_type}({{obj_params}})")""")
+                    else:
+                        # 必需复杂对象
+                        params_building_code.append(f"""
+        obj = args.input.{field_name}
+        if hasattr(obj, '__dict__'):
+            obj_params = ', '.join(f"{{k}}={{v}}" for k, v in vars(obj).items())
+        else:
+            obj_params = str(obj)
+        params.append(f"{field_name}={base_type}({{obj_params}})")""")
+                        
                 else:
-                    # 对于其他类型（数字、布尔等），直接使用值
-                    params.append(f"{field_name}={{args.input.{field_name}}}")
+                    # 基本类型（int, float, bool）
+                    if is_optional or default_value != '...':
+                        params_building_code.append(f"""
+        if args.input.{field_name} is not None:
+            params.append(f"{field_name}={{args.input.{field_name}}}")""")
+                    else:
+                        # 必需基本类型
+                        params_building_code.append(f"""
+        params.append(f"{field_name}={{args.input.{field_name}}}")""")
 
             request_construction = f"""
-# 构造 request 对象
-req_{{generated_uuid}} = {endpoint.request_model}({", ".join(params)})
+        # 构造 request 对象参数列表
+        params = []{"".join(params_building_code)}
 """
 
         # 生成 API 调用代码
@@ -63,26 +105,30 @@ req_{{generated_uuid}} = {endpoint.request_model}({", ".join(params)})
             object_type = target_id_name.replace(
                 "_id", ""
             )  # draft_id -> draft, segment_id -> segment
-            api_call_params.append(f"{object_type}_{{args.input.{target_id_name}}}")
+            api_call_params.append(f"{object_type}_{{{{args.input.{target_id_name}}}}}")
         if endpoint.request_model:
-            api_call_params.append(f"req_{{generated_uuid}}")
+            api_call_params.append(f"req_{{{{generated_uuid}}}}")
 
         api_call_code = f"""        # 生成 API 调用代码
         api_call = f\"\"\"
 # API 调用: {endpoint.func_name}
-# 时间: {{time.strftime('%Y-%m-%d %H:%M:%S')}}
+# 时间: {{{{time.strftime('%Y-%m-%d %H:%M:%S')}}}}
 """
 
         if request_construction:
             api_call_code += request_construction
+            api_call_code += f"""
+# 构造 request 对象
+req_{{{{generated_uuid}}}} = {endpoint.request_model}({{{{", ".join(params)}}}})
+"""
 
         if api_call_params:
             api_call_code += f"""
-resp_{{generated_uuid}} = await {endpoint.func_name}({", ".join(api_call_params)})
+resp_{{{{generated_uuid}}}} = await {endpoint.func_name}({", ".join(api_call_params)})
 """
         else:
             api_call_code += f"""
-resp_{{generated_uuid}} = await {endpoint.func_name}()
+resp_{{{{generated_uuid}}}} = await {endpoint.func_name}()
 """
 
         # 检查 output 是否包含 draft_id 或 segment_id
@@ -134,3 +180,49 @@ segment_{{generated_uuid}} = resp_{{generated_uuid}}.segment_id
         
         # 其他类型不需要引号
         return False
+    
+    def _is_complex_object_type(self, field_type: str) -> bool:
+        """
+        判断字段类型是否是复杂对象类型（需要从CustomNamespace转换）
+        
+        Args:
+            field_type: 字段类型字符串
+            
+        Returns:
+            True 如果是复杂对象类型，False 否则
+        """
+        # 基本类型和常见泛型
+        basic_types = {'str', 'int', 'float', 'bool', 'Any', 'None', 'Dict', 'List'}
+        
+        # 提取类型名称（去除Optional等包装）
+        import re
+        type_names = re.findall(r'\b([A-Z][a-zA-Z0-9_]*)\b', field_type)
+        
+        # 如果有非基本类型的大写开头类型，则认为是复杂对象
+        for type_name in type_names:
+            if type_name not in basic_types and type_name != 'Optional':
+                return True
+        
+        return False
+    
+    def _extract_base_type(self, field_type: str) -> str:
+        """
+        从类型字符串中提取基础类型名
+        
+        Args:
+            field_type: 类型字符串，如 "TimeRange", "Optional[TimeRange]"
+            
+        Returns:
+            基础类型名，如 "TimeRange"
+        """
+        import re
+        # 提取所有大写开头的类型名
+        type_names = re.findall(r'\b([A-Z][a-zA-Z0-9_]*)\b', field_type)
+        
+        # 过滤掉 Optional 等泛型包装器
+        basic_wrappers = {'Optional', 'List', 'Dict', 'Union', 'Tuple'}
+        for type_name in type_names:
+            if type_name not in basic_wrappers:
+                return type_name
+        
+        return 'Any'
