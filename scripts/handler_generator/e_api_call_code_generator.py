@@ -52,14 +52,14 @@ class APICallCodeGenerator:
                             f"{field_name}={{TimeRange(**{{k: v for k, v in args.input.{field_name}._asdict().items()}}) if hasattr(args.input.{field_name}, '_asdict') else args.input.{field_name}}}"
                         )
                     else:
-                        # 使用!r格式化，但要确保在f-string中正确求值
-                        # 不使用双层大括号转义，让!r在生成的f-string中起作用
-                        params.append(f"{field_name}={{args.input.{field_name}!r}}")
+                        # 使用repr()函数调用来格式化值
+                        # 在运行时f-string中，这会正确地将值转换为repr形式
+                        params.append(f"{field_name}={{repr(args.input.{field_name})}}")
                 else:
                     # 可选字段：只在值不为None时传递，避免覆盖默认值
                     # 使用条件表达式动态构建参数
                     params.append(
-                        f"**({{{repr(field_name)}: args.input.{field_name}!r}} if args.input.{field_name} is not None else {{}})"
+                        f"**({{{repr(field_name)}: repr(args.input.{field_name})}} if args.input.{field_name} is not None else {{}})"
                     )
 
             request_construction = f"""
