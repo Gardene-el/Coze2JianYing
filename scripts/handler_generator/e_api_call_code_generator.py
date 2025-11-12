@@ -52,12 +52,13 @@ class APICallCodeGenerator:
                             f"{field_name}={{TimeRange(**{{k: v for k, v in args.input.{field_name}._asdict().items()}}) if hasattr(args.input.{field_name}, '_asdict') else args.input.{field_name}}}"
                         )
                     else:
-                        params.append(f"{field_name}={{args.input.{field_name}}}")
+                        # 使用 repr() 确保字符串等值被正确引用
+                        params.append(f"{field_name}={{repr(args.input.{field_name})}}")
                 else:
                     # 可选字段：只在值不为None时传递，避免覆盖默认值
-                    # 使用条件表达式动态构建参数
+                    # 使用条件表达式动态构建参数，同样使用 repr() 确保正确引用
                     params.append(
-                        f"**({{{repr(field_name)}: args.input.{field_name}}} if args.input.{field_name} is not None else {{}})"
+                        f"**({{{repr(field_name)}: repr(args.input.{field_name})}} if args.input.{field_name} is not None else {{}})"
                     )
 
             request_construction = f"""
