@@ -1,10 +1,8 @@
-"
-
 # API 调用: create_draft
 # 时间: 2025-11-12 04:37:22
 
 # 构造 request 对象
-req_f71ad170_a32e_424d_895a_54cb8f1a1a70 = CreateDraftRequest(draft_name=demo, width=1920, height=1080, fps=30, allow_replace=True)
+req_f71ad170_a32e_424d_895a_54cb8f1a1a70 = CreateDraftRequest(draft_name="demo", width=1920, height=1080, fps=30, allow_replace=True)
 
 resp_f71ad170_a32e_424d_895a_54cb8f1a1a70 = await create_draft(req_f71ad170_a32e_424d_895a_54cb8f1a1a70)
 
@@ -16,7 +14,7 @@ draft_f71ad170_a32e_424d_895a_54cb8f1a1a70 = resp_f71ad170_a32e_424d_895a_54cb8f
 # 时间: 2025-11-12 04:40:43
 
 # 构造 request 对象
-req_83594b0f_9b2f_470c_aa31_f11136c6d1ee = AddTrackRequest(track_type=audio, track_name=None)
+req_83594b0f_9b2f_470c_aa31_f11136c6d1ee = AddTrackRequest(track_type="audio", track_name=None)
 
 resp_83594b0f_9b2f_470c_aa31_f11136c6d1ee = await add_track(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70, req_83594b0f_9b2f_470c_aa31_f11136c6d1ee)
 
@@ -26,7 +24,7 @@ resp_83594b0f_9b2f_470c_aa31_f11136c6d1ee = await add_track(draft_f71ad170_a32e_
 # 时间: 2025-11-12 04:40:53
 
 # 构造 request 对象
-req_05da7563_8679_43fd_8007_9ca05c19aed0 = AddTrackRequest(track_type=video, track_name=None)
+req_05da7563_8679_43fd_8007_9ca05c19aed0 = AddTrackRequest(track_type="video", track_name=None)
 
 resp_05da7563_8679_43fd_8007_9ca05c19aed0 = await add_track(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70, req_05da7563_8679_43fd_8007_9ca05c19aed0)
 
@@ -36,7 +34,7 @@ resp_05da7563_8679_43fd_8007_9ca05c19aed0 = await add_track(draft_f71ad170_a32e_
 # 时间: 2025-11-12 04:40:57
 
 # 构造 request 对象
-req_e7009ab6_f365_47a1_bd98_ae2becd31bea = AddTrackRequest(track_type=text, track_name=None)
+req_e7009ab6_f365_47a1_bd98_ae2becd31bea = AddTrackRequest(track_type="text", track_name=None)
 
 resp_e7009ab6_f365_47a1_bd98_ae2becd31bea = await add_track(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70, req_e7009ab6_f365_47a1_bd98_ae2becd31bea)
 
@@ -46,7 +44,7 @@ resp_e7009ab6_f365_47a1_bd98_ae2becd31bea = await add_track(draft_f71ad170_a32e_
 # 时间: 2025-11-12 04:41:29
 
 # 构造 request 对象
-req_bf1ca35b_9410_495d_96ce_97c37a1a9339 = CreateAudioSegmentRequest(material_url=https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3, target_timerange=CustomNamespace(start=0, duration=5000000), source_timerange=None, speed=1, volume=1, change_pitch=False)
+req_bf1ca35b_9410_495d_96ce_97c37a1a9339 = CreateAudioSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3", target_timerange=CustomNamespace(start=0, duration=5000000), source_timerange=None, speed=1, volume=1, change_pitch=False)
 
 resp_bf1ca35b_9410_495d_96ce_97c37a1a9339 = await create_audio_segment(req_bf1ca35b_9410_495d_96ce_97c37a1a9339)
 
@@ -58,7 +56,7 @@ segment_bf1ca35b_9410_495d_96ce_97c37a1a9339 = resp_bf1ca35b_9410_495d_96ce_97c3
 # 时间: 2025-11-12 04:44:09
 
 # 构造 request 对象
-req_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = AddFadeRequest(in_duration=1s, out_duration=0s)
+req_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = AddFadeRequest(in_duration="1s", out_duration="0s")
 
 resp_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = await add_video_fade(segment_bf1ca35b_9410_495d_96ce_97c37a1a9339, req_ea88fbe7_31bf_4189_a10c_cc58e6ca527c)
 
@@ -68,7 +66,7 @@ resp_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = await add_video_fade(segment_bf1ca35
 # 时间: 2025-11-12 04:49:13
 
 # 构造 request 对象
-req_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = CreateAudioSegmentRequest(material_url=https://gardene-el.github.io/Coze2JianYing/assets/video.mp4, target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None)
+req_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = CreateAudioSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4", target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None)
 
 resp_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = await create_audio_segment(req_b2c423d0_dc7b_4c06_86a0_de0e7d84500c)
 
@@ -80,7 +78,7 @@ segment_b2c423d0_dc7b_4c06_86a0_de0e7d84500c = resp_b2c423d0_dc7b_4c06_86a0_de0e
 # 时间: 2025-11-12 04:51:27
 
 # 构造 request 对象
-req_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = CreateVideoSegmentRequest(material_url=https://gardene-el.github.io/Coze2JianYing/assets/video.mp4, target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None, clip_settings=None)
+req_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = CreateVideoSegmentRequest(material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4", target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None, clip_settings=None)
 
 resp_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = await create_video_segment(req_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900)
 
@@ -92,7 +90,7 @@ segment_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900 = resp_fc6ea2d6_f50b_4a0a_90d7_b07d
 # 时间: 2025-11-12 04:53:09
 
 # 构造 request 对象
-req_a8411e51_86b9_4338_8071_f92438f73d19 = AddAnimationRequest(animation_type=斜切, duration=None)
+req_a8411e51_86b9_4338_8071_f92438f73d19 = AddAnimationRequest(animation_type="斜切", duration=None)
 
 resp_a8411e51_86b9_4338_8071_f92438f73d19 = await add_video_animation(segment_fc6ea2d6_f50b_4a0a_90d7_b07dff58f900, req_a8411e51_86b9_4338_8071_f92438f73d19)
 
@@ -102,7 +100,7 @@ resp_a8411e51_86b9_4338_8071_f92438f73d19 = await add_video_animation(segment_fc
 # 时间: 2025-11-12 04:56:01
 
 # 构造 request 对象
-req_8e428087_2586_4fb5_96a1_dc74629e6626 = AddSegmentToDraftRequest(segment_id=bf1ca35b_9410_495d_96ce_97c37a1a9339, track_index=None)
+req_8e428087_2586_4fb5_96a1_dc74629e6626 = AddSegmentToDraftRequest(segment_id="bf1ca35b_9410_495d_96ce_97c37a1a9339", track_index=None)
 
 resp_8e428087_2586_4fb5_96a1_dc74629e6626 = await add_segment(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70, req_8e428087_2586_4fb5_96a1_dc74629e6626)
 
@@ -112,7 +110,7 @@ resp_8e428087_2586_4fb5_96a1_dc74629e6626 = await add_segment(draft_f71ad170_a32
 # 时间: 2025-11-12 04:56:09
 
 # 构造 request 对象
-req_6b5f235b_c75a_4ddb_bc13_4a09b77e4a22 = AddSegmentToDraftRequest(segment_id=fc6ea2d6_f50b_4a0a_90d7_b07dff58f900, track_index=None)
+req_6b5f235b_c75a_4ddb_bc13_4a09b77e4a22 = AddSegmentToDraftRequest(segment_id="fc6ea2d6_f50b_4a0a_90d7_b07dff58f900", track_index=None)
 
 resp_6b5f235b_c75a_4ddb_bc13_4a09b77e4a22 = await add_segment(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70, req_6b5f235b_c75a_4ddb_bc13_4a09b77e4a22)
 
@@ -123,4 +121,3 @@ resp_6b5f235b_c75a_4ddb_bc13_4a09b77e4a22 = await add_segment(draft_f71ad170_a32
 
 resp_920e1e87_53f4_45f8_85f2_c7b969af3a3b = await save_draft(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70)
 
-"
