@@ -16,56 +16,8 @@ from types import SimpleNamespace
 from app.gui.base_tab import BaseTab
 from app.utils.logger import get_logger
 
-# 导入所有需要的 API schemas 和函数
-from app.schemas.segment_schemas import (
-    # Draft 操作
-    CreateDraftRequest, CreateDraftResponse,
-    AddTrackRequest, AddTrackResponse,
-    AddSegmentToDraftRequest, AddSegmentToDraftResponse,
-    AddGlobalEffectRequest, AddGlobalEffectResponse,
-    AddGlobalFilterRequest, AddGlobalFilterResponse,
-    SaveDraftResponse,
-    # Segment 创建
-    CreateAudioSegmentRequest, CreateVideoSegmentRequest,
-    CreateTextSegmentRequest, CreateStickerSegmentRequest,
-    CreateEffectSegmentRequest, CreateFilterSegmentRequest,
-    CreateSegmentResponse,
-    # Segment 操作
-    AddEffectRequest, AddEffectResponse,
-    AddFadeRequest, AddFadeResponse,
-    AddKeyframeRequest, AddKeyframeResponse,
-    AddAnimationRequest, AddAnimationResponse,
-    AddFilterRequest, AddFilterResponse,
-    AddMaskRequest, AddMaskResponse,
-    AddTransitionRequest, AddTransitionResponse,
-    AddBackgroundFillingRequest, AddBackgroundFillingResponse,
-    AddBubbleRequest, AddBubbleResponse,
-    AddTextEffectRequest, AddTextEffectResponse,
-    # 查询
-    DraftStatusResponse, TrackInfo, SegmentInfo, DownloadStatusInfo,
-    SegmentDetailResponse,
-)
-
-# 导入 API 路由函数
-from app.api.draft_routes import (
-    create_draft, add_track, add_segment,
-    add_global_effect, add_global_filter,
-    save_draft, get_draft_status,
-)
-from app.api.segment_routes import (
-    create_audio_segment, create_video_segment,
-    create_text_segment, create_sticker_segment,
-    create_effect_segment, create_filter_segment,
-    add_effect, add_fade, add_keyframe,
-    add_animation, add_filter, add_mask,
-    add_transition, add_background_filling,
-    add_bubble, add_text_effect,
-    # Segment 特定函数
-    add_audio_fade, add_audio_volume_change,
-    add_video_fade, add_video_animation,
-    add_video_keyframe, add_video_clip_settings,
-    get_segment_detail,
-)
+# NOTE: API schemas and functions are imported lazily in _prepare_execution_namespace()
+# to avoid PyInstaller bundling issues. Do not import them at module level.
 
 
 class ScriptExecutorTab(BaseTab):
@@ -306,7 +258,74 @@ class ScriptExecutorTab(BaseTab):
             self.frame.after(0, self._on_execution_error, error_msg)
     
     def _prepare_execution_namespace(self):
-        """准备脚本执行的命名空间，注入所有必要的依赖"""
+        """准备脚本执行的命名空间，注入所有必要的依赖
+        
+        使用延迟导入（lazy imports）以避免 PyInstaller 打包时的依赖问题。
+        只在脚本实际执行时才导入 API 模块。
+        """
+        # 首先进行延迟导入
+        try:
+            # 导入所有需要的 API schemas
+            from app.schemas.segment_schemas import (
+                # Draft 操作
+                CreateDraftRequest, CreateDraftResponse,
+                AddTrackRequest, AddTrackResponse,
+                AddSegmentToDraftRequest, AddSegmentToDraftResponse,
+                AddGlobalEffectRequest, AddGlobalEffectResponse,
+                AddGlobalFilterRequest, AddGlobalFilterResponse,
+                SaveDraftResponse,
+                # Segment 创建
+                CreateAudioSegmentRequest, CreateVideoSegmentRequest,
+                CreateTextSegmentRequest, CreateStickerSegmentRequest,
+                CreateEffectSegmentRequest, CreateFilterSegmentRequest,
+                CreateSegmentResponse,
+                # Segment 操作
+                AddEffectRequest, AddEffectResponse,
+                AddFadeRequest, AddFadeResponse,
+                AddKeyframeRequest, AddKeyframeResponse,
+                AddAnimationRequest, AddAnimationResponse,
+                AddFilterRequest, AddFilterResponse,
+                AddMaskRequest, AddMaskResponse,
+                AddTransitionRequest, AddTransitionResponse,
+                AddBackgroundFillingRequest, AddBackgroundFillingResponse,
+                AddBubbleRequest, AddBubbleResponse,
+                AddTextEffectRequest, AddTextEffectResponse,
+                # 查询
+                DraftStatusResponse, TrackInfo, SegmentInfo, DownloadStatusInfo,
+                SegmentDetailResponse,
+            )
+            
+            # 导入 API 路由函数
+            from app.api.draft_routes import (
+                create_draft, add_track, add_segment,
+                add_global_effect, add_global_filter,
+                save_draft, get_draft_status,
+            )
+            from app.api.segment_routes import (
+                create_audio_segment, create_video_segment,
+                create_text_segment, create_sticker_segment,
+                create_effect_segment, create_filter_segment,
+                add_effect, add_fade, add_keyframe,
+                add_animation, add_filter, add_mask,
+                add_transition, add_background_filling,
+                add_bubble, add_text_effect,
+                # Segment 特定函数
+                add_audio_fade, add_audio_volume_change,
+                add_video_fade, add_video_animation,
+                add_video_keyframe, add_video_clip_settings,
+                get_segment_detail,
+            )
+        except ImportError as e:
+            self.logger.error(f"导入 API 模块失败: {e}")
+            # 如果导入失败，返回基本的命名空间
+            return {
+                '__builtins__': __builtins__,
+                'print': print,
+                'asyncio': asyncio,
+                'CustomNamespace': SimpleNamespace,
+            }
+        
+        # 构建命名空间
         namespace = {
             # Python 内置
             '__builtins__': __builtins__,

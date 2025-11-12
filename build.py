@@ -62,6 +62,16 @@ def build_exe():
         "--hidden-import=tkinter.ttk",
         "--hidden-import=tkinter.scrolledtext",
         "--hidden-import=pyJianYingDraft",  # 添加pyJianYingDraft库
+        # API 依赖项 - 用于脚本执行器
+        "--hidden-import=app.api.draft_routes",
+        "--hidden-import=app.api.segment_routes",
+        "--hidden-import=app.schemas.segment_schemas",
+        "--hidden-import=app.utils.draft_state_manager",
+        "--hidden-import=app.utils.segment_manager",
+        "--hidden-import=app.utils.draft_saver",
+        "--hidden-import=fastapi",
+        "--hidden-import=pydantic",
+        "--hidden-import=uvicorn",
         "--noconfirm",  # 不询问确认
     ]
 
