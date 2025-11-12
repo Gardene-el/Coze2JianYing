@@ -1,50 +1,9 @@
-2025-11-13 05:23:03 - app.utils.draft_generator - INFO - 初始化草稿生成器
-2025-11-13 05:23:03 - app.utils.draft_generator - INFO - 输出目录: ./JianyingProjects
-2025-11-13 05:23:03 - app.gui.base_tab.手动草稿生成 - INFO - 标签页 '手动草稿生成' 已初始化
-2025-11-13 05:23:03 - app.utils.draft_generator - INFO - 初始化草稿生成器
-2025-11-13 05:23:03 - app.utils.draft_generator - INFO - 输出目录: ./JianyingProjects
-2025-11-13 05:23:03 - app.gui.base_tab.云端服务 - INFO - 标签页 '云端服务' 已初始化
-2025-11-13 05:23:03 - app.utils.draft_generator - INFO - 初始化草稿生成器
-2025-11-13 05:23:03 - app.utils.draft_generator - INFO - 输出目录: ./JianyingProjects
-2025-11-13 05:23:04 - app.gui.base_tab.本地服务 - INFO - 标签页 '本地服务' 已初始化
-2025-11-13 05:23:04 - app.gui.base_tab.脚本执行 - INFO - 标签页 '脚本执行' 已初始化
-2025-11-13 05:23:04 - app.gui.base_tab.示例标签页 - INFO - 标签页 '示例标签页' 已初始化
-2025-11-13 05:23:04 - app.gui.main_window - INFO - 已创建 5 个标签页
-2025-11-13 05:23:04 - __main__ - INFO - 主窗口已创建
-2025-11-13 05:23:17 - app.gui.base_tab.脚本执行 - INFO - 开始执行脚本
-2025-11-13 05:23:17 - app.utils.draft_state_manager - INFO - 草稿状态管理器已初始化: C:\Users\aloud\AppData\Local\coze2jianying_data\cache
-2025-11-13 05:23:17 - app.utils.segment_manager - INFO - 片段状态管理器已初始化: C:\Users\aloud\AppData\Local\coze2jianying_data\cache
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - ============================================================
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 收到创建草稿请求
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 项目名称: demo
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 分辨率: 1920x1080
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 帧率: 30
-2025-11-13 05:23:17 - app.utils.draft_state_manager - INFO - 草稿创建成功: cd785386-9e62-478d-be0f-684eba35ec93
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 草稿创建成功: cd785386-9e62-478d-be0f-684eba35ec93
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - ============================================================
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - ============================================================
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 收到添加轨道请求: draft_id=cd785386-9e62-478d-be0f-684eba35ec93
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 轨道类型: audio
-2025-11-13 05:23:17 - app.utils.draft_state_manager - INFO - 草稿配置已更新: cd785386-9e62-478d-be0f-684eba35ec93
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 轨道添加成功: index=0, type=audio
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - ============================================================
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - ============================================================
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 收到添加轨道请求: draft_id=cd785386-9e62-478d-be0f-684eba35ec93
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 轨道类型: video
-2025-11-13 05:23:17 - app.utils.draft_state_manager - INFO - 草稿配置已更新: cd785386-9e62-478d-be0f-684eba35ec93
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - 轨道添加成功: index=1, type=video
-2025-11-13 05:23:17 - app.api.draft_routes - INFO - ============================================================
-2025-11-13 05:23:17 - app.gui.base_tab.脚本执行 - ERROR - 脚本执行失败: 4 validation errors for CreateVideoSegmentRequest
-target_timerange
-  Input should be a valid dictionary or instance of TimeRange [type=model_type, input_value=namespace(start=0, duration=4200000), input_type=SimpleNamespace]
-    For further information visit https://errors.pydantic.dev/2.11/v/model_type
-speed
-  Input should be a valid number [type=float_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.11/v/float_type
-volume
-  Input should be a valid number [type=float_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.11/v/float_type
-change_pitch
-  Input should be a valid boolean [type=bool_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.11/v/bool_type
-NoneType: None
+调用 create_audio_segment，参数: CustomNamespace(material_url='https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3', target_timerange=CustomNamespace(start=0, duration=5000000), speed=1, volume=1, change_pitch=False)
+生成 UUID: b15de4f1_4c5c_4d05_b36f_d20a38140265
+调用 create_audio_segment 时发生错误: name 'k' is not defined
+Traceback: Traceback (most recent call last):
+  File "/cloudide/workspace/api/create_audio_segment/create_audio_segment.py", line 118, in handler
+    obj_params = ', '.join(f"{k}={v}" for k, v in vars(obj).items())
+                              ^
+NameError: name 'k' is not defined
+Execute success, cost: 219ms, function_cost: 3ms
