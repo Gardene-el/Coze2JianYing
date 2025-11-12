@@ -1,100 +1,215 @@
 # API 调用: create_draft
-# 时间: 2025-11-13 05:16:42
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.draft_name is not None:
+            params.append(f"draft_name="demo"")
+        if args.input.width is not None:
+            params.append(f"width=1920")
+        if args.input.height is not None:
+            params.append(f"height=1080")
+        if args.input.fps is not None:
+            params.append(f"fps=30")
+        if args.input.allow_replace is not None:
+            params.append(f"allow_replace=True")
 
 # 构造 request 对象
-req_21fe59e9_adf3_49b3_b3db_33f5c85a4840 = CreateDraftRequest(draft_name='demo', width=1920, height=1080, fps=30, allow_replace=True)
+req_{generated_uuid} = CreateDraftRequest({", ".join(params)})
 
-resp_21fe59e9_adf3_49b3_b3db_33f5c85a4840 = await create_draft(req_21fe59e9_adf3_49b3_b3db_33f5c85a4840)
+resp_{generated_uuid} = await create_draft(req_{generated_uuid})
 
-draft_21fe59e9_adf3_49b3_b3db_33f5c85a4840 = resp_21fe59e9_adf3_49b3_b3db_33f5c85a4840.draft_id
+draft_5f591963_a7bc_4cb4_8998_69072bd73beb = resp_5f591963_a7bc_4cb4_8998_69072bd73beb.draft_id
+
+# API 调用: add_track
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.track_type is not None:
+            params.append(f"track_type="video"")
+        if args.input.track_name is not None:
+            params.append(f"track_name=null")
+
+# 构造 request 对象
+req_{generated_uuid} = AddTrackRequest({", ".join(params)})
+
+resp_{generated_uuid} = await add_track(draft_{args.input.draft_id}, req_{generated_uuid})
 
 
 
 # API 调用: add_track
-# 时间: 2025-11-13 05:16:58
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.track_type is not None:
+            params.append(f"track_type="audio"")
+        if args.input.track_name is not None:
+            params.append(f"track_name=null")
 
 # 构造 request 对象
-req_64666ed3_038f_4337_adb6_eeb7679bb5a5 = AddTrackRequest(track_type='audio', track_name=None)
+req_{generated_uuid} = AddTrackRequest({", ".join(params)})
 
-resp_64666ed3_038f_4337_adb6_eeb7679bb5a5 = await add_track(draft_21fe59e9_adf3_49b3_b3db_33f5c85a4840, req_64666ed3_038f_4337_adb6_eeb7679bb5a5)
-
-
-
-# API 调用: add_track
-# 时间: 2025-11-13 05:17:03
-
-# 构造 request 对象
-req_21096a00_4d49_4815_856d_629d60c7cc99 = AddTrackRequest(track_type='video', track_name=None)
-
-resp_21096a00_4d49_4815_856d_629d60c7cc99 = await add_track(draft_21fe59e9_adf3_49b3_b3db_33f5c85a4840, req_21096a00_4d49_4815_856d_629d60c7cc99)
+resp_{generated_uuid} = await add_track(draft_{args.input.draft_id}, req_{generated_uuid})
 
 
 
 # API 调用: create_video_segment
-# 时间: 2025-11-13 05:17:19
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.material_url is not None:
+            params.append(f"material_url="https://gardene-el.github.io/Coze2JianYing/assets/video.mp4"")
+        if args.input.target_timerange is not None:
+            # 转换 CustomNamespace 为 TimeRange
+            obj = args.input.target_timerange
+            if hasattr(obj, '__dict__'):
+                obj_params = ', '.join(f"{k}={v}" for k, v in vars(obj).items())
+            else:
+                obj_params = str(obj)
+            params.append(f"target_timerange=TimeRange({obj_params})")
+        if args.input.source_timerange is not None:
+            # 转换 CustomNamespace 为 TimeRange
+            obj = args.input.source_timerange
+            if hasattr(obj, '__dict__'):
+                obj_params = ', '.join(f"{k}={v}" for k, v in vars(obj).items())
+            else:
+                obj_params = str(obj)
+            params.append(f"source_timerange=TimeRange({obj_params})")
+        if args.input.speed is not None:
+            params.append(f"speed=None")
+        if args.input.volume is not None:
+            params.append(f"volume=None")
+        if args.input.change_pitch is not None:
+            params.append(f"change_pitch=None")
+        if args.input.clip_settings is not None:
+            # 转换 CustomNamespace 为 ClipSettings
+            obj = args.input.clip_settings
+            if hasattr(obj, '__dict__'):
+                obj_params = ', '.join(f"{k}={v}" for k, v in vars(obj).items())
+            else:
+                obj_params = str(obj)
+            params.append(f"clip_settings=ClipSettings({obj_params})")
 
 # 构造 request 对象
-req_50b459dc_3045_4a44_81b0_a2ca170b2cda = CreateVideoSegmentRequest(material_url='https://gardene-el.github.io/Coze2JianYing/assets/video.mp4', target_timerange=CustomNamespace(start=0, duration=4200000), source_timerange=None, speed=None, volume=None, change_pitch=None, clip_settings=None)
+req_{generated_uuid} = CreateVideoSegmentRequest({", ".join(params)})
 
-resp_50b459dc_3045_4a44_81b0_a2ca170b2cda = await create_video_segment(req_50b459dc_3045_4a44_81b0_a2ca170b2cda)
+resp_{generated_uuid} = await create_video_segment(req_{generated_uuid})
 
-segment_50b459dc_3045_4a44_81b0_a2ca170b2cda = resp_50b459dc_3045_4a44_81b0_a2ca170b2cda.segment_id
-
-
-
-# API 调用: add_video_animation
-# 时间: 2025-11-13 05:17:35
-
-# 构造 request 对象
-req_05aef8e1_c158_4ea5_94ca_a21548cc4cce = AddAnimationRequest(animation_type='斜切', duration=None)
-
-resp_05aef8e1_c158_4ea5_94ca_a21548cc4cce = await add_video_animation(segment_50b459dc_3045_4a44_81b0_a2ca170b2cda, req_05aef8e1_c158_4ea5_94ca_a21548cc4cce)
+segment_65e0ed0a_ece3_45dd_8127_0593e68aee46 = resp_65e0ed0a_ece3_45dd_8127_0593e68aee46.segment_id
 
 
 
 # API 调用: create_audio_segment
-# 时间: 2025-11-13 05:17:43
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.material_url is not None:
+            params.append(f"material_url="https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3"")
+        if args.input.target_timerange is not None:
+            # 转换 CustomNamespace 为 TimeRange
+            obj = args.input.target_timerange
+            if hasattr(obj, '__dict__'):
+                obj_params = ', '.join(f"{k}={v}" for k, v in vars(obj).items())
+            else:
+                obj_params = str(obj)
+            params.append(f"target_timerange=TimeRange({obj_params})")
+        if args.input.source_timerange is not None:
+            # 转换 CustomNamespace 为 TimeRange
+            obj = args.input.source_timerange
+            if hasattr(obj, '__dict__'):
+                obj_params = ', '.join(f"{k}={v}" for k, v in vars(obj).items())
+            else:
+                obj_params = str(obj)
+            params.append(f"source_timerange=TimeRange({obj_params})")
+        if args.input.speed is not None:
+            params.append(f"speed=1")
+        if args.input.volume is not None:
+            params.append(f"volume=1")
+        if args.input.change_pitch is not None:
+            params.append(f"change_pitch=False")
 
 # 构造 request 对象
-req_0870de00_bb9e_4822_8f7c_739d32bddb90 = CreateAudioSegmentRequest(material_url='https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3', target_timerange=CustomNamespace(start=0, duration=5000000), source_timerange=None, speed=1, volume=1, change_pitch=False)
+req_{generated_uuid} = CreateAudioSegmentRequest({", ".join(params)})
 
-resp_0870de00_bb9e_4822_8f7c_739d32bddb90 = await create_audio_segment(req_0870de00_bb9e_4822_8f7c_739d32bddb90)
+resp_{generated_uuid} = await create_audio_segment(req_{generated_uuid})
 
-segment_0870de00_bb9e_4822_8f7c_739d32bddb90 = resp_0870de00_bb9e_4822_8f7c_739d32bddb90.segment_id
+segment_5a96374f_a666_4b7f_b5dd_09979d15a6cf = resp_5a96374f_a666_4b7f_b5dd_09979d15a6cf.segment_id
+
+
+
+# API 调用: add_video_animation
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.animation_type is not None:
+            params.append(f"animation_type="\u659c\u5207"")
+        if args.input.duration is not None:
+            params.append(f"duration=null")
+
+# 构造 request 对象
+req_{generated_uuid} = AddAnimationRequest({", ".join(params)})
+
+resp_{generated_uuid} = await add_video_animation(segment_{args.input.segment_id}, req_{generated_uuid})
 
 
 
 # API 调用: add_audio_fade
-# 时间: 2025-11-13 05:17:57
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.in_duration is not None:
+            params.append(f"in_duration="1s"")
+        if args.input.out_duration is not None:
+            params.append(f"out_duration="0s"")
 
 # 构造 request 对象
-req_4b73d376_8a4d_4558_bbbc_7286933a4219 = AddFadeRequest(in_duration='1s', out_duration='0s')
+req_{generated_uuid} = AddFadeRequest({", ".join(params)})
 
-resp_4b73d376_8a4d_4558_bbbc_7286933a4219 = await add_audio_fade(segment_0870de00_bb9e_4822_8f7c_739d32bddb90, req_4b73d376_8a4d_4558_bbbc_7286933a4219)
-
-
-
-# API 调用: add_audio_fade
-# 时间: 2025-11-13 05:19:25
-
-# 构造 request 对象
-req_594fd609_5e5a_436f_96b1_f1508b437a73 = AddFadeRequest(in_duration=None, out_duration=None)
-
-resp_594fd609_5e5a_436f_96b1_f1508b437a73 = await add_audio_fade(segment_0870de00_bb9e_4822_8f7c_739d32bddb90, req_594fd609_5e5a_436f_96b1_f1508b437a73)
+resp_{generated_uuid} = await add_audio_fade(segment_{args.input.segment_id}, req_{generated_uuid})
 
 
 
-# API 调用: add_audio_fade
-# 时间: 2025-11-13 05:19:38
+# API 调用: add_segment
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.segment_id is not None:
+            params.append(f"segment_id="65e0ed0a_ece3_45dd_8127_0593e68aee46"")
+        if args.input.track_index is not None:
+            params.append(f"track_index=None")
 
 # 构造 request 对象
-req_c6a6851a_5972_44e7_89a9_5e0cc400413a = AddFadeRequest(in_duration=None, out_duration=None)
+req_{generated_uuid} = AddSegmentToDraftRequest({", ".join(params)})
 
-resp_c6a6851a_5972_44e7_89a9_5e0cc400413a = await add_audio_fade(segment_50b459dc_3045_4a44_81b0_a2ca170b2cda, req_c6a6851a_5972_44e7_89a9_5e0cc400413a)
+resp_{generated_uuid} = await add_segment(draft_{args.input.draft_id}, req_{generated_uuid})
+
+
+
+# API 调用: add_segment
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
+
+        # 构造 request 对象参数列表
+        params = []
+        if args.input.segment_id is not None:
+            params.append(f"segment_id="5a96374f_a666_4b7f_b5dd_09979d15a6cf"")
+        if args.input.track_index is not None:
+            params.append(f"track_index=None")
+
+# 构造 request 对象
+req_{generated_uuid} = AddSegmentToDraftRequest({", ".join(params)})
+
+resp_{generated_uuid} = await add_segment(draft_{args.input.draft_id}, req_{generated_uuid})
 
 
 
 # API 调用: save_draft
-# 时间: 2025-11-13 05:19:47
+# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
-resp_8ddb5a6a_245e_43fc_b64d_ec2e92515fff = await save_draft(draft_21fe59e9_adf3_49b3_b3db_33f5c85a4840)
+resp_{generated_uuid} = await save_draft(draft_{args.input.draft_id})
