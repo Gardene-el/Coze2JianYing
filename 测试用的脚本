@@ -1,5 +1,3 @@
-"
-
 # API 调用: create_draft
 # 时间: 2025-11-12 04:37:22
 
@@ -54,13 +52,13 @@ segment_bf1ca35b_9410_495d_96ce_97c37a1a9339 = resp_bf1ca35b_9410_495d_96ce_97c3
 
 
 
-# API 调用: add_video_fade
+# API 调用: add_audio_fade
 # 时间: 2025-11-12 04:44:09
 
 # 构造 request 对象
 req_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = AddFadeRequest(in_duration=1s, out_duration=0s)
 
-resp_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = await add_video_fade(segment_bf1ca35b_9410_495d_96ce_97c37a1a9339, req_ea88fbe7_31bf_4189_a10c_cc58e6ca527c)
+resp_ea88fbe7_31bf_4189_a10c_cc58e6ca527c = await add_audio_fade(segment_bf1ca35b_9410_495d_96ce_97c37a1a9339, req_ea88fbe7_31bf_4189_a10c_cc58e6ca527c)
 
 
 
@@ -122,5 +120,3 @@ resp_6b5f235b_c75a_4ddb_bc13_4a09b77e4a22 = await add_segment(draft_f71ad170_a32
 # 时间: 2025-11-12 04:56:37
 
 resp_920e1e87_53f4_45f8_85f2_c7b969af3a3b = await save_draft(draft_f71ad170_a32e_424d_895a_54cb8f1a1a70)
-
-"
