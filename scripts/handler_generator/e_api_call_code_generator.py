@@ -67,19 +67,19 @@ class APICallCodeGenerator:
             # 转换 CustomNamespace 为 {base_type}
             obj = args.input.{field_name}
             if hasattr(obj, '__dict__'):
-                obj_params = ', '.join(f"{{k}}={{v}}" for k, v in vars(obj).items())
+                obj_params = ', '.join(f"{{{{k}}}}={{{{v}}}}" for k, v in vars(obj).items())
             else:
                 obj_params = str(obj)
-            params.append(f"{field_name}={base_type}({{obj_params}})")""")
+            params.append(f"{field_name}={base_type}({{{{obj_params}}}})") """)
                     else:
                         # 必需复杂对象
                         params_building_code.append(f"""
         obj = args.input.{field_name}
         if hasattr(obj, '__dict__'):
-            obj_params = ', '.join(f"{{k}}={{v}}" for k, v in vars(obj).items())
+            obj_params = ', '.join(f"{{{{k}}}}={{{{v}}}}" for k, v in vars(obj).items())
         else:
             obj_params = str(obj)
-        params.append(f"{field_name}={base_type}({{obj_params}})")""")
+        params.append(f"{field_name}={base_type}({{{{obj_params}}}})") """)
                         
                 else:
                     # 基本类型（int, float, bool）
