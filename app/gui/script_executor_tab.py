@@ -171,6 +171,70 @@ class ScriptExecutorTab(BaseTab):
             self.logger.error(f"验证失败: {e}", exc_info=True)
             messagebox.showerror("验证失败", f"验证失败:\n{e}")
     
+    def _fix_unquoted_strings(self, script_content: str) -> str:
+        """
+        修复脚本中未加引号的字符串值
+        
+        处理 Coze 导出脚本中常见的语法问题，如：
+        - draft_name=demo -> draft_name="demo"
+        - track_type=audio -> track_type="audio"
+        - material_url=https://... -> material_url="https://..."
+        
+        Args:
+            script_content: 原始脚本内容
+            
+        Returns:
+            修复后的脚本内容
+        """
+        import re
+        
+        lines = script_content.split('\n')
+        fixed_lines = []
+        
+        for line in lines:
+            # 跳过注释行和空行
+            if line.strip().startswith('#') or not line.strip():
+                fixed_lines.append(line)
+                continue
+            
+            # 匹配函数调用中的参数: param_name=value
+            # 需要处理的模式：参数名=未加引号的值
+            # 不处理已经有引号的、数字、None、True、False、以及已经是函数调用的
+            def fix_param(match):
+                param_name = match.group(1)
+                value = match.group(2)
+                
+                # 如果值已经有引号，不处理
+                if value.startswith('"') or value.startswith("'"):
+                    return match.group(0)
+                
+                # 如果是 None, True, False，不处理
+                if value in ['None', 'True', 'False']:
+                    return match.group(0)
+                
+                # 如果是纯数字（整数或小数），不处理
+                try:
+                    float(value)
+                    return match.group(0)
+                except ValueError:
+                    pass
+                
+                # 如果是函数调用（包含括号），不处理
+                if '(' in value and ')' in value:
+                    return match.group(0)
+                
+                # 其他情况，添加引号
+                return f'{param_name}="{value}"'
+            
+            # 匹配模式：参数名=值（不在引号中，且后面是逗号、右括号或空白）
+            # 使用负向后查找确保不在字符串内部
+            pattern = r'(\w+)=([^,\)\s"\']+)(?=[,\)\s])'
+            fixed_line = re.sub(pattern, fix_param, line)
+            
+            fixed_lines.append(fixed_line)
+        
+        return '\n'.join(fixed_lines)
+    
     def _preprocess_script(self, script_content: str) -> str:
         """
         预处理脚本内容，注入必要的导入和依赖
@@ -242,6 +306,9 @@ CustomNamespace = SimpleNamespace
         script_content = script_content.strip()
         if script_content.startswith('"') and script_content.endswith('"'):
             script_content = script_content[1:-1]
+        
+        # 修复未加引号的字符串
+        script_content = self._fix_unquoted_strings(script_content)
         
         # 将用户脚本包装在async main函数中
         async_main = f"""
