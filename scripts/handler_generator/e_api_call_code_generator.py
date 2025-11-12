@@ -35,8 +35,30 @@ class APICallCodeGenerator:
             )
             params = []
             for field in request_fields:
-                # 使用 {{args.input.field}} 来在生成的 f-string 中正确引用值
-                params.append(f"{field['name']}={{args.input.{field['name']}}}")
+                field_name = field['name']
+                field_type = field.get('type', '')
+                default = field.get('default', '...')
+                
+                # 判断字段是否必需（没有默认值）
+                is_required = default in ('...', 'Ellipsis')
+                
+                # 对于有默认值的字段，只在值不是None时才传递
+                if is_required:
+                    # 必需字段：始终传递
+                    # 对于TimeRange等自定义类型，需要特殊处理
+                    if 'TimeRange' in field_type:
+                        # TimeRange类型：生成构造器代码
+                        params.append(
+                            f"{field_name}={{TimeRange(**{{k: v for k, v in args.input.{field_name}._asdict().items()}}) if hasattr(args.input.{field_name}, '_asdict') else args.input.{field_name}}}"
+                        )
+                    else:
+                        params.append(f"{field_name}={{args.input.{field_name}}}")
+                else:
+                    # 可选字段：只在值不为None时传递，避免覆盖默认值
+                    # 使用条件表达式动态构建参数
+                    params.append(
+                        f"**({{{repr(field_name)}: args.input.{field_name}}} if args.input.{field_name} is not None else {{}})"
+                    )
 
             request_construction = f"""
 # 构造 request 对象
