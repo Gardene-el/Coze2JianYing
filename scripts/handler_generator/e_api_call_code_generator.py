@@ -42,6 +42,30 @@ class APICallCodeGenerator:
         # 其他类型（int, float, bool, List[int], Dict 等）不需要引号
         return False
 
+    def _is_optional_field(self, field: Dict[str, Any]) -> bool:
+        """
+        判断字段是否为可选字段（可以不传递）
+
+        Args:
+            field: 字段信息字典，包含 name, type, default, description
+
+        Returns:
+            True 如果字段是可选的（有默认值或类型包含 Optional）
+        """
+        field_type = field["type"]
+        field_default = field["default"]
+
+        # 如果类型中包含 Optional，说明可以为 None
+        if "Optional" in field_type:
+            return True
+
+        # 如果有默认值且不是 "..." 或 "Ellipsis"（Pydantic 的必需字段标记），说明是可选的
+        # SchemaExtractor 会将 ... 转换为字符串 "..." 或 Ellipsis 对象的字符串表示
+        if field_default not in ("...", "Ellipsis"):
+            return True
+
+        return False
+
     def _format_param_value(self, field_name: str, field_type: str) -> str:
         """
         根据字段类型格式化参数值
@@ -82,22 +106,55 @@ class APICallCodeGenerator:
             request_fields = self.schema_extractor.get_schema_fields(
                 endpoint.request_model
             )
-            params = []
+
+            # 分离必需字段和可选字段
+            required_fields = []
+            optional_fields = []
             for field in request_fields:
+                if self._is_optional_field(field):
+                    optional_fields.append(field)
+                else:
+                    required_fields.append(field)
+
+            # 构造 request 对象的代码
+            request_construction = "\n# 构造 request 对象\n"
+            request_construction += "req_params_{generated_uuid} = {{}}\n"
+
+            # 必需字段直接添加到字典
+            for field in required_fields:
                 field_name = field["name"]
                 field_type = field["type"]
-
-                # 根据类型格式化参数值
                 formatted_value = self._format_param_value(field_name, field_type)
-                params.append(field_name + "=" + formatted_value)
+                request_construction += (
+                    "req_params_{generated_uuid}['"
+                    + field_name
+                    + "'] = "
+                    + formatted_value
+                    + "\n"
+                )
 
-            # 直接拼接字符串，避免任何转义问题
-            request_construction = "\n# 构造 request 对象\n"
-            request_construction += "req_{generated_uuid} = "
-            request_construction += endpoint.request_model
-            request_construction += "("
-            request_construction += ", ".join(params)
-            request_construction += ")\n"
+            # 可选字段：仅在非 None 时添加
+            for field in optional_fields:
+                field_name = field["name"]
+                field_type = field["type"]
+                formatted_value = self._format_param_value(field_name, field_type)
+                request_construction += (
+                    "if {args.input." + field_name + "} is not None:\n"
+                )
+                request_construction += (
+                    "    req_params_{generated_uuid}['"
+                    + field_name
+                    + "'] = "
+                    + formatted_value
+                    + "\n"
+                )
+
+            # 使用字典解包创建 request 对象
+            request_construction += (
+                "req_{generated_uuid} = "
+                + endpoint.request_model
+                + "(**req_params_{generated_uuid})\n"
+            )
 
         # 生成 API 调用代码
         api_call_params = []
