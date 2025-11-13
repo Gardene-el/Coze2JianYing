@@ -88,7 +88,71 @@ class HandlerFunctionGenerator:
 
         output_construction = ", ".join(output_params)
 
-        handler_function = f'''def handler(args: Args[Input]) -> Output:
+        # 生成辅助函数的定义（用于处理 CustomNamespace）
+        helper_functions = '''def _to_type_constructor(obj, type_name: str) -> str:
+    """
+    将 CustomNamespace/SimpleNamespace 对象转换为类型构造表达式字符串
+
+    用于处理 Coze 的 CustomNamespace/SimpleNamespace 对象
+    这些对象在 Coze 云端使用，在应用端执行时需要转换为对应类型的构造调用
+
+    例如：
+        CustomNamespace(start=0, duration=5000000)
+        -> "TimeRange(start=0, duration=5000000)"
+
+    Args:
+        obj: CustomNamespace/SimpleNamespace 对象
+        type_name: 目标类型名，如 "TimeRange", "ClipSettings"
+
+    Returns:
+        类型构造表达式字符串，如 "TimeRange(start=0, duration=5000000)"
+    """
+    if obj is None:
+        return 'None'
+
+    # 检查是否有 __dict__ 属性（CustomNamespace, SimpleNamespace 等）
+    if hasattr(obj, '__dict__'):
+        obj_dict = obj.__dict__
+        # 构造类型构造调用的参数列表
+        params = []
+        for key, value in obj_dict.items():
+            # 递归处理嵌套对象
+            if hasattr(value, '__dict__'):
+                # 嵌套对象：尝试推断其类型名（使用首字母大写的 key）
+                nested_type_name = key.capitalize() if key else 'Object'
+                # 如果 key 本身就是类型相关的，使用更智能的命名
+                if 'settings' in key.lower():
+                    nested_type_name = 'ClipSettings'
+                elif 'timerange' in key.lower():
+                    nested_type_name = 'TimeRange'
+                elif 'style' in key.lower():
+                    nested_type_name = 'TextStyle'
+                elif 'position' in key.lower():
+                    nested_type_name = 'Position'
+                value_repr = _to_type_constructor(value, nested_type_name)
+            elif isinstance(value, str):
+                # 字符串值：加引号
+                value_repr = f'"{value}"'
+            else:
+                # 其他类型：直接使用 repr
+                value_repr = repr(value)
+            params.append(f'{key}={value_repr}')
+
+        # 构造类型构造表达式：TypeName(param1=value1, param2=value2)
+        return f'{type_name}(' + ', '.join(params) + ')'
+
+    # 如果不是复杂对象，返回其 repr
+    if isinstance(obj, str):
+        return f'"{obj}"'
+    else:
+        return repr(obj)
+
+
+'''
+
+        handler_function = (
+            helper_functions
+            + f'''def handler(args: Args[Input]) -> Output:
     """
     {endpoint.func_name} 的主处理函数
 
@@ -126,5 +190,6 @@ class HandlerFunctionGenerator:
 
         return Output(success=False, message=error_msg)
 '''
+        )
 
         return handler_function

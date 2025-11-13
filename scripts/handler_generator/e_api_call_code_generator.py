@@ -66,6 +66,75 @@ class APICallCodeGenerator:
 
         return False
 
+    def _extract_type_name(self, field_type: str) -> str:
+        """
+        从类型字符串中提取核心类型名
+
+        例如：
+        - "TimeRange" -> "TimeRange"
+        - "Optional[TimeRange]" -> "TimeRange"
+        - "Optional[List[ClipSettings]]" -> "ClipSettings"
+        - "List[str]" -> "str"
+
+        Args:
+            field_type: 字段类型字符串
+
+        Returns:
+            核心类型名
+        """
+        import re
+
+        # 去除空格
+        field_type = field_type.strip()
+
+        # 使用正则表达式提取最内层的类型名
+        # 匹配大写字母开头的类型名（自定义类型通常是 PascalCase）
+        matches = re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", field_type)
+
+        if matches:
+            # 返回最后一个匹配（最内层类型）
+            # 例如 Optional[List[ClipSettings]] 会匹配 [Optional, List, ClipSettings]
+            # 我们要返回 ClipSettings
+            return matches[-1]
+
+        return field_type
+
+    def _is_complex_type(self, field_type: str) -> bool:
+        """
+        判断字段类型是否为复杂类型（需要类型构造）
+
+        Args:
+            field_type: 字段类型字符串
+
+        Returns:
+            True 如果是复杂类型（如 TimeRange, ClipSettings 等自定义类型）
+        """
+        # 提取核心类型名
+        type_name = self._extract_type_name(field_type)
+
+        # 基本类型不是复杂类型
+        basic_types = {
+            "str",
+            "int",
+            "float",
+            "bool",
+            "None",
+            "Any",
+            "List",
+            "Dict",
+            "Tuple",
+            "Set",
+            "Optional",
+            "Union",
+        }
+
+        if type_name in basic_types:
+            return False
+
+        # 其他类型（如 TimeRange, ClipSettings 等）视为复杂类型
+        # 在 Coze 中这些会是 CustomNamespace，需要转换为类型构造调用
+        return True
+
     def _format_param_value(self, field_name: str, field_type: str) -> str:
         """
         根据字段类型格式化参数值
@@ -84,8 +153,13 @@ class APICallCodeGenerator:
             # 字符串类型：需要在 handler.py 的 f-string 中是 "{args.input.xxx}"
             # 使用单层大括号，这样在 handler 运行时会插值
             return '"{' + access_expr + '}"'
+        elif self._is_complex_type(field_type):
+            # 复杂类型（如 TimeRange, ClipSettings）：调用 _to_type_constructor 生成类型构造表达式
+            # 例如：CustomNamespace(start=0, duration=5000000) -> TimeRange(start=0, duration=5000000)
+            type_name = self._extract_type_name(field_type)
+            return "{_to_type_constructor(" + access_expr + ", '" + type_name + "')}"
         else:
-            # 非字符串类型：需要在 handler.py 的 f-string 中是 {args.input.xxx}
+            # 非字符串的基本类型：需要在 handler.py 的 f-string 中是 {args.input.xxx}
             return "{" + access_expr + "}"
 
     def generate_api_call_code(

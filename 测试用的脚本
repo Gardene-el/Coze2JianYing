@@ -1,19 +1,22 @@
-# API 调用: add_audio_fade
-# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
-
-        # 构造 request 对象参数列表
-        params = []
-        if args.input.in_duration is not None:
-            param_str = f'in_duration={json.dumps(args.input.in_duration)}'
-            params.append(param_str)
-        if args.input.out_duration is not None:
-            param_str = f'out_duration={json.dumps(args.input.out_duration)}'
-            params.append(param_str)
-
-        # 生成 request 构造代码
-        params_str = ', '.join(params)
+# API 调用: create_video_segment
+# 时间: 2025-11-13 21:34:26
 
 # 构造 request 对象
-req_{generated_uuid} = AddFadeRequest({params_str})
+req_params_20d376da_f182_4baf_9631_e963349069de = {}
+req_params_20d376da_f182_4baf_9631_e963349069de['material_url'] = "https://gardene-el.github.io/Coze2JianYing/assets/video.mp4"
+req_params_20d376da_f182_4baf_9631_e963349069de['target_timerange'] = TimeRange(start=0, duration=4200000)
+if None is not None:
+    req_params_20d376da_f182_4baf_9631_e963349069de['source_timerange'] = None
+if None is not None:
+    req_params_20d376da_f182_4baf_9631_e963349069de['speed'] = None
+if None is not None:
+    req_params_20d376da_f182_4baf_9631_e963349069de['volume'] = None
+if None is not None:
+    req_params_20d376da_f182_4baf_9631_e963349069de['change_pitch'] = None
+if None is not None:
+    req_params_20d376da_f182_4baf_9631_e963349069de['clip_settings'] = None
+req_20d376da_f182_4baf_9631_e963349069de = CreateVideoSegmentRequest(**req_params_20d376da_f182_4baf_9631_e963349069de)
 
-resp_{generated_uuid} = await add_audio_fade(segment_{args.input.segment_id}, req_{generated_uuid})
+resp_20d376da_f182_4baf_9631_e963349069de = await create_video_segment(req_20d376da_f182_4baf_9631_e963349069de)
+
+segment_20d376da_f182_4baf_9631_e963349069de = resp_20d376da_f182_4baf_9631_e963349069de.segment_id

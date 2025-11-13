@@ -2,6 +2,14 @@
 
 这个包包含了 5 个脚本模块 (A-E)，用于从 API 端点自动生成 Coze handler。
 
+## 核心特性
+
+- ✅ **自动 API 扫描** - 智能识别所有 POST 端点
+- ✅ **完整类型映射** - 从 Pydantic Schema 提取所有字段信息
+- ✅ **可选参数处理** - 自动识别并正确处理可选字段
+- ✅ **类型构造方案** - 将 CustomNamespace 转换为类型构造表达式
+- ✅ **模块化设计** - 各脚本模块独立可测试
+
 ## 模块结构
 
 ### 数据模型
@@ -137,6 +145,93 @@ generate_handler_from_api.py (主程序)
         └── schema_extractor.py
 ```
 
+## 核心功能详解
+
+### CustomNamespace 处理机制（类型构造方案）
+
+**问题**: Coze 云端将复杂类型（如 `TimeRange`, `ClipSettings`）表示为 `CustomNamespace` 对象，应用端无法直接识别。
+
+**解决方案**: 
+1. E 脚本识别复杂类型字段，提取类型名（如 `TimeRange`, `ClipSettings`）
+2. D 脚本在每个 handler 中生成 `_to_type_constructor` 辅助函数
+3. 运行时将 `CustomNamespace(start=0, duration=5000000)` 转换为 `TimeRange(start=0, duration=5000000)`
+4. 生成的代码在应用端可以直接执行，构造正确的类型实例
+
+**优势**:
+- ✅ 类型正确：生成实际的类型构造调用，而非 dict
+- ✅ 无转义问题：使用关键字参数格式，避免 f-string 大括号冲突
+- ✅ 环境兼容：脚本执行环境已导入所有类型定义
+
+**示例**:
+```python
+# Coze 云端输入
+args.input.target_timerange = CustomNamespace(start=0, duration=5000000)
+
+# 生成的脚本输出
+req_params_xxx['target_timerange'] = TimeRange(start=0, duration=5000000)
+```
+
+详见: [`../../docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md`](../../docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md)
+
+### 可选参数处理
+
+**识别逻辑**:
+- 类型包含 `Optional`
+- 有默认值且不是 `...` 或 `Ellipsis`
+
+**生成代码**:
+```python
+# 必需字段直接添加
+req_params_xxx['material_url'] = "..."
+
+# 可选字段加 None 检查
+if {args.input.source_timerange} is not None:
+    req_params_xxx['source_timerange'] = ...
+```
+
+### 类型感知格式化
+
+**字符串类型** - 自动加引号:
+```python
+req_params_xxx['material_url'] = "{args.input.material_url}"
+```
+
+**数字/布尔类型** - 不加引号:
+```python
+req_params_xxx['speed'] = {args.input.speed}
+```
+
+**复杂类型** - 调用类型构造函数:
+```python
+req_params_xxx['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
+```
+
+## 测试
+
+### 运行测试
+
+```bash
+# 测试类型构造方案
+python scripts/test_type_constructor.py
+
+# 测试类型名提取
+python scripts/test_extract_type_name.py
+
+# 测试可选参数处理
+python scripts/test_optional_params.py
+```
+
+### 测试覆盖
+
+- ✅ _to_type_constructor 函数逻辑
+- ✅ SimpleNamespace 对象转换为类型构造表达式
+- ✅ 嵌套对象递归处理
+- ✅ 类型名提取（从 Optional[TimeRange] 提取 TimeRange）
+- ✅ 复杂类型判断（区分自定义类型和基本类型）
+- ✅ 可选字段识别和 None 检查
+- ✅ 字符串/数字类型格式化
+- ✅ 生成的类型构造表达式可执行
+
 ## 扩展指南
 
 ### 添加新的代码生成逻辑
@@ -156,3 +251,17 @@ generate_handler_from_api.py (主程序)
 1. 修改 D 脚本的 `generate_handler_function` 方法
 2. 调整返回值生成逻辑
 3. 更新 E 脚本的 API 调用代码格式
+
+### 添加新的复杂类型处理
+
+1. 在 E 脚本的 `_extract_type_name` 中添加类型名提取逻辑（如果需要）
+2. 在 D 脚本的 `_to_type_constructor` 中添加嵌套类型的智能推断规则
+3. 添加测试用例验证类型构造表达式生成和执行
+
+## 相关文档
+
+- [`../../docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md`](../../docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md) - CustomNamespace 处理机制详解（类型构造方案）
+- [`../test_type_constructor.py`](../test_type_constructor.py) - 类型构造方案测试
+- [`../test_extract_type_name.py`](../test_extract_type_name.py) - 类型名提取测试
+- [`../test_optional_params.py`](../test_optional_params.py) - 可选参数测试
+- [`../test_customnamespace_handling.py`](../test_customnamespace_handling.py) - 旧的 dict 方案测试（已过时，仅供参考）
