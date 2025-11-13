@@ -10,6 +10,10 @@ __pycache__/
 .Python
 build/
 develop-eggs/
+# dist/ 目录包含构建产物：
+# - Python 包：.tar.gz 和 .whl (通过 python -m build 生成)
+# - exe 文件：CozeJianYingDraftGenerator.exe (通过 python build.py 生成)
+# 这些文件不应提交到 git，但在本地构建后会出现在此目录
 dist/
 downloads/
 eggs/
