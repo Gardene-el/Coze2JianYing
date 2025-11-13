@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coze-2-jianying"
+version = "0.1.0"
+description = "开源的Coze剪映小助手"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GPL-3.0-or-later"
+authors = [
+    {name = "Gardene-el"}
+]
+keywords = ["coze", "jianying", "video-editing", "draft-generator"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Video",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "pyJianYingDraft>=0.2.5",
+    "cozepy>=0.20.0",
+    "requests>=2.31.0",
+    "python-dotenv>=0.19.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0.0",
+    "python-multipart>=0.0.6",
+    "pyngrok>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+]
+build = [
+    "pyinstaller>=5.0.0",
+]
+all = [
+    "coze-2-jianying[dev,build]",
+]
+
+[project.urls]
+Homepage = "https://github.com/Gardene-el/Coze2JianYing"
+Repository = "https://github.com/Gardene-el/Coze2JianYing"
+Issues = "https://github.com/Gardene-el/Coze2JianYing/issues"
+
+[project.scripts]
+coze-2-jianying = "coze_plugin.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "coze_plugin*"]
+exclude = ["tests*", "build*", "dist*", "*.egg-info", "scripts*", "data_structures*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.json", "*.md"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "coze_plugin/tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+]

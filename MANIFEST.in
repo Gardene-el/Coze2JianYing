@@ -1,0 +1,41 @@
+# Include documentation files
+include README.md
+include LICENSE
+include QUICK_START_GUIDE.md
+
+# Include configuration files
+include pyproject.toml
+include requirements.txt
+include coze_openapi.yaml
+
+# Include all README files in subdirectories
+recursive-include app *.md
+recursive-include coze_plugin *.md
+recursive-include docs *.md
+
+# Include example files
+recursive-include coze_plugin/examples *.py *.json
+
+# Include YAML and JSON configuration files
+recursive-include app *.yaml *.json
+recursive-include coze_plugin *.yaml *.json
+
+# Include test files
+recursive-include tests *.py
+recursive-include coze_plugin/tests *.py
+
+# Exclude build artifacts and cache
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude *.so
+global-exclude *.egg-info
+global-exclude .DS_Store
+
+# Exclude development and build directories
+prune build
+prune dist
+prune .git
+prune .github
+prune scripts
+prune data_structures
