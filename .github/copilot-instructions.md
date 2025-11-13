@@ -121,6 +121,7 @@
 3. **草稿生成器** (`app/`) → 将 JSON 数据转换为剪映草稿文件，下载素材，生成完整项目
    - **方案一：手动粘贴** - 用户手动复制 Coze 插件输出的 JSON，粘贴到草稿生成器的"手动草稿生成"标签页
    - **方案二：网络云端传输** - Coze 通过 API 调用草稿生成器的"本地服务"（FastAPI 后端），自动传输 JSON 数据
+   - **方案三：脚本生成执行** *(实验性，开发中)* - Coze 工作流生成 Python 脚本，在草稿生成器中执行脚本调用 API 序列。详见下文"🚧 正在开发的功能"部分
 4. **剪映** → 用户在剪映中打开生成的草稿，进行最终编辑
 
 #### 设计理念与技术约束
@@ -210,6 +211,253 @@
 - 关键帧动画支持
 - 更多高级特效和滤镜
 - Coze API 集成完善（当前已有基础配置界面）
+
+### 🚧 正在开发的功能
+
+#### 脚本生成方案 (Script Generation Approach) - **实验性开发中**
+
+> **⚠️ 重要提示**: 此功能正在开发中，遇到重大技术挑战。仅在 issue 中**明确要求**时才进行相关开发工作。
+
+**开发背景** ([Issue #168](https://github.com/Gardene-el/Coze2JianYing/issues/168), [Issue #169](https://github.com/Gardene-el/Coze2JianYing/issues/169)):
+
+开发一种新的草稿生成方案，通过 Coze 插件的"云侧插件 - 在 Coze IDE 中创建"模式，生成并返回一段"按照插件中的工具函数调用顺序来执行对应 API 函数的 Python 脚本"，然后交给 app 来执行生成草稿。
+
+这种方案允许用户在 Coze 工作流中构建草稿操作序列，最终导出为可在草稿生成器中直接执行的 Python 脚本。
+
+**当前开发状态**:
+- ✅ `scripts/handler_generator/` 中的生成器脚本已实现
+- ✅ 使用生成的 handler 文件和 `export_script` 工具成功生成测试脚本
+- ❌ 开发执行脚本的标签页时遇到阻碍
+- ❌ handler_generator 脚本存在多个已知问题
+
+**核心组件**:
+
+1. **scripts/handler_generator/** - 开发端脚本生成系统
+2. **coze_plugin/raw_tools/** - Coze 云端生成的 handler 文件
+3. **coze_plugin/export_script/** - 导出脚本的 Coze 工具
+4. **app/gui/** - 计划中的脚本执行标签页（未完成）
+
+**三个执行环境说明**:
+
+此方案涉及三个不同的执行环境，理解它们之间的关系对于开发至关重要：
+
+| 执行环境 | 代码位置 | 执行者 | 作用 |
+|---------|---------|-------|------|
+| **开发端** | `scripts/handler_generator/` | 开发者在本地运行 | 从 API 定义自动生成 handler 文件 |
+| **Coze 云端** | `coze_plugin/raw_tools/` 中生成的 handler 文件 | Coze 平台运行 | 在 Coze 工作流中记录 API 调用序列到脚本文件 |
+| **应用端** | `app/gui/` 中计划的脚本执行标签页 | 草稿生成器 GUI | 执行从 Coze 导出的 Python 脚本生成草稿 |
+
+**工作流程图**:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ 开发端 (Development Environment)                                       │
+│ scripts/handler_generator/                                            │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  1. 扫描 API 定义 (A脚本)                                              │
+│  2. 生成 handler 文件 (B-E脚本)                                        │
+│     └─> 输出到 coze_plugin/raw_tools/                                 │
+│                                                                        │
+└────────────────┬───────────────────────────────────────────────────────┘
+                 │
+                 │ 生成的 handler 文件上传到 Coze
+                 ↓
+┌────────────────────────────────────────────────────────────────────────┐
+│ Coze 云端 (Coze Cloud Environment)                                    │
+│ 在 Coze IDE 中部署的 handler 工具                                      │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  1. 用户在 Coze 工作流中调用各种工具                                    │
+│  2. 每个工具调用被记录为 Python 代码                                    │
+│  3. 代码追加到 /tmp/coze2jianying.py                                   │
+│  4. 使用 export_script 工具导出完整脚本                                │
+│     └─> 输出: Python 脚本字符串                                        │
+│                                                                        │
+└────────────────┬───────────────────────────────────────────────────────┘
+                 │
+                 │ 用户复制脚本到草稿生成器
+                 ↓
+┌────────────────────────────────────────────────────────────────────────┐
+│ 应用端 (Application Environment)                                      │
+│ app/gui/ 中计划的脚本执行标签页 (未完成)                               │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  1. 接收从 Coze 导出的 Python 脚本                                     │
+│  2. 解析并验证脚本内容                                                  │
+│  3. 执行脚本中的 API 调用序列                                          │
+│  4. 生成剪映草稿文件                                                    │
+│     └─> 输出: 剪映草稿项目                                             │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Handler Generator 模块详解 (`scripts/handler_generator/`)
+
+`scripts/handler_generator/` 包含 5 个核心脚本模块（A-E），用于从 FastAPI API 端点自动生成 Coze 兼容的 handler 文件。
+
+##### 模块结构与职责
+
+**数据模型**:
+- `api_endpoint_info.py` - API 端点信息数据类，在各模块间传递数据
+
+**A 脚本: API 扫描器** (`a_api_scanner.py`)
+- **职责**: 扫描 `/app/api` 目录下所有 POST API 函数
+- **主要类**: `APIScanner`
+- **功能**:
+  - 使用 AST 解析识别 `@router.post` 装饰的函数
+  - 提取端点路径、请求/响应模型、路径参数等信息
+  - 支持异步函数识别
+- **输出**: `List[APIEndpointInfo]` 包含所有发现的 API 端点信息
+
+**B 脚本: 文件夹创建器** (`b_folder_creator.py`)
+- **职责**: 在 `coze_plugin/raw_tools` 下创建对应工具文件夹和文件
+- **主要类**: `FolderCreator`
+- **功能**:
+  - 为每个 API 创建独立的工具目录
+  - 生成 `handler.py` 文件
+  - 生成 `README.md` 文档
+- **输出**: 创建完整的工具目录结构
+
+**C 脚本: Input/Output 生成器** (`c_input_output_generator.py`)
+- **职责**: 定义 Coze handler 的 Input/Output NamedTuple 类型
+- **主要类**: `InputOutputGenerator`
+- **功能**:
+  - 生成 Input 类（包含路径参数 + Request 模型字段）
+  - 提取 Output 字段信息（返回 `Dict[str, Any]` 类型）
+  - 处理复杂类型简化（如 Optional, List 等）
+- **输出**: Input/Output 类型定义代码字符串
+
+**D 脚本: Handler 函数生成器** (`d_handler_function_generator.py`)
+- **职责**: 生成完整的 handler 函数实现
+- **主要类**: `HandlerFunctionGenerator`
+- **功能**:
+  - 生成主 handler 函数框架
+  - 实现 UUID 生成逻辑
+  - 生成返回值结构
+  - 添加错误处理和日志记录
+  - 调用 E 脚本生成的 API 调用代码
+- **输出**: 完整的 handler 函数代码
+
+**E 脚本: API 调用代码生成器** (`e_api_call_code_generator.py`)
+- **职责**: 生成记录 API 调用的 Python 代码
+- **主要类**: `APICallCodeGenerator`
+- **功能**:
+  - 生成 request 对象构造代码
+  - 生成 API 调用代码字符串
+  - 生成写入 `/tmp/coze2jianying.py` 的逻辑
+  - 提取响应中的 ID（draft_id/segment_id）
+- **输出**: 可追加到脚本文件的 Python 代码字符串
+
+**辅助模块**: `schema_extractor.py`
+- **职责**: 提取 Pydantic Schema 的字段信息
+- **主要类**: `SchemaExtractor`
+- **功能**:
+  - 解析 Pydantic BaseModel 类定义
+  - 提取字段名、类型、默认值、描述
+  - 处理泛型类型（Optional, List 等）
+- **用途**: 被 C/D/E 脚本调用以获取 schema 信息
+
+##### 生成的 Handler 工作原理
+
+生成的每个 handler 文件包含以下逻辑：
+
+1. **接收参数**: 从 Coze 工作流接收 Input 参数
+2. **生成 UUID**: 创建唯一标识符用于跟踪此次调用
+3. **构造 API 调用代码**: 使用 E 脚本逻辑生成 Python 代码字符串
+4. **追加到脚本文件**: 将代码追加到 `/tmp/coze2jianying.py`
+5. **返回结果**: 返回包含生成的 UUID 的 Output
+
+例如，调用 `create_draft` handler 时：
+```python
+# 在 Coze 中生成并追加到 /tmp/coze2jianying.py 的代码：
+req_abc123 = CreateDraftRequest(name="我的草稿", canvas_ratio="16:9")
+resp_abc123 = await create_draft(req_abc123)
+draft_id_abc123 = resp_abc123.draft_id
+```
+
+##### 已知问题和挑战 (参考 [Issue #168](https://github.com/Gardene-el/Coze2JianYing/issues/168) 和 [Issue #169](https://github.com/Gardene-el/Coze2JianYing/issues/169))
+
+虽然无法直接访问这些 issue 的详细内容，但根据开发历史和代码结构，已知的挑战包括：
+
+**脚本生成器端 (handler_generator) 的问题**:
+1. **类型推断不完善**: 复杂嵌套类型的处理可能不准确
+2. **参数映射错误**: 某些 API 参数可能无法正确映射到 Input 类
+3. **代码格式问题**: 生成的 Python 代码可能存在格式或语法问题
+4. **依赖关系处理**: 多个 API 调用之间的依赖关系可能未正确表达
+5. **错误处理不足**: 生成的代码缺少足够的异常处理逻辑
+
+**脚本执行端 (应用标签页) 的问题**:
+1. **执行环境差异**: Coze 云端生成的脚本与本地执行环境不匹配
+2. **异步执行问题**: 生成的脚本包含 async/await 但执行环境可能不支持
+3. **API 认证**: 脚本执行时如何处理 API 认证和授权
+4. **错误恢复**: 执行失败时如何恢复和重试
+5. **UI 集成**: 如何在 GUI 中展示执行进度和结果
+
+**Coze 平台约束导致的问题**:
+1. **文件大小限制**: `/tmp` 目录只有 512MB，生成的脚本可能过大
+2. **执行超时**: Coze handler 函数有执行时间限制
+3. **变量传递限制**: 大型脚本字符串可能超过 Coze 变量大小限制
+4. **状态管理**: 无法在 Coze 中维护持久状态
+
+##### Export Script 工具
+
+`coze_plugin/export_script/` 包含专门用于导出生成的脚本的 Coze 工具：
+
+**功能**:
+- 读取 `/tmp/coze2jianying.py` 文件内容
+- 将脚本内容作为字符串返回
+- 支持可选的导出后清空文件功能
+
+**使用场景**:
+在 Coze 工作流的最后步骤调用，将累积的 API 调用序列导出为完整的 Python 脚本。
+
+**参数**:
+- `clear_content` (boolean): 是否在导出后清空文件内容
+
+**返回**:
+```json
+{
+  "script_content": "#!/usr/bin/env python3\n...",
+  "file_size": 1234,
+  "success": true,
+  "message": "成功导出脚本文件，大小: 1234 字符"
+}
+```
+
+##### 开发指南：何时和如何参与此功能开发
+
+**⚠️ 重要约束**:
+
+1. **仅在明确要求时工作**: 只有当 issue 中明确要求继续开发此功能时，才应该参与相关开发工作
+
+2. **理解复杂性**: 这个方案涉及三个不同的执行环境，容易产生混淆：
+   - 不要混淆开发端的生成器脚本和 Coze 云端的 handler
+   - 不要混淆 Coze 生成的脚本和应用端执行的脚本
+   - 明确当前工作在哪个环境
+
+3. **问题排查顺序**:
+   - 首先确认是哪个环境的问题
+   - 其次确认是哪个模块（A-E）的问题
+   - 最后再尝试修复
+
+4. **测试策略**:
+   - 开发端：使用 `scripts/test_generated_handlers.py` 验证生成的代码语法
+   - Coze 云端：在 Coze IDE 中测试 handler 是否正确执行
+   - 应用端：需要完整的端到端测试（当标签页完成后）
+
+5. **修改原则**:
+   - 修改 A-E 脚本时，确保向后兼容已生成的 handler
+   - 修改 handler 模板时，重新生成所有工具进行测试
+   - 不要破坏现有的手动粘贴和 API 调用两种草稿生成方案
+
+**当前建议**:
+
+由于此功能遇到重大技术挑战且应用端标签页未完成，建议：
+- 暂停继续开发，除非 issue 中明确要求
+- 优先考虑现有的两种草稿生成方案（手动粘贴和 API 调用）
+- 如果必须继续，先解决应用端执行环境的基础问题
+- 考虑是否有更简单的替代方案
 
 ## Coze 平台特性与约束
 
@@ -338,6 +586,11 @@ Coze2JianYing/
 │   │   ├── add_captions/      # ✅ 添加字幕工具
 │   │   ├── add_effects/       # ⚠️ 特效工具（已弃用，待重新实现）
 │   │   └── make_*_info/       # ✅ 各类配置生成工具
+│   ├── raw_tools/             # 🏗️ 自动生成的handler工具（实验性）
+│   │   └── (各API对应的工具)  # 由handler_generator生成
+│   ├── export_script/         # 📤 导出脚本工具（实验性）
+│   │   ├── handler.py         # 导出/tmp/coze2jianying.py的工具
+│   │   └── README.md          # 工具文档
 │   ├── base_tools/            # 基础工具函数
 │   ├── tests/                 # ✅ 完整测试套件
 │   └── examples/              # 使用示例
@@ -379,6 +632,16 @@ Coze2JianYing/
 │   ├── updates/              # 功能更新记录
 │   └── analysis/             # 技术分析报告
 ├── scripts/                  # 🛠️ 实用工具脚本
+│   ├── handler_generator/    # 🏗️ Handler 生成器模块（实验性）
+│   │   ├── a_api_scanner.py              # A脚本：扫描API端点
+│   │   ├── b_folder_creator.py           # B脚本：创建工具文件夹
+│   │   ├── c_input_output_generator.py   # C脚本：生成Input/Output类型
+│   │   ├── d_handler_function_generator.py # D脚本：生成handler函数
+│   │   ├── e_api_call_code_generator.py  # E脚本：生成API调用代码
+│   │   ├── schema_extractor.py           # 辅助：Schema提取器
+│   │   ├── api_endpoint_info.py          # 数据模型
+│   │   └── README.md                     # 模块文档
+│   ├── generate_handler_from_api.py      # Handler生成器主程序
 │   └── coze_json_formatter.py # JSON 格式化工具
 ├── build.py                 # 🔨 PyInstaller 打包脚本
 ├── start_api.py             # 🚀 API 快速启动脚本
