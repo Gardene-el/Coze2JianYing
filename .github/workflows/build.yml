@@ -10,9 +10,6 @@ on:
 permissions:
   contents: read
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: windows-latest
@@ -26,12 +23,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set up UTF-8 encoding
+        run: |
+          # 设置 Python 使用 UTF-8 编码
+          [System.Environment]::SetEnvironmentVariable('PYTHONIOENCODING', 'utf-8', 'Process')
+          [System.Environment]::SetEnvironmentVariable('PYTHONUTF8', '1', 'Process')
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Build executable
+        env:
+          PYTHONIOENCODING: utf-8
+          PYTHONUTF8: 1
         run: |
           python build.py
 

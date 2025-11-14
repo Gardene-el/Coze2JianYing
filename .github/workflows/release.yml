@@ -18,13 +18,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0  # 获取完整历史以便分析 commits
+          fetch-depth: 0 # 获取完整历史以便分析 commits
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+
+      - name: Set up UTF-8 encoding
+        run: |
+          # 设置 Python 使用 UTF-8 编码
+          [System.Environment]::SetEnvironmentVariable('PYTHONIOENCODING', 'utf-8', 'Process')
+          [System.Environment]::SetEnvironmentVariable('PYTHONUTF8', '1', 'Process')
+
+          # 设置 Git 使用 UTF-8
+          git config --global core.quotepath false
+          git config --global i18n.commitencoding utf-8
+          git config --global i18n.logoutputencoding utf-8
+
+          # 验证设置
+          Write-Host "PYTHONIOENCODING: $env:PYTHONIOENCODING"
+          Write-Host "Git encoding config:"
+          git config --get i18n.commitencoding
+          git config --get i18n.logoutputencoding
 
       - name: Install dependencies
         run: |
@@ -36,6 +53,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 确保 UTF-8 编码
+          git config core.quotepath false
+          git config i18n.commitencoding utf-8
+          git config i18n.logoutputencoding utf-8
 
       - name: Check for version bump
         id: check_version
@@ -62,7 +84,14 @@ jobs:
         if: steps.check_version.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHONIOENCODING: utf-8
+          PYTHONUTF8: 1
         run: |
+          # 设置编码环境变量
+          $env:PYTHONIOENCODING = 'utf-8'
+          $env:PYTHONUTF8 = '1'
+
+          # 执行 semantic-release
           semantic-release version
           semantic-release publish
 
