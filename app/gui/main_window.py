@@ -67,13 +67,22 @@ class MainWindow:
         menubar.add_cascade(label="帮助", menu=help_menu)
         help_menu.add_command(label="关于", command=self._show_about)
 
-        # 主PanedWindow - 分隔上下区域（增强分隔条可见性）
-        self.paned_window = ttk.PanedWindow(self.root, orient=tk.VERTICAL)
+        # 主PanedWindow - 分隔上下区域（使用tk.PanedWindow避免拖影）
+        self.paned_window = tk.PanedWindow(
+            self.root,
+            orient=tk.VERTICAL,
+            sashwidth=8,  # 分隔条宽度
+            sashrelief=tk.RAISED,  # 分隔条样式（凸起）
+            sashpad=2,  # 分隔条内边距
+            bg="#d0d0d0",  # 分隔条背景色（灰色，更明显）
+            bd=1,  # 边框宽度
+            relief=tk.SUNKEN,  # 边框样式
+        )
         self.paned_window.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 上部框架 - 主要工作区（包含标签页和滚动条）
         self.top_frame = ttk.Frame(self.paned_window)
-        self.paned_window.add(self.top_frame, weight=3)
+        self.paned_window.add(self.top_frame, minsize=300, stretch="always")
 
         # 创建Canvas和滚动条用于标签页区域
         self.top_canvas = tk.Canvas(self.top_frame, highlightthickness=0)
@@ -106,7 +115,7 @@ class MainWindow:
 
         # 下部框架 - 日志面板
         self.log_frame = ttk.LabelFrame(self.paned_window, text="日志", padding="5")
-        self.paned_window.add(self.log_frame, weight=1)
+        self.paned_window.add(self.log_frame, minsize=150, stretch="always")
 
         # 日志工具栏
         log_toolbar = ttk.Frame(self.log_frame)
