@@ -12,8 +12,8 @@ from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.draft_generator_tab import DraftGeneratorTab
 from app.gui.example_tab import ExampleTab
 from app.gui.local_service_tab import LocalServiceTab
-from app.gui.script_executor_tab import ScriptExecutorTab
 from app.gui.log_window import LogWindow
+from app.gui.script_executor_tab import ScriptExecutorTab
 from app.utils.logger import get_logger, set_gui_log_callback
 
 
@@ -67,19 +67,39 @@ class MainWindow:
         menubar.add_cascade(label="帮助", menu=help_menu)
         help_menu.add_command(label="关于", command=self._show_about)
 
-        # 主PanedWindow - 分隔上下区域
+        # 主PanedWindow - 分隔上下区域（增强分隔条可见性）
         self.paned_window = ttk.PanedWindow(self.root, orient=tk.VERTICAL)
         self.paned_window.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-        # 上部框架 - 主要工作区（包含标签页）
+        # 上部框架 - 主要工作区（包含标签页和滚动条）
         self.top_frame = ttk.Frame(self.paned_window)
         self.paned_window.add(self.top_frame, weight=3)
 
-        # 创建Notebook（标签页容器）
-        self.notebook = ttk.Notebook(self.top_frame)
-        self.notebook.grid(
-            row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=10, pady=10
+        # 创建Canvas和滚动条用于标签页区域
+        self.top_canvas = tk.Canvas(self.top_frame, highlightthickness=0)
+        self.top_scrollbar = ttk.Scrollbar(
+            self.top_frame, orient=tk.VERTICAL, command=self.top_canvas.yview
         )
+        self.top_canvas.configure(yscrollcommand=self.top_scrollbar.set)
+
+        # 创建容器框架用于放置Notebook
+        self.notebook_container = ttk.Frame(self.top_canvas)
+        self.canvas_window = self.top_canvas.create_window(
+            (0, 0), window=self.notebook_container, anchor=tk.NW
+        )
+
+        # 创建Notebook（标签页容器）
+        self.notebook = ttk.Notebook(self.notebook_container)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # 绑定Canvas大小变化事件
+        self.notebook_container.bind(
+            "<Configure>", self._on_notebook_container_configure
+        )
+        self.top_canvas.bind("<Configure>", self._on_canvas_configure)
+
+        # 绑定鼠标滚轮事件
+        self.top_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         # 创建标签页
         self._create_tabs()
@@ -124,9 +144,36 @@ class MainWindow:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.top_frame.columnconfigure(0, weight=1)
+        self.top_frame.columnconfigure(1, weight=0)  # 滚动条列不扩展
         self.top_frame.rowconfigure(0, weight=1)
         self.log_frame.columnconfigure(0, weight=1)
         self.log_frame.rowconfigure(1, weight=1)
+
+    def _on_notebook_container_configure(self, event):
+        """当notebook容器大小改变时更新滚动区域"""
+        self.top_canvas.configure(scrollregion=self.top_canvas.bbox("all"))
+
+    def _on_canvas_configure(self, event):
+        """当canvas大小改变时调整内部窗口宽度"""
+        canvas_width = event.width
+        self.top_canvas.itemconfig(self.canvas_window, width=canvas_width)
+
+    def _on_mousewheel(self, event):
+        """处理鼠标滚轮事件"""
+        # 检查鼠标是否在top_canvas区域内
+        if (
+            self.top_canvas.winfo_containing(event.x_root, event.y_root)
+            == self.top_canvas
+            or self.notebook.winfo_containing(event.x_root, event.y_root) is not None
+        ):
+            # Windows和Linux的滚轮事件delta不同
+            if event.delta:
+                self.top_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            else:
+                if event.num == 4:
+                    self.top_canvas.yview_scroll(-1, "units")
+                elif event.num == 5:
+                    self.top_canvas.yview_scroll(1, "units")
 
     def _create_tabs(self):
         """创建所有标签页"""
@@ -271,6 +318,10 @@ class MainWindow:
 
     def _setup_layout(self):
         """设置布局"""
+        # 布局上部框架（Canvas和滚动条）
+        self.top_canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.top_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+
         # 日志工具栏
         self.log_toolbar.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
         self.clear_log_btn.pack(side=tk.LEFT, padx=(0, 5))
@@ -385,6 +436,12 @@ class MainWindow:
         """窗口关闭事件"""
         if messagebox.askokcancel("退出", "确定要退出吗？"):
             self.logger.info("用户关闭应用程序")
+
+            # 解绑鼠标滚轮事件
+            try:
+                self.top_canvas.unbind_all("<MouseWheel>")
+            except:
+                pass
 
             # 清理所有标签页资源
             for tab in self.tabs:

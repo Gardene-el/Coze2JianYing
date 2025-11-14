@@ -362,13 +362,26 @@ Coze2JianYing/
 │   ├── draft_generator_interface/  # 草稿生成器接口
 │   └── media_models/         # 媒体文件模型
 ├── docs/                     # 完整项目文档
+│   ├── UI_IMPROVEMENT.md     # UI改进说明文档
+│   └── ...                   # 其他文档
 ├── scripts/                  # 实用工具脚本
 │   ├── coze_json_formatter.py    # Coze JSON 格式化工具
 │   └── test_coze_json_formatter.py  # 测试脚本
+├── test_ui_improvement.py    # UI改进测试脚本
 ├── build.py                  # PyInstaller 打包脚本
 ├── requirements.txt          # 项目依赖列表
 └── setup.py                  # 项目安装配置
 ```
+
+### 🎨 UI 改进说明
+
+本项目的图形界面已进行优化，提供更灵活的布局和更好的用户体验：
+
+- **✅ 可拖动的分隔条** - 可以自由调整日志面板和标签页区域的显示比例
+- **✅ 滚动条支持** - 标签页区域和日志面板都支持滚动，无需拉长窗口
+- **✅ 鼠标滚轮支持** - 在标签页区域可以使用滚轮上下滚动内容
+
+详细说明请参考：[UI改进文档](docs/UI_IMPROVEMENT.md)
 
 ---
 
