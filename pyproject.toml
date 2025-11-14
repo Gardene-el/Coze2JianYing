@@ -117,8 +117,11 @@ upload_to_vcs_release = true
 upload_to_pypi = false
 build_command = "python build.py"
 commit_message = "chore(release): {version} [skip ci]"
-major_on_zero = false  # 保持 0.x.x 版本，feat 只触发 MINOR 升级
-no_git_verify = false
+# 允许使用 0.x.x 模式的版本号
+allow_zero_version = true
+# 当版本为 0.y.z 时，遇到破坏性变更（major bump）时，不递增主版本号
+# 而是改为递增次版本号（minor bump），例如从 0.5.0 升级到 0.6.0
+major_on_zero = false
 
 [tool.semantic_release.branches.main]
 match = "main"
