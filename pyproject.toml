@@ -118,6 +118,7 @@ upload_to_pypi = false
 build_command = "python build.py"
 commit_message = "chore(release): {version} [skip ci]"
 major_on_zero = false  # 保持 0.x.x 版本，feat 只触发 MINOR 升级
+no_git_verify = false
 
 [tool.semantic_release.branches.main]
 match = "main"
@@ -148,6 +149,7 @@ allowed_tags = [
 ]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf"]  # 只有 fix 和 perf 触发 PATCH 版本升级
+major_tags = []  # 明确设置为空列表，禁止任何 commit 触发 major 版本升级
 
 [tool.semantic_release.remote]
 name = "origin"
