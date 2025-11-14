@@ -130,10 +130,10 @@ jobs:
           chcp 65001
 
           Write-Host "=== 执行 semantic-release version ==="
-          semantic-release version --verbose
+          semantic-release version
 
           Write-Host "=== 执行 semantic-release publish ==="
-          semantic-release publish --verbose
+          semantic-release publish
 
       - name: Get new version
         if: steps.check_version.outputs.should_release == 'true'
