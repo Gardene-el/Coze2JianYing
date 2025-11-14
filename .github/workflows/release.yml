@@ -14,6 +14,14 @@ jobs:
   release:
     runs-on: windows-latest
 
+    # 在 job 级别设置环境变量，确保所有步骤都使用 UTF-8
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: 1
+      # 强制 Python 使用 UTF-8
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -28,29 +36,37 @@ jobs:
 
       - name: Set up UTF-8 encoding
         run: |
-          # 设置 Python 使用 UTF-8 编码
-          [System.Environment]::SetEnvironmentVariable('PYTHONIOENCODING', 'utf-8', 'Process')
-          [System.Environment]::SetEnvironmentVariable('PYTHONUTF8', '1', 'Process')
+          # 设置控制台代码页为 UTF-8
+          chcp 65001
+
+          # 设置环境变量（持久化到后续步骤）
+          echo "PYTHONIOENCODING=utf-8" >> $env:GITHUB_ENV
+          echo "PYTHONUTF8=1" >> $env:GITHUB_ENV
 
           # 设置 Git 使用 UTF-8
           git config --global core.quotepath false
           git config --global i18n.commitencoding utf-8
           git config --global i18n.logoutputencoding utf-8
+          git config --global core.pager "cat"
 
           # 验证设置
+          Write-Host "当前代码页: $(chcp)"
           Write-Host "PYTHONIOENCODING: $env:PYTHONIOENCODING"
+          Write-Host "PYTHONUTF8: $env:PYTHONUTF8"
           Write-Host "Git encoding config:"
           git config --get i18n.commitencoding
           git config --get i18n.logoutputencoding
 
       - name: Install dependencies
         run: |
+          chcp 65001
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install python-semantic-release
 
       - name: Configure Git
         run: |
+          chcp 65001
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -59,25 +75,51 @@ jobs:
           git config i18n.commitencoding utf-8
           git config i18n.logoutputencoding utf-8
 
+      - name: Debug Git Log Encoding
+        run: |
+          chcp 65001
+          Write-Host "=== 测试 Git Log 编码 ==="
+          git log --oneline -5
+          Write-Host "=== Python 编码测试 ==="
+          python -c "import sys; print(f'stdout encoding: {sys.stdout.encoding}'); print(f'default encoding: {sys.getdefaultencoding()}')"
+
       - name: Check for version bump
         id: check_version
         run: |
-          semantic-release version --print --no-commit --no-tag --no-push > version_output.txt 2>&1 || true
-          $output = Get-Content version_output.txt -Raw
-          Write-Host "Semantic Release Output:"
+          chcp 65001
+
+          # 使用 -vv 查看详细错误
+          Write-Host "=== 运行 semantic-release version --print ==="
+          $output = ""
+          $exitCode = 0
+
+          try {
+            $output = semantic-release version --print --no-commit --no-tag --no-push -vv 2>&1
+            $exitCode = $LASTEXITCODE
+          } catch {
+            $output = $_.Exception.Message
+            $exitCode = 1
+          }
+
+          Write-Host "Exit code: $exitCode"
+          Write-Host "Output:"
           Write-Host $output
 
           if ($output -match "No release will be made") {
             Write-Host "::notice::没有需要发布的更新（无符合条件的 commit）"
             echo "should_release=false" >> $env:GITHUB_OUTPUT
-          } else {
+          } elseif ($exitCode -eq 0) {
             Write-Host "::notice::检测到需要发布的更新"
             echo "should_release=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "::error::semantic-release 执行失败"
+            exit 1
           }
 
       - name: Build executable
         if: steps.check_version.outputs.should_release == 'true'
         run: |
+          chcp 65001
           python build.py
 
       - name: Semantic Release
@@ -87,28 +129,36 @@ jobs:
           PYTHONIOENCODING: utf-8
           PYTHONUTF8: 1
         run: |
-          # 设置编码环境变量
-          $env:PYTHONIOENCODING = 'utf-8'
-          $env:PYTHONUTF8 = '1'
+          chcp 65001
 
-          # 执行 semantic-release
-          semantic-release version
-          semantic-release publish
+          Write-Host "=== 执行 semantic-release version ==="
+          semantic-release version -vv
+
+          Write-Host "=== 执行 semantic-release publish ==="
+          semantic-release publish -vv
 
       - name: Get new version
         if: steps.check_version.outputs.should_release == 'true'
         id: version
         run: |
-          $version = semantic-release version --print
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          Write-Host "新版本: $version"
+          chcp 65001
+
+          # 从 Git tags 获取最新版本
+          $latestTag = git describe --tags --abbrev=0
+          Write-Host "最新标签: $latestTag"
+
+          echo "version=$latestTag" >> $env:GITHUB_OUTPUT
 
       - name: Upload release asset
         if: steps.check_version.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          chcp 65001
+
           $version = "${{ steps.version.outputs.version }}"
+          Write-Host "准备上传到版本: $version"
+
           if (Test-Path dist/CozeJianYingDraftGenerator.exe) {
             gh release upload $version dist/CozeJianYingDraftGenerator.exe --clobber
             Write-Host "✅ 已上传 CozeJianYingDraftGenerator.exe 到 Release $version"
@@ -120,6 +170,7 @@ jobs:
       - name: Summary
         if: steps.check_version.outputs.should_release == 'true'
         run: |
+          chcp 65001
           Write-Host "🎉 发布完成！"
           Write-Host "版本: ${{ steps.version.outputs.version }}"
           Write-Host "查看 Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
