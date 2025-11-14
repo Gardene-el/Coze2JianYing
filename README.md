@@ -1,5 +1,7 @@
 <h1 align="center">开源的Coze剪映小助手：Coze2JianYing</h1>
 
+<!-- 测试 semantic-release 从 v0.1.0 升级到 v0.1.1 -->
+
 <div align="center">
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
