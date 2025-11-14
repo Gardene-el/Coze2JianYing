@@ -117,7 +117,7 @@ upload_to_vcs_release = true
 upload_to_pypi = false
 build_command = "python build.py"
 commit_message = "chore(release): {version} [skip ci]"
-major_on_zero = true  # 强制保持 0.x.x 版本，feat 只触发 MINOR 升级
+major_on_zero = false  # 保持 0.x.x 版本，feat 只触发 MINOR 升级
 
 [tool.semantic_release.branches.main]
 match = "main"
@@ -147,7 +147,7 @@ allowed_tags = [
     "test",
 ]
 minor_tags = ["feat"]
-patch_tags = ["fix","refactor", "perf","chore","ci","build"]
+patch_tags = ["fix", "perf"]
 
 [tool.semantic_release.remote]
 name = "origin"
