@@ -20,6 +20,9 @@ pytest>=7.0.0
 black>=22.0.0
 flake8>=4.0.0
 
+# Semantic versioning and release automation
+python-semantic-release>=8.0.0
+
 # CLI and Console
 click>=8.1.0
 rich>=13.0.0
