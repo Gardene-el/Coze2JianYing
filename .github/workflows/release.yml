@@ -88,7 +88,7 @@ jobs:
         run: |
           chcp 65001
 
-          # 使用 -vv 查看详细错误
+          # 检查是否需要发布新版本
           Write-Host "=== 运行 semantic-release version --print ==="
           $output = ""
           $exitCode = 0
@@ -126,8 +126,6 @@ jobs:
         if: steps.check_version.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHONIOENCODING: utf-8
-          PYTHONUTF8: 1
         run: |
           chcp 65001
 
