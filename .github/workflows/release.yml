@@ -126,6 +126,8 @@ jobs:
         if: steps.check_version.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHONIOENCODING: utf-8
+          PYTHONUTF8: 1
         run: |
           chcp 65001
 
