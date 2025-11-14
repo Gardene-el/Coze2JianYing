@@ -1,6 +1,8 @@
-# Windows 编码问题修复说明
+# Windows 编码问题与参数问题修复说明
 
 ## 问题描述
+
+### 问题 1：编码错误
 
 在 GitHub Actions 的 Windows runner 上运行 `semantic-release` 时遇到编码错误：
 
@@ -8,12 +10,29 @@
 Error: 'charmap' codec can't decode byte 0x90 in position 177: character maps to <undefined>
 ```
 
-### 问题原因
+### 问题 2：参数不支持错误
+
+修复编码后，又遇到参数错误：
+
+```
+Error: No such option: -vv
+Error: No such option: --verbose
+```
+
+## 问题原因
+
+### 编码问题原因
 
 1. **Windows 默认编码**：Windows 系统默认使用 `cp1252` (charmap) 编码，而不是 UTF-8
 2. **Git commit 包含中文**：项目的 commit 消息中包含中文字符
 3. **环境变量未持久化**：PowerShell 的 `[System.Environment]::SetEnvironmentVariable(..., 'Process')` 只影响当前步骤，不会传递到后续步骤
 4. **semantic-release 读取历史**：`semantic-release` 需要读取完整的 Git commit 历史来分析版本号，遇到非 ASCII 字符时解码失败
+
+### 参数问题原因
+
+1. **python-semantic-release v8.x 不支持 `-vv` 参数**：尝试使用 `-vv` 导致错误
+2. **python-semantic-release v8.x 不支持 `--verbose` 参数**：尝试使用 `--verbose` 也导致错误
+3. **版本差异**：不同版本的 `python-semantic-release` 有不同的命令行参数，需要使用基本命令
 
 ## 解决方案
 
@@ -73,14 +92,16 @@ git config --global core.pager "cat"
     python -c "import sys; print(f'stdout encoding: {sys.stdout.encoding}'); print(f'default encoding: {sys.getdefaultencoding()}')"
 ```
 
-### 6. 使用详细模式 (-vv)
+### 6. 使用基本命令（不使用详细模式）
 
-在 `semantic-release` 命令中添加 `-vv` 参数，便于查看详细错误信息：
+**注意**：`python-semantic-release` v8.x 不支持 `-vv` 或 `--verbose` 参数，使用基本命令即可：
 
 ```powershell
-semantic-release version -vv
-semantic-release publish -vv
+semantic-release version
+semantic-release publish
 ```
+
+如需调试，可以查看步骤输出的完整日志，GitHub Actions 默认会显示所有输出。
 
 ### 7. 优化版本号获取
 
@@ -91,14 +112,32 @@ $latestTag = git describe --tags --abbrev=0
 echo "version=$latestTag" >> $env:GITHUB_OUTPUT
 ```
 
+### 8. 同步版本号
+
+确保 `app/__init__.py` 和 `pyproject.toml` 中的版本号与最新的 Git tag 一致：
+
+```python
+# app/__init__.py
+__version__ = "0.0.4"  # 匹配当前最新 Release
+```
+
+```toml
+# pyproject.toml
+[project]
+version = "0.0.4"  # 匹配当前最新 Release
+```
+
+这样 `semantic-release` 才能正确计算下一个版本号（0.0.5）。
+
 ## 修复效果
 
 修复后，工作流应该能够：
 
 1. ✅ 正确读取包含中文的 Git commit 历史
-2. ✅ 成功运行 `semantic-release version` 和 `semantic-release publish`
+2. ✅ 成功运行 `semantic-release version` 和 `semantic-release publish`（不需要额外参数）
 3. ✅ 自动创建 Release 和上传 exe 文件
 4. ✅ 在调试步骤中显示正确的编码配置
+5. ✅ 正确计算版本号递增（0.0.4 → 0.0.5）
 
 ## 验证步骤
 
@@ -108,9 +147,22 @@ echo "version=$latestTag" >> $env:GITHUB_OUTPUT
 4. 确认 `stdout encoding` 显示为 `utf-8`
 5. 确认 `semantic-release` 成功运行无编码错误
 
-## 相关 Commit
+## 相关 Commits
 
-- Commit: [fix: 修复 Windows 编码问题导致 semantic-release 失败](https://github.com/Gardene-el/Coze2JianYing/commit/bc4c583)
+- Commit: `fix: 修复 Windows 编码问题导致 semantic-release 失败`
+  - 在 job 级别设置 UTF-8 环境变量
+  - 每个步骤使用 chcp 65001
+  - 添加调试步骤
+  
+- Commit: `fix: 移除不支持的 -vv 参数，使用 --verbose 替代`
+  - 移除 `-vv` 参数（第一次尝试）
+  
+- Commit: `fix: 移除不支持的 --verbose 参数并同步版本号为 0.0.4`
+  - 移除 `--verbose` 参数（正确修复）
+  - 同步版本号到 0.0.4
+  
+- Commit: `refactor: 移除重复的环境变量设置并更新注释`
+  - 清理重复配置
 
 ## 参考资料
 
@@ -118,6 +170,41 @@ echo "version=$latestTag" >> $env:GITHUB_OUTPUT
 - [GitHub Actions Environment Variables](https://docs.github.com/en/actions/learn-github-actions/variables)
 - [Windows Code Pages](https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
 - [Git i18n Configuration](https://git-scm.com/docs/git-config#Documentation/git-config.txt-i18ncommitEncoding)
+
+## 重要经验教训
+
+### 1. python-semantic-release v8.x 命令行参数
+
+**不支持的参数**：
+- ❌ `-v`
+- ❌ `-vv`
+- ❌ `--verbose`
+
+**正确用法**：
+```bash
+# 基本命令即可
+semantic-release version
+semantic-release publish
+
+# 如需帮助
+semantic-release version --help
+semantic-release publish --help
+```
+
+### 2. 版本号同步的重要性
+
+`semantic-release` 依赖当前代码中的版本号来计算下一个版本：
+- 如果代码中是 `0.0.3`，但 Git 有 `v0.0.4` tag，可能导致冲突
+- 必须确保 `app/__init__.py` 和 `pyproject.toml` 与最新 Release tag 一致
+- 每次手动创建 Release 后，需要手动更新代码中的版本号
+
+### 3. Windows 编码的多层设置
+
+仅设置 Python 环境变量不够，需要多层设置：
+- ✅ Job 级别环境变量
+- ✅ PowerShell 代码页 (chcp 65001)
+- ✅ Git 配置
+- ✅ GITHUB_ENV 持久化
 
 ## 备选方案
 
@@ -153,4 +240,39 @@ jobs:
 
 ## 结论
 
-通过在多个层面设置 UTF-8 编码（job 环境、PowerShell 代码页、Git 配置、Python 环境），应该能够完全解决 Windows runner 上的编码问题，使自动化发布流程正常工作。
+通过在多个层面设置 UTF-8 编码（job 环境、PowerShell 代码页、Git 配置、Python 环境）并使用正确的 `semantic-release` 命令参数，应该能够完全解决 Windows runner 上的编码问题和参数问题，使自动化发布流程正常工作。
+
+## 最终工作流关键配置
+
+```yaml
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    # Job 级别环境变量
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: 1
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    steps:
+      # ... 其他步骤 ...
+      
+      - name: Set up UTF-8 encoding
+        run: |
+          chcp 65001
+          echo "PYTHONIOENCODING=utf-8" >> $env:GITHUB_ENV
+          echo "PYTHONUTF8=1" >> $env:GITHUB_ENV
+          git config --global core.quotepath false
+          git config --global i18n.commitencoding utf-8
+          git config --global i18n.logoutputencoding utf-8
+          
+      - name: Semantic Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chcp 65001
+          semantic-release version    # 不使用任何详细参数
+          semantic-release publish    # 不使用任何详细参数
+```
