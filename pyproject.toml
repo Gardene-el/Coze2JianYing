@@ -117,6 +117,7 @@ upload_to_vcs_release = true
 upload_to_pypi = false
 build_command = "python build.py"
 commit_message = "chore(release): {version} [skip ci]"
+major_on_zero = false  # 强制保持 0.x.x 版本，feat 只触发 MINOR 升级
 
 [tool.semantic_release.branches.main]
 match = "main"
