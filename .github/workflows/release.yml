@@ -94,7 +94,7 @@ jobs:
           $exitCode = 0
 
           try {
-            $output = semantic-release version --print --no-commit --no-tag --no-push -vv 2>&1
+            $output = semantic-release version --print --no-commit --no-tag --no-push 2>&1
             $exitCode = $LASTEXITCODE
           } catch {
             $output = $_.Exception.Message
@@ -132,10 +132,10 @@ jobs:
           chcp 65001
 
           Write-Host "=== 执行 semantic-release version ==="
-          semantic-release version -vv
+          semantic-release version --verbose
 
           Write-Host "=== 执行 semantic-release publish ==="
-          semantic-release publish -vv
+          semantic-release publish --verbose
 
       - name: Get new version
         if: steps.check_version.outputs.should_release == 'true'
