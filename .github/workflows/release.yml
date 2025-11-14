@@ -1,0 +1,96 @@
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # 获取完整历史以便分析 commits
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install python-semantic-release
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for version bump
+        id: check_version
+        run: |
+          semantic-release version --print --no-commit --no-tag --no-push > version_output.txt 2>&1 || true
+          $output = Get-Content version_output.txt -Raw
+          Write-Host "Semantic Release Output:"
+          Write-Host $output
+
+          if ($output -match "No release will be made") {
+            Write-Host "::notice::没有需要发布的更新（无符合条件的 commit）"
+            echo "should_release=false" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "::notice::检测到需要发布的更新"
+            echo "should_release=true" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Build executable
+        if: steps.check_version.outputs.should_release == 'true'
+        run: |
+          python build.py
+
+      - name: Semantic Release
+        if: steps.check_version.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          semantic-release version
+          semantic-release publish
+
+      - name: Get new version
+        if: steps.check_version.outputs.should_release == 'true'
+        id: version
+        run: |
+          $version = semantic-release version --print
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "新版本: $version"
+
+      - name: Upload release asset
+        if: steps.check_version.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          if (Test-Path dist/CozeJianYingDraftGenerator.exe) {
+            gh release upload $version dist/CozeJianYingDraftGenerator.exe --clobber
+            Write-Host "✅ 已上传 CozeJianYingDraftGenerator.exe 到 Release $version"
+          } else {
+            Write-Host "❌ 找不到可执行文件"
+            exit 1
+          }
+
+      - name: Summary
+        if: steps.check_version.outputs.should_release == 'true'
+        run: |
+          Write-Host "🎉 发布完成！"
+          Write-Host "版本: ${{ steps.version.outputs.version }}"
+          Write-Host "查看 Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
