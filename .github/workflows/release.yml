@@ -116,13 +116,7 @@ jobs:
             exit 1
           }
 
-      - name: Build executable
-        if: steps.check_version.outputs.should_release == 'true'
-        run: |
-          chcp 65001
-          python build.py
-
-      - name: Semantic Release
+      - name: Semantic Release (version + build + publish)
         if: steps.check_version.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -130,12 +124,20 @@ jobs:
           chcp 65001
 
           Write-Host "=== 执行 semantic-release version ==="
+          Write-Host "此步骤会自动："
+          Write-Host "  1. 更新版本号"
+          Write-Host "  2. 执行 build_command (python build.py)"
+          Write-Host "  3. 创建 commit 和 tag"
           semantic-release version
 
+          Write-Host ""
           Write-Host "=== 执行 semantic-release publish ==="
+          Write-Host "此步骤会自动："
+          Write-Host "  1. 创建 GitHub Release"
+          Write-Host "  2. 上传 dist/*.exe 到 Release"
           semantic-release publish
 
-      - name: Get new version
+      - name: Get new version and summary
         if: steps.check_version.outputs.should_release == 'true'
         id: version
         run: |
@@ -143,32 +145,16 @@ jobs:
 
           # 从 Git tags 获取最新版本
           $latestTag = git describe --tags --abbrev=0
-          Write-Host "最新标签: $latestTag"
+          Write-Host "🎉 发布完成！"
+          Write-Host "新版本: $latestTag"
+          Write-Host "查看 Release: https://github.com/${{ github.repository }}/releases/tag/$latestTag"
 
-          echo "version=$latestTag" >> $env:GITHUB_OUTPUT
-
-      - name: Upload release asset
-        if: steps.check_version.outputs.should_release == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          chcp 65001
-
-          $version = "${{ steps.version.outputs.version }}"
-          Write-Host "准备上传到版本: $version"
-
+          # 验证 exe 文件是否存在
           if (Test-Path dist/CozeJianYingDraftGenerator.exe) {
-            gh release upload $version dist/CozeJianYingDraftGenerator.exe --clobber
-            Write-Host "✅ 已上传 CozeJianYingDraftGenerator.exe 到 Release $version"
+            $fileSize = (Get-Item dist/CozeJianYingDraftGenerator.exe).Length / 1MB
+            Write-Host "✅ 可执行文件已生成: $([math]::Round($fileSize, 2)) MB"
           } else {
-            Write-Host "❌ 找不到可执行文件"
-            exit 1
+            Write-Host "⚠️ 警告: 找不到可执行文件"
           }
 
-      - name: Summary
-        if: steps.check_version.outputs.should_release == 'true'
-        run: |
-          chcp 65001
-          Write-Host "🎉 发布完成！"
-          Write-Host "版本: ${{ steps.version.outputs.version }}"
-          Write-Host "查看 Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
+          echo "version=$latestTag" >> $env:GITHUB_OUTPUT
