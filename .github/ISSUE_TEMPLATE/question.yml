@@ -40,6 +40,18 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: pipeline
+    attributes:
+      label: 执行管线
+      description: 您使用的是哪种执行方式？
+      options:
+        - 手动复制粘贴
+        - API调用
+      default: 0
+    validations:
+      required: true
+
   - type: textarea
     id: question
     attributes:
@@ -99,8 +111,6 @@ body:
       description: 在提交之前，请确认以下事项
       options:
         - label: 我已经搜索了现有的 Issues，没有找到类似的问题
-          required: true
-        - label: 我已经阅读了项目文档和快速开始指南
           required: true
         - label: 这个问题不是 Bug 报告或功能请求
           required: true

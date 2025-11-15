@@ -20,6 +20,18 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: pipeline
+    attributes:
+      label: 执行管线
+      description: 您使用的是哪种执行方式？
+      options:
+        - 手动复制粘贴
+        - API调用
+      default: 0
+    validations:
+      required: true
+
   - type: textarea
     id: description
     attributes:
@@ -100,8 +112,6 @@ body:
       description: 在提交之前，请确认以下事项
       options:
         - label: 我已经搜索了现有的 Issues，确认这不是重复的问题
-          required: true
-        - label: 我已经阅读了项目文档和快速开始指南
           required: true
         - label: 我提供了足够的信息来重现此问题
           required: true

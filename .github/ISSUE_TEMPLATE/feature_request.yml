@@ -37,6 +37,18 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: pipeline
+    attributes:
+      label: 执行管线
+      description: 这个功能涉及哪种执行方式？
+      options:
+        - 手动复制粘贴
+        - API调用
+      default: 0
+    validations:
+      required: true
+
   - type: textarea
     id: problem
     attributes:
@@ -111,8 +123,6 @@ body:
       description: 在提交之前，请确认以下事项
       options:
         - label: 我已经搜索了现有的 Issues，确认这不是重复的功能请求
-          required: true
-        - label: 我已经阅读了项目的当前功能和发展方向
           required: true
         - label: 这个功能符合项目的目标和定位
           required: true
