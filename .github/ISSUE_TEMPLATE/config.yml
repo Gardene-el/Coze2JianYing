@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 讨论区
+    url: https://github.com/Gardene-el/Coze2JianYing/discussions
+    about: 如有一般性问题或想要讨论项目，请访问讨论区
+  - name: 📝 空白问题
+    url: https://github.com/Gardene-el/Coze2JianYing/issues/new
+    about: 创建一个空白的 Issue（适用于不适合使用模板的情况）

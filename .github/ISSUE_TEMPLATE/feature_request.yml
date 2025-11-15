@@ -1,0 +1,128 @@
+name: ✨ 功能请求
+description: 提出新功能或改进建议
+title: "[Feature]: "
+labels: ["enhancement", "需要确认"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您提出新功能建议！请详细描述您的想法，这将帮助我们更好地理解和评估这个功能请求。
+
+  - type: dropdown
+    id: feature_type
+    attributes:
+      label: 功能类型
+      description: 这个功能属于哪个类别？
+      options:
+        - 新增功能
+        - 现有功能改进
+        - 用户界面优化
+        - 性能优化
+        - API 接口增强
+        - 开发者工具
+        - 其他
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 相关组件
+      description: 这个功能涉及哪个组件？
+      options:
+        - 草稿生成器应用
+        - Coze 插件
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pipeline
+    attributes:
+      label: 执行管线
+      description: 这个功能涉及哪种执行方式？
+      options:
+        - 手动复制粘贴
+        - API调用
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题或需求背景
+      description: 请描述当前存在的问题或您想要实现的目标
+      placeholder: |
+        例如：目前在使用草稿生成器时，每次都需要手动选择输出目录，这很不方便...
+        或者：作为一个内容创作者，我希望能够批量处理多个视频草稿...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 您建议的解决方案
+      description: 详细描述您希望如何实现这个功能
+      placeholder: |
+        例如：
+        1. 添加一个"记住上次输出目录"的配置选项
+        2. 在设置中允许用户设置默认输出路径
+        3. 提供一个"使用上次目录"的快捷按钮
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案
+      description: 如果有其他可能的实现方式，请在此描述
+      placeholder: 例如：也可以考虑添加一个"最近使用的目录"列表供快速选择
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: 参考示例
+      description: 如果有其他类似的实现或参考资料，请提供链接或说明
+      placeholder: 例如：类似于 VS Code 的"打开最近的文件夹"功能
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级评估
+      description: 您认为这个功能的重要程度如何？
+      options:
+        - 高 - 严重影响使用体验
+        - 中 - 能显著改善使用体验
+        - 低 - 锦上添花的功能
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息
+      description: 其他您想要补充的信息或想法
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 贡献意愿
+      description: 如果需要，您是否愿意参与实现这个功能？
+      options:
+        - label: 我愿意尝试实现这个功能（需要指导）
+        - label: 我可以独立实现这个功能
+        - label: 我可以提供测试和反馈
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 确认事项
+      description: 在提交之前，请确认以下事项
+      options:
+        - label: 我已经搜索了现有的 Issues，确认这不是重复的功能请求
+          required: true
+        - label: 这个功能符合项目的目标和定位
+          required: true
