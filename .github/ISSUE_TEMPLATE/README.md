@@ -163,5 +163,5 @@
 
 - [GitHub 官方文档 - Issue 模板](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/about-issue-and-pull-request-templates)
 - [项目 README](../README.md)
-- [快速开始指南](../QUICK_START_GUIDE.md)
+- [快速开始指南](../../docs/guides/QUICK_START_GUIDE.md)
 - [更新日志](../CHANGELOG.md)
