@@ -32,12 +32,7 @@ body:
       description: 这个功能涉及哪个组件？
       options:
         - 草稿生成器应用
-        - Coze 插件工具
-        - API 服务
-        - 文档或示例
-        - 构建或部署流程
-        - 项目管理
-        - 多个组件
+        - Coze 插件
       default: 0
     validations:
       required: true

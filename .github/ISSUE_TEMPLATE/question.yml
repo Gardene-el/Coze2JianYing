@@ -35,12 +35,7 @@ body:
       description: 您的问题涉及哪个部分？
       options:
         - 草稿生成器应用
-        - Coze 插件工具
-        - API 服务
-        - 工作流配置
-        - 剪映软件对接
-        - 项目构建
-        - 不确定
+        - Coze 插件
       default: 0
     validations:
       required: true

@@ -3,9 +3,3 @@ contact_links:
   - name: 💬 讨论区
     url: https://github.com/Gardene-el/Coze2JianYing/discussions
     about: 如有一般性问题或想要讨论项目，请访问讨论区
-  - name: 📚 项目文档
-    url: https://github.com/Gardene-el/Coze2JianYing/blob/main/README.md
-    about: 查看项目使用文档和快速开始指南
-  - name: 🔌 Coze 插件
-    url: https://www.coze.cn/store/plugin/7565396538596818950?from=plugin_card
-    about: 访问 Coze 平台上的官方插件

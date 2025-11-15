@@ -15,11 +15,7 @@ body:
       description: 请选择问题所在的组件
       options:
         - 草稿生成器应用 (CozeJianYingDraftGenerator.exe)
-        - Coze 插件工具
-        - API 服务 (start_api.py)
-        - 构建或安装过程
-        - 文档或示例
-        - 不确定
+        - Coze 插件
       default: 0
     validations:
       required: true
