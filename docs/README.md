@@ -9,7 +9,9 @@
 
 - **[DEVELOPMENT_ROADMAP.md](./guides/DEVELOPMENT_ROADMAP.md)** - 项目功能开发历程，记录各功能的实现背景和方法
 - **[DRAFT_MANAGEMENT_GUIDE.md](./guides/DRAFT_MANAGEMENT_GUIDE.md)** - 草稿管理系统使用指南
-- **[PROJECT_REFACTORING_REPORT.md](./guides/PROJECT_REFACTORING_REPORT.md)** - 🆕 项目重构报告：coze_plugin 子项目创建
+- **[PROJECT_REFACTORING_REPORT.md](./guides/PROJECT_REFACTORING_REPORT.md)** - 项目重构报告：coze_plugin 子项目创建
+- **[QUICK_START_GUIDE.md](./guides/QUICK_START_GUIDE.md)** - CustomNamespace 处理修复快速开始指南
+- **[ISSUE_4_SOLUTION.md](./guides/ISSUE_4_SOLUTION.md)** - Issue #4 接口设计和实现解决方案
 
 ### 🔄 [updates/](./updates/) - 功能更新记录
 记录各个功能模块的实现过程和技术细节。
@@ -18,6 +20,20 @@
 - **[ADD_CAPTIONS_UPDATE.md](./updates/ADD_CAPTIONS_UPDATE.md)** - add_captions 和 make_caption_info 实现总结
 - **[ADD_EFFECTS_UPDATE.md](./updates/ADD_EFFECTS_UPDATE.md)** - add_effects 和 make_effect_info 实现总结
 - **[MAKE_IMAGE_INFO_UPDATE.md](./updates/MAKE_IMAGE_INFO_UPDATE.md)** - make_image_info 实现总结
+- **[IMPLEMENTATION_COMPLETE.md](./updates/IMPLEMENTATION_COMPLETE.md)** - GitHub Issue 模板实现完成总结
+- **[ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md](./updates/ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md)** - GitHub Issue 模板实现详细总结
+- **[SCRIPT_EXECUTOR_IMPLEMENTATION_SUMMARY.md](./updates/SCRIPT_EXECUTOR_IMPLEMENTATION_SUMMARY.md)** - 脚本执行标签页实现总结
+- **[ISSUE_162_SUMMARY.md](./updates/ISSUE_162_SUMMARY.md)** - Issue #162 Handler Generator 完成总结
+- **[API_REFACTORING_SUMMARY.md](./updates/API_REFACTORING_SUMMARY.md)** - API 重构实施总结
+
+### 🔧 [fixes/](./fixes/) - 问题修复记录
+记录重要的 Bug 修复和问题解决方案。
+
+- **[CUSTOMNAMESPACE_FIX_SUMMARY.md](./fixes/CUSTOMNAMESPACE_FIX_SUMMARY.md)** - CustomNamespace 处理修复总结
+- **[COMPLETION_REPORT.md](./fixes/COMPLETION_REPORT.md)** - 修复完成报告
+- **[SUMMARY.md](./fixes/SUMMARY.md)** - 修复总结
+- **[USAGE_GUIDE.md](./fixes/USAGE_GUIDE.md)** - 修复使用指南
+- **[VERIFICATION_CHECKLIST.md](./fixes/VERIFICATION_CHECKLIST.md)** - 修复验证清单
 
 ### 🔍 [analysis/](./analysis/) - 技术分析与审计报告
 深入的技术分析、设计评审和审计报告。
@@ -35,6 +51,7 @@ API 参考文档、参数列表和快速查询指南。
 - **[EXPORTED_PARAMETERS_LIST.md](./reference/EXPORTED_PARAMETERS_LIST.md)** - 导出参数列表
 - **[PARAMETER_COMPLETION_SUMMARY.md](./reference/PARAMETER_COMPLETION_SUMMARY.md)** - 参数完成度总结
 - **[SEGMENT_MAPPING_CORRECTIONS.md](./reference/SEGMENT_MAPPING_CORRECTIONS.md)** - 段类型映射修正说明
+- **[VISUAL_DEMO_ISSUE_TEMPLATES.md](./reference/VISUAL_DEMO_ISSUE_TEMPLATES.md)** - GitHub Issue 模板可视化演示
 
 ## 🔗 其他文档
 

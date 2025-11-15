@@ -19,8 +19,8 @@
 - ✅ `.github/ISSUE_TEMPLATE/README.md` (167 行)
 
 #### 2. 项目文档 (2 个文件，562 行)
-- ✅ `ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md` (262 行)
-- ✅ `VISUAL_DEMO_ISSUE_TEMPLATES.md` (300 行)
+- ✅ `docs/updates/ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md` (262 行)
+- ✅ `docs/reference/VISUAL_DEMO_ISSUE_TEMPLATES.md` (300 行)
 
 ---
 
@@ -143,13 +143,13 @@
    - 撰写高质量 Issue 的技巧
 
 ### 技术文档
-2. **实现总结** (`ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md`)
+2. **实现总结** (`docs/updates/ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md`)
    - 完整的文件结构和统计信息
    - 每个模板的功能特点
    - 设计理念和原则
    - 验证结果和统计数据
 
-3. **可视化演示** (`VISUAL_DEMO_ISSUE_TEMPLATES.md`)
+3. **可视化演示** (`docs/reference/VISUAL_DEMO_ISSUE_TEMPLATES.md`)
    - 用户界面预览
    - 完整的表单布局展示
    - 用户体验流程说明
@@ -180,12 +180,12 @@
 
 ### 文档参考
 - **使用说明**: `.github/ISSUE_TEMPLATE/README.md`
-- **实现总结**: `ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md`
-- **可视化演示**: `VISUAL_DEMO_ISSUE_TEMPLATES.md`
+- **实现总结**: `docs/updates/ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md`
+- **可视化演示**: `docs/reference/VISUAL_DEMO_ISSUE_TEMPLATES.md`
 
 ### 项目资源
 - **项目主页**: `README.md`
-- **快速开始**: `QUICK_START_GUIDE.md`
+- **快速开始**: `docs/guides/QUICK_START_GUIDE.md`
 - **更新日志**: `CHANGELOG.md`
 
 ---
