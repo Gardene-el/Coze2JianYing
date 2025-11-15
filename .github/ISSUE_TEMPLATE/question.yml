@@ -1,0 +1,111 @@
+name: ❓ 使用问题
+description: 在使用过程中遇到的疑问或需要帮助
+title: "[Question]: "
+labels: ["question", "需要回答"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您使用 Coze2JianYing！如果您在使用过程中遇到疑问，请填写以下信息。
+        
+        **提示**：如果是 Bug 或功能请求，请使用对应的问题模板。
+
+  - type: dropdown
+    id: question_type
+    attributes:
+      label: 问题类型
+      description: 您的问题属于哪个类别？
+      options:
+        - 使用方法不清楚
+        - 功能理解有疑问
+        - 配置或设置问题
+        - Coze 工作流相关
+        - 剪映草稿格式问题
+        - API 接口使用
+        - 从源码构建
+        - 其他
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 相关组件
+      description: 您的问题涉及哪个部分？
+      options:
+        - 草稿生成器应用
+        - Coze 插件工具
+        - API 服务
+        - 工作流配置
+        - 剪映软件对接
+        - 项目构建
+        - 不确定
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 您的问题
+      description: 请清晰地描述您的疑问
+      placeholder: |
+        例如：
+        - 如何在 Coze 工作流中使用 create_draft 工具？
+        - 草稿生成器生成的文件应该放在剪映的哪个目录？
+        - API 服务需要配置哪些参数？
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 您已经尝试过什么？
+      description: 请描述您已经尝试过的方法或查阅过的资料
+      placeholder: |
+        例如：
+        - 我已经阅读了 README 文档
+        - 我尝试过 xxx 方法，但是...
+        - 我在网上搜索了相关信息，但没有找到...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 使用场景
+      description: 请描述您的具体使用场景或目标
+      placeholder: |
+        例如：
+        - 我想要使用 Coze 工作流自动生成带字幕的视频草稿
+        - 我需要批量处理 100 个视频素材
+        - 我想要在本地搭建 API 服务供 Coze 调用
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境（如果相关）
+      description: 如果问题与特定环境有关，请提供环境信息
+      placeholder: |
+        - 操作系统：Windows 11 / macOS / Linux
+        - 应用版本：v0.1.1
+        - Python 版本：3.11.5
+        - 剪映版本：5.9.0
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图或示例（可选）
+      description: 如果有助于说明问题，可以提供截图或代码示例
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 确认事项
+      description: 在提交之前，请确认以下事项
+      options:
+        - label: 我已经搜索了现有的 Issues，没有找到类似的问题
+          required: true
+        - label: 我已经阅读了项目文档和快速开始指南
+          required: true
+        - label: 这个问题不是 Bug 报告或功能请求
+          required: true
