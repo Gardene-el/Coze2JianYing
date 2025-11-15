@@ -116,7 +116,7 @@ _to_type_constructor(obj, 'TimeRange') -> 'TimeRange(start=0, duration=5000000)'
 ### 技术细节
 - **详细文档**: `docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md`
 - **版本记录**: `scripts/handler_generator/CHANGELOG.md`
-- **修复总结**: `CUSTOMNAMESPACE_FIX_SUMMARY.md`
+- **修复总结**: `docs/fixes/CUSTOMNAMESPACE_FIX_SUMMARY.md`
 
 ### 模块文档
 - **Handler Generator**: `scripts/handler_generator/README.md`
@@ -213,8 +213,7 @@ python scripts/generate_handler_from_api.py
 
 如有问题，请参考：
 - 详细文档：`docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md`
-- 修复总结：`CUSTOMNAMESPACE_FIX_SUMMARY.md`
-- 文件清单：`FILES_CHANGED.md`
+- 修复总结：`docs/fixes/CUSTOMNAMESPACE_FIX_SUMMARY.md`
 
 ## 🎯 总结
 

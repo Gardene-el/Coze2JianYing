@@ -293,7 +293,7 @@
 
 - 查看实际效果：[创建新 Issue](https://github.com/Gardene-el/Coze2JianYing/issues/new/choose)
 - 使用说明：[README](.github/ISSUE_TEMPLATE/README.md)
-- 实现总结：[ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md](ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md)
+- 实现总结：[ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md](../updates/ISSUE_TEMPLATE_IMPLEMENTATION_SUMMARY.md)
 
 ---
 
