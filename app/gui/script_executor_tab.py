@@ -16,6 +16,7 @@ from types import SimpleNamespace
 
 from app.gui.base_tab import BaseTab
 from app.utils.logger import get_logger
+from app.utils.storage_settings import get_storage_settings
 
 
 class ScriptExecutorTab(BaseTab):
@@ -416,6 +417,11 @@ if __name__ == "__main__":
             self.folder_var.set(folder)
             self.logger.info(f"已选择输出文件夹: {folder}")
             self.status_var.set(f"输出文件夹: {folder}")
+            # 更新全局存储设置 - 选择了文件夹就启用传输模式
+            storage_settings = get_storage_settings()
+            storage_settings.enable_transfer = True
+            storage_settings.target_folder = folder
+            self.logger.info(f"全局存储设置已更新: enable_transfer=True, target_folder={folder}")
     
     def _auto_detect_folder(self):
         """自动检测剪映草稿文件夹"""
@@ -432,6 +438,11 @@ if __name__ == "__main__":
             self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
             self.status_var.set(f"已检测到: {detected_path}")
             messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
+            # 更新全局存储设置 - 检测到文件夹就启用传输模式
+            storage_settings = get_storage_settings()
+            storage_settings.enable_transfer = True
+            storage_settings.target_folder = detected_path
+            self.logger.info(f"全局存储设置已更新: enable_transfer=True, target_folder={detected_path}")
         else:
             self.logger.warning("未能检测到剪映草稿文件夹")
             messagebox.showwarning(

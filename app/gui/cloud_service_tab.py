@@ -21,6 +21,7 @@ from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
 from app.utils.ngrok_manager import NgrokManager
 from app.utils.draft_folder_manager import DraftFolderManager, DraftFolderWidget
+from app.utils.storage_settings import get_storage_settings
 
 
 class CloudServiceTab(BaseTab):
@@ -312,11 +313,20 @@ class CloudServiceTab(BaseTab):
     def _on_folder_changed(self, folder: str):
         """文件夹路径改变回调"""
         self.status_var.set(f"输出文件夹: {folder}")
+        # 更新全局存储设置
+        storage_settings = get_storage_settings()
+        storage_settings.target_folder = folder
+        self.logger.info(f"全局存储设置已更新: target_folder={folder}")
     
     def _on_transfer_changed(self, enabled: bool):
         """传输选项改变回调"""
         status = "启用" if enabled else "禁用"
         self.logger.info(f"传输草稿到文件夹: {status}")
+        # 更新全局存储设置
+        storage_settings = get_storage_settings()
+        storage_settings.enable_transfer = enabled
+        storage_settings.target_folder = self.folder_manager.folder_path
+        self.logger.info(f"全局存储设置已更新: enable_transfer={enabled}, target_folder={storage_settings.target_folder}")
 
     def _check_port_available(self):
         """检测端口是否可用"""

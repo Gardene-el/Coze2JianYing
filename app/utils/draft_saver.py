@@ -13,6 +13,7 @@ from pyJianYingDraft import IntroType, TransitionType, trange, tim, TextOutro
 from app.utils.logger import get_logger
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
+from app.utils.storage_settings import get_storage_settings
 from app.config import get_config
 
 
@@ -97,13 +98,38 @@ class DraftSaver:
         
         self.logger.info(f"项目: {draft_name}, {width}x{height}@{fps}fps")
         
-        # 创建素材目录 - 使用配置系统的assets目录下的draft_id子目录
+        # 读取全局存储设置
+        storage_settings = get_storage_settings()
+        use_local_storage = storage_settings.get_use_local_storage()
+        
+        self.logger.info(f"存储模式: {'本地数据目录' if use_local_storage else '指定文件夹+CozeJianYingAssistantAssets'}")
+        
+        # 根据存储模式选择输出目录和素材目录
         app_config = get_config()
-        temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
-        os.makedirs(temp_assets_dir, exist_ok=True)
+        
+        if use_local_storage:
+            # 本地存储模式：使用 config.drafts_dir 和 config.assets_dir
+            draft_output_dir = self.output_dir or app_config.drafts_dir
+            temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
+            os.makedirs(temp_assets_dir, exist_ok=True)
+            self.logger.info(f"本地存储 - 草稿: {draft_output_dir}, 素材: {temp_assets_dir}")
+        else:
+            # 传输模式：使用指定文件夹 + CozeJianYingAssistantAssets
+            target_folder = storage_settings.get_output_folder()
+            if target_folder:
+                draft_output_dir = target_folder
+                # 素材将通过 MaterialManager 存储到 CozeJianYingAssistantAssets
+                temp_assets_dir = None  # 标记使用 CozeJianYingAssistantAssets 模式
+                self.logger.info(f"传输存储 - 草稿: {draft_output_dir}, 素材: CozeJianYingAssistantAssets")
+            else:
+                # 如果没有设置目标文件夹，回退到本地存储
+                self.logger.warning("传输模式但未设置目标文件夹，回退到本地存储")
+                draft_output_dir = self.output_dir or app_config.drafts_dir
+                temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
+                os.makedirs(temp_assets_dir, exist_ok=True)
         
         # 创建 DraftFolder 和 Script
-        draft_folder = draft.DraftFolder(self.output_dir)
+        draft_folder = draft.DraftFolder(draft_output_dir)
         script = draft_folder.create_draft(draft_name, width, height, fps, allow_replace=True)
         
         # 处理轨道
@@ -137,8 +163,14 @@ class DraftSaver:
                 config_data = segment.get("config", {})
                 operations = segment.get("operations", [])
                 
-                # 创建片段
-                seg = self._create_segment(segment_type, config_data, temp_assets_dir)
+                # 创建片段 - 传递素材目录和存储模式信息
+                seg = self._create_segment(
+                    segment_type, 
+                    config_data, 
+                    temp_assets_dir,
+                    draft_folder=draft_folder if temp_assets_dir is None else None,
+                    draft_id=draft_id
+                )
                 if seg:
                     # 应用操作
                     self._apply_operations(seg, operations)
@@ -148,13 +180,23 @@ class DraftSaver:
         
         # 保存草稿
         script.save()
-        draft_path = os.path.join(self.output_dir, draft_name)
+        draft_path = os.path.join(draft_output_dir, draft_name)
         
         self.logger.info(f"草稿保存成功: {draft_path}")
         return draft_path
     
-    def _create_segment(self, segment_type: str, config: Dict[str, Any], assets_dir: str):
-        """创建片段对象"""
+    def _create_segment(self, segment_type: str, config: Dict[str, Any], assets_dir: Optional[str], 
+                       draft_folder=None, draft_id: str = None):
+        """
+        创建片段对象
+        
+        Args:
+            segment_type: 片段类型
+            config: 片段配置
+            assets_dir: 本地存储模式的素材目录，如果为 None 则使用 CozeJianYingAssistantAssets 模式
+            draft_folder: DraftFolder 对象（CozeJianYingAssistantAssets 模式需要）
+            draft_id: 草稿ID（CozeJianYingAssistantAssets 模式需要）
+        """
         try:
             material_url = config.get("material_url")
             target_timerange = config.get("target_timerange", {})
@@ -165,25 +207,43 @@ class DraftSaver:
             start_sec = start / 1000000
             duration_sec = duration / 1000000
             
-            if segment_type == "audio":
-                # 下载音频
-                local_path = self.download_material(material_url, assets_dir)
-                volume = config.get("volume", 1.0)
-                seg = draft.AudioSegment(
-                    local_path,
-                    trange(f"{start_sec}s", f"{duration_sec}s"),
-                    volume=volume
-                )
-                return seg
+            # 处理需要下载素材的片段类型
+            if segment_type in ["audio", "video"] and material_url:
+                # 根据存储模式选择下载位置
+                if assets_dir is not None:
+                    # 本地存储模式：下载到 assets_dir
+                    local_path = self.download_material(material_url, assets_dir)
+                else:
+                    # CozeJianYingAssistantAssets 模式：使用 MaterialManager
+                    from app.utils.material_manager import create_material_manager
+                    material_manager = create_material_manager(
+                        draft_folder=draft_folder,
+                        draft_name=draft_folder.folder_path.name if draft_folder else "",
+                        project_id=draft_id
+                    )
+                    # 下载并获取 Material 对象
+                    if segment_type == "video":
+                        material = material_manager.get_video_material(material_url)
+                        local_path = material.path
+                    else:  # audio
+                        material = material_manager.get_audio_material(material_url)
+                        local_path = material.path
                 
-            elif segment_type == "video":
-                # 下载视频
-                local_path = self.download_material(material_url, assets_dir)
-                seg = draft.VideoSegment(
-                    local_path,
-                    trange(f"{start_sec}s", f"{duration_sec}s")
-                )
-                return seg
+                if segment_type == "audio":
+                    volume = config.get("volume", 1.0)
+                    seg = draft.AudioSegment(
+                        local_path,
+                        trange(f"{start_sec}s", f"{duration_sec}s"),
+                        volume=volume
+                    )
+                    return seg
+                    
+                elif segment_type == "video":
+                    seg = draft.VideoSegment(
+                        local_path,
+                        trange(f"{start_sec}s", f"{duration_sec}s")
+                    )
+                    return seg
                 
             elif segment_type == "text":
                 # 文本片段
