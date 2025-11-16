@@ -20,7 +20,6 @@ import atexit
 
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
-from app.utils.draft_folder_manager import DraftFolderManager, DraftFolderWidget
 
 # Coze API 相关导入
 try:
@@ -52,9 +51,6 @@ class LocalServiceTab(BaseTab):
         # 初始化草稿生成器（用于检测文件夹）
         self.draft_generator = DraftGenerator()
 
-        # 使用共享的草稿文件夹管理器
-        self.folder_manager = DraftFolderManager()
-
         # Coze API 配置（端插件必需）
         self.coze_api_token = None
         self.coze_base_url = COZE_CN_BASE_URL
@@ -75,13 +71,15 @@ class LocalServiceTab(BaseTab):
             foreground="blue"
         )
         
-        # 使用共享的草稿文件夹组件
-        self.folder_widget = DraftFolderWidget(
-            parent=self.frame,
-            manager=self.folder_manager,
-            on_folder_changed=self._on_folder_changed,
-            on_transfer_changed=self._on_transfer_changed
+        # 说明标签（提示使用全局设置）
+        self.global_hint_frame = ttk.LabelFrame(self.frame, text="提示", padding="5")
+        hint_label = ttk.Label(
+            self.global_hint_frame,
+            text="💡 文件夹设置：请在窗口顶部的「全局草稿存储设置」中配置",
+            foreground="blue",
+            font=("Arial", 9)
         )
+        hint_label.pack()
 
         # Coze API 配置区域（端插件必需）
         self.coze_frame = ttk.LabelFrame(self.frame, text="Coze API 配置（端插件必需）", padding="5")
@@ -159,8 +157,8 @@ class LocalServiceTab(BaseTab):
         self.info_label_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         self.info_label.pack(fill=tk.X)
         
-        # 草稿文件夹选择区域
-        self.folder_widget.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        # 提示信息
+        self.global_hint_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
         # Coze API 配置区域
         self.coze_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
@@ -190,15 +188,6 @@ class LocalServiceTab(BaseTab):
 
         # 底部状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
-
-    def _on_folder_changed(self, folder: str):
-        """文件夹路径改变回调"""
-        self.status_var.set(f"输出文件夹: {folder}")
-    
-    def _on_transfer_changed(self, enabled: bool):
-        """传输选项改变回调"""
-        status = "启用" if enabled else "禁用"
-        self.logger.info(f"传输草稿到文件夹: {status}")
 
     def _toggle_token_visibility(self):
         """切换 API Token 的显示/隐藏"""
@@ -289,7 +278,6 @@ class LocalServiceTab(BaseTab):
         """清理标签页资源"""
         super().cleanup()
         # 清理标签页特定的资源
-        self.folder_manager = None
         self.draft_generator = None
         
         # 清理 Coze API 相关资源
