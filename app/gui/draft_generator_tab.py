@@ -155,10 +155,13 @@ class DraftGeneratorTab(BaseTab):
         self.generate_btn.config(state=tk.DISABLED)
         self.is_generating = True
         
+        # 确定是否使用本地存储：如果未启用传输，则使用本地存储模式
+        use_local_storage = not self.folder_manager.enable_transfer
+        
         # 在后台线程中生成草稿
         self.generation_thread = threading.Thread(
             target=self._generate_draft_worker,
-            args=(content, output_folder),
+            args=(content, output_folder, use_local_storage),
             daemon=True
         )
         self.generation_thread.start()
@@ -166,11 +169,11 @@ class DraftGeneratorTab(BaseTab):
         # 定期检查线程状态
         self._check_generation_status()
     
-    def _generate_draft_worker(self, content: str, output_folder: str):
+    def _generate_draft_worker(self, content: str, output_folder: str, use_local_storage: bool):
         """后台线程工作函数"""
         try:
-            # 调用草稿生成器，传入已验证的输出文件夹
-            draft_paths = self.draft_generator.generate(content, output_folder)
+            # 调用草稿生成器，传入已验证的输出文件夹和存储模式
+            draft_paths = self.draft_generator.generate(content, output_folder, use_local_storage=use_local_storage)
             
             # 使用after方法在主线程中更新GUI
             self.frame.after(0, self._on_generation_success, draft_paths)

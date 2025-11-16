@@ -11,7 +11,7 @@ from app.utils.coze_parser import CozeOutputParser
 from app.utils.converter import DraftInterfaceConverter
 from app.utils.material_manager import MaterialManager, create_material_manager
 import pyJianYingDraft as draft
-from pyJianYingDraft import ScriptFile  
+from pyJianYingDraft import ScriptFile
 
 
 class DraftGenerator:
@@ -59,13 +59,14 @@ class DraftGenerator:
         self.logger.warning("未能检测到剪映草稿文件夹")
         return None
     
-    def generate(self, content: str, output_folder: Optional[str] = None) -> List[str]:
+    def generate(self, content: str, output_folder: Optional[str] = None, use_local_storage: bool = False) -> List[str]:
         """
         从Coze JSON内容生成剪映草稿
         
         Args:
             content: Coze输出的JSON字符串
             output_folder: 输出文件夹路径(可选,默认使用初始化时的路径)
+            use_local_storage: 是否使用本地存储模式(True=使用config目录, False=使用指定文件夹)
             
         Returns:
             生成的草稿文件路径列表
@@ -74,6 +75,7 @@ class DraftGenerator:
             Exception: 草稿生成过程中的任何错误
         """
         self.logger.info(f"开始生成草稿，内容长度: {len(content)}")
+        self.logger.info(f"存储模式: {'本地数据目录' if use_local_storage else '指定文件夹'}")
         
         try:
             # 如果指定了output_folder，临时修改输出目录
@@ -106,18 +108,20 @@ class DraftGenerator:
             self.logger.error(f"生成草稿时出错: {e}", exc_info=True)
             raise
     
-    def generate_from_file(self, file_path: str, output_folder: Optional[str] = None) -> List[str]:
+    def generate_from_file(self, file_path: str, output_folder: Optional[str] = None, use_local_storage: bool = False) -> List[str]:
         """
         从Coze JSON文件生成剪映草稿
         
         Args:
             file_path: Coze输出JSON文件路径
             output_folder: 输出文件夹路径(可选)
+            use_local_storage: 是否使用本地存储模式(True=使用config目录, False=使用指定文件夹)
             
         Returns:
             生成的草稿文件路径列表
         """
         self.logger.info(f"从文件生成草稿: {file_path}")
+        self.logger.info(f"存储模式: {'本地数据目录' if use_local_storage else '指定文件夹'}")
         
         try:
             # 如果指定了output_folder，临时修改输出目录
@@ -137,7 +141,7 @@ class DraftGenerator:
             self.logger.info("✅ 数据标准化完成")
             
             # 3. 转换所有草稿
-            draft_paths = self._convert_drafts(normalized_data)
+            draft_paths = self._convert_drafts(normalized_data, use_local_storage=use_local_storage)
             
             # 恢复原始输出目录
             self.output_base_dir = original_output_dir
@@ -148,12 +152,13 @@ class DraftGenerator:
             self.logger.error(f"从文件生成草稿失败: {e}", exc_info=True)
             raise
     
-    def _convert_drafts(self, parsed_data: Dict[str, Any]) -> List[str]:
+    def _convert_drafts(self, parsed_data: Dict[str, Any], use_local_storage: bool = False) -> List[str]:
         """
         转换所有草稿
         
         Args:
             parsed_data: 解析后的数据
+            use_local_storage: 是否使用本地存储模式
             
         Returns:
             生成的草稿路径列表
@@ -169,7 +174,7 @@ class DraftGenerator:
             self.logger.info(f"{'='*60}")
             
             try:
-                draft_path = self._convert_single_draft(draft_data)
+                draft_path = self._convert_single_draft(draft_data, use_local_storage=use_local_storage)
                 draft_paths.append(draft_path)
                 self.logger.info(f"✅ 草稿 {i} 生成成功: {draft_path}")
             except Exception as e:
@@ -182,12 +187,15 @@ class DraftGenerator:
         
         return draft_paths
     
-    def _convert_single_draft(self, draft_data: Dict[str, Any]) -> str:
+    def _convert_single_draft(self, draft_data: Dict[str, Any], use_local_storage: bool = False) -> str:
         """
         转换单个草稿
         
         Args:
             draft_data: 单个草稿数据
+            use_local_storage: 是否使用本地存储模式
+                True: 草稿存config.drafts_dir, 素材存config.assets_dir/{draft_id}/
+                False: 草稿存output_base_dir, 素材存CozeJianYingAssistantAssets/{draft_id}/
             
         Returns:
             草稿路径
@@ -214,13 +222,33 @@ class DraftGenerator:
         self.logger.info(f"项目名称: {project_name}")
         self.logger.info(f"文件夹名称: {draft_folder_name}")
         self.logger.info(f"分辨率: {width}x{height}, 帧率: {fps}")
+        self.logger.info(f"存储模式: {'本地数据目录' if use_local_storage else '指定文件夹+CozeJianYingAssistantAssets'}")
         
-        # 2. 创建DraftFolder和Script
+        # 2. 根据存储模式选择输出目录
+        if use_local_storage:
+            # 本地存储模式：使用config的drafts_dir
+            from app.config import get_config
+            config = get_config()
+            draft_output_dir = config.drafts_dir
+            assets_dir = os.path.join(config.assets_dir, draft_id)
+            os.makedirs(assets_dir, exist_ok=True)
+            self.logger.info(f"使用本地数据目录:")
+            self.logger.info(f"  草稿目录: {draft_output_dir}")
+            self.logger.info(f"  素材目录: {assets_dir}")
+        else:
+            # 指定文件夹模式：使用output_base_dir
+            draft_output_dir = self.output_base_dir
+            assets_dir = None  # MaterialManager会自动使用CozeJianYingAssistantAssets
+            self.logger.info(f"使用指定文件夹模式:")
+            self.logger.info(f"  草稿目录: {draft_output_dir}")
+            self.logger.info(f"  素材目录: 将使用CozeJianYingAssistantAssets")
+        
+        # 3. 创建DraftFolder和Script
         # 重要: 使用"扣子2剪映：" + UUID 作为文件夹名
         # 这样可以避免剪映自动重命名文件夹（因为有人类可读前缀），同时保留UUID用于批量识别
         # 参考 pyJianYingDraft 的 demo.py，使用人类可读的名称不会被剪映重命名
         self.logger.info("创建草稿...")
-        draft_folder_obj = draft.DraftFolder(self.output_base_dir)
+        draft_folder_obj = draft.DraftFolder(draft_output_dir)
         script: ScriptFile = draft_folder_obj.create_draft(
             draft_name=draft_folder_name,  # 使用"扣子2剪映：" + UUID 作为文件夹名
             width=width,
@@ -230,16 +258,28 @@ class DraftGenerator:
         )
         
         # 草稿实际路径
-        draft_folder = os.path.join(self.output_base_dir, draft_folder_name)
+        draft_folder = os.path.join(draft_output_dir, draft_folder_name)
         
-        # 3. 初始化MaterialManager
-        # MaterialManager 现在将素材下载到 {draft_folder_path}/CozeJianYingAssistantAssets/{draft_folder_name}/
+        # 4. 初始化MaterialManager
         self.logger.info("初始化MaterialManager...")
-        material_manager = create_material_manager(
-            draft_folder=draft_folder_obj,
-            draft_name=draft_folder_name,  # 使用文件夹名称，与 create_draft 一致
-            project_id=draft_id             # 传入 draft_id 用于素材文件夹命名
-        )
+        if use_local_storage:
+            # 本地存储模式：使用独立的assets目录
+            from app.utils.material_manager import MaterialManager
+            material_manager = MaterialManager(
+                draft_folder_path=assets_dir,  # 直接使用assets目录作为根路径
+                draft_name="",  # 不需要子目录
+                project_id=None  # 不使用project_id子目录
+            )
+            # 覆盖assets_path为指定的目录
+            material_manager.assets_path = Path(assets_dir)
+            material_manager._ensure_assets_folder()
+        else:
+            # 指定文件夹模式：使用CozeJianYingAssistantAssets
+            material_manager = create_material_manager(
+                draft_folder=draft_folder_obj,
+                draft_name=draft_folder_name,  # 使用文件夹名称，与 create_draft 一致
+                project_id=draft_id             # 传入 draft_id 用于素材文件夹命名
+            )
         self.material_managers[draft_id] = material_manager  # 使用 draft_id 作为键
         
         # 4. 初始化Converter
