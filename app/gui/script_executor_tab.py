@@ -47,27 +47,15 @@ class ScriptExecutorTab(BaseTab):
     
     def _create_widgets(self):
         """创建UI组件"""
-        # 输出文件夹选择区域
-        self.folder_frame = ttk.LabelFrame(self.frame, text="输出设置", padding="5")
-        
-        self.folder_label = ttk.Label(self.folder_frame, text="剪映草稿文件夹:")
-        self.folder_var = tk.StringVar(value="未选择（将使用默认路径）")
-        self.folder_entry = ttk.Entry(
-            self.folder_frame, 
-            textvariable=self.folder_var, 
-            state="readonly", 
-            width=40
+        # 说明标签（提示使用全局设置）
+        self.global_hint_frame = ttk.LabelFrame(self.frame, text="提示", padding="5")
+        hint_label = ttk.Label(
+            self.global_hint_frame,
+            text="💡 文件夹设置：请在窗口顶部的「全局草稿存储设置」中配置",
+            foreground="blue",
+            font=("Arial", 9)
         )
-        self.folder_btn = ttk.Button(
-            self.folder_frame,
-            text="选择文件夹...",
-            command=self._select_output_folder
-        )
-        self.auto_detect_btn = ttk.Button(
-            self.folder_frame,
-            text="自动检测",
-            command=self._auto_detect_folder
-        )
+        hint_label.pack()
         
         # 文件操作区域
         self.file_frame = ttk.LabelFrame(self.frame, text="脚本文件", padding="5")
@@ -401,54 +389,6 @@ if __name__ == "__main__":
         self.file_var.set("未加载")
         self.logger.info("已清空输入")
         self.status_var.set("已清空")
-    
-    def _select_output_folder(self):
-        """选择输出文件夹"""
-        # 设置初始目录
-        initial_dir = self.output_folder if self.output_folder else os.path.expanduser("~")
-        
-        folder = filedialog.askdirectory(
-            title="选择剪映草稿文件夹",
-            initialdir=initial_dir
-        )
-        
-        if folder:
-            self.output_folder = folder
-            self.folder_var.set(folder)
-            self.logger.info(f"已选择输出文件夹: {folder}")
-            self.status_var.set(f"输出文件夹: {folder}")
-            # 更新全局存储设置 - 选择了文件夹就启用传输模式
-            storage_settings = get_storage_settings()
-            storage_settings.enable_transfer = True
-            storage_settings.target_folder = folder
-            self.logger.info(f"全局存储设置已更新: enable_transfer=True, target_folder={folder}")
-    
-    def _auto_detect_folder(self):
-        """自动检测剪映草稿文件夹"""
-        from app.utils.draft_generator import DraftGenerator
-        
-        self.logger.info("尝试自动检测剪映草稿文件夹...")
-        
-        draft_generator = DraftGenerator()
-        detected_path = draft_generator.detect_default_draft_folder()
-        
-        if detected_path:
-            self.output_folder = detected_path
-            self.folder_var.set(detected_path)
-            self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
-            self.status_var.set(f"已检测到: {detected_path}")
-            messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
-            # 更新全局存储设置 - 检测到文件夹就启用传输模式
-            storage_settings = get_storage_settings()
-            storage_settings.enable_transfer = True
-            storage_settings.target_folder = detected_path
-            self.logger.info(f"全局存储设置已更新: enable_transfer=True, target_folder={detected_path}")
-        else:
-            self.logger.warning("未能检测到剪映草稿文件夹")
-            messagebox.showwarning(
-                "检测失败",
-                "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。"
-            )
     
     def cleanup(self):
         """清理标签页资源"""

@@ -20,7 +20,6 @@ import atexit
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
 from app.utils.ngrok_manager import NgrokManager
-from app.utils.draft_folder_manager import DraftFolderManager, DraftFolderWidget
 from app.utils.storage_settings import get_storage_settings
 
 
@@ -44,8 +43,8 @@ class CloudServiceTab(BaseTab):
         # 初始化草稿生成器（用于检测文件夹）
         self.draft_generator = DraftGenerator()
 
-        # 使用共享的草稿文件夹管理器
-        self.folder_manager = DraftFolderManager()
+        # 使用全局存储设置
+        self.storage_settings = get_storage_settings()
 
         # FastAPI服务相关(使用子进程方式)
         self.service_process = None  # 子进程对象(源码环境)
@@ -101,13 +100,15 @@ class CloudServiceTab(BaseTab):
             foreground="blue"
         )
         
-        # 使用共享的草稿文件夹组件
-        self.folder_widget = DraftFolderWidget(
-            parent=self.frame,
-            manager=self.folder_manager,
-            on_folder_changed=self._on_folder_changed,
-            on_transfer_changed=self._on_transfer_changed
+        # 说明标签（提示使用全局设置）
+        self.global_hint_frame = ttk.LabelFrame(self.frame, text="提示", padding="5")
+        hint_label = ttk.Label(
+            self.global_hint_frame,
+            text="💡 文件夹设置：请在窗口顶部的「全局草稿存储设置」中配置",
+            foreground="blue",
+            font=("Arial", 9)
         )
+        hint_label.pack()
 
         # FastAPI服务管理区域
         self.service_frame = ttk.LabelFrame(self.frame, text="FastAPI 服务管理", padding="10")
@@ -232,8 +233,8 @@ class CloudServiceTab(BaseTab):
         self.info_label_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         self.info_label.pack(fill=tk.X)
         
-        # 草稿文件夹选择区域
-        self.folder_widget.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        # 提示信息
+        self.global_hint_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
         # FastAPI服务管理区域
         self.service_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
@@ -309,24 +310,6 @@ class CloudServiceTab(BaseTab):
 
         # 底部状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
-
-    def _on_folder_changed(self, folder: str):
-        """文件夹路径改变回调"""
-        self.status_var.set(f"输出文件夹: {folder}")
-        # 更新全局存储设置
-        storage_settings = get_storage_settings()
-        storage_settings.target_folder = folder
-        self.logger.info(f"全局存储设置已更新: target_folder={folder}")
-    
-    def _on_transfer_changed(self, enabled: bool):
-        """传输选项改变回调"""
-        status = "启用" if enabled else "禁用"
-        self.logger.info(f"传输草稿到文件夹: {status}")
-        # 更新全局存储设置
-        storage_settings = get_storage_settings()
-        storage_settings.enable_transfer = enabled
-        storage_settings.target_folder = self.folder_manager.folder_path
-        self.logger.info(f"全局存储设置已更新: enable_transfer={enabled}, target_folder={storage_settings.target_folder}")
 
     def _check_port_available(self):
         """检测端口是否可用"""
@@ -887,7 +870,6 @@ class CloudServiceTab(BaseTab):
                 self.log_reader_thread.join(timeout=2)
 
         super().cleanup()
-        self.folder_manager = None
         self.draft_generator = None
         self.service_process = None
         self.log_reader_thread = None
