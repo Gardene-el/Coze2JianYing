@@ -167,6 +167,3 @@ openapi.yaml
 coze_openapi.yaml
 coze_openapi.json
 debug_nested.yaml
-
-# Auto-generated Coze handlers (can be regenerated with scripts/generate_handler_from_api.py)
-coze_plugin/raw_tools/

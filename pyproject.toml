@@ -57,9 +57,6 @@ Homepage = "https://github.com/Gardene-el/Coze2JianYing"
 Repository = "https://github.com/Gardene-el/Coze2JianYing"
 Issues = "https://github.com/Gardene-el/Coze2JianYing/issues"
 
-[project.scripts]
-coze-2-jianying = "coze_plugin.main:main"
-
 [tool.setuptools]
 package-dir = {"" = "."}
 
@@ -160,5 +157,5 @@ type = "github"
 ignore_token_for_push = false
 
 [tool.semantic_release.publish]
-dist_glob_patterns = ["dist/*.exe"]
+dist_glob_patterns = ["dist/*.exe", "dist/*.zip"]
 upload_to_vcs_release = true

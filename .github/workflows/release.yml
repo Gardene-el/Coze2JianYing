@@ -131,10 +131,33 @@ jobs:
           semantic-release version
 
           Write-Host ""
+          Write-Host "=== 打包 coze_plugin 内容 ==="
+          # 创建 coze_plugin.zip 包含所有工具
+          if (Test-Path coze_plugin) {
+            # 确保 dist 目录存在
+            if (-not (Test-Path dist)) {
+              New-Item -ItemType Directory -Path dist
+            }
+            
+            # 使用 PowerShell 压缩
+            Compress-Archive -Path coze_plugin\* -DestinationPath dist\coze_plugin.zip -Force
+            
+            # 验证文件
+            if (Test-Path dist/coze_plugin.zip) {
+              $zipSize = (Get-Item dist/coze_plugin.zip).Length / 1KB
+              Write-Host "✅ coze_plugin.zip 已创建: $([math]::Round($zipSize, 2)) KB"
+            } else {
+              Write-Host "⚠️ 警告: coze_plugin.zip 创建失败"
+            }
+          } else {
+            Write-Host "⚠️ 警告: 找不到 coze_plugin 目录"
+          }
+
+          Write-Host ""
           Write-Host "=== 执行 semantic-release publish ==="
           Write-Host "此步骤会自动："
           Write-Host "  1. 创建 GitHub Release"
-          Write-Host "  2. 上传 dist/*.exe 到 Release"
+          Write-Host "  2. 上传 dist/*.exe 和 dist/*.zip 到 Release"
           semantic-release publish
 
       - name: Get new version and summary
@@ -155,6 +178,14 @@ jobs:
             Write-Host "✅ 可执行文件已生成: $([math]::Round($fileSize, 2)) MB"
           } else {
             Write-Host "⚠️ 警告: 找不到可执行文件"
+          }
+
+          # 验证 coze_plugin.zip 是否存在
+          if (Test-Path dist/coze_plugin.zip) {
+            $zipSize = (Get-Item dist/coze_plugin.zip).Length / 1KB
+            Write-Host "✅ coze_plugin.zip 已生成: $([math]::Round($zipSize, 2)) KB"
+          } else {
+            Write-Host "⚠️ 警告: 找不到 coze_plugin.zip"
           }
 
           echo "version=$latestTag" >> $env:GITHUB_OUTPUT
