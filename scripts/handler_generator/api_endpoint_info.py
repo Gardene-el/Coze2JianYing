@@ -10,7 +10,7 @@ class APIEndpointInfo:
     """存储 API 端点信息"""
     def __init__(self, func_name: str, path: str, has_draft_id: bool, has_segment_id: bool,
                  request_model: Optional[str], response_model: Optional[str],
-                 path_params: List[str], source_file: str):
+                 path_params: List[str], source_file: str, docstring: Optional[str] = None):
         self.func_name = func_name
         self.path = path
         self.has_draft_id = has_draft_id
@@ -19,3 +19,4 @@ class APIEndpointInfo:
         self.response_model = response_model
         self.path_params = path_params
         self.source_file = source_file
+        self.docstring = docstring

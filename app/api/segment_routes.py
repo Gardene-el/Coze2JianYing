@@ -56,6 +56,9 @@ async def create_audio_segment(request: CreateAudioSegmentRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        创建音频片段, 并指定其时间信息、音量、播放速度等设置
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
         Args:
             material (`AudioMaterial` or `str`): 素材实例或素材路径, 若为路径则自动构造素材实例
             target_timerange (`Timerange`): 片段在轨道上的目标时间范围
@@ -123,6 +126,9 @@ async def create_video_segment(request: CreateVideoSegmentRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        创建视频片段, 并指定其时间信息、音量、播放速度及图像调节设置
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
         Args:
             material (`VideoMaterial` or `str`): 素材实例或素材路径, 若为路径则自动构造素材实例(此时不能指定`cropSettings`参数)
             target_timerange (`Timerange`): 片段在轨道上的目标时间范围
@@ -191,6 +197,9 @@ async def create_text_segment(request: CreateTextSegmentRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        创建文本片段, 并指定其时间信息、字体样式及图像调节设置
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
         Args:
             text (`str`): 文本内容
             timerange (`Timerange`): 片段在轨道上的时间范围
@@ -257,6 +266,9 @@ async def create_sticker_segment(request: CreateStickerSegmentRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        创建贴纸片段, 并指定其时间信息及图像调节设置
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
         Args:
             resource_id (`str`): 贴纸resource_id, 可通过`ScriptFile.inspect_material`从模板中获取
             target_timerange (`Timerange`): 片段在轨道上的目标时间范围
@@ -319,7 +331,16 @@ async def create_effect_segment(request: CreateEffectSegmentRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
-        EffectSegment 没有提供详细文档注释
+        创建特效片段, 并指定其时间信息及特效参数
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
+        Args:
+            effect_type (`VideoSceneEffectType` or `VideoCharacterEffectType`): 特效类型
+            target_timerange (`Timerange`): 片段在轨道上的时间范围
+            params (`List[Optional[float]]`, optional): 特效参数列表, 参数列表中未提供或为None的项使用默认值. 参数取值范围(0~100)与剪映中一致. 某个特效类型有何参数以及具体参数顺序以枚举类成员的annotation为准.
+        
+        Raises:
+            `ValueError`: 提供的参数数量超过了该特效类型的参数数量, 或参数值超出范围.
     ```
     """
     logger.info("=" * 60)
@@ -378,7 +399,13 @@ async def create_filter_segment(request: CreateFilterSegmentRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
-        FilterSegment 没有提供详细文档注释
+        创建滤镜片段, 并指定其时间信息及滤镜强度
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
+        Args:
+            filter_meta (`FilterType`): 滤镜类型
+            target_timerange (`Timerange`): 片段在轨道上的时间范围
+            intensity (`float`, optional): 滤镜强度(0-100). 仅当所选滤镜能够调节强度时有效. 默认为100.
     ```
     """
     logger.info("=" * 60)
@@ -434,6 +461,9 @@ async def add_audio_effect(segment_id: str, request: AddEffectRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为音频片段添加音效, 可配置音效类型及参数
+        音效将应用于整个片段, 每种类型的音效只能添加一次
+        
         Args:
             effect_type (`AudioSceneEffectType` | `ToneEffectType` | `SpeechToSongType`): 音效类型, 一类音效只能添加一个.
             params (`List[Optional[float]]`, optional): 音效参数列表, 参数列表中未提供或为None的项使用默认值.
@@ -506,6 +536,9 @@ async def add_audio_fade(segment_id: str, request: AddFadeRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为音频片段添加淡入淡出效果, 可配置淡入淡出的时长
+        淡入淡出将应用于片段的开头和结尾部分
+        
         Args:
             in_duration (`int` or `str`): 音频淡入时长, 单位为微秒, 若为字符串则会调用`tim()`函数进行解析
             out_duration (`int` or `str`): 音频淡出时长, 单位为微秒, 若为字符串则会调用`tim()`函数进行解析
@@ -572,6 +605,9 @@ async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为音频片段添加音量关键帧, 可精确控制音量随时间变化
+        关键帧可用于实现复杂的音量变化效果
+        
         Args:
             time_offset (`int`): 关键帧的时间偏移量, 单位为微秒
             volume (`float`): 音量在`time_offset`处的值
@@ -642,6 +678,9 @@ async def add_video_animation(segment_id: str, request: AddAnimationRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加动画效果, 可配置动画类型及参数
+        动画将应用于片段的进出场或全程
+        
         Args:
             animation_type (`IntroType`, `OutroType`, or `GroupAnimationType`): 动画类型
             duration (`int` or `str`, optional): 动画持续时间, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
@@ -711,6 +750,9 @@ async def add_video_effect(segment_id: str, request: AddEffectRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加视频特效, 可配置特效类型及参数
+        特效将应用于整个片段或指定时间段
+        
         Args:
             effect_type (`VideoSceneEffectType` or `VideoCharacterEffectType`): 特效类型
             params (`List[Optional[float]]`, optional): 特效参数列表, 参数列表中未提供或为None的项使用默认值.
@@ -845,6 +887,9 @@ async def add_video_filter(segment_id: str, request: AddFilterRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加淡入淡出效果, 可配置淡入淡出的时长
+        淡入淡出将应用于片段的开头和结尾部分
+        
         Args:
             filter_type (`FilterType`): 滤镜类型
             intensity (`float`, optional): 滤镜强度(0-100), 仅当所选滤镜能够调节强度时有效. 默认为100.
@@ -913,6 +958,9 @@ async def add_video_mask(segment_id: str, request: AddMaskRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加滤镜效果, 可配置滤镜类型及强度
+        滤镜将应用于整个片段或指定时间段
+        
         Args:
             mask_type (`MaskType`): 蒙版类型
             center_x (`float`, optional): 蒙版中心点X坐标(以素材的像素为单位), 默认设置在素材中心
@@ -991,6 +1039,9 @@ async def add_video_transition(segment_id: str, request: AddTransitionRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加蒙版效果, 可配置蒙版类型及参数
+        蒙版可用于实现各种遮罩和形状效果
+        
         Args:
             transition_type (`TransitionType`): 转场类型
             duration (`int` or `str`, optional): 转场持续时间, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析. 若不指定则使用转场类型定义的默认值.
@@ -1062,6 +1113,9 @@ async def add_video_background_filling(segment_id: str, request: AddBackgroundFi
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加转场效果, 可配置转场类型及时长
+        转场将应用于片段与下一片段的衔接处
+        
         Args:
             fill_type (`blur` or `color`): 填充类型, `blur`表示模糊, `color`表示颜色.
             blur (`float`, optional): 模糊程度, 0.0-1.0. 仅在`fill_type`为`blur`时有效. 剪映中的四档模糊数值分别为0.0625, 0.375, 0.75和1.0, 默认为0.0625.
@@ -1129,6 +1183,9 @@ async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加背景填充效果, 可配置填充类型及参数
+        背景填充可用于调整画面比例和背景样式
+        
         Args:
             _property (`KeyframeProperty`): 要控制的属性
             time_offset (`int` or `str`): 关键帧的时间偏移量, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
@@ -1203,6 +1260,9 @@ async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为视频片段添加关键帧, 可精确控制位置、大小、旋转等参数随时间变化
+        关键帧可用于实现复杂的动画效果
+        
         Args:
             _property (`KeyframeProperty`): 要控制的属性
             time_offset (`int` or `str`): 关键帧的时间偏移量, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
@@ -1277,6 +1337,9 @@ async def add_text_animation(segment_id: str, request: AddAnimationRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为贴纸片段添加关键帧, 可精确控制位置、大小、旋转等参数随时间变化
+        关键帧可用于实现复杂的动画效果
+        
         Args:
             animation_type (`TextIntro`, `TextOutro` or `TextLoopAnim`): 文本动画类型.
             duration (`str` or `float`, optional): 动画持续时间, 单位为微秒, 仅对入场/出场动画有效.
@@ -1346,6 +1409,9 @@ async def add_text_bubble(segment_id: str, request: AddBubbleRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为文本片段添加动画效果, 可配置动画类型及参数
+        动画将应用于文本的进出场或全程
+        
         Args:
             effect_id (`str`): 气泡效果的effect_id
             resource_id (`str`): 气泡效果的resource_id
@@ -1414,6 +1480,9 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为文本片段添加气泡效果, 可配置气泡样式及参数
+        气泡可用于实现对话框和标注效果
+        
         Args:
             effect_id (`str`): 花字效果的effect_id, 也同时是其resource_id
     ```
@@ -1481,6 +1550,9 @@ async def add_text_keyframe(segment_id: str, request: AddKeyframeRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        为文本片段添加文本特效, 可配置特效类型及参数
+        特效将应用于整个文本或指定部分
+        
         Args:
             _property (`KeyframeProperty`): 要控制的属性
             time_offset (`int` or `str`): 关键帧的时间偏移量, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.

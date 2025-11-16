@@ -90,6 +90,9 @@ class APIScanner:
                     if isinstance(arg.annotation, ast.Name):
                         request_model = arg.annotation.id
         
+        # 提取函数的 docstring
+        docstring = ast.get_docstring(node)
+        
         return APIEndpointInfo(
             func_name=func_name,
             path=endpoint_path,
@@ -98,7 +101,8 @@ class APIScanner:
             request_model=request_model,
             response_model=response_model,
             path_params=path_params,
-            source_file=str(source_file)
+            source_file=str(source_file),
+            docstring=docstring
         )
     
     def scan_all(self) -> List[APIEndpointInfo]:

@@ -44,6 +44,9 @@ async def create_draft(request: CreateDraftRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        创建剪映草稿, 并指定其基本参数如分辨率、帧率等
+        草稿创建完成后, 可通过添加轨道和片段来构建完整的视频项目
+        
         Args:
             draft_name (`str`): 草稿名称, 即相应文件夹名称
             width (`int`): 视频宽度, 单位为像素
@@ -109,12 +112,15 @@ async def add_track(draft_id: str, request: AddTrackRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        向草稿添加指定类型的轨道, 并可配置轨道名称、静音状态及图层位置
+        轨道创建完成后, 可通过添加片段来填充轨道内容
+        
         Args:
-            track_type (TrackType): 轨道类型
-            track_name (str, optional): 轨道名称. 仅在创建第一个同类型轨道时允许不指定.
-            mute (bool, optional): 轨道是否静音. 默认不静音.
-            relative_index (int, optional): 相对(同类型轨道的)图层位置, 越高越接近前景. 默认为0.
-            absolute_index (int, optional): 绝对图层位置, 越高越接近前景. 此参数将直接覆盖相应片段的`render_index`属性, 供有经验的用户使用.
+            track_type (`TrackType`): 轨道类型
+            track_name (`str`, optional): 轨道名称. 仅在创建第一个同类型轨道时允许不指定.
+            mute (`bool`, optional): 轨道是否静音. 默认不静音.
+            relative_index (`int`, optional): 相对(同类型轨道的)图层位置, 越高越接近前景. 默认为0.
+            absolute_index (`int`, optional): 绝对图层位置, 越高越接近前景. 此参数将直接覆盖相应片段的`render_index`属性, 供有经验的用户使用.
                 此参数不能与`relative_index`同时使用.
 
         Raises:
@@ -192,6 +198,9 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        将已创建的片段添加到草稿的指定轨道中, 可自动或手动指定轨道名称
+        片段添加后将按时间轴排列, 不允许与已有片段重叠
+        
         Args:
             segment (`VideoSegment`, `StickerSegment`, `AudioSegment`, or `TextSegment`): 要添加的片段
             track_name (`str`, optional): 添加到的轨道名称. 当此类型的轨道仅有一条时可省略.
@@ -330,6 +339,9 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        向草稿添加全局特效, 可配置特效类型、时间范围及参数
+        特效将应用于指定时间段的所有视频内容
+        
         Args:
             effect (`VideoSceneEffectType` or `VideoCharacterEffectType`): 特效类型
             t_range (`Timerange`): 特效片段的时间范围
@@ -413,6 +425,9 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        向草稿添加全局滤镜, 可配置滤镜类型、时间范围及强度
+        滤镜将应用于指定时间段的所有视频内容
+        
         Args:
             filter_meta (`FilterType`): 滤镜类型
             t_range (`Timerange`): 滤镜片段的时间范围
@@ -495,6 +510,9 @@ async def save_draft(draft_id: str):
     ```
     对应 pyJianYingDraft 注释：
     ```
+        保存草稿到磁盘, 生成剪映可识别的草稿文件
+        保存完成后即可在剪映中打开和编辑该草稿
+        
         Raises:
             `ValueError`: 没有设置保存路径
     ```
