@@ -177,7 +177,7 @@ def main():
 
     # 初始化各个脚本模块
     print("步骤 3: 初始化生成器模块...")
-    folder_creator = FolderCreator(str(output_dir))  # B 脚本
+    folder_creator = FolderCreator(str(output_dir), schema_extractor)  # B 脚本
     input_output_gen = InputOutputGenerator(schema_extractor)  # C 脚本
     api_call_gen = APICallCodeGenerator(schema_extractor)  # E 脚本
     handler_func_gen = HandlerFunctionGenerator()  # D 脚本
