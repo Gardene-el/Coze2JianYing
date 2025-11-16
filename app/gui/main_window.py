@@ -58,11 +58,10 @@ class MainWindow:
         file_menu.add_separator()
         file_menu.add_command(label="退出", command=self._on_closing)
 
-        # 查看菜单
-        view_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="查看", menu=view_menu)
-        view_menu.add_command(label="切换日志面板", command=self._toggle_log_panel)
-        view_menu.add_command(label="日志窗口（独立）", command=self._show_log_window)
+        # 帮助菜单
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="帮助", menu=help_menu)
+        help_menu.add_command(label="关于", command=self._show_about)
 
         # 主PanedWindow - 分隔上下区域（使用tk.PanedWindow避免拖影）
         self.paned_window = tk.PanedWindow(
