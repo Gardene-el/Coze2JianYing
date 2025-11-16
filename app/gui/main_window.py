@@ -52,6 +52,10 @@ class MainWindow:
         # 文件菜单
         file_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="文件", menu=file_menu)
+        file_menu.add_command(label="打开数据文件夹", command=self._open_data_folder)
+        file_menu.add_command(label="清空数据文件", command=self._clear_data_files)
+        file_menu.add_command(label="清空缓存", command=self._clear_cache)
+        file_menu.add_separator()
         file_menu.add_command(label="退出", command=self._on_closing)
 
         # 查看菜单
@@ -59,11 +63,6 @@ class MainWindow:
         menubar.add_cascade(label="查看", menu=view_menu)
         view_menu.add_command(label="切换日志面板", command=self._toggle_log_panel)
         view_menu.add_command(label="日志窗口（独立）", command=self._show_log_window)
-
-        # 帮助菜单
-        help_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="帮助", menu=help_menu)
-        help_menu.add_command(label="关于", command=self._show_about)
 
         # 主PanedWindow - 分隔上下区域（使用tk.PanedWindow避免拖影）
         self.paned_window = tk.PanedWindow(
@@ -405,6 +404,108 @@ class MainWindow:
 
 © 2025 版权所有"""
         messagebox.showinfo("关于", about_text)
+    
+    def _open_data_folder(self):
+        """打开数据文件夹"""
+        import subprocess
+        from app.config import get_config
+        
+        try:
+            config = get_config()
+            data_root = config.data_root
+            
+            if not os.path.exists(data_root):
+                messagebox.showwarning("警告", f"数据文件夹不存在:\n{data_root}")
+                return
+            
+            # 在 Windows 中打开文件夹
+            if os.name == 'nt':
+                os.startfile(data_root)
+            else:
+                # 非 Windows 系统使用 xdg-open 或 open
+                try:
+                    subprocess.run(['xdg-open', data_root], check=True)
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    try:
+                        subprocess.run(['open', data_root], check=True)
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        messagebox.showerror("错误", f"无法打开文件夹:\n{data_root}\n请手动打开。")
+            
+            self.logger.info(f"打开数据文件夹: {data_root}")
+        except Exception as e:
+            self.logger.error(f"打开数据文件夹失败: {e}", exc_info=True)
+            messagebox.showerror("错误", f"打开数据文件夹失败:\n{e}")
+    
+    def _clear_data_files(self):
+        """清空数据文件"""
+        from app.config import get_config
+        
+        if not messagebox.askyesno(
+            "确认清空", 
+            "确定要清空所有数据文件吗？\n\n这将删除所有草稿配置和片段数据。\n此操作不可恢复！",
+            icon='warning'
+        ):
+            return
+        
+        try:
+            config = get_config()
+            drafts_dir = config.drafts_dir
+            
+            if os.path.exists(drafts_dir):
+                import shutil
+                # 删除并重建目录
+                shutil.rmtree(drafts_dir)
+                os.makedirs(drafts_dir, exist_ok=True)
+                self.logger.info(f"已清空数据文件: {drafts_dir}")
+                messagebox.showinfo("成功", f"数据文件已清空！\n\n文件夹: {drafts_dir}")
+            else:
+                self.logger.warning(f"数据文件夹不存在: {drafts_dir}")
+                messagebox.showinfo("提示", "数据文件夹不存在，无需清空。")
+        except Exception as e:
+            self.logger.error(f"清空数据文件失败: {e}", exc_info=True)
+            messagebox.showerror("错误", f"清空数据文件失败:\n{e}")
+    
+    def _clear_cache(self):
+        """清空缓存"""
+        from app.config import get_config
+        
+        if not messagebox.askyesno(
+            "确认清空", 
+            "确定要清空所有缓存文件吗？\n\n这将删除缓存的素材和临时文件。\n此操作不可恢复！",
+            icon='warning'
+        ):
+            return
+        
+        try:
+            config = get_config()
+            cache_dir = config.cache_dir
+            assets_dir = config.assets_dir
+            
+            deleted_items = []
+            
+            # 清空 cache 目录
+            if os.path.exists(cache_dir):
+                import shutil
+                shutil.rmtree(cache_dir)
+                os.makedirs(cache_dir, exist_ok=True)
+                deleted_items.append(f"缓存目录: {cache_dir}")
+                self.logger.info(f"已清空缓存: {cache_dir}")
+            
+            # 清空 assets 目录
+            if os.path.exists(assets_dir):
+                import shutil
+                shutil.rmtree(assets_dir)
+                os.makedirs(assets_dir, exist_ok=True)
+                deleted_items.append(f"素材目录: {assets_dir}")
+                self.logger.info(f"已清空素材缓存: {assets_dir}")
+            
+            if deleted_items:
+                messagebox.showinfo("成功", "缓存已清空！\n\n" + "\n".join(deleted_items))
+            else:
+                messagebox.showinfo("提示", "没有缓存需要清空。")
+        except Exception as e:
+            self.logger.error(f"清空缓存失败: {e}", exc_info=True)
+            messagebox.showerror("错误", f"清空缓存失败:\n{e}")
 
     def _on_log_message(self, message: str):
         """处理日志消息（线程安全）"""
