@@ -4,13 +4,14 @@
 实现方案三：脚本生成执行
 允许用户粘贴或加载从Coze导出的Python脚本，自动注入API依赖并执行
 """
-import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext, filedialog
-from pathlib import Path
 import asyncio
+import os
+import re
 import sys
 import threading
-import re
+import tkinter as tk
+from pathlib import Path
+from tkinter import filedialog, messagebox, scrolledtext, ttk
 from types import SimpleNamespace
 
 from app.gui.base_tab import BaseTab
@@ -37,11 +38,36 @@ class ScriptExecutorTab(BaseTab):
         self.execution_thread = None
         self.is_executing = False
         
+        # 输出文件夹路径（标签页特定）
+        self.output_folder = None
+        
         # 调用父类初始化
         super().__init__(parent, "脚本执行")
     
     def _create_widgets(self):
         """创建UI组件"""
+        # 输出文件夹选择区域
+        self.folder_frame = ttk.LabelFrame(self.frame, text="输出设置", padding="5")
+        
+        self.folder_label = ttk.Label(self.folder_frame, text="剪映草稿文件夹:")
+        self.folder_var = tk.StringVar(value="未选择（将使用默认路径）")
+        self.folder_entry = ttk.Entry(
+            self.folder_frame, 
+            textvariable=self.folder_var, 
+            state="readonly", 
+            width=40
+        )
+        self.folder_btn = ttk.Button(
+            self.folder_frame,
+            text="选择文件夹...",
+            command=self._select_output_folder
+        )
+        self.auto_detect_btn = ttk.Button(
+            self.folder_frame,
+            text="自动检测",
+            command=self._auto_detect_folder
+        )
+        
         # 文件操作区域
         self.file_frame = ttk.LabelFrame(self.frame, text="脚本文件", padding="5")
         
@@ -97,29 +123,37 @@ class ScriptExecutorTab(BaseTab):
         
         # 配置网格权重
         self.frame.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(2, weight=1)
+        self.frame.rowconfigure(3, weight=1)
     
     def _setup_layout(self):
         """设置布局"""
+        # 输出文件夹选择区域
+        self.folder_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.folder_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
+        self.folder_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
+        self.folder_btn.grid(row=0, column=2, padx=(0, 5))
+        self.auto_detect_btn.grid(row=0, column=3)
+        self.folder_frame.columnconfigure(1, weight=1)
+        
         # 文件选择区域
-        self.file_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.file_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         self.file_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
         self.file_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
         self.load_file_btn.grid(row=0, column=2)
         self.file_frame.columnconfigure(1, weight=1)
         
         # 输入区域
-        self.input_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 5))
-        self.input_text.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        self.input_label.grid(row=2, column=0, sticky=tk.W, pady=(0, 5))
+        self.input_text.grid(row=3, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         
         # 按钮区域
-        self.button_frame.grid(row=3, column=0, sticky=tk.W, pady=(0, 10))
+        self.button_frame.grid(row=4, column=0, sticky=tk.W, pady=(0, 10))
         self.execute_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.validate_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.clear_btn.pack(side=tk.LEFT, padx=(0, 5))
         
         # 状态栏
-        self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
+        self.status_bar.grid(row=5, column=0, sticky=(tk.W, tk.E))
     
     def _load_script_file(self):
         """加载脚本文件"""
@@ -366,6 +400,44 @@ if __name__ == "__main__":
         self.file_var.set("未加载")
         self.logger.info("已清空输入")
         self.status_var.set("已清空")
+    
+    def _select_output_folder(self):
+        """选择输出文件夹"""
+        # 设置初始目录
+        initial_dir = self.output_folder if self.output_folder else os.path.expanduser("~")
+        
+        folder = filedialog.askdirectory(
+            title="选择剪映草稿文件夹",
+            initialdir=initial_dir
+        )
+        
+        if folder:
+            self.output_folder = folder
+            self.folder_var.set(folder)
+            self.logger.info(f"已选择输出文件夹: {folder}")
+            self.status_var.set(f"输出文件夹: {folder}")
+    
+    def _auto_detect_folder(self):
+        """自动检测剪映草稿文件夹"""
+        from app.utils.draft_generator import DraftGenerator
+        
+        self.logger.info("尝试自动检测剪映草稿文件夹...")
+        
+        draft_generator = DraftGenerator()
+        detected_path = draft_generator.detect_default_draft_folder()
+        
+        if detected_path:
+            self.output_folder = detected_path
+            self.folder_var.set(detected_path)
+            self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
+            self.status_var.set(f"已检测到: {detected_path}")
+            messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
+        else:
+            self.logger.warning("未能检测到剪映草稿文件夹")
+            messagebox.showwarning(
+                "检测失败",
+                "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。"
+            )
     
     def cleanup(self):
         """清理标签页资源"""

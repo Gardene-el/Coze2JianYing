@@ -10,8 +10,6 @@ from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.draft_generator_tab import DraftGeneratorTab
-from app.gui.example_tab import ExampleTab
-from app.gui.local_service_tab import LocalServiceTab
 from app.gui.log_window import LogWindow
 from app.gui.script_executor_tab import ScriptExecutorTab
 from app.utils.logger import get_logger, set_gui_log_callback
@@ -186,28 +184,13 @@ class MainWindow:
 
     def _create_tabs(self):
         """创建所有标签页"""
-        # 创建手动草稿生成器标签页（原有功能）
-        draft_tab = DraftGeneratorTab(self.notebook, log_callback=self._on_log_message)
-        self.tabs.append(draft_tab)
-        self._add_tooltip(0, "手动粘贴 JSON 生成草稿")
-
         # 创建云端服务标签页（基于已有服务的云侧插件）
         cloud_service_tab = CloudServiceTab(
             self.notebook, log_callback=self._on_log_message
         )
         self.tabs.append(cloud_service_tab)
         self._add_tooltip(
-            1, "启动 FastAPI 服务，配置为 Coze 云侧插件\n无需 cozepy SDK 或 Coze Token"
-        )
-
-        # 创建本地服务标签页（端插件）
-        local_service_tab = LocalServiceTab(
-            self.notebook, log_callback=self._on_log_message
-        )
-        self.tabs.append(local_service_tab)
-        self._add_tooltip(
-            2,
-            "使用 cozepy SDK 监听 Coze Workflow 事件\n需要配置 Coze Token 和 Workflow ID",
+            0, "启动 FastAPI 服务，配置为 Coze 云侧插件\n无需 cozepy SDK 或 Coze Token"
         )
 
         # 创建脚本执行标签页（方案三：脚本生成执行）
@@ -215,12 +198,12 @@ class MainWindow:
             self.notebook, log_callback=self._on_log_message
         )
         self.tabs.append(script_executor_tab)
-        self._add_tooltip(3, "执行从Coze导出的Python脚本生成草稿")
+        self._add_tooltip(1, "执行从Coze导出的Python脚本生成草稿")
 
-        # 创建示例标签页（演示扩展性）
-        example_tab = ExampleTab(self.notebook)
-        self.tabs.append(example_tab)
-        self._add_tooltip(4, "示例标签页")
+        # 创建手动草稿生成器标签页（原有功能 - 旧版）
+        draft_tab = DraftGeneratorTab(self.notebook, log_callback=self._on_log_message)
+        self.tabs.append(draft_tab)
+        self._add_tooltip(2, "手动粘贴 JSON 生成草稿（旧版）")
 
         self.logger.info(f"已创建 {len(self.tabs)} 个标签页")
 
