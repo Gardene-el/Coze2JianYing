@@ -13,6 +13,7 @@ import threading
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
 from app.utils.logger import get_logger
+from app.utils.draft_folder_manager import DraftFolderManager, DraftFolderWidget
 
 
 class DraftGeneratorTab(BaseTab):
@@ -34,8 +35,8 @@ class DraftGeneratorTab(BaseTab):
         # 初始化草稿生成器（标签页特定）
         self.draft_generator = DraftGenerator()
         
-        # 输出文件夹路径（标签页特定）
-        self.output_folder = None
+        # 使用共享的草稿文件夹管理器
+        self.folder_manager = DraftFolderManager()
         
         # 后台线程相关（标签页特定）
         self.generation_thread = None
@@ -46,26 +47,12 @@ class DraftGeneratorTab(BaseTab):
     
     def _create_widgets(self):
         """创建UI组件"""
-        # 输出文件夹选择区域
-        self.folder_frame = ttk.LabelFrame(self.frame, text="输出设置", padding="5")
-        
-        self.folder_label = ttk.Label(self.folder_frame, text="剪映草稿文件夹:")
-        self.folder_var = tk.StringVar(value="未选择（将使用默认路径）")
-        self.folder_entry = ttk.Entry(
-            self.folder_frame, 
-            textvariable=self.folder_var, 
-            state="readonly", 
-            width=50
-        )
-        self.folder_btn = ttk.Button(
-            self.folder_frame,
-            text="选择文件夹...",
-            command=self._select_output_folder
-        )
-        self.auto_detect_btn = ttk.Button(
-            self.folder_frame,
-            text="自动检测",
-            command=self._auto_detect_folder
+        # 使用共享的草稿文件夹组件
+        self.folder_widget = DraftFolderWidget(
+            parent=self.frame,
+            manager=self.folder_manager,
+            on_folder_changed=self._on_folder_changed,
+            on_transfer_changed=self._on_transfer_changed
         )
         
         # 输入区域
@@ -106,12 +93,7 @@ class DraftGeneratorTab(BaseTab):
     def _setup_layout(self):
         """设置布局"""
         # 文件夹选择区域
-        self.folder_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        self.folder_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        self.folder_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
-        self.folder_btn.grid(row=0, column=2, padx=(0, 5))
-        self.auto_detect_btn.grid(row=0, column=3)
-        self.folder_frame.columnconfigure(1, weight=1)
+        self.folder_widget.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
         # 输入区域
         self.input_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 5))
@@ -125,40 +107,14 @@ class DraftGeneratorTab(BaseTab):
         # 状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
     
-    def _select_output_folder(self):
-        """选择输出文件夹"""
-        # 设置初始目录
-        initial_dir = self.output_folder if self.output_folder else os.path.expanduser("~")
-        
-        folder = filedialog.askdirectory(
-            title="选择剪映草稿文件夹",
-            initialdir=initial_dir
-        )
-        
-        if folder:
-            self.output_folder = folder
-            self.folder_var.set(folder)
-            self.logger.info(f"已选择输出文件夹: {folder}")
-            self.status_var.set(f"输出文件夹: {folder}")
+    def _on_folder_changed(self, folder: str):
+        """文件夹路径改变回调"""
+        self.status_var.set(f"输出文件夹: {folder}")
     
-    def _auto_detect_folder(self):
-        """自动检测剪映草稿文件夹"""
-        self.logger.info("尝试自动检测剪映草稿文件夹...")
-        
-        detected_path = self.draft_generator.detect_default_draft_folder()
-        
-        if detected_path:
-            self.output_folder = detected_path
-            self.folder_var.set(detected_path)
-            self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
-            self.status_var.set(f"已检测到: {detected_path}")
-            messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
-        else:
-            self.logger.warning("未能检测到剪映草稿文件夹")
-            messagebox.showwarning(
-                "检测失败",
-                "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。"
-            )
+    def _on_transfer_changed(self, enabled: bool):
+        """传输选项改变回调"""
+        status = "启用" if enabled else "禁用"
+        self.logger.info(f"传输草稿到文件夹: {status}")
     
     def _generate_draft(self):
         """生成草稿"""
@@ -174,25 +130,24 @@ class DraftGeneratorTab(BaseTab):
             return
         
         # 确定输出文件夹
-        output_folder = self.output_folder
-        if output_folder is None:
-            # 尝试自动检测
-            output_folder = self.draft_generator.detect_default_draft_folder()
-            if output_folder is None:
-                messagebox.showerror(
-                    "错误",
-                    "未指定输出文件夹，且无法自动检测到剪映草稿文件夹。\n\n请点击「选择文件夹...」或「自动检测」按钮指定输出位置。"
-                )
-                return
-            self.logger.info(f"自动检测到输出文件夹: {output_folder}")
+        # 如果未启用传输，使用临时目录（由DraftGenerator默认提供）
+        from app.config import get_config
+        config = get_config()
+        fallback_folder = config.drafts_dir
         
-        # 验证文件夹是否存在
-        if not os.path.exists(output_folder):
-            messagebox.showerror("错误", f"指定的文件夹不存在:\n{output_folder}\n\n请重新选择有效的文件夹。")
+        output_folder = self.folder_manager.get_output_folder(fallback_folder)
+        
+        if output_folder is None:
+            messagebox.showerror(
+                "错误",
+                "未指定输出文件夹，且无法自动检测到剪映草稿文件夹。\n\n请勾选「传输草稿到指定文件夹」并点击「选择文件夹...」或「自动检测」按钮指定输出位置。"
+            )
             return
         
-        if not os.path.isdir(output_folder):
-            messagebox.showerror("错误", f"指定的路径不是文件夹:\n{output_folder}\n\n请选择一个文件夹。")
+        # 验证文件夹
+        is_valid, error_msg = self.folder_manager.validate_folder(output_folder)
+        if not is_valid:
+            messagebox.showerror("错误", f"{error_msg}\n\n请重新选择有效的文件夹。")
             return
         
         self.logger.info("开始生成草稿")
@@ -262,6 +217,6 @@ class DraftGeneratorTab(BaseTab):
         """清理标签页资源"""
         super().cleanup()
         # 清理标签页特定的资源
-        self.output_folder = None
+        self.folder_manager = None
         self.draft_generator = None
         self.generation_thread = None

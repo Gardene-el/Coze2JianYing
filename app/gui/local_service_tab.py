@@ -20,6 +20,7 @@ import atexit
 
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
+from app.utils.draft_folder_manager import DraftFolderManager, DraftFolderWidget
 
 # Coze API 相关导入
 try:
@@ -51,8 +52,8 @@ class LocalServiceTab(BaseTab):
         # 初始化草稿生成器（用于检测文件夹）
         self.draft_generator = DraftGenerator()
 
-        # 输出文件夹路径
-        self.output_folder = None
+        # 使用共享的草稿文件夹管理器
+        self.folder_manager = DraftFolderManager()
 
         # Coze API 配置（端插件必需）
         self.coze_api_token = None
@@ -74,14 +75,13 @@ class LocalServiceTab(BaseTab):
             foreground="blue"
         )
         
-        # 草稿文件夹选择区域
-        self.folder_frame = ttk.LabelFrame(self.frame, text="草稿文件夹设置", padding="5")
-
-        self.folder_label = ttk.Label(self.folder_frame, text="剪映草稿文件夹:")
-        self.folder_var = tk.StringVar(value="未选择（将使用默认路径）")
-        self.folder_entry = ttk.Entry(self.folder_frame, textvariable=self.folder_var, state="readonly", width=50)
-        self.folder_btn = ttk.Button(self.folder_frame, text="选择文件夹...", command=self._select_output_folder)
-        self.auto_detect_btn = ttk.Button(self.folder_frame, text="自动检测", command=self._auto_detect_folder)
+        # 使用共享的草稿文件夹组件
+        self.folder_widget = DraftFolderWidget(
+            parent=self.frame,
+            manager=self.folder_manager,
+            on_folder_changed=self._on_folder_changed,
+            on_transfer_changed=self._on_transfer_changed
+        )
 
         # Coze API 配置区域（端插件必需）
         self.coze_frame = ttk.LabelFrame(self.frame, text="Coze API 配置（端插件必需）", padding="5")
@@ -160,12 +160,7 @@ class LocalServiceTab(BaseTab):
         self.info_label.pack(fill=tk.X)
         
         # 草稿文件夹选择区域
-        self.folder_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        self.folder_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        self.folder_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
-        self.folder_btn.grid(row=0, column=2, padx=(0, 5))
-        self.auto_detect_btn.grid(row=0, column=3)
-        self.folder_frame.columnconfigure(1, weight=1)
+        self.folder_widget.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
         # Coze API 配置区域
         self.coze_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
@@ -196,34 +191,14 @@ class LocalServiceTab(BaseTab):
         # 底部状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
 
-    def _select_output_folder(self):
-        """选择输出文件夹"""
-        # 设置初始目录
-        initial_dir = self.output_folder if self.output_folder else os.path.expanduser("~")
-
-        folder = filedialog.askdirectory(title="选择剪映草稿文件夹", initialdir=initial_dir)
-
-        if folder:
-            self.output_folder = folder
-            self.folder_var.set(folder)
-            self.logger.info(f"已选择输出文件夹: {folder}")
-            self.status_var.set(f"输出文件夹: {folder}")
-
-    def _auto_detect_folder(self):
-        """自动检测剪映草稿文件夹"""
-        self.logger.info("尝试自动检测剪映草稿文件夹...")
-
-        detected_path = self.draft_generator.detect_default_draft_folder()
-
-        if detected_path:
-            self.output_folder = detected_path
-            self.folder_var.set(detected_path)
-            self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
-            self.status_var.set(f"已检测到: {detected_path}")
-            messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
-        else:
-            self.logger.warning("未能检测到剪映草稿文件夹")
-            messagebox.showwarning("检测失败", "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。")
+    def _on_folder_changed(self, folder: str):
+        """文件夹路径改变回调"""
+        self.status_var.set(f"输出文件夹: {folder}")
+    
+    def _on_transfer_changed(self, enabled: bool):
+        """传输选项改变回调"""
+        status = "启用" if enabled else "禁用"
+        self.logger.info(f"传输草稿到文件夹: {status}")
 
     def _toggle_token_visibility(self):
         """切换 API Token 的显示/隐藏"""
@@ -314,7 +289,7 @@ class LocalServiceTab(BaseTab):
         """清理标签页资源"""
         super().cleanup()
         # 清理标签页特定的资源
-        self.output_folder = None
+        self.folder_manager = None
         self.draft_generator = None
         
         # 清理 Coze API 相关资源
