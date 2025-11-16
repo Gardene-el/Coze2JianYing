@@ -10,8 +10,6 @@ from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.draft_generator_tab import DraftGeneratorTab
-from app.gui.example_tab import ExampleTab
-from app.gui.local_service_tab import LocalServiceTab
 from app.gui.log_window import LogWindow
 from app.gui.script_executor_tab import ScriptExecutorTab
 from app.utils.logger import get_logger, set_gui_log_callback
@@ -54,13 +52,11 @@ class MainWindow:
         # 文件菜单
         file_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="文件", menu=file_menu)
+        file_menu.add_command(label="打开数据文件夹", command=self._open_data_folder)
+        file_menu.add_command(label="清空数据文件", command=self._clear_data_files)
+        file_menu.add_command(label="清空缓存", command=self._clear_cache)
+        file_menu.add_separator()
         file_menu.add_command(label="退出", command=self._on_closing)
-
-        # 查看菜单
-        view_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="查看", menu=view_menu)
-        view_menu.add_command(label="切换日志面板", command=self._toggle_log_panel)
-        view_menu.add_command(label="日志窗口（独立）", command=self._show_log_window)
 
         # 帮助菜单
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -186,28 +182,13 @@ class MainWindow:
 
     def _create_tabs(self):
         """创建所有标签页"""
-        # 创建手动草稿生成器标签页（原有功能）
-        draft_tab = DraftGeneratorTab(self.notebook, log_callback=self._on_log_message)
-        self.tabs.append(draft_tab)
-        self._add_tooltip(0, "手动粘贴 JSON 生成草稿")
-
         # 创建云端服务标签页（基于已有服务的云侧插件）
         cloud_service_tab = CloudServiceTab(
             self.notebook, log_callback=self._on_log_message
         )
         self.tabs.append(cloud_service_tab)
         self._add_tooltip(
-            1, "启动 FastAPI 服务，配置为 Coze 云侧插件\n无需 cozepy SDK 或 Coze Token"
-        )
-
-        # 创建本地服务标签页（端插件）
-        local_service_tab = LocalServiceTab(
-            self.notebook, log_callback=self._on_log_message
-        )
-        self.tabs.append(local_service_tab)
-        self._add_tooltip(
-            2,
-            "使用 cozepy SDK 监听 Coze Workflow 事件\n需要配置 Coze Token 和 Workflow ID",
+            0, "启动 FastAPI 服务，配置为 Coze 云侧插件\n无需 cozepy SDK 或 Coze Token"
         )
 
         # 创建脚本执行标签页（方案三：脚本生成执行）
@@ -215,12 +196,12 @@ class MainWindow:
             self.notebook, log_callback=self._on_log_message
         )
         self.tabs.append(script_executor_tab)
-        self._add_tooltip(3, "执行从Coze导出的Python脚本生成草稿")
+        self._add_tooltip(1, "执行从Coze导出的Python脚本生成草稿")
 
-        # 创建示例标签页（演示扩展性）
-        example_tab = ExampleTab(self.notebook)
-        self.tabs.append(example_tab)
-        self._add_tooltip(4, "示例标签页")
+        # 创建手动草稿生成器标签页（原有功能 - 旧版）
+        draft_tab = DraftGeneratorTab(self.notebook, log_callback=self._on_log_message)
+        self.tabs.append(draft_tab)
+        self._add_tooltip(2, "手动粘贴 JSON 生成草稿（旧版）")
 
         self.logger.info(f"已创建 {len(self.tabs)} 个标签页")
 
@@ -422,6 +403,95 @@ class MainWindow:
 
 © 2025 版权所有"""
         messagebox.showinfo("关于", about_text)
+    
+    def _open_data_folder(self):
+        """打开数据文件夹"""
+        import subprocess
+        from app.config import get_config
+        
+        try:
+            config = get_config()
+            data_root = config.data_root
+            
+            if not os.path.exists(data_root):
+                messagebox.showwarning("警告", f"数据文件夹不存在:\n{data_root}")
+                return
+            
+            # 在 Windows 中打开文件夹
+            if os.name == 'nt':
+                os.startfile(data_root)
+            else:
+                # 非 Windows 系统使用 xdg-open 或 open
+                try:
+                    subprocess.run(['xdg-open', data_root], check=True)
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    try:
+                        subprocess.run(['open', data_root], check=True)
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        messagebox.showerror("错误", f"无法打开文件夹:\n{data_root}\n请手动打开。")
+            
+            self.logger.info(f"打开数据文件夹: {data_root}")
+        except Exception as e:
+            self.logger.error(f"打开数据文件夹失败: {e}", exc_info=True)
+            messagebox.showerror("错误", f"打开数据文件夹失败:\n{e}")
+    
+    def _clear_data_files(self):
+        """清空数据文件"""
+        from app.config import get_config
+        
+        if not messagebox.askyesno(
+            "确认清空", 
+            "确定要清空所有数据文件吗？\n\n这将删除所有草稿配置和片段数据。\n此操作不可恢复！",
+            icon='warning'
+        ):
+            return
+        
+        try:
+            config = get_config()
+            drafts_dir = config.drafts_dir
+            
+            if os.path.exists(drafts_dir):
+                import shutil
+                # 删除并重建目录
+                shutil.rmtree(drafts_dir)
+                os.makedirs(drafts_dir, exist_ok=True)
+                self.logger.info(f"已清空数据文件: {drafts_dir}")
+                messagebox.showinfo("成功", f"数据文件已清空！\n\n文件夹: {drafts_dir}")
+            else:
+                self.logger.warning(f"数据文件夹不存在: {drafts_dir}")
+                messagebox.showinfo("提示", "数据文件夹不存在，无需清空。")
+        except Exception as e:
+            self.logger.error(f"清空数据文件失败: {e}", exc_info=True)
+            messagebox.showerror("错误", f"清空数据文件失败:\n{e}")
+    
+    def _clear_cache(self):
+        """清空缓存"""
+        from app.config import get_config
+        
+        if not messagebox.askyesno(
+            "确认清空", 
+            "确定要清空缓存文件吗？\n\n这将删除缓存目录中的临时文件。\n此操作不可恢复！",
+            icon='warning'
+        ):
+            return
+        
+        try:
+            config = get_config()
+            cache_dir = config.cache_dir
+            
+            # 清空 cache 目录
+            if os.path.exists(cache_dir):
+                import shutil
+                shutil.rmtree(cache_dir)
+                os.makedirs(cache_dir, exist_ok=True)
+                self.logger.info(f"已清空缓存: {cache_dir}")
+                messagebox.showinfo("成功", f"缓存已清空！\n\n缓存目录: {cache_dir}")
+            else:
+                self.logger.warning(f"缓存目录不存在: {cache_dir}")
+                messagebox.showinfo("提示", "缓存目录不存在，无需清空。")
+        except Exception as e:
+            self.logger.error(f"清空缓存失败: {e}", exc_info=True)
+            messagebox.showerror("错误", f"清空缓存失败:\n{e}")
 
     def _on_log_message(self, message: str):
         """处理日志消息（线程安全）"""
