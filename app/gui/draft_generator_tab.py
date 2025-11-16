@@ -13,7 +13,7 @@ import threading
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
 from app.utils.logger import get_logger
-from app.utils.draft_folder_manager import DraftFolderManager, DraftFolderWidget
+from app.utils.storage_settings import get_storage_settings
 
 
 class DraftGeneratorTab(BaseTab):
@@ -35,25 +35,27 @@ class DraftGeneratorTab(BaseTab):
         # 初始化草稿生成器（标签页特定）
         self.draft_generator = DraftGenerator()
         
-        # 使用共享的草稿文件夹管理器
-        self.folder_manager = DraftFolderManager()
+        # 使用全局存储设置
+        self.storage_settings = get_storage_settings()
         
         # 后台线程相关（标签页特定）
         self.generation_thread = None
         self.is_generating = False
         
         # 调用父类初始化
-        super().__init__(parent, "手动草稿生成（旧版）")
+        super().__init__(parent, "手动草稿生成")
     
     def _create_widgets(self):
         """创建UI组件"""
-        # 使用共享的草稿文件夹组件
-        self.folder_widget = DraftFolderWidget(
-            parent=self.frame,
-            manager=self.folder_manager,
-            on_folder_changed=self._on_folder_changed,
-            on_transfer_changed=self._on_transfer_changed
+        # 说明标签（提示使用全局设置）
+        self.info_frame = ttk.Frame(self.frame)
+        info_label = ttk.Label(
+            self.info_frame,
+            text="💡 提示：请在窗口顶部的「全局草稿存储设置」中配置文件夹路径",
+            foreground="blue",
+            font=("Arial", 9)
         )
+        info_label.pack(fill=tk.X)
         
         # 输入区域
         self.input_label = ttk.Label(self.frame, text="输入内容:")
@@ -92,8 +94,8 @@ class DraftGeneratorTab(BaseTab):
     
     def _setup_layout(self):
         """设置布局"""
-        # 文件夹选择区域
-        self.folder_widget.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        # 提示信息
+        self.info_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
         # 输入区域
         self.input_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 5))
@@ -106,15 +108,6 @@ class DraftGeneratorTab(BaseTab):
         
         # 状态栏
         self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
-    
-    def _on_folder_changed(self, folder: str):
-        """文件夹路径改变回调"""
-        self.status_var.set(f"输出文件夹: {folder}")
-    
-    def _on_transfer_changed(self, enabled: bool):
-        """传输选项改变回调"""
-        status = "启用" if enabled else "禁用"
-        self.logger.info(f"传输草稿到文件夹: {status}")
     
     def _generate_draft(self):
         """生成草稿"""
@@ -129,23 +122,22 @@ class DraftGeneratorTab(BaseTab):
             messagebox.showwarning("警告", "请输入内容！")
             return
         
-        # 确定输出文件夹
-        # 如果未启用传输，使用临时目录（由DraftGenerator默认提供）
+        # 从全局设置获取输出文件夹
         from app.config import get_config
         config = get_config()
         fallback_folder = config.drafts_dir
         
-        output_folder = self.folder_manager.get_output_folder(fallback_folder)
+        output_folder = self.storage_settings.get_output_folder(fallback_folder)
         
         if output_folder is None:
             messagebox.showerror(
                 "错误",
-                "未指定输出文件夹，且无法自动检测到剪映草稿文件夹。\n\n请勾选「传输草稿到指定文件夹」并点击「选择文件夹...」或「自动检测」按钮指定输出位置。"
+                "未指定输出文件夹，且无法自动检测到剪映草稿文件夹。\n\n请在窗口顶部勾选「传输草稿到指定文件夹」并选择或检测文件夹。"
             )
             return
         
         # 验证文件夹
-        is_valid, error_msg = self.folder_manager.validate_folder(output_folder)
+        is_valid, error_msg = self.storage_settings.validate_folder(output_folder)
         if not is_valid:
             messagebox.showerror("错误", f"{error_msg}\n\n请重新选择有效的文件夹。")
             return
@@ -156,7 +148,7 @@ class DraftGeneratorTab(BaseTab):
         self.is_generating = True
         
         # 确定是否使用本地存储：如果未启用传输，则使用本地存储模式
-        use_local_storage = not self.folder_manager.enable_transfer
+        use_local_storage = self.storage_settings.get_use_local_storage()
         
         # 在后台线程中生成草稿
         self.generation_thread = threading.Thread(
@@ -220,6 +212,5 @@ class DraftGeneratorTab(BaseTab):
         """清理标签页资源"""
         super().cleanup()
         # 清理标签页特定的资源
-        self.folder_manager = None
         self.draft_generator = None
         self.generation_thread = None

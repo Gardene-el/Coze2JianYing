@@ -12,6 +12,7 @@ from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.draft_generator_tab import DraftGeneratorTab
 from app.gui.log_window import LogWindow
 from app.gui.script_executor_tab import ScriptExecutorTab
+from app.gui.global_folder_selector import GlobalFolderSelector
 from app.utils.logger import get_logger, set_gui_log_callback
 
 
@@ -87,15 +88,22 @@ class MainWindow:
         )
         self.top_canvas.configure(yscrollcommand=self.top_scrollbar.set)
 
-        # 创建容器框架用于放置Notebook
+        # 创建容器框架用于放置全局设置和Notebook
         self.notebook_container = ttk.Frame(self.top_canvas)
         self.canvas_window = self.top_canvas.create_window(
             (0, 0), window=self.notebook_container, anchor=tk.NW
         )
+        
+        # 创建全局文件夹选择器（在标签页上方）
+        self.global_folder_selector = GlobalFolderSelector(
+            self.notebook_container,
+            on_settings_changed=self._on_global_settings_changed
+        )
+        self.global_folder_selector.pack(fill=tk.X, padx=10, pady=(10, 5))
 
         # 创建Notebook（标签页容器）
         self.notebook = ttk.Notebook(self.notebook_container)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=(5, 10))
 
         # 绑定Canvas大小变化事件
         self.notebook_container.bind(
@@ -179,6 +187,11 @@ class MainWindow:
                     self.top_canvas.yview_scroll(-1, "units")
                 elif event.num == 5:
                     self.top_canvas.yview_scroll(1, "units")
+    
+    def _on_global_settings_changed(self):
+        """全局存储设置改变时的回调"""
+        self.logger.info("全局存储设置已更新")
+        # 标签页会自动从全局设置读取，无需额外操作
 
     def _create_tabs(self):
         """创建所有标签页"""
