@@ -147,9 +147,6 @@ class FolderCreator:
 
     def generate_readme(self, endpoint: APIEndpointInfo) -> str:
         """生成 README.md 内容"""
-        # 将 Windows 路径的反斜杠替换为正斜杠，避免显示问题
-        source_file_path = str(endpoint.source_file).replace("\\", "/")
-        
         # 解析 pyJianYingDraft docstring
         doc_info = self._parse_pyjianying_docstring(endpoint.docstring)
         
@@ -167,18 +164,7 @@ class FolderCreator:
 ## 工具介绍
 此工具对应 FastAPI 端点: `{endpoint.path}`
 
-源文件: `{source_file_path}`
-
-### 对应 pyJianYingDraft 注释
-
-**Description:**
 {doc_info['description']}
-
-**Args:**
-{self._format_pyjianying_args(doc_info['args'])}
-
-**Raises:**
-{self._format_pyjianying_raises(doc_info['raises'])}
 
 ## 输入参数
 
@@ -201,29 +187,6 @@ class FolderCreator:
 - API 调用记录保存在 `/tmp/coze2jianying.py`
 - UUID 用于关联和追踪不同的对象实例
 """
-    
-    def _format_pyjianying_args(self, args: List[Dict[str, Any]]) -> str:
-        """格式化 pyJianYingDraft Args 部分"""
-        if not args:
-            return "没有提供详细文档注释"
-        
-        lines = []
-        for arg in args:
-            optional_text = ", optional" if not arg["required"] else ""
-            lines.append(f"- `{arg['name']}` (`{arg['type']}`{optional_text}): {arg['description']}")
-        
-        return "\n".join(lines)
-    
-    def _format_pyjianying_raises(self, raises: List[Dict[str, Any]]) -> str:
-        """格式化 pyJianYingDraft Raises 部分"""
-        if not raises:
-            return "没有提供详细文档注释"
-        
-        lines = []
-        for exc in raises:
-            lines.append(f"- `{exc['type']}`: {exc['description']}")
-        
-        return "\n".join(lines)
     
     def _format_input_parameters(self, endpoint: APIEndpointInfo, doc_info: Dict[str, Any]) -> str:
         """格式化输入参数表格"""
@@ -276,14 +239,10 @@ class FolderCreator:
         is_create_function = "create" in endpoint.func_name.lower()
         
         if not is_create_function:
-            # 非 create 函数，显示基本的成功/失败信息
-            lines = ["| 参数名称 | 参数描述 | 参数类型 | 是否必填 |",
-                    "|---------|---------|---------|---------|",
-                    "| success | 操作是否成功 | bool | 是 |",
-                    "| message | 返回消息 | str | 是 |"]
-            return "\n".join(lines)
+            # 非 create 函数，不显示输出参数
+            return "无输出参数"
         
-        # create 函数，返回对应的 ID
+        # create 函数，只返回对应的 ID
         lines = ["| 参数名称 | 参数描述 | 参数类型 | 是否必填 |",
                 "|---------|---------|---------|---------|"]
         
@@ -292,8 +251,5 @@ class FolderCreator:
             lines.append("| draft_id | 返回创建的草稿ID | str | 是 |")
         else:
             lines.append("| segment_id | 返回创建的片段ID | str | 是 |")
-        
-        lines.append("| success | 操作是否成功 | bool | 是 |")
-        lines.append("| message | 返回消息 | str | 是 |")
         
         return "\n".join(lines)

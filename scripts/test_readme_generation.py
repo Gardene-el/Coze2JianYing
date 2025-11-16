@@ -136,9 +136,11 @@ def test_readme_format():
     # 验证关键部分
     assert "## 工具名称" in readme
     assert "## 工具介绍" in readme
-    assert "**Description:**" in readme
-    assert "**Args:**" in readme
-    assert "**Raises:**" in readme
+    # Description 标签已移除，但描述内容应该存在
+    assert "测试片段创建功能" in readme
+    # Args 和 Raises 标签已移除
+    assert "**Args:**" not in readme
+    assert "**Raises:**" not in readme
     assert "## 输入参数" in readme
     assert "## 输出参数" in readme
     assert "| 参数名称 | 参数描述 | 参数类型 | 是否必填 |" in readme
