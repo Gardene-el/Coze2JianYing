@@ -157,5 +157,5 @@ type = "github"
 ignore_token_for_push = false
 
 [tool.semantic_release.publish]
-dist_glob_patterns = ["dist/*.exe"]
+dist_glob_patterns = ["dist/*.exe", "dist/*.zip"]
 upload_to_vcs_release = true
