@@ -38,11 +38,21 @@ segment_manager = get_segment_manager()
 )
 async def create_draft(request: CreateDraftRequest):
     """
-    创建新的剪映草稿
-    
     对应 pyJianYingDraft 代码：
     ```python
     script = draft_folder.create_draft("demo", 1920, 1080, allow_replace=True)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            draft_name (`str`): 草稿名称, 即相应文件夹名称
+            width (`int`): 视频宽度, 单位为像素
+            height (`int`): 视频高度, 单位为像素
+            fps (`int`, optional): 视频帧率. 默认为30.
+            allow_replace (`bool`, optional): 是否允许覆盖与`draft_name`重名的草稿. 默认为否.
+
+        Raises:
+            `FileExistsError`: 已存在与`draft_name`重名的草稿, 但不允许覆盖.
     ```
     """
     logger.info("=" * 60)
@@ -93,11 +103,22 @@ async def create_draft(request: CreateDraftRequest):
 )
 async def add_track(draft_id: str, request: AddTrackRequest):
     """
-    添加轨道
-    
     对应 pyJianYingDraft 代码：
     ```python
     script.add_track(draft.TrackType.audio)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            track_type (TrackType): 轨道类型
+            track_name (str, optional): 轨道名称. 仅在创建第一个同类型轨道时允许不指定.
+            mute (bool, optional): 轨道是否静音. 默认不静音.
+            relative_index (int, optional): 相对(同类型轨道的)图层位置, 越高越接近前景. 默认为0.
+            absolute_index (int, optional): 绝对图层位置, 越高越接近前景. 此参数将直接覆盖相应片段的`render_index`属性, 供有经验的用户使用.
+                此参数不能与`relative_index`同时使用.
+
+        Raises:
+            `NameError`: 已存在同类型轨道且未指定名称, 或已存在同名轨道
     ```
     """
     logger.info("=" * 60)
@@ -165,11 +186,20 @@ async def add_track(draft_id: str, request: AddTrackRequest):
 )
 async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
     """
-    添加片段到草稿
-    
     对应 pyJianYingDraft 代码：
     ```python
     script.add_segment(audio_segment)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            segment (`VideoSegment`, `StickerSegment`, `AudioSegment`, or `TextSegment`): 要添加的片段
+            track_name (`str`, optional): 添加到的轨道名称. 当此类型的轨道仅有一条时可省略.
+
+        Raises:
+            `NameError`: 未找到指定名称的轨道, 或必须提供`track_name`参数时未提供
+            `TypeError`: 片段类型不匹配轨道类型
+            `SegmentOverlap`: 新片段与已有片段重叠
     ```
     """
     logger.info("=" * 60)
@@ -294,11 +324,23 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
 )
 async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest):
     """
-    添加全局特效
-    
     对应 pyJianYingDraft 代码：
     ```python
     script.add_effect(VideoSceneEffectType.XXX, timerange, params)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            effect (`VideoSceneEffectType` or `VideoCharacterEffectType`): 特效类型
+            t_range (`Timerange`): 特效片段的时间范围
+            track_name (`str`, optional): 添加到的轨道名称. 当特效轨道仅有一条时可省略.
+            params (`List[Optional[float]]`, optional): 特效参数列表, 参数列表中未提供或为None的项使用默认值.
+                参数取值范围(0~100)与剪映中一致. 某个特效类型有何参数以及具体参数顺序以枚举类成员的annotation为准.
+
+        Raises:
+            `NameError`: 未找到指定名称的轨道, 或必须提供`track_name`参数时未提供
+            `TypeError`: 指定的轨道不是特效轨道
+            `ValueError`: 新片段与已有片段重叠、提供的参数数量超过了该特效类型的参数数量, 或参数值超出范围.
     ```
     """
     logger.info(f"为草稿 {draft_id} 添加全局特效: {request.effect_type}")
@@ -365,11 +407,22 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest):
 )
 async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest):
     """
-    添加全局滤镜
-    
     对应 pyJianYingDraft 代码：
     ```python
     script.add_filter(FilterType.XXX, timerange, intensity)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            filter_meta (`FilterType`): 滤镜类型
+            t_range (`Timerange`): 滤镜片段的时间范围
+            track_name (`str`, optional): 添加到的轨道名称. 当滤镜轨道仅有一条时可省略.
+            intensity (`float`, optional): 滤镜强度(0-100). 仅当所选滤镜能够调节强度时有效. 默认为100.
+
+        Raises:
+            `NameError`: 未找到指定名称的轨道, 或必须提供`track_name`参数时未提供
+            `TypeError`: 指定的轨道不是滤镜轨道
+            `ValueError`: 新片段与已有片段重叠
     ```
     """
     logger.info(f"为草稿 {draft_id} 添加全局滤镜: {request.filter_type}")
@@ -436,11 +489,14 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest):
 )
 async def save_draft(draft_id: str):
     """
-    保存草稿
-    
     对应 pyJianYingDraft 代码：
     ```python
     script.save()
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Raises:
+            `ValueError`: 没有设置保存路径
     ```
     
     实际实现: 将 DraftStateManager 和 SegmentManager 的数据转换为 pyJianYingDraft 调用并保存

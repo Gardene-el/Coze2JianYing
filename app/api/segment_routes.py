@@ -46,8 +46,6 @@ segment_manager = get_segment_manager()
 )
 async def create_audio_segment(request: CreateAudioSegmentRequest):
     """
-    创建音频片段
-    
     对应 pyJianYingDraft 代码：
     ```python
     audio_segment = draft.AudioSegment(
@@ -55,6 +53,19 @@ async def create_audio_segment(request: CreateAudioSegmentRequest):
         trange("0s", "5s"),
         volume=0.6
     )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            material (`AudioMaterial` or `str`): 素材实例或素材路径, 若为路径则自动构造素材实例
+            target_timerange (`Timerange`): 片段在轨道上的目标时间范围
+            source_timerange (`Timerange`, optional): 截取的素材片段的时间范围, 默认从开头根据`speed`截取与`target_timerange`等长的一部分
+            speed (`float`, optional): 播放速度, 默认为1.0. 此项与`source_timerange`同时指定时, 将覆盖`target_timerange`中的时长
+            volume (`float`, optional): 音量, 默认为1.0
+            change_pitch (`bool`, optional): 是否跟随变速改变音调, 默认为否
+
+        Raises:
+            `ValueError`: 指定的或计算出的`source_timerange`超出了素材的时长范围
     ```
     """
     logger.info("=" * 60)
@@ -103,14 +114,26 @@ async def create_audio_segment(request: CreateAudioSegmentRequest):
 )
 async def create_video_segment(request: CreateVideoSegmentRequest):
     """
-    创建视频片段
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment = draft.VideoSegment(
         VideoMaterial("video.mp4"),
         trange("0s", "5s")
     )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            material (`VideoMaterial` or `str`): 素材实例或素材路径, 若为路径则自动构造素材实例(此时不能指定`cropSettings`参数)
+            target_timerange (`Timerange`): 片段在轨道上的目标时间范围
+            source_timerange (`Timerange`, optional): 截取的素材片段的时间范围, 默认从开头根据`speed`截取与`target_timerange`等长的一部分
+            speed (`float`, optional): 播放速度, 默认为1.0. 此项与`source_timerange`同时指定时, 将覆盖`target_timerange`中的时长
+            volume (`float`, optional): 音量, 默认为1.0
+            change_pitch (`bool`, optional): 是否跟随变速改变音调, 默认为否
+            clip_settings (`ClipSettings`, optional): 图像调节设置, 默认不作任何变换
+
+        Raises:
+            `ValueError`: 指定的或计算出的`source_timerange`超出了素材的时长范围
     ```
     """
     logger.info("=" * 60)
@@ -159,14 +182,24 @@ async def create_video_segment(request: CreateVideoSegmentRequest):
 )
 async def create_text_segment(request: CreateTextSegmentRequest):
     """
-    创建文本片段
-    
     对应 pyJianYingDraft 代码：
     ```python
     text_segment = draft.TextSegment(
         "Hello World",
         trange("0s", "3s")
     )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            text (`str`): 文本内容
+            timerange (`Timerange`): 片段在轨道上的时间范围
+            font (`Font_type`, optional): 字体类型, 默认为系统字体
+            style (`TextStyle`, optional): 字体样式, 包含大小/颜色/对齐/透明度等.
+            clip_settings (`ClipSettings`, optional): 图像调节设置, 默认不做任何变换
+            border (`TextBorder`, optional): 文本描边参数, 默认无描边
+            background (`TextBackground`, optional): 文本背景参数, 默认无背景
+            shadow (`TextShadow`, optional): 文本阴影参数, 默认无阴影
     ```
     """
     logger.info("=" * 60)
@@ -215,14 +248,19 @@ async def create_text_segment(request: CreateTextSegmentRequest):
 )
 async def create_sticker_segment(request: CreateStickerSegmentRequest):
     """
-    创建贴纸片段
-    
     对应 pyJianYingDraft 代码：
     ```python
     sticker_segment = draft.StickerSegment(
-        material,
+        resource_id,
         trange("0s", "3s")
     )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            resource_id (`str`): 贴纸resource_id, 可通过`ScriptFile.inspect_material`从模板中获取
+            target_timerange (`Timerange`): 片段在轨道上的目标时间范围
+            clip_settings (`ClipSettings`, optional): 图像调节设置, 默认不作任何变换
     ```
     """
     logger.info("=" * 60)
@@ -271,8 +309,6 @@ async def create_sticker_segment(request: CreateStickerSegmentRequest):
 )
 async def create_effect_segment(request: CreateEffectSegmentRequest):
     """
-    创建特效片段
-    
     对应 pyJianYingDraft 代码：
     ```python
     effect_segment = draft.EffectSegment(
@@ -280,6 +316,10 @@ async def create_effect_segment(request: CreateEffectSegmentRequest):
         trange("0s", "5s"),
         params=[50.0, 75.0]
     )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        EffectSegment 没有提供详细文档注释
     ```
     """
     logger.info("=" * 60)
@@ -328,8 +368,6 @@ async def create_effect_segment(request: CreateEffectSegmentRequest):
 )
 async def create_filter_segment(request: CreateFilterSegmentRequest):
     """
-    创建滤镜片段
-    
     对应 pyJianYingDraft 代码：
     ```python
     filter_segment = draft.FilterSegment(
@@ -337,6 +375,10 @@ async def create_filter_segment(request: CreateFilterSegmentRequest):
         trange("0s", "5s"),
         intensity=100.0
     )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        FilterSegment 没有提供详细文档注释
     ```
     """
     logger.info("=" * 60)
@@ -386,11 +428,19 @@ async def create_filter_segment(request: CreateFilterSegmentRequest):
 )
 async def add_audio_effect(segment_id: str, request: AddEffectRequest):
     """
-    添加音频特效
-    
     对应 pyJianYingDraft 代码：
     ```python
     audio_segment.add_effect(AudioSceneEffectType.XXX, params)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            effect_type (`AudioSceneEffectType` | `ToneEffectType` | `SpeechToSongType`): 音效类型, 一类音效只能添加一个.
+            params (`List[Optional[float]]`, optional): 音效参数列表, 参数列表中未提供或为None的项使用默认值.
+                参数取值范围(0~100)与剪映中一致. 某个特效类型有何参数以及具体参数顺序以枚举类成员的annotation为准.
+
+        Raises:
+            `ValueError`: 试图添加一个已经存在的音效类型、提供的参数数量超过了该音效类型的参数数量, 或参数值超出范围.
     ```
     """
     logger.info(f"为音频片段 {segment_id} 添加特效: {request.effect_type}")
@@ -450,11 +500,18 @@ async def add_audio_effect(segment_id: str, request: AddEffectRequest):
 )
 async def add_audio_fade(segment_id: str, request: AddFadeRequest):
     """
-    添加淡入淡出
-    
     对应 pyJianYingDraft 代码：
     ```python
     audio_segment.add_fade("1s", "0s")
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            in_duration (`int` or `str`): 音频淡入时长, 单位为微秒, 若为字符串则会调用`tim()`函数进行解析
+            out_duration (`int` or `str`): 音频淡出时长, 单位为微秒, 若为字符串则会调用`tim()`函数进行解析
+
+        Raises:
+            `ValueError`: 当前片段已存在淡入淡出效果
     ```
     """
     logger.info(f"为音频片段 {segment_id} 添加淡入淡出")
@@ -509,11 +566,15 @@ async def add_audio_fade(segment_id: str, request: AddFadeRequest):
 )
 async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
     """
-    添加音量关键帧
-    
     对应 pyJianYingDraft 代码：
     ```python
     audio_segment.add_keyframe("2s", 0.8)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            time_offset (`int`): 关键帧的时间偏移量, 单位为微秒
+            volume (`float`): 音量在`time_offset`处的值
     ```
     """
     logger.info(f"为音频片段 {segment_id} 添加关键帧")
@@ -575,11 +636,16 @@ async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
 )
 async def add_video_animation(segment_id: str, request: AddAnimationRequest):
     """
-    添加动画
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_animation(IntroType.XXX, duration="1s")
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            animation_type (`IntroType`, `OutroType`, or `GroupAnimationType`): 动画类型
+            duration (`int` or `str`, optional): 动画持续时间, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
+                若不指定则使用动画类型定义的默认值. 理论上只适用于入场和出场动画.
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加动画: {request.animation_type}")
@@ -639,11 +705,19 @@ async def add_video_animation(segment_id: str, request: AddAnimationRequest):
 )
 async def add_video_effect(segment_id: str, request: AddEffectRequest):
     """
-    添加视频特效
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_effect(VideoSceneEffectType.XXX, params)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            effect_type (`VideoSceneEffectType` or `VideoCharacterEffectType`): 特效类型
+            params (`List[Optional[float]]`, optional): 特效参数列表, 参数列表中未提供或为None的项使用默认值.
+                参数取值范围(0~100)与剪映中一致. 某个特效类型有何参数以及具体参数顺序以枚举类成员的annotation为准.
+
+        Raises:
+            `ValueError`: 提供的参数数量超过了该特效类型的参数数量, 或参数值超出范围.
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加特效: {request.effect_type}")
@@ -703,11 +777,14 @@ async def add_video_effect(segment_id: str, request: AddEffectRequest):
 )
 async def add_video_fade(segment_id: str, request: AddFadeRequest):
     """
-    添加淡入淡出
-    
     对应 pyJianYingDraft 代码：
     ```python
-    video_segment.add_fade("1s", "0s")
+    # VideoSegment 没有 add_fade 方法
+    # 此 API 可能与实际的 pyJianYingDraft 功能不对应
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        VideoSegment 没有 add_fade 方法
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加淡入淡出")
@@ -762,11 +839,15 @@ async def add_video_fade(segment_id: str, request: AddFadeRequest):
 )
 async def add_video_filter(segment_id: str, request: AddFilterRequest):
     """
-    添加滤镜
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_filter(FilterType.XXX, intensity=100.0)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            filter_type (`FilterType`): 滤镜类型
+            intensity (`float`, optional): 滤镜强度(0-100), 仅当所选滤镜能够调节强度时有效. 默认为100.
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加滤镜: {request.filter_type}")
@@ -826,11 +907,25 @@ async def add_video_filter(segment_id: str, request: AddFilterRequest):
 )
 async def add_video_mask(segment_id: str, request: AddMaskRequest):
     """
-    添加蒙版
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_mask(MaskType.XXX, center_x=0.0, center_y=0.0, size=0.5)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            mask_type (`MaskType`): 蒙版类型
+            center_x (`float`, optional): 蒙版中心点X坐标(以素材的像素为单位), 默认设置在素材中心
+            center_y (`float`, optional): 蒙版中心点Y坐标(以素材的像素为单位), 默认设置在素材中心
+            size (`float`, optional): 蒙版的"主要尺寸"(镜面的可视部分高度/圆形直径/爱心高度等), 以占素材高度的比例表示, 默认为0.5
+            rotation (`float`, optional): 蒙版顺时针旋转的**角度**, 默认不旋转
+            feather (`float`, optional): 蒙版的羽化参数, 取值范围0~100, 默认无羽化
+            invert (`bool`, optional): 是否反转蒙版, 默认不反转
+            rect_width (`float`, optional): 矩形蒙版的宽度, 仅在蒙版类型为矩形时允许设置, 以占素材宽度的比例表示, 默认与`size`相同
+            round_corner (`float`, optional): 矩形蒙版的圆角参数, 仅在蒙版类型为矩形时允许设置, 取值范围0~100, 默认为0
+
+        Raises:
+            `ValueError`: 试图添加多个蒙版或不正确地设置了`rect_width`及`round_corner`
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加蒙版: {request.mask_type}")
@@ -890,11 +985,18 @@ async def add_video_mask(segment_id: str, request: AddMaskRequest):
 )
 async def add_video_transition(segment_id: str, request: AddTransitionRequest):
     """
-    添加转场
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_transition(TransitionType.XXX, duration="1s")
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            transition_type (`TransitionType`): 转场类型
+            duration (`int` or `str`, optional): 转场持续时间, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析. 若不指定则使用转场类型定义的默认值.
+
+        Raises:
+            `ValueError`: 试图添加多个转场.
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加转场: {request.transition_type}")
@@ -954,11 +1056,19 @@ async def add_video_transition(segment_id: str, request: AddTransitionRequest):
 )
 async def add_video_background_filling(segment_id: str, request: AddBackgroundFillingRequest):
     """
-    添加背景填充
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_background_filling("blur", blur=0.0625)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            fill_type (`blur` or `color`): 填充类型, `blur`表示模糊, `color`表示颜色.
+            blur (`float`, optional): 模糊程度, 0.0-1.0. 仅在`fill_type`为`blur`时有效. 剪映中的四档模糊数值分别为0.0625, 0.375, 0.75和1.0, 默认为0.0625.
+            color (`str`, optional): 填充颜色, 格式为'#RRGGBBAA'. 仅在`fill_type`为`color`时有效.
+
+        Raises:
+            `ValueError`: 当前片段已有背景填充效果或`fill_type`无效.
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加背景填充: {request.fill_type}")
@@ -1013,11 +1123,19 @@ async def add_video_background_filling(segment_id: str, request: AddBackgroundFi
 )
 async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
     """
-    添加视觉属性关键帧
-    
     对应 pyJianYingDraft 代码：
     ```python
     video_segment.add_keyframe(KeyframeProperty.position_x, "2s", 0.5)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            _property (`KeyframeProperty`): 要控制的属性
+            time_offset (`int` or `str`): 关键帧的时间偏移量, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
+            value (`float`): 属性在`time_offset`处的值
+
+        Raises:
+            `ValueError`: 试图同时设置`uniform_scale`以及`scale_x`或`scale_y`其中一者
     ```
     """
     logger.info(f"为视频片段 {segment_id} 添加关键帧")
@@ -1079,11 +1197,19 @@ async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
 )
 async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
     """
-    添加视觉属性关键帧
-    
     对应 pyJianYingDraft 代码：
     ```python
     sticker_segment.add_keyframe(KeyframeProperty.position_x, "2s", 0.5)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            _property (`KeyframeProperty`): 要控制的属性
+            time_offset (`int` or `str`): 关键帧的时间偏移量, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
+            value (`float`): 属性在`time_offset`处的值
+
+        Raises:
+            `ValueError`: 试图同时设置`uniform_scale`以及`scale_x`或`scale_y`其中一者
     ```
     """
     logger.info(f"为贴纸片段 {segment_id} 添加关键帧")
@@ -1145,11 +1271,16 @@ async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
 )
 async def add_text_animation(segment_id: str, request: AddAnimationRequest):
     """
-    添加文字动画
-    
     对应 pyJianYingDraft 代码：
     ```python
     text_segment.add_animation(TextIntro.XXX, duration="1s")
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            animation_type (`TextIntro`, `TextOutro` or `TextLoopAnim`): 文本动画类型.
+            duration (`str` or `float`, optional): 动画持续时间, 单位为微秒, 仅对入场/出场动画有效.
+                若传入字符串则会调用`tim()`函数进行解析. 默认使用动画的时长
     ```
     """
     logger.info(f"为文本片段 {segment_id} 添加动画: {request.animation_type}")
@@ -1209,11 +1340,15 @@ async def add_text_animation(segment_id: str, request: AddAnimationRequest):
 )
 async def add_text_bubble(segment_id: str, request: AddBubbleRequest):
     """
-    添加气泡
-    
     对应 pyJianYingDraft 代码：
     ```python
     text_segment.add_bubble(effect_id, resource_id)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            effect_id (`str`): 气泡效果的effect_id
+            resource_id (`str`): 气泡效果的resource_id
     ```
     """
     logger.info(f"为文本片段 {segment_id} 添加气泡")
@@ -1273,11 +1408,14 @@ async def add_text_bubble(segment_id: str, request: AddBubbleRequest):
 )
 async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
     """
-    添加花字特效
-    
     对应 pyJianYingDraft 代码：
     ```python
     text_segment.add_effect("7296357486490144036")
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            effect_id (`str`): 花字效果的effect_id, 也同时是其resource_id
     ```
     """
     logger.info(f"为文本片段 {segment_id} 添加花字特效")
@@ -1337,11 +1475,19 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
 )
 async def add_text_keyframe(segment_id: str, request: AddKeyframeRequest):
     """
-    添加视觉属性关键帧
-    
     对应 pyJianYingDraft 代码：
     ```python
     text_segment.add_keyframe(KeyframeProperty.position_x, "2s", 0.5)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        Args:
+            _property (`KeyframeProperty`): 要控制的属性
+            time_offset (`int` or `str`): 关键帧的时间偏移量, 单位为微秒. 若传入字符串则会调用`tim()`函数进行解析.
+            value (`float`): 属性在`time_offset`处的值
+
+        Raises:
+            `ValueError`: 试图同时设置`uniform_scale`以及`scale_x`或`scale_y`其中一者
     ```
     """
     logger.info(f"为文本片段 {segment_id} 添加关键帧")
