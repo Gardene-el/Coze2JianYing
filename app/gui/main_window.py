@@ -470,7 +470,7 @@ class MainWindow:
         
         if not messagebox.askyesno(
             "确认清空", 
-            "确定要清空所有缓存文件吗？\n\n这将删除缓存的素材和临时文件。\n此操作不可恢复！",
+            "确定要清空缓存文件吗？\n\n这将删除缓存目录中的临时文件。\n此操作不可恢复！",
             icon='warning'
         ):
             return
@@ -478,30 +478,17 @@ class MainWindow:
         try:
             config = get_config()
             cache_dir = config.cache_dir
-            assets_dir = config.assets_dir
-            
-            deleted_items = []
             
             # 清空 cache 目录
             if os.path.exists(cache_dir):
                 import shutil
                 shutil.rmtree(cache_dir)
                 os.makedirs(cache_dir, exist_ok=True)
-                deleted_items.append(f"缓存目录: {cache_dir}")
                 self.logger.info(f"已清空缓存: {cache_dir}")
-            
-            # 清空 assets 目录
-            if os.path.exists(assets_dir):
-                import shutil
-                shutil.rmtree(assets_dir)
-                os.makedirs(assets_dir, exist_ok=True)
-                deleted_items.append(f"素材目录: {assets_dir}")
-                self.logger.info(f"已清空素材缓存: {assets_dir}")
-            
-            if deleted_items:
-                messagebox.showinfo("成功", "缓存已清空！\n\n" + "\n".join(deleted_items))
+                messagebox.showinfo("成功", f"缓存已清空！\n\n缓存目录: {cache_dir}")
             else:
-                messagebox.showinfo("提示", "没有缓存需要清空。")
+                self.logger.warning(f"缓存目录不存在: {cache_dir}")
+                messagebox.showinfo("提示", "缓存目录不存在，无需清空。")
         except Exception as e:
             self.logger.error(f"清空缓存失败: {e}", exc_info=True)
             messagebox.showerror("错误", f"清空缓存失败:\n{e}")
