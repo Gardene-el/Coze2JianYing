@@ -43,32 +43,15 @@ class ScriptExecutorTab(BaseTab):
         self.draft_path_manager = get_draft_path_manager()
         
         # 调用父类初始化
-        super().__init__(parent, "脚本执行")
+        super().__init__(parent, "手动草稿生成(新版)")
     
     def _create_widgets(self):
         """创建UI组件"""
-        # 文件操作区域
-        self.file_frame = ttk.LabelFrame(self.frame, text="脚本文件", padding="5")
-        
-        self.file_label = ttk.Label(self.file_frame, text="脚本文件:")
-        self.file_var = tk.StringVar(value="未加载")
-        self.file_entry = ttk.Entry(
-            self.file_frame, 
-            textvariable=self.file_var, 
-            state="readonly", 
-            width=50
-        )
-        self.load_file_btn = ttk.Button(
-            self.file_frame,
-            text="加载文件...",
-            command=self._load_script_file
-        )
-        
         # 输入区域
         self.input_label = ttk.Label(self.frame, text="脚本内容:")
         self.input_text = scrolledtext.ScrolledText(
             self.frame,
-            height=15,
+            height=4,
             wrap=tk.WORD,
             font=("Consolas", 9)
         )
@@ -102,54 +85,22 @@ class ScriptExecutorTab(BaseTab):
         
         # 配置网格权重
         self.frame.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(2, weight=1)
+        self.frame.rowconfigure(1, weight=1)
     
     def _setup_layout(self):
         """设置布局"""
-        # 文件选择区域
-        self.file_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        self.file_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        self.file_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
-        self.load_file_btn.grid(row=0, column=2)
-        self.file_frame.columnconfigure(1, weight=1)
-        
         # 输入区域
-        self.input_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 5))
-        self.input_text.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        self.input_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        self.input_text.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         
         # 按钮区域
-        self.button_frame.grid(row=3, column=0, sticky=tk.W, pady=(0, 10))
+        self.button_frame.grid(row=2, column=0, sticky=tk.W, pady=(0, 10))
         self.execute_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.validate_btn.pack(side=tk.LEFT, padx=(0, 5))
         self.clear_btn.pack(side=tk.LEFT, padx=(0, 5))
         
         # 状态栏
-        self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
-    
-    def _load_script_file(self):
-        """加载脚本文件"""
-        file_path = filedialog.askopenfilename(
-            title="选择脚本文件",
-            filetypes=[
-                ("Python脚本", "*.py"),
-                ("文本文件", "*.txt"),
-                ("所有文件", "*.*")
-            ]
-        )
-        
-        if file_path:
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                self.input_text.delete("1.0", tk.END)
-                self.input_text.insert("1.0", content)
-                self.file_var.set(file_path)
-                self.logger.info(f"已加载脚本文件: {file_path}")
-                self.status_var.set(f"已加载: {Path(file_path).name}")
-            except Exception as e:
-                self.logger.error(f"加载脚本文件失败: {e}", exc_info=True)
-                messagebox.showerror("错误", f"加载文件失败:\n{e}")
+        self.status_bar.grid(row=3, column=0, sticky=(tk.W, tk.E))
     
     def _validate_script(self):
         """验证脚本语法"""
@@ -368,7 +319,6 @@ if __name__ == "__main__":
     def _clear_input(self):
         """清空输入"""
         self.input_text.delete("1.0", tk.END)
-        self.file_var.set("未加载")
         self.logger.info("已清空输入")
         self.status_var.set("已清空")
     

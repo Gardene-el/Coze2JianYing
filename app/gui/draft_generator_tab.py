@@ -51,7 +51,7 @@ class DraftGeneratorTab(BaseTab):
         self.input_label = ttk.Label(self.frame, text="输入内容:")
         self.input_text = scrolledtext.ScrolledText(
             self.frame,
-            height=10,
+            height=3,
             wrap=tk.WORD,
             font=("Arial", 10)
         )
