@@ -13,6 +13,7 @@ from app.gui.draft_generator_tab import DraftGeneratorTab
 from app.gui.log_window import LogWindow
 from app.gui.script_executor_tab import ScriptExecutorTab
 from app.utils.logger import get_logger, set_gui_log_callback
+from app.utils.draft_path_manager import get_draft_path_manager
 
 
 class MainWindow:
@@ -32,6 +33,9 @@ class MainWindow:
 
         # 标签页列表（用于管理所有标签页）
         self.tabs = []
+        
+        # 全局草稿路径管理器
+        self.draft_path_manager = get_draft_path_manager()
 
         # 设置GUI日志回调
         set_gui_log_callback(self._on_log_message)
@@ -63,7 +67,55 @@ class MainWindow:
         menubar.add_cascade(label="帮助", menu=help_menu)
         help_menu.add_command(label="关于", command=self._show_about)
 
-        # 主PanedWindow - 分隔上下区域（使用tk.PanedWindow避免拖影）
+        # 全局草稿路径设置面板（在主窗口顶部，独立于标签页）
+        self.path_settings_frame = ttk.LabelFrame(
+            self.root, 
+            text="全局草稿路径设置", 
+            padding="10"
+        )
+        
+        # 路径选择区域
+        self.path_select_frame = ttk.Frame(self.path_settings_frame)
+        
+        self.path_label = ttk.Label(self.path_select_frame, text="剪映草稿文件夹:")
+        self.path_var = tk.StringVar(value="未选择")
+        self.path_entry = ttk.Entry(
+            self.path_select_frame, 
+            textvariable=self.path_var, 
+            state="readonly", 
+            width=50
+        )
+        self.path_select_btn = ttk.Button(
+            self.path_select_frame,
+            text="选择文件夹...",
+            command=self._select_draft_folder
+        )
+        self.path_auto_detect_btn = ttk.Button(
+            self.path_select_frame,
+            text="自动检测",
+            command=self._auto_detect_draft_folder
+        )
+        
+        # 传输选项区域
+        self.transfer_frame = ttk.Frame(self.path_settings_frame)
+        
+        self.transfer_var = tk.BooleanVar(value=False)
+        self.transfer_check = ttk.Checkbutton(
+            self.transfer_frame,
+            text="传输草稿到指定文件夹（启用后草稿将直接保存到剪映草稿文件夹，否则保存在本地数据目录）",
+            variable=self.transfer_var,
+            command=self._on_transfer_option_changed
+        )
+        
+        # 状态显示
+        self.path_status_var = tk.StringVar(value="当前使用本地数据目录")
+        self.path_status_label = ttk.Label(
+            self.path_settings_frame,
+            textvariable=self.path_status_var,
+            foreground="blue"
+        )
+
+        # 主PanedWindow - 分隔标签页区域和日志区域（使用tk.PanedWindow避免拖影）
         self.paned_window = tk.PanedWindow(
             self.root,
             orient=tk.VERTICAL,
@@ -74,7 +126,6 @@ class MainWindow:
             bd=1,  # 边框宽度
             relief=tk.SUNKEN,  # 边框样式
         )
-        self.paned_window.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 上部框架 - 主要工作区（包含标签页和滚动条）
         self.top_frame = ttk.Frame(self.paned_window)
@@ -147,7 +198,8 @@ class MainWindow:
 
         # 配置网格权重
         self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=0)  # 路径设置面板行不扩展
+        self.root.rowconfigure(1, weight=1)  # PanedWindow行扩展以填充剩余空间
         self.top_frame.columnconfigure(0, weight=1)
         self.top_frame.columnconfigure(1, weight=0)  # 滚动条列不扩展
         self.top_frame.rowconfigure(0, weight=1)
@@ -308,6 +360,27 @@ class MainWindow:
 
     def _setup_layout(self):
         """设置布局"""
+        # 布局全局路径设置面板（主窗口顶部，row=0）
+        self.path_settings_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=10, pady=10)
+        
+        # 路径选择区域
+        self.path_select_frame.pack(fill=tk.X, pady=(0, 10))
+        self.path_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
+        self.path_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
+        self.path_select_btn.grid(row=0, column=2, padx=(0, 5))
+        self.path_auto_detect_btn.grid(row=0, column=3)
+        self.path_select_frame.columnconfigure(1, weight=1)
+        
+        # 传输选项区域
+        self.transfer_frame.pack(fill=tk.X, pady=(0, 5))
+        self.transfer_check.pack(side=tk.LEFT)
+        
+        # 状态显示
+        self.path_status_label.pack(fill=tk.X, pady=(0, 5))
+        
+        # 布局主PanedWindow（标签页和日志区域，row=1）
+        self.paned_window.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
         # 布局上部框架（Canvas和滚动条）
         self.top_canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.top_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
@@ -386,6 +459,54 @@ class MainWindow:
 
         # 强制更新显示
         self.embedded_log_text.update_idletasks()
+    
+    def _select_draft_folder(self):
+        """选择草稿文件夹"""
+        # 设置初始目录
+        current_path = self.draft_path_manager.get_draft_folder()
+        initial_dir = current_path if current_path else os.path.expanduser("~")
+        
+        folder = filedialog.askdirectory(
+            title="选择剪映草稿文件夹",
+            initialdir=initial_dir
+        )
+        
+        if folder:
+            self.draft_path_manager.set_draft_folder(folder)
+            self.path_var.set(folder)
+            self.logger.info(f"已选择草稿文件夹: {folder}")
+            self._update_path_status()
+    
+    def _auto_detect_draft_folder(self):
+        """自动检测剪映草稿文件夹"""
+        self.logger.info("尝试自动检测剪映草稿文件夹...")
+        
+        detected_path = self.draft_path_manager.detect_default_draft_folder()
+        
+        if detected_path:
+            self.draft_path_manager.set_draft_folder(detected_path)
+            self.path_var.set(detected_path)
+            self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
+            self._update_path_status()
+            messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
+        else:
+            self.logger.warning("未能检测到剪映草稿文件夹")
+            messagebox.showwarning(
+                "检测失败",
+                "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。"
+            )
+    
+    def _on_transfer_option_changed(self):
+        """传输选项改变时的回调"""
+        enabled = self.transfer_var.get()
+        self.draft_path_manager.set_transfer_enabled(enabled)
+        self.logger.info(f"传输草稿到指定文件夹: {'启用' if enabled else '禁用'}")
+        self._update_path_status()
+    
+    def _update_path_status(self):
+        """更新路径状态显示"""
+        status_text = self.draft_path_manager.get_status_text()
+        self.path_status_var.set(f"当前状态: {status_text}")
 
     def _show_log_window(self):
         """显示独立日志窗口"""

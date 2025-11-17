@@ -20,6 +20,7 @@ import atexit
 from app.gui.base_tab import BaseTab
 from app.utils.draft_generator import DraftGenerator
 from app.utils.ngrok_manager import NgrokManager
+from app.utils.draft_path_manager import get_draft_path_manager
 
 
 class CloudServiceTab(BaseTab):
@@ -41,9 +42,9 @@ class CloudServiceTab(BaseTab):
 
         # 初始化草稿生成器（用于检测文件夹）
         self.draft_generator = DraftGenerator()
-
-        # 输出文件夹路径
-        self.output_folder = None
+        
+        # 使用全局路径管理器
+        self.draft_path_manager = get_draft_path_manager()
 
         # FastAPI服务相关(使用子进程方式)
         self.service_process = None  # 子进程对象(源码环境)
@@ -94,19 +95,10 @@ class CloudServiceTab(BaseTab):
         self.info_label_frame = ttk.LabelFrame(self.frame, text="服务说明", padding="10")
         self.info_label = ttk.Label(
             self.info_label_frame,
-            text="云端服务模式：启动 FastAPI 服务，在 Coze 平台配置\"云侧插件 - 基于已有服务\"，\nCoze 通过 HTTP API 直接调用本服务，无需 cozepy SDK 或 Coze Token。",
+            text="云端服务模式：启动 FastAPI 服务，在 Coze 平台配置\"云侧插件 - 基于已有服务\"，\nCoze 通过 HTTP API 直接调用本服务，无需 cozepy SDK 或 Coze Token。\n草稿输出路径由全局设置控制。",
             justify=tk.LEFT,
             foreground="blue"
         )
-        
-        # 草稿文件夹选择区域
-        self.folder_frame = ttk.LabelFrame(self.frame, text="草稿文件夹设置", padding="5")
-
-        self.folder_label = ttk.Label(self.folder_frame, text="剪映草稿文件夹:")
-        self.folder_var = tk.StringVar(value="未选择（将使用默认路径）")
-        self.folder_entry = ttk.Entry(self.folder_frame, textvariable=self.folder_var, state="readonly", width=50)
-        self.folder_btn = ttk.Button(self.folder_frame, text="选择文件夹...", command=self._select_output_folder)
-        self.auto_detect_btn = ttk.Button(self.folder_frame, text="自动检测", command=self._auto_detect_folder)
 
         # FastAPI服务管理区域
         self.service_frame = ttk.LabelFrame(self.frame, text="FastAPI 服务管理", padding="10")
@@ -230,17 +222,9 @@ class CloudServiceTab(BaseTab):
         # 说明文字
         self.info_label_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         self.info_label.pack(fill=tk.X)
-        
-        # 草稿文件夹选择区域
-        self.folder_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        self.folder_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        self.folder_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
-        self.folder_btn.grid(row=0, column=2, padx=(0, 5))
-        self.auto_detect_btn.grid(row=0, column=3)
-        self.folder_frame.columnconfigure(1, weight=1)
 
         # FastAPI服务管理区域
-        self.service_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        self.service_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
 
         # 服务配置
         self.config_frame.pack(fill=tk.X, pady=(0, 10))
@@ -276,7 +260,7 @@ class CloudServiceTab(BaseTab):
         self.clear_log_btn.pack(side=tk.RIGHT)
 
         # ngrok 内网穿透区域
-        self.ngrok_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.ngrok_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
         # ngrok 配置
         self.ngrok_config_frame.pack(fill=tk.X, pady=(0, 10))
@@ -312,36 +296,7 @@ class CloudServiceTab(BaseTab):
         self.clear_ngrok_log_btn.pack(side=tk.RIGHT)
 
         # 底部状态栏
-        self.status_bar.grid(row=4, column=0, sticky=(tk.W, tk.E))
-
-    def _select_output_folder(self):
-        """选择输出文件夹"""
-        # 设置初始目录
-        initial_dir = self.output_folder if self.output_folder else os.path.expanduser("~")
-
-        folder = filedialog.askdirectory(title="选择剪映草稿文件夹", initialdir=initial_dir)
-
-        if folder:
-            self.output_folder = folder
-            self.folder_var.set(folder)
-            self.logger.info(f"已选择输出文件夹: {folder}")
-            self.status_var.set(f"输出文件夹: {folder}")
-
-    def _auto_detect_folder(self):
-        """自动检测剪映草稿文件夹"""
-        self.logger.info("尝试自动检测剪映草稿文件夹...")
-
-        detected_path = self.draft_generator.detect_default_draft_folder()
-
-        if detected_path:
-            self.output_folder = detected_path
-            self.folder_var.set(detected_path)
-            self.logger.info(f"检测到剪映草稿文件夹: {detected_path}")
-            self.status_var.set(f"已检测到: {detected_path}")
-            messagebox.showinfo("检测成功", f"已检测到剪映草稿文件夹:\n{detected_path}")
-        else:
-            self.logger.warning("未能检测到剪映草稿文件夹")
-            messagebox.showwarning("检测失败", "未能自动检测到剪映草稿文件夹。\n请手动选择或确认剪映专业版已安装。")
+        self.status_bar.grid(row=3, column=0, sticky=(tk.W, tk.E))
 
     def _check_port_available(self):
         """检测端口是否可用"""
@@ -902,7 +857,6 @@ class CloudServiceTab(BaseTab):
                 self.log_reader_thread.join(timeout=2)
 
         super().cleanup()
-        self.output_folder = None
         self.draft_generator = None
         self.service_process = None
         self.log_reader_thread = None

@@ -10,6 +10,7 @@ from app.utils.logger import get_logger
 from app.utils.coze_parser import CozeOutputParser
 from app.utils.converter import DraftInterfaceConverter
 from app.utils.material_manager import MaterialManager, create_material_manager
+from app.utils.draft_path_manager import get_draft_path_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
@@ -23,23 +24,31 @@ class DraftGenerator:
         r"C:\Users\{username}\AppData\Roaming\JianyingPro\User Data\Projects\com.lveditor.draft",
     ]
     
-    def __init__(self, output_base_dir: str = "./JianyingProjects"):
+    def __init__(self, output_base_dir: Optional[str] = None):
         """
         初始化草稿生成器
         
         Args:
-            output_base_dir: 输出根目录(存放所有草稿项目)
+            output_base_dir: 输出根目录(存放所有草稿项目)。
+                           如果为None，则使用全局路径管理器的配置
         """
         self.logger = get_logger(__name__)
         self.logger.info("初始化草稿生成器")
         
-        self.output_base_dir = output_base_dir
+        # 如果未指定输出目录，使用全局路径管理器的配置
+        if output_base_dir is None:
+            path_manager = get_draft_path_manager()
+            self.output_base_dir = path_manager.get_effective_output_path()
+            self.logger.info(f"使用全局路径管理器的输出目录: {self.output_base_dir}")
+        else:
+            self.output_base_dir = output_base_dir
+            self.logger.info(f"使用指定输出目录: {output_base_dir}")
+        
         self.parser = CozeOutputParser()
         self.material_managers: Dict[str, MaterialManager] = {}
         
         # 确保输出目录存在
-        os.makedirs(output_base_dir, exist_ok=True)
-        self.logger.info(f"输出目录: {output_base_dir}")
+        os.makedirs(self.output_base_dir, exist_ok=True)
     
     def detect_default_draft_folder(self) -> Optional[str]:
         """
