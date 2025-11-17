@@ -47,12 +47,37 @@ segment_manager = get_segment_manager()
 @router.post(
     "/audio/create",
     response_model=CreateSegmentResponse,
-    status_code=status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_200_OK,
     summary="创建音频片段",
     description="创建音频片段并返回 UUID（总是返回 success=True）"
 )
 async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, Any]:
-    """创建音频片段（Coze 友好版本）"""
+    """
+    对应 pyJianYingDraft 代码：
+    ```python
+    audio_segment = draft.AudioSegment(
+        "audio.mp3",
+        trange("0s", "5s"),
+        volume=0.6
+    )
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        创建音频片段, 并指定其时间信息、音量、播放速度等设置
+        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
+        
+        Args:
+            material (`AudioMaterial` or `str`): 素材实例或素材路径, 若为路径则自动构造素材实例
+            target_timerange (`Timerange`): 片段在轨道上的目标时间范围
+            source_timerange (`Timerange`, optional): 截取的素材片段的时间范围, 默认从开头根据`speed`截取与`target_timerange`等长的一部分
+            speed (`float`, optional): 播放速度, 默认为1.0. 此项与`source_timerange`同时指定时, 将覆盖`target_timerange`中的时长
+            volume (`float`, optional): 音量, 默认为1.0
+            change_pitch (`bool`, optional): 是否跟随变速改变音调, 默认为否
+
+        Raises:
+            `ValueError`: 指定的或计算出的`source_timerange`超出了素材的时长范围
+    ```
+    """
     logger.info("=" * 60)
     logger.info("收到创建音频片段请求")
     logger.info(f"素材 URL: {request.material_url}")
@@ -93,7 +118,7 @@ async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, 
 @router.post(
     "/video/create",
     response_model=CreateSegmentResponse,
-    status_code=status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_200_OK,
     summary="创建视频片段",
     description="创建视频片段并返回 UUID"
 )
@@ -164,7 +189,7 @@ async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, 
 @router.post(
     "/text/create",
     response_model=CreateSegmentResponse,
-    status_code=status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_200_OK,
     summary="创建文本片段",
     description="创建文本片段并返回 UUID"
 )
@@ -297,7 +322,7 @@ async def create_sticker_segment(request: CreateStickerSegmentRequest) -> Dict[s
 @router.post(
     "/effect/create",
     response_model=CreateSegmentResponse,
-    status_code=status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_200_OK,
     summary="创建特效片段",
     description="创建特效片段并返回 UUID"
 )
@@ -365,7 +390,7 @@ async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str
 @router.post(
     "/filter/create",
     response_model=CreateSegmentResponse,
-    status_code=status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_200_OK,
     summary="创建滤镜片段",
     description="创建滤镜片段并返回 UUID"
 )
