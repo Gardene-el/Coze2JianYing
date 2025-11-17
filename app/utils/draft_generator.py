@@ -10,6 +10,7 @@ from app.utils.logger import get_logger
 from app.utils.coze_parser import CozeOutputParser
 from app.utils.converter import DraftInterfaceConverter
 from app.utils.material_manager import MaterialManager, create_material_manager
+from app.utils.draft_path_manager import get_draft_path_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
