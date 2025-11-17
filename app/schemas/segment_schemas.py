@@ -219,6 +219,12 @@ class AddSegmentToDraftResponse(BaseModel):
     """添加片段到草稿响应"""
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
     timestamp: datetime = Field(default_factory=datetime.now, description="操作时间")
 
 
@@ -241,6 +247,12 @@ class AddTrackResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     track_index: int = Field(..., description="轨道索引")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddEffectRequest(BaseModel):
@@ -262,6 +274,12 @@ class AddEffectResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     effect_id: str = Field(..., description="特效 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddFadeRequest(BaseModel):
@@ -282,6 +300,12 @@ class AddFadeResponse(BaseModel):
     """添加淡入淡出响应"""
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddKeyframeRequest(BaseModel):
@@ -305,6 +329,12 @@ class AddKeyframeResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     keyframe_id: str = Field(..., description="关键帧 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddAnimationRequest(BaseModel):
@@ -326,6 +356,12 @@ class AddAnimationResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     animation_id: str = Field(..., description="动画 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddFilterRequest(BaseModel):
@@ -347,6 +383,12 @@ class AddFilterResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     filter_id: str = Field(..., description="滤镜 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddMaskRequest(BaseModel):
@@ -378,6 +420,12 @@ class AddMaskResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     mask_id: str = Field(..., description="蒙版 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddTransitionRequest(BaseModel):
@@ -399,6 +447,12 @@ class AddTransitionResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     transition_id: str = Field(..., description="转场 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddBackgroundFillingRequest(BaseModel):
@@ -420,6 +474,12 @@ class AddBackgroundFillingResponse(BaseModel):
     """添加背景填充响应"""
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddBubbleRequest(BaseModel):
@@ -441,6 +501,12 @@ class AddBubbleResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     bubble_id: str = Field(..., description="气泡 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddTextEffectRequest(BaseModel):
@@ -460,6 +526,12 @@ class AddTextEffectResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     effect_id: str = Field(..., description="特效 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 # ========== Draft 级别操作 ==========
@@ -531,6 +603,12 @@ class AddGlobalEffectResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     effect_id: str = Field(..., description="特效 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class AddGlobalFilterRequest(BaseModel):
@@ -554,6 +632,12 @@ class AddGlobalFilterResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     filter_id: str = Field(..., description="滤镜 UUID")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
 
 
 class SaveDraftResponse(BaseModel):
@@ -561,6 +645,12 @@ class SaveDraftResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     draft_path: str = Field(..., description="草稿文件夹路径")
     message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
     
     class Config:
         json_schema_extra = {
@@ -614,3 +704,12 @@ class SegmentDetailResponse(BaseModel):
     download_status: str = Field(..., description="下载状态")
     local_path: Optional[str] = Field(None, description="本地路径")
     properties: Dict[str, Any] = Field(..., description="片段属性")
+    # Response fields
+    success: bool = Field(True, description="是否成功")
+    message: str = Field("查询成功", description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
