@@ -67,39 +67,9 @@ class MainWindow:
         menubar.add_cascade(label="帮助", menu=help_menu)
         help_menu.add_command(label="关于", command=self._show_about)
 
-        # 主PanedWindow - 分隔上下区域（使用tk.PanedWindow避免拖影）
-        self.paned_window = tk.PanedWindow(
-            self.root,
-            orient=tk.VERTICAL,
-            sashwidth=8,  # 分隔条宽度
-            sashrelief=tk.RAISED,  # 分隔条样式（凸起）
-            sashpad=2,  # 分隔条内边距
-            bg="#d0d0d0",  # 分隔条背景色（灰色，更明显）
-            bd=1,  # 边框宽度
-            relief=tk.SUNKEN,  # 边框样式
-        )
-        self.paned_window.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-
-        # 上部框架 - 主要工作区（包含标签页和滚动条）
-        self.top_frame = ttk.Frame(self.paned_window)
-        self.paned_window.add(self.top_frame, minsize=300, stretch="always")
-
-        # 创建Canvas和滚动条用于标签页区域
-        self.top_canvas = tk.Canvas(self.top_frame, highlightthickness=0)
-        self.top_scrollbar = ttk.Scrollbar(
-            self.top_frame, orient=tk.VERTICAL, command=self.top_canvas.yview
-        )
-        self.top_canvas.configure(yscrollcommand=self.top_scrollbar.set)
-
-        # 创建容器框架用于放置Notebook
-        self.notebook_container = ttk.Frame(self.top_canvas)
-        self.canvas_window = self.top_canvas.create_window(
-            (0, 0), window=self.notebook_container, anchor=tk.NW
-        )
-        
-        # 全局草稿路径设置面板（在标签页上方）
+        # 全局草稿路径设置面板（在主窗口顶部，独立于标签页）
         self.path_settings_frame = ttk.LabelFrame(
-            self.notebook_container, 
+            self.root, 
             text="全局草稿路径设置", 
             padding="10"
         )
@@ -143,6 +113,35 @@ class MainWindow:
             self.path_settings_frame,
             textvariable=self.path_status_var,
             foreground="blue"
+        )
+
+        # 主PanedWindow - 分隔标签页区域和日志区域（使用tk.PanedWindow避免拖影）
+        self.paned_window = tk.PanedWindow(
+            self.root,
+            orient=tk.VERTICAL,
+            sashwidth=8,  # 分隔条宽度
+            sashrelief=tk.RAISED,  # 分隔条样式（凸起）
+            sashpad=2,  # 分隔条内边距
+            bg="#d0d0d0",  # 分隔条背景色（灰色，更明显）
+            bd=1,  # 边框宽度
+            relief=tk.SUNKEN,  # 边框样式
+        )
+
+        # 上部框架 - 主要工作区（包含标签页和滚动条）
+        self.top_frame = ttk.Frame(self.paned_window)
+        self.paned_window.add(self.top_frame, minsize=300, stretch="always")
+
+        # 创建Canvas和滚动条用于标签页区域
+        self.top_canvas = tk.Canvas(self.top_frame, highlightthickness=0)
+        self.top_scrollbar = ttk.Scrollbar(
+            self.top_frame, orient=tk.VERTICAL, command=self.top_canvas.yview
+        )
+        self.top_canvas.configure(yscrollcommand=self.top_scrollbar.set)
+
+        # 创建容器框架用于放置Notebook
+        self.notebook_container = ttk.Frame(self.top_canvas)
+        self.canvas_window = self.top_canvas.create_window(
+            (0, 0), window=self.notebook_container, anchor=tk.NW
         )
 
         # 创建Notebook（标签页容器）
@@ -199,7 +198,8 @@ class MainWindow:
 
         # 配置网格权重
         self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=0)  # 路径设置面板行不扩展
+        self.root.rowconfigure(1, weight=1)  # PanedWindow行扩展以填充剩余空间
         self.top_frame.columnconfigure(0, weight=1)
         self.top_frame.columnconfigure(1, weight=0)  # 滚动条列不扩展
         self.top_frame.rowconfigure(0, weight=1)
@@ -360,8 +360,8 @@ class MainWindow:
 
     def _setup_layout(self):
         """设置布局"""
-        # 布局全局路径设置面板
-        self.path_settings_frame.pack(fill=tk.X, padx=10, pady=(10, 0))
+        # 布局全局路径设置面板（主窗口顶部，row=0）
+        self.path_settings_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=10, pady=10)
         
         # 路径选择区域
         self.path_select_frame.pack(fill=tk.X, pady=(0, 10))
@@ -377,6 +377,9 @@ class MainWindow:
         
         # 状态显示
         self.path_status_label.pack(fill=tk.X, pady=(0, 5))
+        
+        # 布局主PanedWindow（标签页和日志区域，row=1）
+        self.paned_window.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # 布局上部框架（Canvas和滚动条）
         self.top_canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
