@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v0.2.1 (2025-11-17)
+
+### Bug Fixes
+
+- 更新输入框的高度。
+  ([`477a170`](https://github.com/Gardene-el/Coze2JianYing/commit/477a1703b35e124f429698118be2b1e45360803f))
+
+- 进一步缩小输入框。
+  ([`576cd18`](https://github.com/Gardene-el/Coze2JianYing/commit/576cd1826b244e22123d3c7ef3929b4f7b5ba7f6))
+
+
 ## v0.2.0 (2025-11-16)
 
 ### Chores
