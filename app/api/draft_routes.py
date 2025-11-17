@@ -45,16 +45,24 @@ segment_manager = get_segment_manager()
 )
 async def create_draft(request: CreateDraftRequest) -> Dict[str, Any]:
     """
-    创建草稿（Coze 友好版本）
-    
-    关键特性：
-    - 总是返回 success=True（便于 Coze 插件测试通过）
-    - 错误详情通过 error_code、category 和 message 字段传递
-    - 保持 HTTP 200 状态码，具体结果看响应体
-    
     对应 pyJianYingDraft 代码：
     ```python
     script = draft_folder.create_draft("demo", 1920, 1080, allow_replace=True)
+    ```
+    对应 pyJianYingDraft 注释：
+    ```
+        创建剪映草稿, 并指定其基本参数如分辨率、帧率等
+        草稿创建完成后, 可通过添加轨道和片段来构建完整的视频项目
+        
+        Args:
+            draft_name (`str`): 草稿名称, 即相应文件夹名称
+            width (`int`): 视频宽度, 单位为像素
+            height (`int`): 视频高度, 单位为像素
+            fps (`int`, optional): 视频帧率. 默认为30.
+            allow_replace (`bool`, optional): 是否允许覆盖与`draft_name`重名的草稿. 默认为否.
+
+        Raises:
+            `FileExistsError`: 已存在与`draft_name`重名的草稿, 但不允许覆盖.
     ```
     """
     logger.info("=" * 60)
