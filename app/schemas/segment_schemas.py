@@ -183,7 +183,7 @@ class CreateFilterSegmentRequest(BaseModel):
 
 class CreateSegmentResponse(BaseModel):
     """创建片段响应"""
-    segment_id: str = Field(..., description="Segment UUID")
+    segment_id: str = Field("", description="Segment UUID，错误时为空字符串")
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
     timestamp: datetime = Field(default_factory=datetime.now, description="创建时间")
@@ -245,7 +245,7 @@ class AddTrackRequest(BaseModel):
 class AddTrackResponse(BaseModel):
     """添加轨道响应"""
     success: bool = Field(..., description="是否成功")
-    track_index: int = Field(..., description="轨道索引")
+    track_index: int = Field(-1, description="轨道索引，错误时为-1")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -272,7 +272,7 @@ class AddEffectRequest(BaseModel):
 class AddEffectResponse(BaseModel):
     """添加特效响应"""
     success: bool = Field(..., description="是否成功")
-    effect_id: str = Field(..., description="特效 UUID")
+    effect_id: str = Field("", description="特效 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -327,7 +327,7 @@ class AddKeyframeRequest(BaseModel):
 class AddKeyframeResponse(BaseModel):
     """添加关键帧响应"""
     success: bool = Field(..., description="是否成功")
-    keyframe_id: str = Field(..., description="关键帧 UUID")
+    keyframe_id: str = Field("", description="关键帧 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -354,7 +354,7 @@ class AddAnimationRequest(BaseModel):
 class AddAnimationResponse(BaseModel):
     """添加动画响应"""
     success: bool = Field(..., description="是否成功")
-    animation_id: str = Field(..., description="动画 UUID")
+    animation_id: str = Field("", description="动画 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -381,7 +381,7 @@ class AddFilterRequest(BaseModel):
 class AddFilterResponse(BaseModel):
     """添加滤镜响应"""
     success: bool = Field(..., description="是否成功")
-    filter_id: str = Field(..., description="滤镜 UUID")
+    filter_id: str = Field("", description="滤镜 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -418,7 +418,7 @@ class AddMaskRequest(BaseModel):
 class AddMaskResponse(BaseModel):
     """添加蒙版响应"""
     success: bool = Field(..., description="是否成功")
-    mask_id: str = Field(..., description="蒙版 UUID")
+    mask_id: str = Field("", description="蒙版 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -445,7 +445,7 @@ class AddTransitionRequest(BaseModel):
 class AddTransitionResponse(BaseModel):
     """添加转场响应"""
     success: bool = Field(..., description="是否成功")
-    transition_id: str = Field(..., description="转场 UUID")
+    transition_id: str = Field("", description="转场 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -499,7 +499,7 @@ class AddBubbleRequest(BaseModel):
 class AddBubbleResponse(BaseModel):
     """添加气泡响应"""
     success: bool = Field(..., description="是否成功")
-    bubble_id: str = Field(..., description="气泡 UUID")
+    bubble_id: str = Field("", description="气泡 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -524,7 +524,7 @@ class AddTextEffectRequest(BaseModel):
 class AddTextEffectResponse(BaseModel):
     """添加花字特效响应"""
     success: bool = Field(..., description="是否成功")
-    effect_id: str = Field(..., description="特效 UUID")
+    effect_id: str = Field("", description="特效 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -601,7 +601,7 @@ class AddGlobalEffectRequest(BaseModel):
 class AddGlobalEffectResponse(BaseModel):
     """添加全局特效响应"""
     success: bool = Field(..., description="是否成功")
-    effect_id: str = Field(..., description="特效 UUID")
+    effect_id: str = Field("", description="特效 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -630,7 +630,7 @@ class AddGlobalFilterRequest(BaseModel):
 class AddGlobalFilterResponse(BaseModel):
     """添加全局滤镜响应"""
     success: bool = Field(..., description="是否成功")
-    filter_id: str = Field(..., description="滤镜 UUID")
+    filter_id: str = Field("", description="滤镜 UUID，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
@@ -643,7 +643,7 @@ class AddGlobalFilterResponse(BaseModel):
 class SaveDraftResponse(BaseModel):
     """保存草稿响应"""
     success: bool = Field(..., description="是否成功")
-    draft_path: str = Field(..., description="草稿文件夹路径")
+    draft_path: str = Field("", description="草稿文件夹路径，错误时为空字符串")
     message: str = Field(..., description="响应消息")
     # Optional fields from APIResponseManager
     error_code: Optional[str] = Field(None, description="错误代码")
