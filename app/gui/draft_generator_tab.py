@@ -71,15 +71,15 @@ class DraftGeneratorTab(BaseTab):
 
         # 配置网格权重
         self.frame.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(1, weight=0)  # 不扩展输入框所在行
 
     def _setup_layout(self):
         """设置布局"""
         # 输入区域
         self.input_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         self.input_text.grid(
-            row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10)
-        )
+            row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10)
+        )  # 移除N,S避免垂直拉伸
 
         # 按钮区域
         self.button_frame.grid(row=2, column=0, sticky=tk.W, pady=(0, 10))
