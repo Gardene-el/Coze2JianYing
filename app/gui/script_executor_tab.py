@@ -51,7 +51,7 @@ class ScriptExecutorTab(BaseTab):
         # 输入区域
         self.input_label = ttk.Label(self.frame, text="脚本内容:")
         self.input_text = scrolledtext.ScrolledText(
-            self.frame, height=1, wrap=tk.WORD, font=("Consolas", 9)
+            self.frame, height=10, wrap=tk.WORD, font=("Consolas", 9)
         )
 
         # 按钮区域
