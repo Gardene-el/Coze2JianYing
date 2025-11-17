@@ -13,6 +13,7 @@ from pyJianYingDraft import IntroType, TransitionType, trange, tim, TextOutro
 from app.utils.logger import get_logger
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
+from app.utils.draft_config_manager import get_draft_config_manager
 from app.config import get_config
 
 
@@ -24,14 +25,16 @@ class DraftSaver:
         初始化草稿保存器
         
         Args:
-            output_dir: 输出目录，如果为None则使用配置系统的drafts目录
+            output_dir: 输出目录，如果为None则使用全局配置的输出路径
         """
         self.logger = get_logger(__name__)
         
-        # 如果没有指定输出目录，使用配置系统的drafts目录
+        # 获取全局配置管理器
+        self.draft_config_manager = get_draft_config_manager()
+        
+        # 如果没有指定输出目录，使用全局配置的有效输出路径
         if output_dir is None:
-            config = get_config()
-            self.output_dir = config.drafts_dir
+            self.output_dir = self.draft_config_manager.get_effective_output_path()
         else:
             self.output_dir = output_dir
             
@@ -97,9 +100,20 @@ class DraftSaver:
         
         self.logger.info(f"项目: {draft_name}, {width}x{height}@{fps}fps")
         
-        # 创建素材目录 - 使用配置系统的assets目录下的draft_id子目录
-        app_config = get_config()
-        temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
+        # 创建素材目录
+        # 根据全局配置决定素材存储位置
+        if self.draft_config_manager.transfer_to_draft_folder and self.draft_config_manager.draft_folder_path:
+            # 使用手动草稿生成方案：在草稿根目录的 CozeJianYingAssistantAssets/{draft_id} 下
+            temp_assets_dir = os.path.join(
+                self.draft_config_manager.draft_folder_path, 
+                "CozeJianYingAssistantAssets", 
+                draft_id
+            )
+        else:
+            # 使用云端服务/脚本执行方案：在本地数据的 assets/{draft_id} 下
+            app_config = get_config()
+            temp_assets_dir = os.path.join(app_config.assets_dir, draft_id)
+        
         os.makedirs(temp_assets_dir, exist_ok=True)
         
         # 创建 DraftFolder 和 Script

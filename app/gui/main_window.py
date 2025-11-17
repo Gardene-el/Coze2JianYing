@@ -10,6 +10,7 @@ from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 from app.gui.cloud_service_tab import CloudServiceTab
 from app.gui.draft_generator_tab import DraftGeneratorTab
+from app.gui.draft_folder_panel import DraftFolderPanel
 from app.gui.log_window import LogWindow
 from app.gui.script_executor_tab import ScriptExecutorTab
 from app.utils.logger import get_logger, set_gui_log_callback
@@ -87,15 +88,21 @@ class MainWindow:
         )
         self.top_canvas.configure(yscrollcommand=self.top_scrollbar.set)
 
-        # 创建容器框架用于放置Notebook
+        # 创建容器框架用于放置草稿文件夹面板和Notebook
         self.notebook_container = ttk.Frame(self.top_canvas)
         self.canvas_window = self.top_canvas.create_window(
             (0, 0), window=self.notebook_container, anchor=tk.NW
         )
 
+        # 创建草稿文件夹设置面板
+        self.draft_folder_panel = DraftFolderPanel(
+            self.notebook_container,
+            log_callback=self._on_log_message
+        )
+
         # 创建Notebook（标签页容器）
         self.notebook = ttk.Notebook(self.notebook_container)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
 
         # 绑定Canvas大小变化事件
         self.notebook_container.bind(
