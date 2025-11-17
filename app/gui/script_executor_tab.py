@@ -116,13 +116,8 @@ class ScriptExecutorTab(BaseTab):
     
     def _setup_layout(self):
         """设置布局"""
-        # 输出文件夹选择区域
-        self.folder_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        self.folder_label.grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        self.folder_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 5))
-        self.folder_btn.grid(row=0, column=2, padx=(0, 5))
-        self.auto_detect_btn.grid(row=0, column=3)
-        self.folder_frame.columnconfigure(1, weight=1)
+        # 全局提示区域
+        self.global_hint_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
         # 文件选择区域
         self.file_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
