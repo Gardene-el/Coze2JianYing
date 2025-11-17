@@ -334,10 +334,13 @@ class AddTrackResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddEffectRequest(BaseModel):
-    """添加特效请求（用于 AudioSegment/VideoSegment）"""
+class AddAudioEffectRequest(BaseModel):
+    """添加音频特效请求（用于 AudioSegment）"""
 
-    effect_type: str = Field(..., description="特效类型")
+    effect_type: str = Field(
+        ...,
+        description="音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType",
+    )
     params: Optional[List[float]] = Field(
         None, description="特效参数列表（范围 0-100）"
     )
@@ -345,14 +348,14 @@ class AddEffectRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "effect_type": "AudioSceneEffectType.XXX",
+                "effect_type": "AudioSceneEffectType.VOICE_CHANGER",
                 "params": [50.0, 75.0],
             }
         }
 
 
-class AddEffectResponse(BaseModel):
-    """添加特效响应"""
+class AddAudioEffectResponse(BaseModel):
+    """添加音频特效响应"""
 
     success: bool = Field(..., description="是否成功")
     effect_id: str = Field("", description="特效 UUID，错误时为空字符串")
@@ -365,8 +368,39 @@ class AddEffectResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddFadeRequest(BaseModel):
-    """添加淡入淡出请求（用于 AudioSegment/VideoSegment）"""
+class AddVideoEffectRequest(BaseModel):
+    """添加视频特效请求（用于 VideoSegment）"""
+
+    effect_type: str = Field(
+        ..., description="视频特效类型: VideoSceneEffectType | VideoCharacterEffectType"
+    )
+    params: Optional[List[float]] = Field(None, description="特效参数列表")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "effect_type": "VideoSceneEffectType.GLITCH",
+                "params": [50.0],
+            }
+        }
+
+
+class AddVideoEffectResponse(BaseModel):
+    """添加视频特效响应"""
+
+    success: bool = Field(..., description="是否成功")
+    effect_id: str = Field("", description="特效 UUID，错误时为空字符串")
+    message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
+
+
+class AddAudioFadeRequest(BaseModel):
+    """添加音频淡入淡出请求（用于 AudioSegment）"""
 
     in_duration: str = Field(..., description="淡入时长（字符串如 '1s' 或微秒数）")
     out_duration: str = Field(..., description="淡出时长")
@@ -375,8 +409,8 @@ class AddFadeRequest(BaseModel):
         json_schema_extra = {"example": {"in_duration": "1s", "out_duration": "0s"}}
 
 
-class AddFadeResponse(BaseModel):
-    """添加淡入淡出响应"""
+class AddAudioFadeResponse(BaseModel):
+    """添加音频淡入淡出响应"""
 
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
@@ -388,21 +422,41 @@ class AddFadeResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddKeyframeRequest(BaseModel):
-    """添加关键帧请求"""
+class AddVideoFadeRequest(BaseModel):
+    """添加视频淡入淡出请求（用于 VideoSegment）"""
 
-    time_offset: Any = Field(..., description="时间偏移量（微秒或字符串如 '2s'）")
-    value: float = Field(..., description="关键帧值")
-    property: Optional[str] = Field(None, description="属性名称（VideoSegment 需要）")
+    in_duration: str = Field(..., description="淡入时长（字符串如 '1s' 或微秒数）")
+    out_duration: str = Field(..., description="淡出时长")
 
     class Config:
-        json_schema_extra = {
-            "example": {"time_offset": "2s", "value": 0.8, "property": "position_x"}
-        }
+        json_schema_extra = {"example": {"in_duration": "1s", "out_duration": "0s"}}
 
 
-class AddKeyframeResponse(BaseModel):
-    """添加关键帧响应"""
+class AddVideoFadeResponse(BaseModel):
+    """添加视频淡入淡出响应"""
+
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
+
+
+class AddAudioKeyframeRequest(BaseModel):
+    """添加音频关键帧请求（用于 AudioSegment）"""
+
+    time_offset: Any = Field(..., description="时间偏移量（微秒或字符串如 '2s'）")
+    value: float = Field(..., description="音量值 0-2")
+
+    class Config:
+        json_schema_extra = {"example": {"time_offset": "2s", "value": 0.8}}
+
+
+class AddAudioKeyframeResponse(BaseModel):
+    """添加音频关键帧响应"""
 
     success: bool = Field(..., description="是否成功")
     keyframe_id: str = Field("", description="关键帧 UUID，错误时为空字符串")
@@ -415,20 +469,109 @@ class AddKeyframeResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddAnimationRequest(BaseModel):
-    """添加动画请求（用于 VideoSegment/TextSegment）"""
+class AddVideoKeyframeRequest(BaseModel):
+    """添加视频关键帧请求（用于 VideoSegment）"""
 
-    animation_type: str = Field(..., description="动画类型")
+    time_offset: Any = Field(..., description="时间偏移量（微秒或字符串如 '2s'）")
+    value: float = Field(..., description="关键帧值")
+    property: str = Field(
+        ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"time_offset": "2s", "value": 0.8, "property": "position_x"}
+        }
+
+
+class AddVideoKeyframeResponse(BaseModel):
+    """添加视频关键帧响应"""
+
+    success: bool = Field(..., description="是否成功")
+    keyframe_id: str = Field("", description="关键帧 UUID，错误时为空字符串")
+    message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
+
+
+class AddTextKeyframeRequest(BaseModel):
+    """添加文本关键帧请求（用于 TextSegment）"""
+
+    time_offset: Any = Field(..., description="时间偏移量（微秒或字符串如 '2s'）")
+    value: float = Field(..., description="关键帧值")
+    property: str = Field(
+        ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"time_offset": "2s", "value": 0.5, "property": "position_x"}
+        }
+
+
+class AddTextKeyframeResponse(BaseModel):
+    """添加文本关键帧响应"""
+
+    success: bool = Field(..., description="是否成功")
+    keyframe_id: str = Field("", description="关键帧 UUID，错误时为空字符串")
+    message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
+
+
+class AddStickerKeyframeRequest(BaseModel):
+    """添加贴纸关键帧请求（用于 StickerSegment）"""
+
+    time_offset: Any = Field(..., description="时间偏移量（微秒或字符串如 '2s'）")
+    value: float = Field(..., description="关键帧值")
+    property: str = Field(
+        ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"time_offset": "2s", "value": 1.0, "property": "scale"}
+        }
+
+
+class AddStickerKeyframeResponse(BaseModel):
+    """添加贴纸关键帧响应"""
+
+    success: bool = Field(..., description="是否成功")
+    keyframe_id: str = Field("", description="关键帧 UUID，错误时为空字符串")
+    message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
+
+
+class AddVideoAnimationRequest(BaseModel):
+    """添加视频动画请求（用于 VideoSegment）"""
+
+    animation_type: str = Field(
+        ..., description="动画类型: IntroType | OutroType | GroupAnimationType"
+    )
     duration: Optional[str] = Field("1s", description="动画时长")
 
     class Config:
         json_schema_extra = {
-            "example": {"animation_type": "IntroType.XXX", "duration": "1s"}
+            "example": {"animation_type": "IntroType.FADE_IN", "duration": "1s"}
         }
 
 
-class AddAnimationResponse(BaseModel):
-    """添加动画响应"""
+class AddVideoAnimationResponse(BaseModel):
+    """添加视频动画响应"""
 
     success: bool = Field(..., description="是否成功")
     animation_id: str = Field("", description="动画 UUID，错误时为空字符串")
@@ -441,8 +584,37 @@ class AddAnimationResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddFilterRequest(BaseModel):
-    """添加滤镜请求（用于 VideoSegment）"""
+class AddTextAnimationRequest(BaseModel):
+    """添加文本动画请求（用于 TextSegment）"""
+
+    animation_type: str = Field(..., description="动画类型: TextAnimationType")
+    duration: Optional[str] = Field("1s", description="动画时长")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "animation_type": "TextAnimationType.TYPEWRITER",
+                "duration": "1s",
+            }
+        }
+
+
+class AddTextAnimationResponse(BaseModel):
+    """添加文本动画响应"""
+
+    success: bool = Field(..., description="是否成功")
+    animation_id: str = Field("", description="动画 UUID，错误时为空字符串")
+    message: str = Field(..., description="响应消息")
+    # Optional fields from APIResponseManager
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
+    timestamp: Optional[str] = Field(None, description="时间戳")
+
+
+class AddVideoFilterRequest(BaseModel):
+    """添加视频滤镜请求（用于 VideoSegment）"""
 
     filter_type: str = Field(..., description="滤镜类型")
     intensity: float = Field(100.0, description="滤镜强度 0-100", ge=0, le=100)
@@ -453,8 +625,8 @@ class AddFilterRequest(BaseModel):
         }
 
 
-class AddFilterResponse(BaseModel):
-    """添加滤镜响应"""
+class AddVideoFilterResponse(BaseModel):
+    """添加视频滤镜响应"""
 
     success: bool = Field(..., description="是否成功")
     filter_id: str = Field("", description="滤镜 UUID，错误时为空字符串")
@@ -467,8 +639,8 @@ class AddFilterResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddMaskRequest(BaseModel):
-    """添加蒙版请求（用于 VideoSegment）"""
+class AddVideoMaskRequest(BaseModel):
+    """添加视频蒙版请求（用于 VideoSegment）"""
 
     mask_type: str = Field(..., description="蒙版类型")
     center_x: Optional[float] = Field(0.0, description="蒙版中心 X 坐标")
@@ -492,8 +664,8 @@ class AddMaskRequest(BaseModel):
         }
 
 
-class AddMaskResponse(BaseModel):
-    """添加蒙版响应"""
+class AddVideoMaskResponse(BaseModel):
+    """添加视频蒙版响应"""
 
     success: bool = Field(..., description="是否成功")
     mask_id: str = Field("", description="蒙版 UUID，错误时为空字符串")
@@ -506,8 +678,8 @@ class AddMaskResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddTransitionRequest(BaseModel):
-    """添加转场请求（用于 VideoSegment）"""
+class AddVideoTransitionRequest(BaseModel):
+    """添加视频转场请求（用于 VideoSegment）"""
 
     transition_type: str = Field(..., description="转场类型")
     duration: Optional[str] = Field("1s", description="转场时长")
@@ -518,8 +690,8 @@ class AddTransitionRequest(BaseModel):
         }
 
 
-class AddTransitionResponse(BaseModel):
-    """添加转场响应"""
+class AddVideoTransitionResponse(BaseModel):
+    """添加视频转场响应"""
 
     success: bool = Field(..., description="是否成功")
     transition_id: str = Field("", description="转场 UUID，错误时为空字符串")
@@ -532,8 +704,8 @@ class AddTransitionResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddBackgroundFillingRequest(BaseModel):
-    """添加背景填充请求（用于 VideoSegment）"""
+class AddVideoBackgroundFillingRequest(BaseModel):
+    """添加视频背景填充请求（用于 VideoSegment）"""
 
     fill_type: str = Field(..., description="填充类型: blur 或 color")
     blur: Optional[float] = Field(0.0625, description="模糊程度（fill_type=blur 时）")
@@ -545,8 +717,8 @@ class AddBackgroundFillingRequest(BaseModel):
         json_schema_extra = {"example": {"fill_type": "blur", "blur": 0.0625}}
 
 
-class AddBackgroundFillingResponse(BaseModel):
-    """添加背景填充响应"""
+class AddVideoBackgroundFillingResponse(BaseModel):
+    """添加视频背景填充响应"""
 
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
@@ -558,8 +730,8 @@ class AddBackgroundFillingResponse(BaseModel):
     timestamp: Optional[str] = Field(None, description="时间戳")
 
 
-class AddBubbleRequest(BaseModel):
-    """添加气泡请求（用于 TextSegment）"""
+class AddTextBubbleRequest(BaseModel):
+    """添加文本气泡请求（用于 TextSegment）"""
 
     effect_id: str = Field(..., description="气泡特效 ID")
     resource_id: str = Field(..., description="资源 ID")
@@ -570,8 +742,8 @@ class AddBubbleRequest(BaseModel):
         }
 
 
-class AddBubbleResponse(BaseModel):
-    """添加气泡响应"""
+class AddTextBubbleResponse(BaseModel):
+    """添加文本气泡响应"""
 
     success: bool = Field(..., description="是否成功")
     bubble_id: str = Field("", description="气泡 UUID，错误时为空字符串")
