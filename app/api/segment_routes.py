@@ -47,7 +47,7 @@ segment_manager = get_segment_manager()
 @router.post(
     "/audio/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_200_OK,
+    status_code=status_code=status.HTTP_200_OK,
     summary="创建音频片段",
     description="创建音频片段并返回 UUID（总是返回 success=True）"
 )
@@ -88,24 +88,16 @@ async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, 
     except Exception as e:
         logger.error(f"创建音频片段时发生错误: {e}", exc_info=True)
         return response_manager.format_internal_error(e)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"创建音频片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建音频片段失败: {str(e)}"
-        )
 
 
 @router.post(
     "/video/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status_code=status.HTTP_200_OK,
     summary="创建视频片段",
     description="创建视频片段并返回 UUID"
 )
-async def create_video_segment(request: CreateVideoSegmentRequest):
+async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -145,38 +137,38 @@ async def create_video_segment(request: CreateVideoSegmentRequest):
         
         if not result["success"]:
             logger.error(f"视频片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"视频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建视频片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建视频片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/text/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status_code=status.HTTP_200_OK,
     summary="创建文本片段",
     description="创建文本片段并返回 UUID"
 )
-async def create_text_segment(request: CreateTextSegmentRequest):
+async def create_text_segment(request: CreateTextSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -214,38 +206,38 @@ async def create_text_segment(request: CreateTextSegmentRequest):
         
         if not result["success"]:
             logger.error(f"文本片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"文本片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建文本片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建文本片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/sticker/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建贴纸片段",
     description="创建贴纸片段并返回 UUID"
 )
-async def create_sticker_segment(request: CreateStickerSegmentRequest):
+async def create_sticker_segment(request: CreateStickerSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -278,38 +270,38 @@ async def create_sticker_segment(request: CreateStickerSegmentRequest):
         
         if not result["success"]:
             logger.error(f"贴纸片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"贴纸片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建贴纸片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建贴纸片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/effect/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status_code=status.HTTP_200_OK,
     summary="创建特效片段",
     description="创建特效片段并返回 UUID"
 )
-async def create_effect_segment(request: CreateEffectSegmentRequest):
+async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -346,38 +338,38 @@ async def create_effect_segment(request: CreateEffectSegmentRequest):
         
         if not result["success"]:
             logger.error(f"特效片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"特效片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建特效片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建特效片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/filter/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status_code=status.HTTP_200_OK,
     summary="创建滤镜片段",
     description="创建滤镜片段并返回 UUID"
 )
-async def create_filter_segment(request: CreateFilterSegmentRequest):
+async def create_filter_segment(request: CreateFilterSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -411,28 +403,28 @@ async def create_filter_segment(request: CreateFilterSegmentRequest):
         
         if not result["success"]:
             logger.error(f"滤镜片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"滤镜片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建滤镜片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建滤镜片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 # ==================== AudioSegment 操作端点 ====================
