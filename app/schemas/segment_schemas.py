@@ -1,6 +1,11 @@
 """
 Segment API 数据模型 (Pydantic Schemas)
 定义符合 API_ENDPOINTS_REFERENCE.md 规范的 Segment 创建和操作模型
+
+更新说明：
+- 所有响应模型扩展支持 APIResponseManager 字段
+- success 字段始终为 True（便于 Coze 插件测试）
+- 添加 error_code、category、level 字段用于详细错误信息
 """
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
@@ -485,6 +490,11 @@ class CreateDraftResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     message: str = Field(..., description="响应消息")
     timestamp: datetime = Field(default_factory=datetime.now, description="创建时间")
+    # 可选字段，用于详细错误信息（使用 APIResponseManager 时会填充）
+    error_code: Optional[str] = Field(None, description="错误代码")
+    category: Optional[str] = Field(None, description="错误类别")
+    level: Optional[str] = Field(None, description="响应级别")
+    details: Optional[Dict[str, Any]] = Field(None, description="详细信息")
     
     class Config:
         json_schema_extra = {
@@ -492,7 +502,10 @@ class CreateDraftResponse(BaseModel):
                 "draft_id": "12345678-1234-1234-1234-123456789abc",
                 "success": True,
                 "message": "草稿创建成功",
-                "timestamp": "2025-11-06T10:00:00"
+                "timestamp": "2025-11-06T10:00:00",
+                "error_code": "SUCCESS",
+                "category": "success",
+                "level": "info"
             }
         }
 

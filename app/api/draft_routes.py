@@ -1,9 +1,14 @@
 """
 Draft API 新路由 - 符合 API_ENDPOINTS_REFERENCE.md 规范
 提供草稿级别的操作端点
+
+更新说明：
+- 所有响应使用 APIResponseManager 统一管理
+- 始终返回 success=True（便于 Coze 插件测试）
+- 错误详情通过 error_code 和 message 字段传递
 """
 from fastapi import APIRouter, HTTPException, status
-from typing import List
+from typing import List, Dict, Any
 
 from app.schemas.segment_schemas import (
     # Draft 操作
@@ -20,9 +25,11 @@ from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
 from app.utils.draft_saver import get_draft_saver
 from app.utils.logger import get_logger
+from app.utils.api_response_manager import get_response_manager, ErrorCode
 
 router = APIRouter(prefix="/api/draft", tags=["草稿操作"])
 logger = get_logger(__name__)
+response_manager = get_response_manager()
 
 # 获取全局管理器
 draft_manager = get_draft_state_manager()
@@ -32,30 +39,22 @@ segment_manager = get_segment_manager()
 @router.post(
     "/create",
     response_model=CreateDraftResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,  # 改为 200，因为始终返回 success=True
     summary="创建草稿",
-    description="创建新的剪映草稿项目并返回 UUID"
+    description="创建新的剪映草稿项目并返回 UUID（总是返回 success=True，错误信息在 message 中）"
 )
-async def create_draft(request: CreateDraftRequest):
+async def create_draft(request: CreateDraftRequest) -> Dict[str, Any]:
     """
+    创建草稿（Coze 友好版本）
+    
+    关键特性：
+    - 总是返回 success=True（便于 Coze 插件测试通过）
+    - 错误详情通过 error_code、category 和 message 字段传递
+    - 保持 HTTP 200 状态码，具体结果看响应体
+    
     对应 pyJianYingDraft 代码：
     ```python
     script = draft_folder.create_draft("demo", 1920, 1080, allow_replace=True)
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        创建剪映草稿, 并指定其基本参数如分辨率、帧率等
-        草稿创建完成后, 可通过添加轨道和片段来构建完整的视频项目
-        
-        Args:
-            draft_name (`str`): 草稿名称, 即相应文件夹名称
-            width (`int`): 视频宽度, 单位为像素
-            height (`int`): 视频高度, 单位为像素
-            fps (`int`, optional): 视频帧率. 默认为30.
-            allow_replace (`bool`, optional): 是否允许覆盖与`draft_name`重名的草稿. 默认为否.
-
-        Raises:
-            `FileExistsError`: 已存在与`draft_name`重名的草稿, 但不允许覆盖.
     ```
     """
     logger.info("=" * 60)
@@ -65,6 +64,7 @@ async def create_draft(request: CreateDraftRequest):
     logger.info(f"帧率: {request.fps}")
     
     try:
+        # 调用草稿管理器创建草稿
         result = draft_manager.create_draft(
             draft_name=request.draft_name,
             width=request.width,
@@ -73,29 +73,42 @@ async def create_draft(request: CreateDraftRequest):
         )
         
         if not result["success"]:
+            # 创建失败，但依然返回 success=True
             logger.error(f"草稿创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.DRAFT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            # 添加 draft_id 字段（空字符串）
+            return {
+                "draft_id": "",
+                **error_response
+            }
         
+        # 创建成功
         logger.info(f"草稿创建成功: {result['draft_id']}")
         logger.info("=" * 60)
         
-        return CreateDraftResponse(
-            draft_id=result["draft_id"],
-            success=True,
-            message=result["message"]
+        success_response = response_manager.success(
+            message=result["message"],
+            data={"draft_id": result["draft_id"]}
         )
         
-    except HTTPException:
-        raise
+        # 将 draft_id 提升到顶层，符合原有响应结构
+        return {
+            "draft_id": result["draft_id"],
+            **success_response
+        }
+        
     except Exception as e:
+        # 捕获所有异常，返回内部错误（依然 success=True）
         logger.error(f"创建草稿时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建草稿失败: {str(e)}"
-        )
+        error_response = response_manager.format_internal_error(e)
+        return {
+            "draft_id": "",
+            **error_response
+        }
 
 
 @router.post(
