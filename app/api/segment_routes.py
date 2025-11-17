@@ -1,9 +1,14 @@
 """
 Segment API 路由
 提供符合 API_ENDPOINTS_REFERENCE.md 规范的 Segment 创建和操作 API 端点
+
+更新说明：
+- 所有响应使用 APIResponseManager 统一管理
+- 始终返回 success=True（便于 Coze 插件测试）
+- 错误详情通过 error_code 和 message 字段传递
 """
 from fastapi import APIRouter, HTTPException, status
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from app.schemas.segment_schemas import (
     # Segment 创建
@@ -27,9 +32,11 @@ from app.schemas.segment_schemas import (
 )
 from app.utils.segment_manager import get_segment_manager
 from app.utils.logger import get_logger
+from app.utils.api_response_manager import get_response_manager, ErrorCode
 
 router = APIRouter(prefix="/api/segment", tags=["片段管理"])
 logger = get_logger(__name__)
+response_manager = get_response_manager()
 
 # 获取全局片段管理器
 segment_manager = get_segment_manager()
@@ -40,37 +47,12 @@ segment_manager = get_segment_manager()
 @router.post(
     "/audio/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建音频片段",
-    description="创建音频片段并返回 UUID"
+    description="创建音频片段并返回 UUID（总是返回 success=True）"
 )
-async def create_audio_segment(request: CreateAudioSegmentRequest):
-    """
-    对应 pyJianYingDraft 代码：
-    ```python
-    audio_segment = draft.AudioSegment(
-        "audio.mp3",
-        trange("0s", "5s"),
-        volume=0.6
-    )
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        创建音频片段, 并指定其时间信息、音量、播放速度等设置
-        片段创建完成后, 可通过`ScriptFile.add_segment`方法将其添加到轨道中
-        
-        Args:
-            material (`AudioMaterial` or `str`): 素材实例或素材路径, 若为路径则自动构造素材实例
-            target_timerange (`Timerange`): 片段在轨道上的目标时间范围
-            source_timerange (`Timerange`, optional): 截取的素材片段的时间范围, 默认从开头根据`speed`截取与`target_timerange`等长的一部分
-            speed (`float`, optional): 播放速度, 默认为1.0. 此项与`source_timerange`同时指定时, 将覆盖`target_timerange`中的时长
-            volume (`float`, optional): 音量, 默认为1.0
-            change_pitch (`bool`, optional): 是否跟随变速改变音调, 默认为否
-
-        Raises:
-            `ValueError`: 指定的或计算出的`source_timerange`超出了素材的时长范围
-    ```
-    """
+async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, Any]:
+    """创建音频片段（Coze 友好版本）"""
     logger.info("=" * 60)
     logger.info("收到创建音频片段请求")
     logger.info(f"素材 URL: {request.material_url}")
@@ -84,20 +66,28 @@ async def create_audio_segment(request: CreateAudioSegmentRequest):
         
         if not result["success"]:
             logger.error(f"音频片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"音频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
+    except Exception as e:
+        logger.error(f"创建音频片段时发生错误: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
     except HTTPException:
         raise
     except Exception as e:

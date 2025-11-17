@@ -114,32 +114,12 @@ async def create_draft(request: CreateDraftRequest) -> Dict[str, Any]:
 @router.post(
     "/{draft_id}/add_track",
     response_model=AddTrackResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加轨道",
-    description="向草稿添加指定类型的轨道"
+    description="向草稿添加指定类型的轨道（总是返回 success=True）"
 )
-async def add_track(draft_id: str, request: AddTrackRequest):
-    """
-    对应 pyJianYingDraft 代码：
-    ```python
-    script.add_track(draft.TrackType.audio)
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        向草稿添加指定类型的轨道, 并可配置轨道名称、静音状态及图层位置
-        轨道创建完成后, 可通过添加片段来填充轨道内容
-        
-        Args:
-            track_type (`TrackType`): 轨道类型
-            track_name (`str`, optional): 轨道名称. 仅在创建第一个同类型轨道时允许不指定.
-            mute (`bool`, optional): 轨道是否静音. 默认不静音.
-            relative_index (`int`, optional): 相对(同类型轨道的)图层位置, 越高越接近前景. 默认为0.
-            absolute_index (`int`, optional): 绝对图层位置, 越高越接近前景. 此参数将直接覆盖相应片段的`render_index`属性, 供有经验的用户使用.
-                此参数不能与`relative_index`同时使用.
-
-        Raises:
-            `NameError`: 已存在同类型轨道且未指定名称, 或已存在同名轨道
-    ```
-    """
+async def add_track(draft_id: str, request: AddTrackRequest) -> Dict[str, Any]:
+    """添加轨道（Coze 友好版本）"""
     logger.info("=" * 60)
     logger.info(f"收到添加轨道请求: draft_id={draft_id}")
     logger.info(f"轨道类型: {request.track_type}")
@@ -149,10 +129,7 @@ async def add_track(draft_id: str, request: AddTrackRequest):
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"草稿 {draft_id} 不存在"
-            )
+            return response_manager.format_not_found_error("draft", draft_id)
         
         # 添加轨道
         tracks = config.get("tracks", [])
@@ -173,57 +150,37 @@ async def add_track(draft_id: str, request: AddTrackRequest):
         
         if not success:
             logger.error("添加轨道失败")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加轨道失败"
+            return response_manager.error(
+                error_code=ErrorCode.TRACK_OPERATION_FAILED,
+                details={"reason": "更新配置失败"}
             )
         
         logger.info(f"轨道添加成功: index={track_index}, type={request.track_type}")
         logger.info("=" * 60)
         
-        return AddTrackResponse(
-            success=True,
-            track_index=track_index,
+        success_response = response_manager.success(
             message=f"轨道添加成功，索引: {track_index}"
         )
         
-    except HTTPException:
-        raise
+        return {
+            "track_index": track_index,
+            **success_response
+        }
+        
     except Exception as e:
         logger.error(f"添加轨道时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加轨道失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/{draft_id}/add_segment",
     response_model=AddSegmentToDraftResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加片段到草稿",
-    description="将已创建的 segment 添加到草稿中"
+    description="将已创建的 segment 添加到草稿中（总是返回 success=True）"
 )
-async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
-    """
-    对应 pyJianYingDraft 代码：
-    ```python
-    script.add_segment(audio_segment)
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        将已创建的片段添加到草稿的指定轨道中, 可自动或手动指定轨道名称
-        片段添加后将按时间轴排列, 不允许与已有片段重叠
-        
-        Args:
-            segment (`VideoSegment`, `StickerSegment`, `AudioSegment`, or `TextSegment`): 要添加的片段
-            track_name (`str`, optional): 添加到的轨道名称. 当此类型的轨道仅有一条时可省略.
-
-        Raises:
-            `NameError`: 未找到指定名称的轨道, 或必须提供`track_name`参数时未提供
-            `TypeError`: 片段类型不匹配轨道类型
-            `SegmentOverlap`: 新片段与已有片段重叠
-    ```
-    """
+async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> Dict[str, Any]:
+    """添加片段到草稿（Coze 友好版本）"""
     logger.info("=" * 60)
     logger.info(f"收到添加片段请求: draft_id={draft_id}")
     logger.info(f"片段 ID: {request.segment_id}")
@@ -233,19 +190,13 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"草稿 {draft_id} 不存在"
-            )
+            return response_manager.format_not_found_error("draft", draft_id)
         
         # 验证片段是否存在
         segment = segment_manager.get_segment(request.segment_id)
         if not segment:
             logger.error(f"片段不存在: {request.segment_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {request.segment_id} 不存在"
-            )
+            return response_manager.format_not_found_error("segment", request.segment_id)
         
         segment_type = segment["segment_type"]
         
@@ -255,7 +206,6 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
         
         if target_track_index is None:
             # 自动选择合适的轨道
-            # 根据片段类型映射到轨道类型
             track_type_map = {
                 "audio": "audio",
                 "video": "video",
@@ -285,9 +235,9 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
         
         # 验证轨道索引有效性
         if target_track_index >= len(tracks):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"轨道索引 {target_track_index} 无效"
+            return response_manager.error(
+                error_code=ErrorCode.TRACK_INDEX_INVALID,
+                details={"track_index": target_track_index}
             )
         
         # 验证轨道类型匹配
@@ -301,9 +251,12 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
         expected_track_type = track_type_map.get(segment_type)
         
         if track["track_type"] != expected_track_type:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型 {segment_type} 不能添加到 {track['track_type']} 轨道"
+            return response_manager.error(
+                error_code=ErrorCode.TRACK_TYPE_MISMATCH,
+                details={
+                    "segment_type": segment_type,
+                    "track_type": track["track_type"]
+                }
             )
         
         # 添加片段到轨道
@@ -315,59 +268,32 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest):
         
         if not success:
             logger.error("添加片段失败")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加片段失败"
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "更新配置失败"}
             )
         
         logger.info(f"片段添加成功: segment_id={request.segment_id}, track={target_track_index}")
         logger.info("=" * 60)
         
-        return AddSegmentToDraftResponse(
-            success=True,
+        return response_manager.success(
             message=f"片段已添加到轨道 {target_track_index}"
         )
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"添加片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/{draft_id}/add_effect",
     response_model=AddGlobalEffectResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加全局特效",
-    description="向草稿添加全局特效"
+    description="向草稿添加全局特效（总是返回 success=True）"
 )
-async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest):
-    """
-    对应 pyJianYingDraft 代码：
-    ```python
-    script.add_effect(VideoSceneEffectType.XXX, timerange, params)
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        向草稿添加全局特效, 可配置特效类型、时间范围及参数
-        特效将应用于指定时间段的所有视频内容
-        
-        Args:
-            effect (`VideoSceneEffectType` or `VideoCharacterEffectType`): 特效类型
-            t_range (`Timerange`): 特效片段的时间范围
-            track_name (`str`, optional): 添加到的轨道名称. 当特效轨道仅有一条时可省略.
-            params (`List[Optional[float]]`, optional): 特效参数列表, 参数列表中未提供或为None的项使用默认值.
-                参数取值范围(0~100)与剪映中一致. 某个特效类型有何参数以及具体参数顺序以枚举类成员的annotation为准.
-
-        Raises:
-            `NameError`: 未找到指定名称的轨道, 或必须提供`track_name`参数时未提供
-            `TypeError`: 指定的轨道不是特效轨道
-            `ValueError`: 新片段与已有片段重叠、提供的参数数量超过了该特效类型的参数数量, 或参数值超出范围.
-    ```
-    """
+async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest) -> Dict[str, Any]:
+    """添加全局特效（Coze 友好版本）"""
     logger.info(f"为草稿 {draft_id} 添加全局特效: {request.effect_type}")
     
     try:
@@ -375,10 +301,7 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest):
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"草稿 {draft_id} 不存在"
-            )
+            return response_manager.format_not_found_error("draft", draft_id)
         
         # 添加全局特效记录
         import uuid
@@ -401,58 +324,33 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest):
         
         if not success:
             logger.error("添加全局特效失败")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加全局特效失败"
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "更新配置失败"}
             )
         
         logger.info(f"全局特效添加成功: {effect_id}")
         
-        return AddGlobalEffectResponse(
-            success=True,
-            effect_id=effect_id,
-            message="全局特效添加成功"
-        )
+        success_response = response_manager.success(message="全局特效添加成功")
+        return {
+            "effect_id": effect_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"添加全局特效时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加全局特效失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/{draft_id}/add_filter",
     response_model=AddGlobalFilterResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加全局滤镜",
-    description="向草稿添加全局滤镜"
+    description="向草稿添加全局滤镜（总是返回 success=True）"
 )
-async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest):
-    """
-    对应 pyJianYingDraft 代码：
-    ```python
-    script.add_filter(FilterType.XXX, timerange, intensity)
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        向草稿添加全局滤镜, 可配置滤镜类型、时间范围及强度
-        滤镜将应用于指定时间段的所有视频内容
-        
-        Args:
-            filter_meta (`FilterType`): 滤镜类型
-            t_range (`Timerange`): 滤镜片段的时间范围
-            track_name (`str`, optional): 添加到的轨道名称. 当滤镜轨道仅有一条时可省略.
-            intensity (`float`, optional): 滤镜强度(0-100). 仅当所选滤镜能够调节强度时有效. 默认为100.
-
-        Raises:
-            `NameError`: 未找到指定名称的轨道, 或必须提供`track_name`参数时未提供
-            `TypeError`: 指定的轨道不是滤镜轨道
-            `ValueError`: 新片段与已有片段重叠
-    ```
-    """
+async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest) -> Dict[str, Any]:
+    """添加全局滤镜（Coze 友好版本）"""
     logger.info(f"为草稿 {draft_id} 添加全局滤镜: {request.filter_type}")
     
     try:
@@ -460,10 +358,7 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest):
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"草稿 {draft_id} 不存在"
-            )
+            return response_manager.format_not_found_error("draft", draft_id)
         
         # 添加全局滤镜记录
         import uuid
@@ -486,52 +381,33 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest):
         
         if not success:
             logger.error("添加全局滤镜失败")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加全局滤镜失败"
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "更新配置失败"}
             )
         
         logger.info(f"全局滤镜添加成功: {filter_id}")
         
-        return AddGlobalFilterResponse(
-            success=True,
-            filter_id=filter_id,
-            message="全局滤镜添加成功"
-        )
+        success_response = response_manager.success(message="全局滤镜添加成功")
+        return {
+            "filter_id": filter_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"添加全局滤镜时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加全局滤镜失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/{draft_id}/save",
     response_model=SaveDraftResponse,
+    status_code=status.HTTP_200_OK,
     summary="保存草稿",
-    description="保存并完成草稿编辑，生成剪映草稿文件"
+    description="保存并完成草稿编辑，生成剪映草稿文件（总是返回 success=True）"
 )
-async def save_draft(draft_id: str):
-    """
-    对应 pyJianYingDraft 代码：
-    ```python
-    script.save()
-    ```
-    对应 pyJianYingDraft 注释：
-    ```
-        保存草稿到磁盘, 生成剪映可识别的草稿文件
-        保存完成后即可在剪映中打开和编辑该草稿
-        
-        Raises:
-            `ValueError`: 没有设置保存路径
-    ```
-    
-    实际实现: 将 DraftStateManager 和 SegmentManager 的数据转换为 pyJianYingDraft 调用并保存
-    """
+async def save_draft(draft_id: str) -> Dict[str, Any]:
+    """保存草稿（Coze 友好版本）"""
     logger.info(f"保存草稿: {draft_id}")
     
     try:
@@ -539,10 +415,7 @@ async def save_draft(draft_id: str):
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"草稿 {draft_id} 不存在"
-            )
+            return response_manager.format_not_found_error("draft", draft_id)
         
         # 使用 DraftSaver 保存草稿
         draft_saver = get_draft_saver()
@@ -554,34 +427,26 @@ async def save_draft(draft_id: str):
         
         logger.info(f"草稿保存成功: {draft_path}")
         
-        return SaveDraftResponse(
-            success=True,
-            draft_path=draft_path,
-            message="草稿保存成功"
-        )
+        success_response = response_manager.success(message="草稿保存成功")
+        return {
+            "draft_path": draft_path,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"保存草稿时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"保存草稿失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.get(
     "/{draft_id}/status",
     response_model=DraftStatusResponse,
+    status_code=status.HTTP_200_OK,
     summary="查询草稿状态",
-    description="根据草稿ID查询草稿的详细状态和信息"
+    description="根据草稿ID查询草稿的详细状态和信息（总是返回 success=True）"
 )
-async def get_draft_status(draft_id: str):
-    """
-    查询草稿状态
-    
-    返回草稿的轨道、片段和下载状态信息
-    """
+async def get_draft_status(draft_id: str) -> Dict[str, Any]:
+    """查询草稿状态（Coze 友好版本）"""
     logger.info(f"查询草稿状态: {draft_id}")
     
     try:
@@ -589,10 +454,7 @@ async def get_draft_status(draft_id: str):
         
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"草稿 {draft_id} 不存在"
-            )
+            return response_manager.format_not_found_error("draft", draft_id)
         
         # 构建轨道信息
         tracks_info = []
@@ -641,11 +503,6 @@ async def get_draft_status(draft_id: str):
             download_status=download_status
         )
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"查询草稿状态时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"查询草稿状态失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
