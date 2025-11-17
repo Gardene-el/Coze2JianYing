@@ -1,9 +1,14 @@
 """
 Segment API 路由
 提供符合 API_ENDPOINTS_REFERENCE.md 规范的 Segment 创建和操作 API 端点
+
+更新说明：
+- 所有响应使用 APIResponseManager 统一管理
+- 始终返回 success=True（便于 Coze 插件测试）
+- 错误详情通过 error_code 和 message 字段传递
 """
 from fastapi import APIRouter, HTTPException, status
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from app.schemas.segment_schemas import (
     # Segment 创建
@@ -27,9 +32,11 @@ from app.schemas.segment_schemas import (
 )
 from app.utils.segment_manager import get_segment_manager
 from app.utils.logger import get_logger
+from app.utils.api_response_manager import get_response_manager, ErrorCode
 
 router = APIRouter(prefix="/api/segment", tags=["片段管理"])
 logger = get_logger(__name__)
+response_manager = get_response_manager()
 
 # 获取全局片段管理器
 segment_manager = get_segment_manager()
@@ -40,11 +47,11 @@ segment_manager = get_segment_manager()
 @router.post(
     "/audio/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建音频片段",
-    description="创建音频片段并返回 UUID"
+    description="创建音频片段并返回 UUID（总是返回 success=True）"
 )
-async def create_audio_segment(request: CreateAudioSegmentRequest):
+async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -84,38 +91,38 @@ async def create_audio_segment(request: CreateAudioSegmentRequest):
         
         if not result["success"]:
             logger.error(f"音频片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"音频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建音频片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建音频片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建视频片段",
     description="创建视频片段并返回 UUID"
 )
-async def create_video_segment(request: CreateVideoSegmentRequest):
+async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -155,38 +162,38 @@ async def create_video_segment(request: CreateVideoSegmentRequest):
         
         if not result["success"]:
             logger.error(f"视频片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"视频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建视频片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建视频片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/text/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建文本片段",
     description="创建文本片段并返回 UUID"
 )
-async def create_text_segment(request: CreateTextSegmentRequest):
+async def create_text_segment(request: CreateTextSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -224,38 +231,38 @@ async def create_text_segment(request: CreateTextSegmentRequest):
         
         if not result["success"]:
             logger.error(f"文本片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"文本片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建文本片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建文本片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/sticker/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建贴纸片段",
     description="创建贴纸片段并返回 UUID"
 )
-async def create_sticker_segment(request: CreateStickerSegmentRequest):
+async def create_sticker_segment(request: CreateStickerSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -288,38 +295,38 @@ async def create_sticker_segment(request: CreateStickerSegmentRequest):
         
         if not result["success"]:
             logger.error(f"贴纸片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"贴纸片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建贴纸片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建贴纸片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/effect/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建特效片段",
     description="创建特效片段并返回 UUID"
 )
-async def create_effect_segment(request: CreateEffectSegmentRequest):
+async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -356,38 +363,38 @@ async def create_effect_segment(request: CreateEffectSegmentRequest):
         
         if not result["success"]:
             logger.error(f"特效片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"特效片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建特效片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建特效片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/filter/create",
     response_model=CreateSegmentResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="创建滤镜片段",
     description="创建滤镜片段并返回 UUID"
 )
-async def create_filter_segment(request: CreateFilterSegmentRequest):
+async def create_filter_segment(request: CreateFilterSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -421,28 +428,28 @@ async def create_filter_segment(request: CreateFilterSegmentRequest):
         
         if not result["success"]:
             logger.error(f"滤镜片段创建失败: {result['message']}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result["message"]
+            error_response = response_manager.error(
+                error_code=ErrorCode.SEGMENT_CREATE_FAILED,
+                details={"reason": result["message"]}
             )
+            logger.info("=" * 60)
+            return {
+                "segment_id": "",
+                **error_response
+            }
         
         logger.info(f"滤镜片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
         
-        return CreateSegmentResponse(
-            segment_id=result["segment_id"],
-            success=True,
-            message=result["message"]
-        )
+        success_response = response_manager.success(message=result["message"])
+        return {
+            "segment_id": result["segment_id"],
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"创建滤镜片段时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"创建滤镜片段失败: {str(e)}"
-        )
+        return response_manager.format_internal_error(e)
 
 
 # ==================== AudioSegment 操作端点 ====================
@@ -450,6 +457,7 @@ async def create_filter_segment(request: CreateFilterSegmentRequest):
 @router.post(
     "/audio/{segment_id}/add_effect",
     response_model=AddEffectResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加音频特效",
     description="向音频片段添加特效"
 )
@@ -479,15 +487,14 @@ async def add_audio_effect(segment_id: str, request: AddEffectRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "audio":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 audio，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 audio，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "audio", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -495,9 +502,10 @@ async def add_audio_effect(segment_id: str, request: AddEffectRequest):
         success = segment_manager.add_operation(segment_id, "add_effect", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加特效失败"
+            logger.error("添加特效失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加特效失败"}
             )
         
         # 生成特效 ID
@@ -506,25 +514,21 @@ async def add_audio_effect(segment_id: str, request: AddEffectRequest):
         
         logger.info(f"音频特效添加成功: {effect_id}")
         
-        return AddEffectResponse(
-            success=True,
-            effect_id=effect_id,
-            message="音频特效添加成功"
-        )
+        success_response = response_manager.success(message="音频特效添加成功")
+        return {
+            "effect_id": effect_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加音频特效时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加音频特效失败: {str(e)}"
-        )
+        logger.error(f"添加音频特效失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/audio/{segment_id}/add_fade",
     response_model=AddFadeResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加淡入淡出",
     description="向音频片段添加淡入淡出"
 )
@@ -553,15 +557,14 @@ async def add_audio_fade(segment_id: str, request: AddFadeRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "audio":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 audio，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 audio，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "audio", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -569,31 +572,25 @@ async def add_audio_fade(segment_id: str, request: AddFadeRequest):
         success = segment_manager.add_operation(segment_id, "add_fade", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加淡入淡出失败"
+            logger.error("添加淡入淡出失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加淡入淡出失败"}
             )
         
         logger.info("淡入淡出添加成功")
         
-        return AddFadeResponse(
-            success=True,
-            message="淡入淡出添加成功"
-        )
+        return response_manager.success(message="淡入淡出添加成功")
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加淡入淡出时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加淡入淡出失败: {str(e)}"
-        )
+        logger.error(f"添加淡入淡出失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/audio/{segment_id}/add_keyframe",
     response_model=AddKeyframeResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加音量关键帧",
     description="向音频片段添加音量关键帧"
 )
@@ -619,15 +616,14 @@ async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "audio":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 audio，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 audio，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "audio", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -635,9 +631,10 @@ async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
         success = segment_manager.add_operation(segment_id, "add_keyframe", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加关键帧失败"
+            logger.error("添加关键帧失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加关键帧失败"}
             )
         
         # 生成关键帧 ID
@@ -646,20 +643,15 @@ async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
         
         logger.info(f"关键帧添加成功: {keyframe_id}")
         
-        return AddKeyframeResponse(
-            success=True,
-            keyframe_id=keyframe_id,
-            message="关键帧添加成功"
-        )
+        success_response = response_manager.success(message="关键帧添加成功")
+        return {
+            "keyframe_id": keyframe_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加关键帧时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加关键帧失败: {str(e)}"
-        )
+        logger.error(f"添加关键帧失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== VideoSegment 操作端点 ====================
@@ -667,6 +659,7 @@ async def add_audio_keyframe(segment_id: str, request: AddKeyframeRequest):
 @router.post(
     "/video/{segment_id}/add_animation",
     response_model=AddAnimationResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加动画",
     description="向视频片段添加动画"
 )
@@ -693,15 +686,14 @@ async def add_video_animation(segment_id: str, request: AddAnimationRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -709,9 +701,10 @@ async def add_video_animation(segment_id: str, request: AddAnimationRequest):
         success = segment_manager.add_operation(segment_id, "add_animation", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加动画失败"
+            logger.error("添加动画失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加动画失败"}
             )
         
         # 生成动画 ID
@@ -720,25 +713,21 @@ async def add_video_animation(segment_id: str, request: AddAnimationRequest):
         
         logger.info(f"动画添加成功: {animation_id}")
         
-        return AddAnimationResponse(
-            success=True,
-            animation_id=animation_id,
-            message="动画添加成功"
-        )
+        success_response = response_manager.success(message="动画添加成功")
+        return {
+            "animation_id": animation_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加动画时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加动画失败: {str(e)}"
-        )
+        logger.error(f"添加动画失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_effect",
     response_model=AddEffectResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加视频特效",
     description="向视频片段添加特效"
 )
@@ -768,15 +757,14 @@ async def add_video_effect(segment_id: str, request: AddEffectRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -784,9 +772,10 @@ async def add_video_effect(segment_id: str, request: AddEffectRequest):
         success = segment_manager.add_operation(segment_id, "add_effect", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加特效失败"
+            logger.error("添加特效失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加特效失败"}
             )
         
         # 生成特效 ID
@@ -795,25 +784,21 @@ async def add_video_effect(segment_id: str, request: AddEffectRequest):
         
         logger.info(f"视频特效添加成功: {effect_id}")
         
-        return AddEffectResponse(
-            success=True,
-            effect_id=effect_id,
-            message="视频特效添加成功"
-        )
+        success_response = response_manager.success(message="视频特效添加成功")
+        return {
+            "effect_id": effect_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加视频特效时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加视频特效失败: {str(e)}"
-        )
+        logger.error(f"添加视频特效失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_fade",
     response_model=AddFadeResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加淡入淡出",
     description="向视频片段添加淡入淡出"
 )
@@ -835,15 +820,14 @@ async def add_video_fade(segment_id: str, request: AddFadeRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -851,31 +835,25 @@ async def add_video_fade(segment_id: str, request: AddFadeRequest):
         success = segment_manager.add_operation(segment_id, "add_fade", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加淡入淡出失败"
+            logger.error("添加淡入淡出失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加淡入淡出失败"}
             )
         
         logger.info("淡入淡出添加成功")
         
-        return AddFadeResponse(
-            success=True,
-            message="淡入淡出添加成功"
-        )
+        return response_manager.success(message="淡入淡出添加成功")
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加淡入淡出时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加淡入淡出失败: {str(e)}"
-        )
+        logger.error(f"添加淡入淡出失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_filter",
     response_model=AddFilterResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加滤镜",
     description="向视频片段添加滤镜"
 )
@@ -901,15 +879,14 @@ async def add_video_filter(segment_id: str, request: AddFilterRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -917,9 +894,10 @@ async def add_video_filter(segment_id: str, request: AddFilterRequest):
         success = segment_manager.add_operation(segment_id, "add_filter", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加滤镜失败"
+            logger.error("添加滤镜失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加滤镜失败"}
             )
         
         # 生成滤镜 ID
@@ -928,25 +906,21 @@ async def add_video_filter(segment_id: str, request: AddFilterRequest):
         
         logger.info(f"滤镜添加成功: {filter_id}")
         
-        return AddFilterResponse(
-            success=True,
-            filter_id=filter_id,
-            message="滤镜添加成功"
-        )
+        success_response = response_manager.success(message="滤镜添加成功")
+        return {
+            "filter_id": filter_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加滤镜时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加滤镜失败: {str(e)}"
-        )
+        logger.error(f"添加滤镜失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_mask",
     response_model=AddMaskResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加蒙版",
     description="向视频片段添加蒙版"
 )
@@ -982,15 +956,14 @@ async def add_video_mask(segment_id: str, request: AddMaskRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -998,9 +971,10 @@ async def add_video_mask(segment_id: str, request: AddMaskRequest):
         success = segment_manager.add_operation(segment_id, "add_mask", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加蒙版失败"
+            logger.error("添加蒙版失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加蒙版失败"}
             )
         
         # 生成蒙版 ID
@@ -1009,25 +983,21 @@ async def add_video_mask(segment_id: str, request: AddMaskRequest):
         
         logger.info(f"蒙版添加成功: {mask_id}")
         
-        return AddMaskResponse(
-            success=True,
-            mask_id=mask_id,
-            message="蒙版添加成功"
-        )
+        success_response = response_manager.success(message="蒙版添加成功")
+        return {
+            "mask_id": mask_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加蒙版时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加蒙版失败: {str(e)}"
-        )
+        logger.error(f"添加蒙版失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_transition",
     response_model=AddTransitionResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加转场",
     description="向视频片段添加转场"
 )
@@ -1056,15 +1026,14 @@ async def add_video_transition(segment_id: str, request: AddTransitionRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1072,9 +1041,10 @@ async def add_video_transition(segment_id: str, request: AddTransitionRequest):
         success = segment_manager.add_operation(segment_id, "add_transition", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加转场失败"
+            logger.error("添加转场失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加转场失败"}
             )
         
         # 生成转场 ID
@@ -1083,25 +1053,21 @@ async def add_video_transition(segment_id: str, request: AddTransitionRequest):
         
         logger.info(f"转场添加成功: {transition_id}")
         
-        return AddTransitionResponse(
-            success=True,
-            transition_id=transition_id,
-            message="转场添加成功"
-        )
+        success_response = response_manager.success(message="转场添加成功")
+        return {
+            "transition_id": transition_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加转场时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加转场失败: {str(e)}"
-        )
+        logger.error(f"添加转场失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_background_filling",
     response_model=AddBackgroundFillingResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加背景填充",
     description="向视频片段添加背景填充"
 )
@@ -1131,15 +1097,14 @@ async def add_video_background_filling(segment_id: str, request: AddBackgroundFi
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1147,9 +1112,10 @@ async def add_video_background_filling(segment_id: str, request: AddBackgroundFi
         success = segment_manager.add_operation(segment_id, "add_background_filling", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加背景填充失败"
+            logger.error("添加背景填充失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加背景填充失败"}
             )
         
         logger.info("背景填充添加成功")
@@ -1159,19 +1125,15 @@ async def add_video_background_filling(segment_id: str, request: AddBackgroundFi
             message="背景填充添加成功"
         )
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加背景填充时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加背景填充失败: {str(e)}"
-        )
+        logger.error(f"添加背景填充失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/video/{segment_id}/add_keyframe",
     response_model=AddKeyframeResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加视觉属性关键帧",
     description="向视频片段添加视觉属性关键帧"
 )
@@ -1201,15 +1163,14 @@ async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "video":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 video，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "video", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1217,9 +1178,10 @@ async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
         success = segment_manager.add_operation(segment_id, "add_keyframe", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加关键帧失败"
+            logger.error("添加关键帧失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加关键帧失败"}
             )
         
         # 生成关键帧 ID
@@ -1228,20 +1190,15 @@ async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
         
         logger.info(f"关键帧添加成功: {keyframe_id}")
         
-        return AddKeyframeResponse(
-            success=True,
-            keyframe_id=keyframe_id,
-            message="关键帧添加成功"
-        )
+        success_response = response_manager.success(message="关键帧添加成功")
+        return {
+            "keyframe_id": keyframe_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加关键帧时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加关键帧失败: {str(e)}"
-        )
+        logger.error(f"添加关键帧失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== StickerSegment 操作端点 ====================
@@ -1249,6 +1206,7 @@ async def add_video_keyframe(segment_id: str, request: AddKeyframeRequest):
 @router.post(
     "/sticker/{segment_id}/add_keyframe",
     response_model=AddKeyframeResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加视觉属性关键帧",
     description="向贴纸片段添加视觉属性关键帧"
 )
@@ -1278,15 +1236,14 @@ async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "sticker":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 sticker，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 sticker，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "sticker", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1294,9 +1251,10 @@ async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
         success = segment_manager.add_operation(segment_id, "add_keyframe", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加关键帧失败"
+            logger.error("添加关键帧失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加关键帧失败"}
             )
         
         # 生成关键帧 ID
@@ -1305,20 +1263,15 @@ async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
         
         logger.info(f"关键帧添加成功: {keyframe_id}")
         
-        return AddKeyframeResponse(
-            success=True,
-            keyframe_id=keyframe_id,
-            message="关键帧添加成功"
-        )
+        success_response = response_manager.success(message="关键帧添加成功")
+        return {
+            "keyframe_id": keyframe_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加关键帧时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加关键帧失败: {str(e)}"
-        )
+        logger.error(f"添加关键帧失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== TextSegment 操作端点 ====================
@@ -1326,6 +1279,7 @@ async def add_sticker_keyframe(segment_id: str, request: AddKeyframeRequest):
 @router.post(
     "/text/{segment_id}/add_animation",
     response_model=AddAnimationResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加文字动画",
     description="向文本片段添加文字动画"
 )
@@ -1352,15 +1306,14 @@ async def add_text_animation(segment_id: str, request: AddAnimationRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "text":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 text，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "text", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1368,9 +1321,10 @@ async def add_text_animation(segment_id: str, request: AddAnimationRequest):
         success = segment_manager.add_operation(segment_id, "add_animation", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加动画失败"
+            logger.error("添加动画失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加动画失败"}
             )
         
         # 生成动画 ID
@@ -1379,25 +1333,21 @@ async def add_text_animation(segment_id: str, request: AddAnimationRequest):
         
         logger.info(f"文字动画添加成功: {animation_id}")
         
-        return AddAnimationResponse(
-            success=True,
-            animation_id=animation_id,
-            message="文字动画添加成功"
-        )
+        success_response = response_manager.success(message="文字动画添加成功")
+        return {
+            "animation_id": animation_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加文字动画时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加文字动画失败: {str(e)}"
-        )
+        logger.error(f"添加文字动画失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/text/{segment_id}/add_bubble",
     response_model=AddBubbleResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加气泡",
     description="向文本片段添加气泡"
 )
@@ -1423,15 +1373,14 @@ async def add_text_bubble(segment_id: str, request: AddBubbleRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "text":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 text，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "text", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1439,9 +1388,10 @@ async def add_text_bubble(segment_id: str, request: AddBubbleRequest):
         success = segment_manager.add_operation(segment_id, "add_bubble", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加气泡失败"
+            logger.error("添加气泡失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加气泡失败"}
             )
         
         # 生成气泡 ID
@@ -1450,25 +1400,21 @@ async def add_text_bubble(segment_id: str, request: AddBubbleRequest):
         
         logger.info(f"气泡添加成功: {bubble_id}")
         
-        return AddBubbleResponse(
-            success=True,
-            bubble_id=bubble_id,
-            message="气泡添加成功"
-        )
+        success_response = response_manager.success(message="气泡添加成功")
+        return {
+            "bubble_id": bubble_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加气泡时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加气泡失败: {str(e)}"
-        )
+        logger.error(f"添加气泡失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/text/{segment_id}/add_effect",
     response_model=AddTextEffectResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加花字特效",
     description="向文本片段添加花字特效"
 )
@@ -1493,15 +1439,14 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "text":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 text，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "text", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1509,9 +1454,10 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
         success = segment_manager.add_operation(segment_id, "add_effect", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加花字特效失败"
+            logger.error("添加花字特效失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加花字特效失败"}
             )
         
         # 生成特效 ID
@@ -1526,19 +1472,15 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
             message="花字特效添加成功"
         )
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加花字特效时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加花字特效失败: {str(e)}"
-        )
+        logger.error(f"添加花字特效失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
     "/text/{segment_id}/add_keyframe",
     response_model=AddKeyframeResponse,
+    status_code=status.HTTP_200_OK,
     summary="添加视觉属性关键帧",
     description="向文本片段添加视觉属性关键帧"
 )
@@ -1568,15 +1510,14 @@ async def add_text_keyframe(segment_id: str, request: AddKeyframeRequest):
         # 验证片段是否存在且类型正确
         segment = segment_manager.get_segment(segment_id)
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         if segment["segment_type"] != "text":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型错误，期望 text，实际 {segment['segment_type']}"
+            logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": "text", "actual": segment["segment_type"]}
             )
         
         # 记录操作
@@ -1584,9 +1525,10 @@ async def add_text_keyframe(segment_id: str, request: AddKeyframeRequest):
         success = segment_manager.add_operation(segment_id, "add_keyframe", operation_data)
         
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="添加关键帧失败"
+            logger.error("添加关键帧失败")
+            return response_manager.error(
+                error_code=ErrorCode.OPERATION_FAILED,
+                details={"reason": "添加关键帧失败"}
             )
         
         # 生成关键帧 ID
@@ -1595,20 +1537,15 @@ async def add_text_keyframe(segment_id: str, request: AddKeyframeRequest):
         
         logger.info(f"关键帧添加成功: {keyframe_id}")
         
-        return AddKeyframeResponse(
-            success=True,
-            keyframe_id=keyframe_id,
-            message="关键帧添加成功"
-        )
+        success_response = response_manager.success(message="关键帧添加成功")
+        return {
+            "keyframe_id": keyframe_id,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"添加关键帧时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"添加关键帧失败: {str(e)}"
-        )
+        logger.error(f"添加关键帧失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== 查询端点 ====================
@@ -1616,8 +1553,9 @@ async def add_text_keyframe(segment_id: str, request: AddKeyframeRequest):
 @router.get(
     "/{segment_type}/{segment_id}",
     response_model=SegmentDetailResponse,
+    status_code=status.HTTP_200_OK,
     summary="查询 Segment 详情",
-    description="根据 segment_id 和 segment_type 查询片段的详细信息"
+    description="根据 segment_id 和 segment_type 查询片段的详细信息（总是返回 success=True）"
 )
 async def get_segment_detail(segment_type: str, segment_id: str):
     """
@@ -1631,16 +1569,15 @@ async def get_segment_detail(segment_type: str, segment_id: str):
         segment = segment_manager.get_segment(segment_id)
         
         if not segment:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"片段 {segment_id} 不存在"
-            )
+            logger.error(f"片段不存在: {segment_id}")
+            return response_manager.format_not_found_error("segment", segment_id)
         
         # 验证类型匹配
         if segment["segment_type"] != segment_type:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"片段类型不匹配，期望 {segment_type}，实际 {segment['segment_type']}"
+            logger.error(f"片段类型不匹配: 期望 {segment_type}，实际 {segment['segment_type']}")
+            return response_manager.error(
+                error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
+                details={"expected": segment_type, "actual": segment["segment_type"]}
             )
         
         # 构建响应
@@ -1656,20 +1593,17 @@ async def get_segment_detail(segment_type: str, segment_id: str):
             "last_modified": segment.get("last_modified")
         }
         
-        return SegmentDetailResponse(
-            segment_id=segment_id,
-            segment_type=segment["segment_type"],
-            material_url=material_url,
-            download_status=segment.get("download_status", "none"),
-            local_path=segment.get("local_path"),
-            properties=properties
-        )
+        success_response = response_manager.success(message="查询成功")
+        return {
+            "segment_id": segment_id,
+            "segment_type": segment["segment_type"],
+            "material_url": material_url,
+            "download_status": segment.get("download_status", "none"),
+            "local_path": segment.get("local_path"),
+            "properties": properties,
+            **success_response
+        }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"查询片段详情时发生错误: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"查询片段详情失败: {str(e)}"
-        )
+        logger.error(f"查询片段详情失败: {e}", exc_info=True)
+        return response_manager.format_internal_error(e)
