@@ -363,6 +363,14 @@ if __name__ == "__main__":
         if len(error_msg) > 500:
             error_msg = error_msg[:500] + "..."
         
+        messagebox.showerror("执行失败", f"脚本执行失败:\n\n{error_msg}\n\n详细信息请查看日志。")
+    
+    def _clear_input(self):
+        """清空输入"""
+        self.input_text.delete("1.0", tk.END)
+        self.file_var.set("未加载")
+        self.logger.info("已清空输入")
+        self.status_var.set("已清空")
     
     def cleanup(self):
         """清理标签页资源"""
