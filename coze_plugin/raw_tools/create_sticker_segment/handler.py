@@ -17,10 +17,14 @@ from runtime import Args
 # 以下类型定义从 segment_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
-class Position(NamedTuple):
-    """Position"""
-    x: float  # X 坐标
-    y: float  # Y 坐标
+class ClipSettings(NamedTuple):
+    """ClipSettings"""
+    alpha: float  # 透明度 (0.0-1.0)
+    rotation: float  # 旋转角度（度）
+    scale_x: float  # X 轴缩放比例
+    scale_y: float  # Y 轴缩放比例
+    transform_x: float  # X 轴位置偏移
+    transform_y: float  # Y 轴位置偏移
 
 class TimeRange(NamedTuple):
     """TimeRange"""
@@ -33,14 +37,13 @@ class Input(NamedTuple):
     """create_sticker_segment 工具的输入参数"""
     material_url: str  # 贴纸素材 URL
     target_timerange: TimeRange  # 在轨道上的时间范围
-    position: Optional[Position] = None  # 位置
-    scale: Optional[float] = 1.0  # 缩放比例
+    clip_settings: Optional[ClipSettings] = None  # 图像调节设置（位置、缩放、旋转、透明度）
 
 
 # Output 类型定义
 class Output(NamedTuple):
     """create_sticker_segment 工具的输出参数"""
-    segment_id: str = ""  # Segment UUID
+    segment_id: str = ""  # Segment UUID，错误时为空字符串
     success: bool = False  # 是否成功
     message: str = ""  # 响应消息
 
@@ -96,7 +99,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
 
     Args:
         obj: CustomNamespace/SimpleNamespace 对象
-        type_name: 目标类型名，如 "TimeRange", "ClipSettings"
+        type_name: 目标类型名，如 "TimeRange", "ClipSettings", "CropSettings", "TextStyle"
 
     Returns:
         类型构造表达式字符串，如 "TimeRange(start=0, duration=5000000)"
@@ -115,14 +118,16 @@ def _to_type_constructor(obj, type_name: str) -> str:
                 # 嵌套对象：尝试推断其类型名（使用首字母大写的 key）
                 nested_type_name = key.capitalize() if key else 'Object'
                 # 如果 key 本身就是类型相关的，使用更智能的命名
-                if 'settings' in key.lower():
+                # 根据最新 schema 重构：ClipSettings, CropSettings, TextStyle, TimeRange
+                if 'clip_settings' in key.lower() or key.lower() == 'clipsettings':
                     nested_type_name = 'ClipSettings'
+                elif 'crop_settings' in key.lower() or key.lower() == 'cropsettings':
+                    nested_type_name = 'CropSettings'
                 elif 'timerange' in key.lower():
                     nested_type_name = 'TimeRange'
-                elif 'style' in key.lower():
+                elif 'text_style' in key.lower() or key.lower() == 'textstyle':
                     nested_type_name = 'TextStyle'
-                elif 'position' in key.lower():
-                    nested_type_name = 'Position'
+                # Note: Position class was removed in schema refactoring
                 value_repr = _to_type_constructor(value, nested_type_name)
             elif isinstance(value, str):
                 # 字符串值：加引号
@@ -173,10 +178,8 @@ def handler(args: Args[Input]) -> Output:
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['material_url'] = "{args.input.material_url}"
 req_params_{generated_uuid}['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
-if {args.input.position} is not None:
-    req_params_{generated_uuid}['position'] = {_to_type_constructor(args.input.position, 'Position')}
-if {args.input.scale} is not None:
-    req_params_{generated_uuid}['scale'] = {args.input.scale}
+if {args.input.clip_settings} is not None:
+    req_params_{generated_uuid}['clip_settings'] = {_to_type_constructor(args.input.clip_settings, 'ClipSettings')}
 req_{generated_uuid} = CreateStickerSegmentRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await create_sticker_segment(req_{generated_uuid})

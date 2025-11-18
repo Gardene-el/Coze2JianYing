@@ -13,7 +13,7 @@
 | 参数名称 | 参数描述 | 参数类型 | 是否必填 |
 |---------|---------|---------|---------|
 | segment_id | 片段ID | str | 是 |
-| effect_type | 特效类型 | str | 是 |
+| effect_type | 音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType | str | 是 |
 | params | 特效参数列表（范围 0-100） | Optional[List[float]] | 否 |
 
 ## 输出参数

@@ -19,11 +19,23 @@ from runtime import Args
 
 class ClipSettings(NamedTuple):
     """ClipSettings"""
-    brightness: float  # 亮度 -1.0 到 1.0
-    contrast: float  # 对比度 -1.0 到 1.0
-    saturation: float  # 饱和度 -1.0 到 1.0
-    temperature: float  # 色温 -1.0 到 1.0
-    hue: float  # 色相 -1.0 到 1.0
+    alpha: float  # 透明度 (0.0-1.0)
+    rotation: float  # 旋转角度（度）
+    scale_x: float  # X 轴缩放比例
+    scale_y: float  # Y 轴缩放比例
+    transform_x: float  # X 轴位置偏移
+    transform_y: float  # Y 轴位置偏移
+
+class CropSettings(NamedTuple):
+    """CropSettings"""
+    upper_left_x: float  # 左上角 X 坐标 (0.0-1.0)
+    upper_left_y: float  # 左上角 Y 坐标 (0.0-1.0)
+    upper_right_x: float  # 右上角 X 坐标 (0.0-1.0)
+    upper_right_y: float  # 右上角 Y 坐标 (0.0-1.0)
+    lower_left_x: float  # 左下角 X 坐标 (0.0-1.0)
+    lower_left_y: float  # 左下角 Y 坐标 (0.0-1.0)
+    lower_right_x: float  # 右下角 X 坐标 (0.0-1.0)
+    lower_right_y: float  # 右下角 Y 坐标 (0.0-1.0)
 
 class TimeRange(NamedTuple):
     """TimeRange"""
@@ -41,12 +53,13 @@ class Input(NamedTuple):
     volume: float = 1.0  # 音量 0-2
     change_pitch: bool = False  # 是否跟随变速改变音调
     clip_settings: Optional[ClipSettings] = None  # 图像调节设置
+    crop_settings: Optional[CropSettings] = None  # 裁剪设置
 
 
 # Output 类型定义
 class Output(NamedTuple):
     """create_video_segment 工具的输出参数"""
-    segment_id: str = ""  # Segment UUID
+    segment_id: str = ""  # Segment UUID，错误时为空字符串
     success: bool = False  # 是否成功
     message: str = ""  # 响应消息
 
@@ -102,7 +115,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
 
     Args:
         obj: CustomNamespace/SimpleNamespace 对象
-        type_name: 目标类型名，如 "TimeRange", "ClipSettings"
+        type_name: 目标类型名，如 "TimeRange", "ClipSettings", "CropSettings", "TextStyle"
 
     Returns:
         类型构造表达式字符串，如 "TimeRange(start=0, duration=5000000)"
@@ -121,14 +134,16 @@ def _to_type_constructor(obj, type_name: str) -> str:
                 # 嵌套对象：尝试推断其类型名（使用首字母大写的 key）
                 nested_type_name = key.capitalize() if key else 'Object'
                 # 如果 key 本身就是类型相关的，使用更智能的命名
-                if 'settings' in key.lower():
+                # 根据最新 schema 重构：ClipSettings, CropSettings, TextStyle, TimeRange
+                if 'clip_settings' in key.lower() or key.lower() == 'clipsettings':
                     nested_type_name = 'ClipSettings'
+                elif 'crop_settings' in key.lower() or key.lower() == 'cropsettings':
+                    nested_type_name = 'CropSettings'
                 elif 'timerange' in key.lower():
                     nested_type_name = 'TimeRange'
-                elif 'style' in key.lower():
+                elif 'text_style' in key.lower() or key.lower() == 'textstyle':
                     nested_type_name = 'TextStyle'
-                elif 'position' in key.lower():
-                    nested_type_name = 'Position'
+                # Note: Position class was removed in schema refactoring
                 value_repr = _to_type_constructor(value, nested_type_name)
             elif isinstance(value, str):
                 # 字符串值：加引号
@@ -189,6 +204,8 @@ if {args.input.change_pitch} is not None:
     req_params_{generated_uuid}['change_pitch'] = {args.input.change_pitch}
 if {args.input.clip_settings} is not None:
     req_params_{generated_uuid}['clip_settings'] = {_to_type_constructor(args.input.clip_settings, 'ClipSettings')}
+if {args.input.crop_settings} is not None:
+    req_params_{generated_uuid}['crop_settings'] = {_to_type_constructor(args.input.crop_settings, 'CropSettings')}
 req_{generated_uuid} = CreateVideoSegmentRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await create_video_segment(req_{generated_uuid})

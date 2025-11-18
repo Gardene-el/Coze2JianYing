@@ -6,16 +6,16 @@
 ## 工具介绍
 此工具对应 FastAPI 端点: `/video/{segment_id}/add_keyframe`
 
-为视频片段添加背景填充效果, 可配置填充类型及参数 背景填充可用于调整画面比例和背景样式
+为视频片段添加关键帧, 可精确控制位置、大小、旋转等参数随时间变化 关键帧可用于实现复杂的动画效果
 
 ## 输入参数
 
 | 参数名称 | 参数描述 | 参数类型 | 是否必填 |
 |---------|---------|---------|---------|
 | segment_id | 片段ID | str | 是 |
-| time_offset | 时间偏移量（微秒或字符串如 '2s'） | Any | 是 |
+| time_offset | 时间偏移量，单位：微秒（1秒 = 1,000,000微秒） | int | 是 |
 | value | 关键帧值 | float | 是 |
-| property | 属性名称（VideoSegment 需要） | Optional[str] | 否 |
+| property | 属性名称: position_x, position_y, scale, rotation, opacity 等 | str | 是 |
 
 ## 输出参数
 

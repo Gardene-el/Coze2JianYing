@@ -19,6 +19,7 @@
 | volume | 音量 0-2 | float | 否 |
 | change_pitch | 是否跟随变速改变音调 | bool | 否 |
 | clip_settings | 图像调节设置 | Optional[ClipSettings] | 否 |
+| crop_settings | 裁剪设置 | Optional[CropSettings] | 否 |
 
 ## 输出参数
 

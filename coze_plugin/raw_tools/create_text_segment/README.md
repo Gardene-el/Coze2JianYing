@@ -15,10 +15,8 @@
 | text_content | 文本内容 | str | 是 |
 | target_timerange | 在轨道上的时间范围 | TimeRange | 是 |
 | font_family | 字体名称 | Optional[str] | 否 |
-| font_size | 字体大小 | Optional[float] | 否 |
-| color | 文字颜色（十六进制） | Optional[str] | 否 |
-| text_style | 文本样式 | Optional[TextStyle] | 否 |
-| position | 位置 | Optional[Position] | 否 |
+| text_style | 文本样式（字体大小、颜色、加粗等） | Optional[TextStyle] | 否 |
+| clip_settings | 图像调节设置（位置、缩放、旋转、透明度） | Optional[ClipSettings] | 否 |
 
 ## 输出参数
 
