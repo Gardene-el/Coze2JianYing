@@ -26,6 +26,10 @@ class Output(NamedTuple):
     """add_video_fade 工具的输出参数"""
     success: bool = False  # 是否成功
     message: str = ""  # 响应消息
+    error_code: Optional[str] = None  # 错误代码
+    category: Optional[str] = None  # 错误类别
+    level: Optional[str] = None  # 响应级别
+    details: Optional[Dict] = None  # 详细信息
 
 
 def ensure_coze2jianying_file() -> str:
@@ -79,7 +83,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
 
     Args:
         obj: CustomNamespace/SimpleNamespace 对象
-        type_name: 目标类型名，如 "TimeRange", "ClipSettings"
+        type_name: 目标类型名，如 "TimeRange", "ClipSettings", "CropSettings", "TextStyle"
 
     Returns:
         类型构造表达式字符串，如 "TimeRange(start=0, duration=5000000)"
@@ -98,14 +102,16 @@ def _to_type_constructor(obj, type_name: str) -> str:
                 # 嵌套对象：尝试推断其类型名（使用首字母大写的 key）
                 nested_type_name = key.capitalize() if key else 'Object'
                 # 如果 key 本身就是类型相关的，使用更智能的命名
-                if 'settings' in key.lower():
+                # 根据最新 schema 重构：ClipSettings, CropSettings, TextStyle, TimeRange
+                if 'clip_settings' in key.lower() or key.lower() == 'clipsettings':
                     nested_type_name = 'ClipSettings'
+                elif 'crop_settings' in key.lower() or key.lower() == 'cropsettings':
+                    nested_type_name = 'CropSettings'
                 elif 'timerange' in key.lower():
                     nested_type_name = 'TimeRange'
-                elif 'style' in key.lower():
+                elif 'text_style' in key.lower() or key.lower() == 'textstyle':
                     nested_type_name = 'TextStyle'
-                elif 'position' in key.lower():
-                    nested_type_name = 'Position'
+                # Note: Position class was removed in schema refactoring
                 value_repr = _to_type_constructor(value, nested_type_name)
             elif isinstance(value, str):
                 # 字符串值：加引号
@@ -156,7 +162,7 @@ def handler(args: Args[Input]) -> Output:
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['in_duration'] = "{args.input.in_duration}"
 req_params_{generated_uuid}['out_duration'] = "{args.input.out_duration}"
-req_{generated_uuid} = AddFadeRequest(**req_params_{generated_uuid})
+req_{generated_uuid} = AddVideoFadeRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_video_fade(segment_{args.input.segment_id}, req_{generated_uuid})
 """
@@ -169,7 +175,7 @@ resp_{generated_uuid} = await add_video_fade(segment_{args.input.segment_id}, re
         if logger:
             logger.info(f"add_video_fade 调用成功")
 
-        return Output(success=True, message="操作成功")
+        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None)
 
     except Exception as e:
         error_msg = f"调用 add_video_fade 时发生错误: {str(e)}"

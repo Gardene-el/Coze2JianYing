@@ -13,9 +13,9 @@
 | 参数名称 | 参数描述 | 参数类型 | 是否必填 |
 |---------|---------|---------|---------|
 | segment_id | 片段ID | str | 是 |
-| time_offset | 时间偏移量（微秒或字符串如 '2s'） | Any | 是 |
+| time_offset | 时间偏移量，单位：微秒（1秒 = 1,000,000微秒） | int | 是 |
 | value | 关键帧值 | float | 是 |
-| property | 属性名称（VideoSegment 需要） | Optional[str] | 否 |
+| property | 属性名称: position_x, position_y, scale, rotation, opacity 等 | str | 是 |
 
 ## 输出参数
 

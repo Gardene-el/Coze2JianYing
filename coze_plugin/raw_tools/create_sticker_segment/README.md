@@ -14,8 +14,7 @@
 |---------|---------|---------|---------|
 | material_url | 贴纸素材 URL | str | 是 |
 | target_timerange | 在轨道上的时间范围 | TimeRange | 是 |
-| position | 位置 | Optional[Position] | 否 |
-| scale | 缩放比例 | Optional[float] | 否 |
+| clip_settings | 图像调节设置（位置、缩放、旋转、透明度） | Optional[ClipSettings] | 否 |
 
 ## 输出参数
 

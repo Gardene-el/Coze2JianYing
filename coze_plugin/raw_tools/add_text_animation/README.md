@@ -13,7 +13,7 @@
 | 参数名称 | 参数描述 | 参数类型 | 是否必填 |
 |---------|---------|---------|---------|
 | segment_id | 片段ID | str | 是 |
-| animation_type | 动画类型 | str | 是 |
+| animation_type | 动画类型: TextAnimationType | str | 是 |
 | duration | 动画时长 | Optional[str] | 否 |
 
 ## 输出参数

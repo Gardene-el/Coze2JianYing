@@ -34,7 +34,7 @@ class Input(NamedTuple):
 # Output 类型定义
 class Output(NamedTuple):
     """create_effect_segment 工具的输出参数"""
-    segment_id: str = ""  # Segment UUID
+    segment_id: str = ""  # Segment UUID，错误时为空字符串
     success: bool = False  # 是否成功
     message: str = ""  # 响应消息
 
@@ -90,7 +90,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
 
     Args:
         obj: CustomNamespace/SimpleNamespace 对象
-        type_name: 目标类型名，如 "TimeRange", "ClipSettings"
+        type_name: 目标类型名，如 "TimeRange", "ClipSettings", "CropSettings", "TextStyle"
 
     Returns:
         类型构造表达式字符串，如 "TimeRange(start=0, duration=5000000)"
@@ -109,14 +109,16 @@ def _to_type_constructor(obj, type_name: str) -> str:
                 # 嵌套对象：尝试推断其类型名（使用首字母大写的 key）
                 nested_type_name = key.capitalize() if key else 'Object'
                 # 如果 key 本身就是类型相关的，使用更智能的命名
-                if 'settings' in key.lower():
+                # 根据最新 schema 重构：ClipSettings, CropSettings, TextStyle, TimeRange
+                if 'clip_settings' in key.lower() or key.lower() == 'clipsettings':
                     nested_type_name = 'ClipSettings'
+                elif 'crop_settings' in key.lower() or key.lower() == 'cropsettings':
+                    nested_type_name = 'CropSettings'
                 elif 'timerange' in key.lower():
                     nested_type_name = 'TimeRange'
-                elif 'style' in key.lower():
+                elif 'text_style' in key.lower() or key.lower() == 'textstyle':
                     nested_type_name = 'TextStyle'
-                elif 'position' in key.lower():
-                    nested_type_name = 'Position'
+                # Note: Position class was removed in schema refactoring
                 value_repr = _to_type_constructor(value, nested_type_name)
             elif isinstance(value, str):
                 # 字符串值：加引号

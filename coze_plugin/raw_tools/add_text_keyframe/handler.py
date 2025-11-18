@@ -17,17 +17,21 @@ from runtime import Args
 class Input(NamedTuple):
     """add_text_keyframe 工具的输入参数"""
     segment_id: str  # 片段ID
-    time_offset: Any  # 时间偏移量（微秒或字符串如 '2s'）
+    time_offset: int  # 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
     value: float  # 关键帧值
-    property: Optional[str] = None  # 属性名称（VideoSegment 需要）
+    property: str  # 属性名称: position_x, position_y, scale, rotation, opacity 等
 
 
 # Output 类型定义
 class Output(NamedTuple):
     """add_text_keyframe 工具的输出参数"""
     success: bool = False  # 是否成功
-    keyframe_id: str = ""  # 关键帧 UUID
+    keyframe_id: str = ""  # 关键帧 UUID，错误时为空字符串
     message: str = ""  # 响应消息
+    error_code: Optional[str] = None  # 错误代码
+    category: Optional[str] = None  # 错误类别
+    level: Optional[str] = None  # 响应级别
+    details: Optional[Dict] = None  # 详细信息
 
 
 def ensure_coze2jianying_file() -> str:
@@ -81,7 +85,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
 
     Args:
         obj: CustomNamespace/SimpleNamespace 对象
-        type_name: 目标类型名，如 "TimeRange", "ClipSettings"
+        type_name: 目标类型名，如 "TimeRange", "ClipSettings", "CropSettings", "TextStyle"
 
     Returns:
         类型构造表达式字符串，如 "TimeRange(start=0, duration=5000000)"
@@ -100,14 +104,16 @@ def _to_type_constructor(obj, type_name: str) -> str:
                 # 嵌套对象：尝试推断其类型名（使用首字母大写的 key）
                 nested_type_name = key.capitalize() if key else 'Object'
                 # 如果 key 本身就是类型相关的，使用更智能的命名
-                if 'settings' in key.lower():
+                # 根据最新 schema 重构：ClipSettings, CropSettings, TextStyle, TimeRange
+                if 'clip_settings' in key.lower() or key.lower() == 'clipsettings':
                     nested_type_name = 'ClipSettings'
+                elif 'crop_settings' in key.lower() or key.lower() == 'cropsettings':
+                    nested_type_name = 'CropSettings'
                 elif 'timerange' in key.lower():
                     nested_type_name = 'TimeRange'
-                elif 'style' in key.lower():
+                elif 'text_style' in key.lower() or key.lower() == 'textstyle':
                     nested_type_name = 'TextStyle'
-                elif 'position' in key.lower():
-                    nested_type_name = 'Position'
+                # Note: Position class was removed in schema refactoring
                 value_repr = _to_type_constructor(value, nested_type_name)
             elif isinstance(value, str):
                 # 字符串值：加引号
@@ -158,9 +164,8 @@ def handler(args: Args[Input]) -> Output:
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['time_offset'] = {args.input.time_offset}
 req_params_{generated_uuid}['value'] = {args.input.value}
-if {args.input.property} is not None:
-    req_params_{generated_uuid}['property'] = "{args.input.property}"
-req_{generated_uuid} = AddKeyframeRequest(**req_params_{generated_uuid})
+req_params_{generated_uuid}['property'] = "{args.input.property}"
+req_{generated_uuid} = AddTextKeyframeRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_text_keyframe(segment_{args.input.segment_id}, req_{generated_uuid})
 """
@@ -173,7 +178,7 @@ resp_{generated_uuid} = await add_text_keyframe(segment_{args.input.segment_id},
         if logger:
             logger.info(f"add_text_keyframe 调用成功")
 
-        return Output(success=True, keyframe_id="", message="操作成功")
+        return Output(success=True, keyframe_id="", message="操作成功", error_code=None, category=None, level=None, details=None)
 
     except Exception as e:
         error_msg = f"调用 add_text_keyframe 时发生错误: {str(e)}"
