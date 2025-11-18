@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v0.3.0 (2025-11-17)
+
+### Documentation
+
+- Delete scripts/generate_tool_doc.py
+  ([`16c8d4c`](https://github.com/Gardene-el/Coze2JianYing/commit/16c8d4cb71bbec58e0a15c354cb74ca10096734e))
+
+- 重构的相关文档
+  ([`d1865a7`](https://github.com/Gardene-el/Coze2JianYing/commit/d1865a76cf3f4fc033d76b43fa98c705df9862f4))
+
+### Features
+
+- Fix Request model
+  ([`5cb4336`](https://github.com/Gardene-el/Coze2JianYing/commit/5cb4336b16cd44f7aa751613cecbcf5dbc7434c7))
+
+- 重构api。
+  ([`b2bbc1d`](https://github.com/Gardene-el/Coze2JianYing/commit/b2bbc1d71d5307acca5b60bef8c3b1bdec4f54c9))
+
+
 ## v0.2.1 (2025-11-17)
 
 ### Bug Fixes
