@@ -188,7 +188,7 @@ def handler(args: Args[Input]) -> Output:
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['text_content'] = "{args.input.text_content}"
 req_params_{generated_uuid}['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
-if {args.input.font_family} is not None:
+if "{args.input.font_family}" is not None:
     req_params_{generated_uuid}['font_family'] = "{args.input.font_family}"
 if {args.input.text_style} is not None:
     req_params_{generated_uuid}['text_style'] = {_to_type_constructor(args.input.text_style, 'TextStyle')}
