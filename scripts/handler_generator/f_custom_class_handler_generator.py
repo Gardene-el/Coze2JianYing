@@ -87,7 +87,10 @@ class CustomClassHandlerGenerator:
 {custom_class.docstring}
 
 此工具接收 {custom_class.class_name} 的所有参数（可选，使用原始默认值），
-并返回一个 {custom_class.class_name} 对象。
+并返回一个包含 {custom_class.class_name} 数据的字典。
+
+注意：handler 直接返回 Dict[str, Any]，而不是 NamedTuple，
+以确保在 Coze 平台中正确的 JSON 对象序列化。
 """
 
 import json
@@ -99,14 +102,6 @@ from runtime import Args
 
 
 {input_class}
-
-
-# Output 类型定义
-class Output(NamedTuple):
-    """{custom_class.tool_name} 工具的输出"""
-    result: Optional[{custom_class.class_name}]  # {custom_class.class_name} 对象（错误时为 None）
-    success: bool           # 操作成功状态
-    message: str            # 状态消息
 
 
 {handler_func}
@@ -188,11 +183,11 @@ class Output(NamedTuple):
                     f"            # {field_name} 是必需参数但未提供，返回 None\n"
                     f"            if logger:\n"
                     f"                logger.warning(f'{field_name} 未提供，返回 None')\n"
-                    f"            return Output(\n"
-                    f"                result=None,\n"
-                    f"                success=True,\n"
-                    f"                message='{custom_class.class_name} 对象创建成功（参数不完整）'\n"
-                    f"            )\n"
+                    f"            return {{\n"
+                    f"                'result': None,\n"
+                    f"                'success': True,\n"
+                    f"                'message': '{custom_class.class_name} 对象创建成功（参数不完整）'\n"
+                    f"            }}\n"
                     f"        {field_name} = args.input.{field_name}"
                 )
             else:
@@ -206,7 +201,7 @@ class Output(NamedTuple):
         field_assignments_code = '\n'.join(field_assignments)
         constructor_params_code = ', '.join(constructor_params)
         
-        handler = f'''def handler(args: Args[Input]) -> Output:
+        handler = f'''def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建 {custom_class.class_name} 对象的主处理函数
     
@@ -214,7 +209,10 @@ class Output(NamedTuple):
         args: 包含所有 {custom_class.class_name} 参数的输入参数（使用原始默认值）
         
     Returns:
-        包含 {custom_class.class_name} 对象的 Output
+        Dict[str, Any]: 包含 result、success、message 字段的字典
+            - result: {custom_class.class_name} 对象的字典表示（参数不完整时为 None）
+            - success: 操作是否成功
+            - message: 状态消息
     """
     logger = getattr(args, 'logger', None)
     
@@ -226,27 +224,30 @@ class Output(NamedTuple):
 {field_assignments_code}
         
         # 创建 {custom_class.class_name} 对象
-        result = {custom_class.class_name}({constructor_params_code})
+        obj = {custom_class.class_name}({constructor_params_code})
+        
+        # 转换为字典以确保正确的 JSON 序列化
+        result_dict = obj._asdict()
         
         if logger:
             logger.info(f"Successfully created {custom_class.class_name} object")
         
-        return Output(
-            result=result,
-            success=True,
-            message="{custom_class.class_name} 对象创建成功"
-        )
+        return {{
+            'result': result_dict,
+            'success': True,
+            'message': '{custom_class.class_name} 对象创建成功'
+        }}
         
     except Exception as e:
         error_msg = f"创建 {custom_class.class_name} 对象时发生错误: {{str(e)}}"
         if logger:
             logger.error(error_msg)
         
-        return Output(
-            result=None,
-            success=False,
-            message=error_msg
-        )
+        return {{
+            'result': None,
+            'success': False,
+            'message': error_msg
+        }}
 '''
         return handler
     

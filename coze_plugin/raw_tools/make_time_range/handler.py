@@ -5,7 +5,10 @@ make_time_range 工具处理器
 时间范围模型（微秒）
 
 此工具接收 TimeRange 的所有参数（可选，使用原始默认值），
-并返回一个 TimeRange 对象。
+并返回一个包含 TimeRange 数据的字典。
+
+注意：handler 直接返回 Dict[str, Any]，而不是 NamedTuple，
+以确保在 Coze 平台中正确的 JSON 对象序列化。
 """
 
 import json
@@ -27,15 +30,7 @@ class Input(NamedTuple):
     duration: Optional[int] = None  # 持续时长（微秒）
 
 
-# Output 类型定义
-class Output(NamedTuple):
-    """make_time_range 工具的输出"""
-    result: Optional[TimeRange]  # TimeRange 对象（错误时为 None）
-    success: bool           # 操作成功状态
-    message: str            # 状态消息
-
-
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建 TimeRange 对象的主处理函数
     
@@ -43,7 +38,10 @@ def handler(args: Args[Input]) -> Output:
         args: 包含所有 TimeRange 参数的输入参数（使用原始默认值）
         
     Returns:
-        包含 TimeRange 对象的 Output
+        Dict[str, Any]: 包含 result、success、message 字段的字典
+            - result: TimeRange 对象的字典表示（参数不完整时为 None）
+            - success: 操作是否成功
+            - message: 状态消息
     """
     logger = getattr(args, 'logger', None)
     
@@ -56,43 +54,46 @@ def handler(args: Args[Input]) -> Output:
             # start 是必需参数但未提供，返回 None
             if logger:
                 logger.warning(f'start 未提供，返回 None')
-            return Output(
-                result=None,
-                success=True,
-                message='TimeRange 对象创建成功（参数不完整）'
-            )
+            return {
+                'result': None,
+                'success': True,
+                'message': 'TimeRange 对象创建成功（参数不完整）'
+            }
         start = args.input.start
         if args.input.duration is None:
             # duration 是必需参数但未提供，返回 None
             if logger:
                 logger.warning(f'duration 未提供，返回 None')
-            return Output(
-                result=None,
-                success=True,
-                message='TimeRange 对象创建成功（参数不完整）'
-            )
+            return {
+                'result': None,
+                'success': True,
+                'message': 'TimeRange 对象创建成功（参数不完整）'
+            }
         duration = args.input.duration
         
         # 创建 TimeRange 对象
-        result = TimeRange(start=start, duration=duration)
+        obj = TimeRange(start=start, duration=duration)
+        
+        # 转换为字典以确保正确的 JSON 序列化
+        result_dict = obj._asdict()
         
         if logger:
             logger.info(f"Successfully created TimeRange object")
         
-        return Output(
-            result=result,
-            success=True,
-            message="TimeRange 对象创建成功"
-        )
+        return {
+            'result': result_dict,
+            'success': True,
+            'message': 'TimeRange 对象创建成功'
+        }
         
     except Exception as e:
         error_msg = f"创建 TimeRange 对象时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return Output(
-            result=None,
-            success=False,
-            message=error_msg
-        )
+        return {
+            'result': None,
+            'success': False,
+            'message': error_msg
+        }
 
