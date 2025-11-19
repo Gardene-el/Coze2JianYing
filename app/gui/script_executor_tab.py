@@ -340,10 +340,12 @@ from app.schemas.segment_schemas import (
     CreateDraftRequest, AddTrackRequest, AddSegmentToDraftRequest,
     AddGlobalEffectRequest, AddGlobalFilterRequest,
     # Segment操作请求
-    AddEffectRequest, AddFadeRequest, AddKeyframeRequest,
-    AddAnimationRequest, AddFilterRequest, AddMaskRequest,
-    AddTransitionRequest, AddBackgroundFillingRequest,
-    AddBubbleRequest, AddTextEffectRequest,
+    AddAudioEffectRequest, AddVideoEffectRequest,
+    AddAudioFadeRequest, AddVideoFadeRequest,
+    AddAudioKeyframeRequest, AddVideoKeyframeRequest, AddTextKeyframeRequest, AddStickerKeyframeRequest,
+    AddVideoAnimationRequest, AddTextAnimationRequest,
+    AddVideoFilterRequest, AddVideoMaskRequest, AddVideoTransitionRequest,
+    AddVideoBackgroundFillingRequest, AddTextBubbleRequest, AddTextEffectRequest,
     # 辅助模型
     TimeRange, ClipSettings, TextStyle, Position
 )
