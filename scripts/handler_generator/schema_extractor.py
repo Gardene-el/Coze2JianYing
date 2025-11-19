@@ -169,15 +169,30 @@ class SchemaExtractor:
             if isinstance(value_node.value, str):
                 return f'"{value_node.value}"'
             return str(value_node.value)
+        elif isinstance(value_node, ast.List):
+            # 处理列表默认值，如 [1.0, 1.0, 1.0]
+            elements = []
+            for elt in value_node.elts:
+                if isinstance(elt, ast.Constant):
+                    elements.append(str(elt.value))
+            return f"[{', '.join(elements)}]"
         elif isinstance(value_node, ast.Call):
             if isinstance(value_node.func, ast.Name) and value_node.func.id == "Field":
                 # 从 Field() 提取默认值
                 if value_node.args:
-                    if isinstance(value_node.args[0], ast.Constant):
-                        val = value_node.args[0].value
+                    first_arg = value_node.args[0]
+                    if isinstance(first_arg, ast.Constant):
+                        val = first_arg.value
                         if isinstance(val, str):
                             return f'"{val}"'
                         return str(val)
+                    elif isinstance(first_arg, ast.List):
+                        # 处理 Field([1.0, 2.0, 3.0]) 这样的情况
+                        elements = []
+                        for elt in first_arg.elts:
+                            if isinstance(elt, ast.Constant):
+                                elements.append(str(elt.value))
+                        return f"[{', '.join(elements)}]"
                 return "..."
         return "..."
 
