@@ -347,21 +347,11 @@ from app.schemas.segment_schemas import (
     AddVideoFilterRequest, AddVideoMaskRequest, AddVideoTransitionRequest,
     AddVideoBackgroundFillingRequest, AddTextBubbleRequest, AddTextEffectRequest,
     # 辅助模型
-    TimeRange, ClipSettings, TextStyle, Position
+    TimeRange, ClipSettings, TextStyle, CropSettings
 )
 
 # 兼容CustomNamespace（脚本中可能使用）
 CustomNamespace = SimpleNamespace
-
-# 添加CropSettings（如果脚本中使用了它）
-try:
-    from app.schemas.segment_schemas import CropSettings
-except ImportError:
-    # 如果不存在，创建一个简单的类
-    class CropSettings:
-        def __init__(self, **kwargs):
-            for k, v in kwargs.items():
-                setattr(self, k, v)
 
 # === 用户脚本开始 ===
 """
