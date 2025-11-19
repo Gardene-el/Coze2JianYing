@@ -2,17 +2,17 @@
 
 ## 功能描述
 
-为 `ClipSettings` 类生成 Object 对象的辅助工具。
+为 `ClipSettings` 类生成对象的辅助工具。
 
 图像调节设置（镜像 pyJianYingDraft.ClipSettings）
 对应 pyJianYingDraft 的 ClipSettings 类，用于控制片段的变换属性
 
-此工具接收 ClipSettings 的所有参数（全部为可选），并返回一个 Object（字典）表示。
+此工具接收 ClipSettings 的所有参数（可选，有默认值的使用原始默认值），并返回一个 `ClipSettings` 类型的对象。
 该对象可以在 Coze 工作流中传递给需要 ClipSettings 参数的其他工具。
 
 ## 输入参数
 
-所有参数均为可选，仅在提供时才会包含在返回的对象中。
+参数均为可选，有默认值的参数会使用原始默认值。
 
 | 参数名 | 类型 | 描述 | 默认值 |
 |--------|------|------|--------|
@@ -25,14 +25,11 @@
 
 ## 输出结果
 
-### Output 类型定义
+返回一个 `ClipSettings` 类型的对象。
 
-```python
-class Output(NamedTuple):
-    result: Dict[str, Any]  # ClipSettings 对象的字典表示
-    success: bool           # 操作成功状态
-    message: str            # 状态消息
-```
+### 主要返回值
+
+- `result`: `ClipSettings` 对象（成功时）或 `None`（失败时）
 
 ## 使用示例
 
@@ -46,17 +43,15 @@ class Output(NamedTuple):
 }
 ```
 
-### 返回示例
+### 返回的对象结构
+
+成功时返回 `ClipSettings` 对象，包含以下字段：
 
 ```json
 {
-  "result": {
   "alpha": 0.5,
   "rotation": 0.5,
   "scale_x": 0.5
-  },
-  "success": true,
-  "message": "ClipSettings 对象创建成功"
 }
 ```
 
@@ -68,6 +63,6 @@ class Output(NamedTuple):
 
 ## 注意事项
 
-- 所有参数均为可选，未提供的参数不会出现在返回的对象中
-- 返回的 `result` 字段是一个标准的 JSON 对象（字典）
+- 所有参数均为可选，未提供的参数将使用默认值（如果有）
+- 返回的是 `ClipSettings` 类型对象，不是字典
 - 可以在 Coze 工作流的后续步骤中直接使用此对象
