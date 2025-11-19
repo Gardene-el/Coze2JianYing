@@ -2,7 +2,7 @@
 
 ## 概述
 
-此目录用于存放 FastAPI 服务相关的代码。本地服务标签页中的 FastAPI 服务实现将放置在这里。
+此目录用于存放 FastAPI 服务相关的代码。云端服务标签页中的 FastAPI 服务实现将放置在这里。
 
 ## 目录结构
 
@@ -25,12 +25,12 @@ services/
 
 ### 创建 FastAPI 服务
 
-当前 `LocalServiceTab` 中使用占位符实现。未来的 FastAPI 服务应该：
+FastAPI 服务用于云端服务标签页。服务实现应该：
 
 1. 在 `services/core/service.py` 中定义主服务类
 2. 在 `services/api/routes.py` 中定义 API 路由
 3. 在 `services/models/schemas.py` 中定义数据模型
-4. 在 `LocalServiceTab._run_service()` 方法中启动实际的 FastAPI 应用
+4. 在云端服务标签页中启动实际的 FastAPI 应用
 
 ### 示例代码结构
 
@@ -87,9 +87,9 @@ class DraftResponse(BaseModel):
     message: str
 ```
 
-## 集成到 LocalServiceTab
+## 集成到云端服务标签页
 
-在 `src/gui/local_service_tab.py` 中：
+在 `app/gui/cloud_service_tab.py` 中：
 
 ```python
 def _run_service(self, port: int):
@@ -156,6 +156,6 @@ FastAPI 服务需要以下依赖（已在 `requirements.txt` 中）：
 
 ## 注意事项
 
-- 当前 LocalServiceTab 中的 `_run_service()` 方法使用占位符实现
-- 替换占位符实现时，确保保持线程安全和 GUI 更新的正确性
-- FastAPI 服务应在单独的线程中运行，避免阻塞 GUI
+- FastAPI 服务需要公网访问才能被 Coze 调用，可以使用 ngrok 等工具
+- 确保保持线程安全和 GUI 更新的正确性
+- FastAPI 服务应在单独的线程或进程中运行，避免阻塞 GUI

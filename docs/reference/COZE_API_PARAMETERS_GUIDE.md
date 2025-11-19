@@ -639,4 +639,4 @@ except Exception as e:
 
 **文档版本**: v1.0  
 **最后更新**: 2025-11-04  
-**相关文档**: [Coze 端插件详解](./COZE_LOCAL_PLUGIN_DETAILED_EXPLANATION.md)
+**相关文档**: [端侧插件不可用调查报告](../analysis/LOCAL_PLUGIN_NOT_SUPPORTED.md)

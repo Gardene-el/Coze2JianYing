@@ -79,7 +79,7 @@ pip install -r requirements.txt
    python app/main.py
    ```
 
-2. 切换到"本地服务"标签页
+2. 切换到"云端服务"标签页
 
 3. 配置端口（默认 8000）
 
@@ -108,7 +108,7 @@ uvicorn app.api_main:app --host 127.0.0.1 --port 8000 --reload
 
 ### 步骤 3：配置内网穿透（如需 Coze 访问）
 
-由于 Coze 需要访问公网 URL，本地服务需要通过内网穿透暴露。
+由于 Coze 需要访问公网 URL，云端服务需要通过内网穿透暴露。
 
 #### 使用 ngrok（推荐）
 
@@ -501,7 +501,7 @@ curl "http://your-domain.com/api/draft/list?skip=0&limit=10"
 
 ## 常见问题
 
-### 1. Coze 无法访问本地服务
+### 1. Coze 无法访问云端服务
 
 **原因**：Coze 只能访问公网 URL
 
