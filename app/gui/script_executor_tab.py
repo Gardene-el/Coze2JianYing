@@ -231,13 +231,13 @@ class ScriptExecutorTab(BaseTab):
                     
             # 问题3: 修复包含错误JSON字符串的行
             # 例如: req_params['target_timerange'] = "{\"duration\":4200000,\"start\":0}"
+            # 或: req["timerange"] = "{"duration":5000000,"start":0}"
             # 这种应该是TimeRange对象，不是字符串
-            if 'target_timerange' in line and '= "' in line:
+            if ('target_timerange' in line or 'timerange' in line) and '= "' in line and ('{' in line or '\\{' in line):
                 # 尝试提取JSON并转换为TimeRange调用
                 # 支持转义和非转义的JSON字符串
                 patterns = [
-                    r'= "(\\{[^}]+\\})"',  # Escaped: "{\"duration\":...}"
-                    r'= "(\{[^}]+\})"',    # Unescaped: "{"duration":...}"
+                    r'= "(\\?\{[^}]+\\?\})"',  # Both escaped and unescaped
                 ]
                 
                 for pattern in patterns:
