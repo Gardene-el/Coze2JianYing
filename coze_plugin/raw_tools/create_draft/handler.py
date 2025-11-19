@@ -177,7 +177,7 @@ req_{generated_uuid} = CreateDraftRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await create_draft(req_{generated_uuid})
 
-draft_{generated_uuid} = resp_{generated_uuid}.draft_id
+draft_{generated_uuid} = resp_{generated_uuid}['draft_id']
 """
 
         # 写入 API 调用到文件

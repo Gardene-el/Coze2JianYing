@@ -290,15 +290,17 @@ class APICallCodeGenerator:
         if has_output_draft_id:
             # 保存为 draft_{uuid} 而不是 draft_id_{uuid}
             # 这样后续函数可以通过 draft_{uuid} 引用这个草稿
+            # 使用字典访问而不是属性访问，因为 API 返回的是字典
             api_call_code += "\n"
-            api_call_code += "draft_{generated_uuid} = resp_{generated_uuid}.draft_id\n"
+            api_call_code += "draft_{generated_uuid} = resp_{generated_uuid}['draft_id']\n"
 
         if has_output_segment_id:
             # 保存为 segment_{uuid} 而不是 segment_id_{uuid}
             # 这样后续函数可以通过 segment_{uuid} 引用这个片段
+            # 使用字典访问而不是属性访问，因为 API 返回的是字典
             api_call_code += "\n"
             api_call_code += (
-                "segment_{generated_uuid} = resp_{generated_uuid}.segment_id\n"
+                "segment_{generated_uuid} = resp_{generated_uuid}['segment_id']\n"
             )
 
         api_call_code += '"""\n'

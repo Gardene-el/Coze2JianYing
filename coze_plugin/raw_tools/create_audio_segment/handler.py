@@ -184,7 +184,7 @@ req_{generated_uuid} = CreateAudioSegmentRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await create_audio_segment(req_{generated_uuid})
 
-segment_{generated_uuid} = resp_{generated_uuid}.segment_id
+segment_{generated_uuid} = resp_{generated_uuid}['segment_id']
 """
 
         # 写入 API 调用到文件
