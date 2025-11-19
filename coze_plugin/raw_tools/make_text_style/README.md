@@ -17,7 +17,7 @@
 | 参数名 | 类型 | 描述 | 默认值 |
 |--------|------|------|--------|
 | `font_size` | `float` | 字体大小 | `24.0` |
-| `color` | `List[float]` | 文字颜色 RGB (0.0-1.0) | `...` |
+| `color` | `List[float]` | 文字颜色 RGB (0.0-1.0) | `[1.0, 1.0, 1.0]` |
 | `bold` | `bool` | 是否加粗 | `False` |
 | `italic` | `bool` | 是否斜体 | `False` |
 | `underline` | `bool` | 是否下划线 | `False` |

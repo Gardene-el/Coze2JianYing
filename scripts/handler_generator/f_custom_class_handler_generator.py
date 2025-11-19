@@ -74,22 +74,28 @@ class CustomClassHandlerGenerator:
         # 生成 Input 类
         input_class = self._generate_input_class(custom_class)
         
+        # 生成自定义类的定义
+        class_definition = self._generate_class_definition(custom_class)
+        
         # 生成 handler 函数
         handler_func = self._generate_handler_function(custom_class)
         
         content = f'''"""
 {custom_class.tool_name} 工具处理器
 
-为 {custom_class.class_name} 类生成 Object 对象
+为 {custom_class.class_name} 类生成对象
 {custom_class.docstring}
 
-此工具接收 {custom_class.class_name} 的所有参数（全部为可选），
-并返回一个 Object（字典）表示。
+此工具接收 {custom_class.class_name} 的所有参数（可选，使用原始默认值），
+并返回一个 {custom_class.class_name} 对象。
 """
 
 import json
 from typing import NamedTuple, Optional, Dict, Any, List
 from runtime import Args
+
+
+{class_definition}
 
 
 {input_class}
@@ -98,7 +104,7 @@ from runtime import Args
 # Output 类型定义
 class Output(NamedTuple):
     """{custom_class.tool_name} 工具的输出"""
-    result: Dict[str, Any]  # {custom_class.class_name} 对象的字典表示
+    result: Optional[{custom_class.class_name}]  # {custom_class.class_name} 对象（错误时为 None）
     success: bool           # 操作成功状态
     message: str            # 状态消息
 
@@ -107,12 +113,33 @@ class Output(NamedTuple):
 '''
         return content
     
+    def _generate_class_definition(self, custom_class: CustomClass) -> str:
+        """生成自定义类的定义（NamedTuple形式）"""
+        lines = [
+            f"# {custom_class.class_name} 类型定义",
+            f"class {custom_class.class_name}(NamedTuple):",
+            f'    """{custom_class.docstring}"""'
+        ]
+        
+        for field in custom_class.fields:
+            field_name = field['name']
+            field_type = field['type']
+            description = field.get('description', '')
+            
+            # 构建字段定义行（不设置默认值，让类使用原始定义）
+            if description:
+                lines.append(f"    {field_name}: {field_type}  # {description}")
+            else:
+                lines.append(f"    {field_name}: {field_type}")
+        
+        return '\n'.join(lines)
+    
     def _generate_input_class(self, custom_class: CustomClass) -> str:
         """生成 Input 类定义"""
         lines = [
             "# Input 类型定义",
             "class Input(NamedTuple):",
-            f'    """{custom_class.tool_name} 工具的输入参数（全部可选）"""'
+            f'    """{custom_class.tool_name} 工具的输入参数（可选，有默认值的参数使用原始默认值）"""'
         ]
         
         for field in custom_class.fields:
@@ -126,8 +153,13 @@ class Output(NamedTuple):
                 # 如果不是 Optional，则包装为 Optional
                 field_type = f"Optional[{field_type}]"
             
-            # 设置默认值为 None（使所有参数可选）
-            default_value = "None"
+            # 使用原始默认值，如果是 ... 则表示无默认值（必需参数），在Input中设为None
+            if default == '...' or default == 'Ellipsis':
+                # 对于必需参数，在Input中设为 None 使其可选
+                default_value = "None"
+            else:
+                # 保留原始默认值
+                default_value = default
             
             # 构建字段定义行
             if description:
@@ -140,26 +172,40 @@ class Output(NamedTuple):
     def _generate_handler_function(self, custom_class: CustomClass) -> str:
         """生成 handler 函数"""
         
-        # 生成字段处理代码
-        field_processing = []
+        # 生成字段处理代码 - 构建参数列表
+        field_assignments = []
         for field in custom_class.fields:
             field_name = field['name']
-            field_processing.append(
-                f"        if args.input.{field_name} is not None:\n"
-                f"            result['{field_name}'] = args.input.{field_name}"
-            )
+            default = field.get('default', '...')
+            
+            # 如果输入为 None，使用默认值；否则使用输入值
+            if default == '...' or default == 'Ellipsis':
+                # 必需参数，如果 None 则抛出错误
+                field_assignments.append(
+                    f"        if args.input.{field_name} is None:\n"
+                    f"            raise ValueError('{field_name} 是必需参数，必须提供')\n"
+                    f"        {field_name} = args.input.{field_name}"
+                )
+            else:
+                # 可选参数，如果 None 则使用默认值
+                field_assignments.append(
+                    f"        {field_name} = args.input.{field_name} if args.input.{field_name} is not None else {default}"
+                )
         
-        field_processing_code = '\n'.join(field_processing)
+        field_assignments_code = '\n'.join(field_assignments)
+        
+        # 生成构造函数参数列表
+        constructor_params = ', '.join([f"{field['name']}={field['name']}" for field in custom_class.fields])
         
         handler = f'''def handler(args: Args[Input]) -> Output:
     """
     创建 {custom_class.class_name} 对象的主处理函数
     
     Args:
-        args: 包含所有 {custom_class.class_name} 参数的输入参数（全部可选）
+        args: 包含所有 {custom_class.class_name} 参数的输入参数（使用原始默认值）
         
     Returns:
-        包含 {custom_class.class_name} 对象字典表示的 Output
+        包含 {custom_class.class_name} 对象的 Output
     """
     logger = getattr(args, 'logger', None)
     
@@ -167,13 +213,14 @@ class Output(NamedTuple):
         logger.info(f"Creating {custom_class.class_name} object")
     
     try:
-        # 构建结果字典，仅包含提供的非 None 参数
-        result = {{}}
+        # 准备参数，使用提供的值或默认值
+{field_assignments_code}
         
-{field_processing_code}
+        # 创建 {custom_class.class_name} 对象
+        result = {custom_class.class_name}({constructor_params})
         
         if logger:
-            logger.info(f"Successfully created {custom_class.class_name} object with {{len(result)}} fields")
+            logger.info(f"Successfully created {custom_class.class_name} object")
         
         return Output(
             result=result,
@@ -181,13 +228,25 @@ class Output(NamedTuple):
             message="{custom_class.class_name} 对象创建成功"
         )
         
+    except ValueError as e:
+        # 参数验证错误
+        error_msg = f"参数错误: {{str(e)}}"
+        if logger:
+            logger.error(error_msg)
+        
+        # 返回 None 作为错误情况（Output 中 result 改为 Optional）
+        return Output(
+            result=None,
+            success=False,
+            message=error_msg
+        )
     except Exception as e:
         error_msg = f"创建 {custom_class.class_name} 对象时发生错误: {{str(e)}}"
         if logger:
             logger.error(error_msg)
         
         return Output(
-            result={{}},
+            result=None,
             success=False,
             message=error_msg
         )
