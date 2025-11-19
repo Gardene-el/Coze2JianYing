@@ -173,9 +173,10 @@ if {args.input.params} is not None:
     req_params_{generated_uuid}['params'] = {args.input.params}
 req_{generated_uuid} = CreateEffectSegmentRequest(**req_params_{generated_uuid})
 
-resp_{generated_uuid} = await create_effect_segment(req_{generated_uuid})
+resp_raw_{generated_uuid} = await create_effect_segment(req_{generated_uuid})
+resp_{generated_uuid} = CreateSegmentResponse(**resp_raw_{generated_uuid})
 
-segment_{generated_uuid} = resp_{generated_uuid}['segment_id']
+segment_{generated_uuid} = resp_{generated_uuid}.segment_id
 """
 
         # 写入 API 调用到文件

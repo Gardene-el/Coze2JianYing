@@ -178,7 +178,8 @@ if {args.input.intensity} is not None:
     req_params_{generated_uuid}['intensity'] = {args.input.intensity}
 req_{generated_uuid} = AddGlobalFilterRequest(**req_params_{generated_uuid})
 
-resp_{generated_uuid} = await add_global_filter(draft_{args.input.draft_id}, req_{generated_uuid})
+resp_raw_{generated_uuid} = await add_global_filter(draft_{args.input.draft_id}, req_{generated_uuid})
+resp_{generated_uuid} = AddGlobalFilterResponse(**resp_raw_{generated_uuid})
 """
 
         # 写入 API 调用到文件

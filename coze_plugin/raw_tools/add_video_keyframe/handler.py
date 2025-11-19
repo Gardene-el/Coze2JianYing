@@ -167,7 +167,8 @@ req_params_{generated_uuid}['value'] = {args.input.value}
 req_params_{generated_uuid}['property'] = "{args.input.property}"
 req_{generated_uuid} = AddVideoKeyframeRequest(**req_params_{generated_uuid})
 
-resp_{generated_uuid} = await add_video_keyframe(segment_{args.input.segment_id}, req_{generated_uuid})
+resp_raw_{generated_uuid} = await add_video_keyframe(segment_{args.input.segment_id}, req_{generated_uuid})
+resp_{generated_uuid} = AddVideoKeyframeResponse(**resp_raw_{generated_uuid})
 """
 
         # 写入 API 调用到文件

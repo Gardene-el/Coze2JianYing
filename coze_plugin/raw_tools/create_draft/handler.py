@@ -175,9 +175,10 @@ if {args.input.allow_replace} is not None:
     req_params_{generated_uuid}['allow_replace'] = {args.input.allow_replace}
 req_{generated_uuid} = CreateDraftRequest(**req_params_{generated_uuid})
 
-resp_{generated_uuid} = await create_draft(req_{generated_uuid})
+resp_raw_{generated_uuid} = await create_draft(req_{generated_uuid})
+resp_{generated_uuid} = CreateDraftResponse(**resp_raw_{generated_uuid})
 
-draft_{generated_uuid} = resp_{generated_uuid}['draft_id']
+draft_{generated_uuid} = resp_{generated_uuid}.draft_id
 """
 
         # 写入 API 调用到文件
