@@ -1,5 +1,10 @@
 # Coze API Gateway 调查报告
 
+> **⚠️ 历史文档说明**: 本文档记录了对 Coze 端插件（Local Plugin）机制的调查。
+> 经过进一步验证（详见 [LOCAL_PLUGIN_NOT_SUPPORTED.md](./LOCAL_PLUGIN_NOT_SUPPORTED.md)），
+> 端侧插件仅支持 Bot Chat 模式，不支持 Workflow 模式。因此本项目已移除端插件相关的实现（LocalServiceTab），
+> 仅保留云端服务模式（CloudServiceTab）用于工作流调用。
+
 ## 📋 调查目标
 
 本报告针对 Issue 中提出的问题进行深入调查：

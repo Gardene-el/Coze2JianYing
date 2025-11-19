@@ -40,7 +40,7 @@ python scripts/generate_coze_openapi.py --output my_api.yaml
 # 方式一：直接启动
 python start_api.py
 
-# 方式二：使用 GUI 的"本地服务"标签页启动
+# 方式二：使用 GUI 的"云端服务"标签页启动
 python app/main.py
 ```
 

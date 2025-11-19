@@ -93,7 +93,7 @@ pip install -r requirements.txt
 ## 注意事项
 
 ### 安全性
-- ⚠️ ngrok 将本地服务暴露到公网，请注意数据安全
+- ⚠️ ngrok 将云端服务暴露到公网，请注意数据安全
 - 建议使用 Authtoken 以获得更好的安全性和稳定性
 - 定期轮换 Authtoken
 - 不使用时及时停止 ngrok 服务

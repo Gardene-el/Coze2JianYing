@@ -113,7 +113,7 @@ def _stop_service(self):
 
 ## 📋 修改文件清单
 
-### app/gui/local_service_tab.py
+### app/gui/cloud_service_tab.py
 - 添加 `import atexit`
 - 移除 multiprocessing 相关导入
 - 添加 `__del__` 析构函数
@@ -130,7 +130,7 @@ def _stop_service(self):
 # 1. 运行打包后的程序
 dist\CozeJianYingDraftGenerator.exe
 
-# 2. 在"本地服务"标签页点击"启动服务"
+# 2. 在"云端服务"标签页点击"启动服务"
 # 3. 检查是否只有一个窗口
 # 4. 访问 http://localhost:8000/docs 验证服务正常
 # 5. 点击"停止服务"
