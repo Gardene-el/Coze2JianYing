@@ -196,11 +196,9 @@ class ScriptExecutorTab(BaseTab):
 ### 符合 GUI 设计
 ```
 MainWindow
-├── DraftGeneratorTab (手动草稿生成)
 ├── CloudServiceTab (云端服务)
-├── LocalServiceTab (本地服务)
 ├── ScriptExecutorTab (脚本执行) ← 新增
-└── ExampleTab (示例)
+└── DraftGeneratorTab (手动草稿生成)
 ```
 
 ### 符合 API 架构
