@@ -37,7 +37,7 @@ def test_make_time_range():
     sys.path.insert(0, str(handler_path))
     
     try:
-        from handler import handler, Input, Output
+        from handler import handler, Input
         
         # 测试用例 1: 提供所有参数
         print("测试用例 1: 提供所有参数")
@@ -45,31 +45,35 @@ def test_make_time_range():
         args = Args(test_input)
         result = handler(args)
         
-        assert result.success == True, "应该成功"
-        assert result.result.get('start') == 0, "start 应该为 0"
-        assert result.result.get('duration') == 5000000, "duration 应该为 5000000"
-        print(f"✓ 通过: {result.result}")
+        assert isinstance(result, dict), "result 应该是字典"
+        assert result['success'] == True, "应该成功"
+        assert result['result'] is not None, "result 字段不应该为 None"
+        assert isinstance(result['result'], dict), "result 字段应该是字典"
+        assert result['result']['start'] == 0, "start 应该为 0"
+        assert result['result']['duration'] == 5000000, "duration 应该为 5000000"
+        print(f"✓ 通过: {result['result']}")
         
-        # 测试用例 2: 仅提供部分参数
-        print("测试用例 2: 仅提供部分参数")
+        # 测试用例 2: 仅提供部分参数（必需参数）
+        print("测试用例 2: 仅提供部分参数（应返回 None）")
         test_input = Input(start=1000000, duration=None)
         args = Args(test_input)
         result = handler(args)
         
-        assert result.success == True, "应该成功"
-        assert result.result.get('start') == 1000000, "start 应该为 1000000"
-        assert 'duration' not in result.result, "duration 不应该在结果中"
-        print(f"✓ 通过: {result.result}")
+        assert isinstance(result, dict), "result 应该是字典"
+        assert result['success'] == True, "应该成功"
+        assert result['result'] is None, "result 字段应该为 None（参数不完整）"
+        print(f"✓ 通过: result is None")
         
         # 测试用例 3: 不提供任何参数
-        print("测试用例 3: 不提供任何参数")
+        print("测试用例 3: 不提供任何参数（应返回 None）")
         test_input = Input(start=None, duration=None)
         args = Args(test_input)
         result = handler(args)
         
-        assert result.success == True, "应该成功"
-        assert len(result.result) == 0, "结果应该为空字典"
-        print(f"✓ 通过: {result.result}")
+        assert isinstance(result, dict), "result 应该是字典"
+        assert result['success'] == True, "应该成功"
+        assert result['result'] is None, "result 字段应该为 None（参数不完整）"
+        print(f"✓ 通过: result is None")
         
         print("✓ make_time_range 所有测试通过！")
         return True
@@ -81,6 +85,9 @@ def test_make_time_range():
         return False
     finally:
         sys.path.remove(str(handler_path))
+        # Remove cached module to allow fresh import in next test
+        if 'handler' in sys.modules:
+            del sys.modules['handler']
 
 
 def test_make_clip_settings():
@@ -93,15 +100,13 @@ def test_make_clip_settings():
     sys.path.insert(0, str(handler_path))
     
     try:
-        from handler import handler, Input, Output
+        from handler import handler, Input
         
         # 验证基本结构
         print("验证 handler 文件结构...")
         assert hasattr(Input, '_fields'), "Input 应该是 NamedTuple"
-        assert hasattr(Output, '_fields'), "Output 应该是 NamedTuple"
         assert callable(handler), "handler 应该是可调用的"
         print(f"✓ Input 字段: {Input._fields}")
-        print(f"✓ Output 字段: {Output._fields}")
         
         # 简单测试：使用默认值
         print("测试用例: 使用默认值")
@@ -109,9 +114,11 @@ def test_make_clip_settings():
         args = Args(test_input)
         result = handler(args)
         
-        assert result.success == True, "应该成功"
-        assert isinstance(result.result, dict), "result 应该是字典"
-        print(f"✓ 通过: 返回空字典 {result.result}")
+        assert isinstance(result, dict), "result 应该是字典"
+        assert result['success'] == True, "应该成功"
+        assert result['result'] is not None, "result 字段不应该为 None（有默认值）"
+        assert isinstance(result['result'], dict), "result 字段应该是字典"
+        print(f"✓ 通过: 返回对象 {result['result']}")
         
         print("✓ make_clip_settings 基本测试通过！")
         return True
@@ -123,6 +130,9 @@ def test_make_clip_settings():
         return False
     finally:
         sys.path.remove(str(handler_path))
+        # Remove cached module to allow fresh import in next test
+        if 'handler' in sys.modules:
+            del sys.modules['handler']
 
 
 def test_make_text_style():
@@ -135,15 +145,13 @@ def test_make_text_style():
     sys.path.insert(0, str(handler_path))
     
     try:
-        from handler import handler, Input, Output
+        from handler import handler, Input
         
         # 验证基本结构
         print("验证 handler 文件结构...")
         assert hasattr(Input, '_fields'), "Input 应该是 NamedTuple"
-        assert hasattr(Output, '_fields'), "Output 应该是 NamedTuple"
         assert callable(handler), "handler 应该是可调用的"
         print(f"✓ Input 字段: {Input._fields}")
-        print(f"✓ Output 字段: {Output._fields}")
         
         # 简单测试：使用默认值
         print("测试用例: 使用默认值")
@@ -151,9 +159,11 @@ def test_make_text_style():
         args = Args(test_input)
         result = handler(args)
         
-        assert result.success == True, "应该成功"
-        assert isinstance(result.result, dict), "result 应该是字典"
-        print(f"✓ 通过: 返回空字典 {result.result}")
+        assert isinstance(result, dict), "result 应该是字典"
+        assert result['success'] == True, "应该成功"
+        assert result['result'] is not None, "result 字段不应该为 None（有默认值）"
+        assert isinstance(result['result'], dict), "result 字段应该是字典"
+        print(f"✓ 通过: 返回对象 {result['result']}")
         
         print("✓ make_text_style 基本测试通过！")
         return True
@@ -165,6 +175,9 @@ def test_make_text_style():
         return False
     finally:
         sys.path.remove(str(handler_path))
+        # Remove cached module to allow fresh import in next test
+        if 'handler' in sys.modules:
+            del sys.modules['handler']
 
 
 def test_make_crop_settings():
@@ -177,15 +190,13 @@ def test_make_crop_settings():
     sys.path.insert(0, str(handler_path))
     
     try:
-        from handler import handler, Input, Output
+        from handler import handler, Input
         
         # 验证基本结构
         print("验证 handler 文件结构...")
         assert hasattr(Input, '_fields'), "Input 应该是 NamedTuple"
-        assert hasattr(Output, '_fields'), "Output 应该是 NamedTuple"
         assert callable(handler), "handler 应该是可调用的"
         print(f"✓ Input 字段: {Input._fields}")
-        print(f"✓ Output 字段: {Output._fields}")
         
         # 简单测试：使用默认值
         print("测试用例: 使用默认值")
@@ -193,9 +204,11 @@ def test_make_crop_settings():
         args = Args(test_input)
         result = handler(args)
         
-        assert result.success == True, "应该成功"
-        assert isinstance(result.result, dict), "result 应该是字典"
-        print(f"✓ 通过: 返回空字典 {result.result}")
+        assert isinstance(result, dict), "result 应该是字典"
+        assert result['success'] == True, "应该成功"
+        assert result['result'] is not None, "result 字段不应该为 None（有默认值）"
+        assert isinstance(result['result'], dict), "result 字段应该是字典"
+        print(f"✓ 通过: 返回对象 {result['result']}")
         
         print("✓ make_crop_settings 基本测试通过！")
         return True
@@ -207,6 +220,9 @@ def test_make_crop_settings():
         return False
     finally:
         sys.path.remove(str(handler_path))
+        # Remove cached module to allow fresh import in next test
+        if 'handler' in sys.modules:
+            del sys.modules['handler']
 
 
 def main():

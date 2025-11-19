@@ -6,7 +6,10 @@ make_text_style 工具处理器
 对应 pyJianYingDraft 的 TextStyle 类，用于控制文本的样式属性
 
 此工具接收 TextStyle 的所有参数（可选，使用原始默认值），
-并返回一个 TextStyle 对象。
+并返回一个包含 TextStyle 数据的字典。
+
+注意：handler 直接返回 Dict[str, Any]，而不是 NamedTuple，
+以确保在 Coze 平台中正确的 JSON 对象序列化。
 """
 
 import json
@@ -35,15 +38,7 @@ class Input(NamedTuple):
     underline: Optional[bool] = False  # 是否下划线
 
 
-# Output 类型定义
-class Output(NamedTuple):
-    """make_text_style 工具的输出"""
-    result: Optional[TextStyle]  # TextStyle 对象（错误时为 None）
-    success: bool           # 操作成功状态
-    message: str            # 状态消息
-
-
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建 TextStyle 对象的主处理函数
     
@@ -51,7 +46,10 @@ def handler(args: Args[Input]) -> Output:
         args: 包含所有 TextStyle 参数的输入参数（使用原始默认值）
         
     Returns:
-        包含 TextStyle 对象的 Output
+        Dict[str, Any]: 包含 result、success、message 字段的字典
+            - result: TextStyle 对象的字典表示（参数不完整时为 None）
+            - success: 操作是否成功
+            - message: 状态消息
     """
     logger = getattr(args, 'logger', None)
     
@@ -67,37 +65,28 @@ def handler(args: Args[Input]) -> Output:
         underline = args.input.underline if args.input.underline is not None else False
         
         # 创建 TextStyle 对象
-        result = TextStyle(font_size=font_size, color=color, bold=bold, italic=italic, underline=underline)
+        obj = TextStyle(font_size=font_size, color=color, bold=bold, italic=italic, underline=underline)
+        
+        # 转换为字典以确保正确的 JSON 序列化
+        result_dict = obj._asdict()
         
         if logger:
             logger.info(f"Successfully created TextStyle object")
         
-        return Output(
-            result=result,
-            success=True,
-            message="TextStyle 对象创建成功"
-        )
+        return {
+            'result': result_dict,
+            'success': True,
+            'message': 'TextStyle 对象创建成功'
+        }
         
-    except ValueError as e:
-        # 参数验证错误
-        error_msg = f"参数错误: {str(e)}"
-        if logger:
-            logger.error(error_msg)
-        
-        # 返回 None 作为错误情况（Output 中 result 改为 Optional）
-        return Output(
-            result=None,
-            success=False,
-            message=error_msg
-        )
     except Exception as e:
         error_msg = f"创建 TextStyle 对象时发生错误: {str(e)}"
         if logger:
             logger.error(error_msg)
         
-        return Output(
-            result=None,
-            success=False,
-            message=error_msg
-        )
+        return {
+            'result': None,
+            'success': False,
+            'message': error_msg
+        }
 

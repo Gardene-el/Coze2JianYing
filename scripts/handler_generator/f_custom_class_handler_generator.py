@@ -87,7 +87,10 @@ class CustomClassHandlerGenerator:
 {custom_class.docstring}
 
 此工具接收 {custom_class.class_name} 的所有参数（可选，使用原始默认值），
-并返回一个 {custom_class.class_name} 对象。
+并返回一个包含 {custom_class.class_name} 数据的字典。
+
+注意：handler 直接返回 Dict[str, Any]，而不是 NamedTuple，
+以确保在 Coze 平台中正确的 JSON 对象序列化。
 """
 
 import json
@@ -99,14 +102,6 @@ from runtime import Args
 
 
 {input_class}
-
-
-# Output 类型定义
-class Output(NamedTuple):
-    """{custom_class.tool_name} 工具的输出"""
-    result: Optional[{custom_class.class_name}]  # {custom_class.class_name} 对象（错误时为 None）
-    success: bool           # 操作成功状态
-    message: str            # 状态消息
 
 
 {handler_func}
@@ -172,32 +167,41 @@ class Output(NamedTuple):
     def _generate_handler_function(self, custom_class: CustomClass) -> str:
         """生成 handler 函数"""
         
-        # 生成字段处理代码 - 构建参数列表
+        # 生成字段处理代码 - 准备参数
         field_assignments = []
+        constructor_params = []
+        
         for field in custom_class.fields:
             field_name = field['name']
             default = field.get('default', '...')
             
-            # 如果输入为 None，使用默认值；否则使用输入值
+            # 为每个字段准备参数值
             if default == '...' or default == 'Ellipsis':
-                # 必需参数，如果 None 则抛出错误
+                # 无默认值的参数：检查是否为 None，如果是则返回 None 结果
                 field_assignments.append(
                     f"        if args.input.{field_name} is None:\n"
-                    f"            raise ValueError('{field_name} 是必需参数，必须提供')\n"
+                    f"            # {field_name} 是必需参数但未提供，返回 None\n"
+                    f"            if logger:\n"
+                    f"                logger.warning(f'{field_name} 未提供，返回 None')\n"
+                    f"            return {{\n"
+                    f"                'result': None,\n"
+                    f"                'success': True,\n"
+                    f"                'message': '{custom_class.class_name} 对象创建成功（参数不完整）'\n"
+                    f"            }}\n"
                     f"        {field_name} = args.input.{field_name}"
                 )
             else:
-                # 可选参数，如果 None 则使用默认值
+                # 有默认值的参数：如果 None 则使用默认值
                 field_assignments.append(
                     f"        {field_name} = args.input.{field_name} if args.input.{field_name} is not None else {default}"
                 )
+            
+            constructor_params.append(f"{field_name}={field_name}")
         
         field_assignments_code = '\n'.join(field_assignments)
+        constructor_params_code = ', '.join(constructor_params)
         
-        # 生成构造函数参数列表
-        constructor_params = ', '.join([f"{field['name']}={field['name']}" for field in custom_class.fields])
-        
-        handler = f'''def handler(args: Args[Input]) -> Output:
+        handler = f'''def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建 {custom_class.class_name} 对象的主处理函数
     
@@ -205,7 +209,10 @@ class Output(NamedTuple):
         args: 包含所有 {custom_class.class_name} 参数的输入参数（使用原始默认值）
         
     Returns:
-        包含 {custom_class.class_name} 对象的 Output
+        Dict[str, Any]: 包含 result、success、message 字段的字典
+            - result: {custom_class.class_name} 对象的字典表示（参数不完整时为 None）
+            - success: 操作是否成功
+            - message: 状态消息
     """
     logger = getattr(args, 'logger', None)
     
@@ -217,39 +224,30 @@ class Output(NamedTuple):
 {field_assignments_code}
         
         # 创建 {custom_class.class_name} 对象
-        result = {custom_class.class_name}({constructor_params})
+        obj = {custom_class.class_name}({constructor_params_code})
+        
+        # 转换为字典以确保正确的 JSON 序列化
+        result_dict = obj._asdict()
         
         if logger:
             logger.info(f"Successfully created {custom_class.class_name} object")
         
-        return Output(
-            result=result,
-            success=True,
-            message="{custom_class.class_name} 对象创建成功"
-        )
+        return {{
+            'result': result_dict,
+            'success': True,
+            'message': '{custom_class.class_name} 对象创建成功'
+        }}
         
-    except ValueError as e:
-        # 参数验证错误
-        error_msg = f"参数错误: {{str(e)}}"
-        if logger:
-            logger.error(error_msg)
-        
-        # 返回 None 作为错误情况（Output 中 result 改为 Optional）
-        return Output(
-            result=None,
-            success=False,
-            message=error_msg
-        )
     except Exception as e:
         error_msg = f"创建 {custom_class.class_name} 对象时发生错误: {{str(e)}}"
         if logger:
             logger.error(error_msg)
         
-        return Output(
-            result=None,
-            success=False,
-            message=error_msg
-        )
+        return {{
+            'result': None,
+            'success': False,
+            'message': error_msg
+        }}
 '''
         return handler
     
@@ -329,7 +327,7 @@ class Output(NamedTuple):
 
 ### 返回的对象结构
 
-成功时返回 `{custom_class.class_name}` 对象，包含以下字段：
+成功时返回包含以下字段的 `{custom_class.class_name}` 对象：
 
 ```json
 {{
@@ -346,8 +344,9 @@ class Output(NamedTuple):
 ## 注意事项
 
 - 所有参数均为可选，未提供的参数将使用默认值（如果有）
-- 返回的是 `{custom_class.class_name}` 类型对象，不是字典
-- 可以在 Coze 工作流的后续步骤中直接使用此对象
+- 如果必需参数未提供，返回 `None`
+- 返回的是 `{custom_class.class_name}` 类型对象，可以在 Coze 工作流中直接使用
+- 可以在 Coze 工作流的后续步骤中直接传递给需要此类型的其他工具
 '''
         return readme
     
