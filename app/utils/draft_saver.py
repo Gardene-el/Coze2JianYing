@@ -203,14 +203,6 @@ class DraftSaver:
                 )
                 return seg
 
-            elif segment_type == "image":
-                # 图片片段 - 作为 VideoSegment 处理
-                local_path = self.download_material(material_url, assets_dir)
-                seg = draft.VideoSegment(
-                    local_path, trange(f"{start_sec}s", f"{duration_sec}s")
-                )
-                return seg
-
             elif segment_type == "text":
                 # 文本片段
                 text_content = config.get("text_content", "")
