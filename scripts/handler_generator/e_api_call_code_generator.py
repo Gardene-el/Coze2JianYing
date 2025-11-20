@@ -181,6 +181,10 @@ class APICallCodeGenerator:
             # 字符串类型：在条件中也需要加引号，避免被解释为变量名
             # 例如：if "demo_coze" is not None（而不是 if demo_coze is not None）
             return '"{' + access_expr + '}"'
+        elif self._is_complex_type(field_type):
+            # 复杂类型（如 TimeRange, ClipSettings）：需要检查是否为空对象
+            # 使用 _is_meaningful_object 辅助函数，避免 CustomNamespace() 空对象被视为有效值
+            return "{_is_meaningful_object(" + access_expr + ")}"
         else:
             # 非字符串类型：直接使用插值表达式
             # 例如：if 1080 is not None, if True is not None
@@ -237,9 +241,16 @@ class APICallCodeGenerator:
                 field_type = field["type"]
                 formatted_value = self._format_param_value(field_name, field_type)
                 condition_value = self._format_condition_value(field_name, field_type)
-                request_construction += (
-                    "if " + condition_value + " is not None:\n"
-                )
+                
+                # 对于复杂类型，condition_value 已经是完整的布尔表达式
+                # 对于其他类型，需要添加 'is not None' 检查
+                if self._is_complex_type(field_type):
+                    # 复杂类型：使用 _is_meaningful_object() 直接返回 bool
+                    request_construction += "if " + condition_value + ":\n"
+                else:
+                    # 简单类型：需要 'is not None' 检查
+                    request_construction += "if " + condition_value + " is not None:\n"
+                
                 request_construction += (
                     "    req_params_{generated_uuid}['"
                     + field_name
