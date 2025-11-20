@@ -220,9 +220,11 @@ class APICallCodeGenerator:
             # 不需要加引号，因为我们要检查的是输入的 ID 值本身
             return "{" + access_expr + "}"
         elif self._should_quote_type(field_type):
-            # 普通字符串类型：在条件中也需要加引号，避免被解释为变量名
-            # 例如：if "demo_coze" is not None（而不是 if demo_coze is not None）
-            return '"{' + access_expr + '}"'
+            # 普通字符串类型：在条件中不需要加引号
+            # 我们要检查的是字符串的值是否为 None，而不是字符串字面量
+            # 例如：if {args.input.color} is not None（检查变量值）
+            # 而不是：if "{args.input.color}" is not None（检查字符串字面量，总是True）
+            return "{" + access_expr + "}"
         elif self._is_complex_type(field_type):
             # 复杂类型（如 TimeRange, ClipSettings）：需要检查是否为空对象
             # 使用 _is_meaningful_object 辅助函数，避免 CustomNamespace() 空对象被视为有效值

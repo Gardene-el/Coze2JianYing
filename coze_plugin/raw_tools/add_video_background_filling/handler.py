@@ -197,7 +197,7 @@ req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['fill_type'] = "{args.input.fill_type}"
 if {args.input.blur} is not None:
     req_params_{generated_uuid}['blur'] = {args.input.blur}
-if "{args.input.color}" is not None:
+if {args.input.color} is not None:
     req_params_{generated_uuid}['color'] = "{args.input.color}"
 req_{generated_uuid} = AddVideoBackgroundFillingRequest(**req_params_{generated_uuid})
 
