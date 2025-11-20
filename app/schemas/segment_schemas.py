@@ -167,7 +167,7 @@ class CreateTextSegmentRequest(BaseModel):
             "example": {
                 "text_content": "Hello World",
                 "target_timerange": {"start": 0, "duration": 3000000},
-                "font_family": "黑体",
+                "font_family": "文轩体",
                 "text_style": {
                     "font_size": 24.0,
                     "color": [1.0, 1.0, 1.0],
