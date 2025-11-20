@@ -2,6 +2,27 @@
 
 <!-- version list -->
 
+## v0.3.2 (2025-11-20)
+
+### Bug Fixes
+
+- 修复默认字体。
+  ([`979df23`](https://github.com/Gardene-el/Coze2JianYing/commit/979df235205afefad06b6104925e127bef3a9267))
+
+### Chores
+
+- 删除过时的临时文件
+  ([`366673c`](https://github.com/Gardene-el/Coze2JianYing/commit/366673c1f550cbc02c426f72b9b801679f615bd4))
+
+### Documentation
+
+- Update README with sponsorship information
+  ([`13d3458`](https://github.com/Gardene-el/Coze2JianYing/commit/13d3458029c8ba573327a87beba8a22efb9dd22a))
+
+- 添加旧版工作流示例
+  ([`0d60bbb`](https://github.com/Gardene-el/Coze2JianYing/commit/0d60bbb98d04c568b2143d468b9b5179cd08857b))
+
+
 ## v0.3.1 (2025-11-18)
 
 
