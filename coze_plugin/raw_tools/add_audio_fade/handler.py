@@ -164,7 +164,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
         return repr(obj)
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     add_audio_fade 的主处理函数
 
@@ -172,7 +172,7 @@ def handler(args: Args[Input]) -> Output:
         args: Input arguments
 
     Returns:
-        Output NamedTuple containing response data
+        Dict containing response data (converted from Output NamedTuple for Coze compatibility)
     """
     logger = getattr(args, 'logger', None)
 
@@ -208,7 +208,7 @@ resp_{generated_uuid} = await add_audio_fade(segment_{args.input.segment_id}, re
         if logger:
             logger.info(f"add_audio_fade 调用成功")
 
-        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None)
+        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None)._asdict()
 
     except Exception as e:
         error_msg = f"调用 add_audio_fade 时发生错误: {str(e)}"
@@ -217,5 +217,5 @@ resp_{generated_uuid} = await add_audio_fade(segment_{args.input.segment_id}, re
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
 
-        return Output(success=False, message=error_msg)
+        return Output(success=False, message=error_msg)._asdict()
 
