@@ -122,18 +122,22 @@ async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, 
 
         if not result["success"]:
             logger.error(f"音频片段创建失败: {result['message']}")
-            error_response = response_manager.error(
+            logger.info("=" * 60)
+            return response_manager.error_response(
+                CreateSegmentResponse,
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]},
+                segment_id=""
             )
-            logger.info("=" * 60)
-            return {"segment_id": "", **error_response}
 
         logger.info(f"音频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
-        success_response = response_manager.success(message=result["message"])
-        return {"segment_id": result["segment_id"], **success_response}
+        return response_manager.success_response(
+            CreateSegmentResponse,
+            message=result["message"],
+            segment_id=result["segment_id"]
+        )
 
     except Exception as e:
         logger.error(f"创建音频片段时发生错误: {e}", exc_info=True)
@@ -147,7 +151,7 @@ async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, 
     summary="创建视频片段",
     description="创建视频片段并返回 UUID",
 )
-async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, Any]:
+async def create_video_segment(request: CreateVideoSegmentRequest) -> CreateSegmentResponse:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -187,22 +191,30 @@ async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, 
 
         if not result["success"]:
             logger.error(f"视频片段创建失败: {result['message']}")
-            error_response = response_manager.error(
+            logger.info("=" * 60)
+            return response_manager.error_response(
+                CreateSegmentResponse,
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]},
+                segment_id=""
             )
-            logger.info("=" * 60)
-            return {"segment_id": "", **error_response}
 
         logger.info(f"视频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
-        success_response = response_manager.success(message=result["message"])
-        return {"segment_id": result["segment_id"], **success_response}
+        return response_manager.success_response(
+            CreateSegmentResponse,
+            message=result["message"],
+            segment_id=result["segment_id"]
+        )
 
     except Exception as e:
         logger.error(f"创建视频片段时发生错误: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(
+            CreateSegmentResponse,
+            error=e,
+            segment_id=""
+        )
 
 
 @router.post(
@@ -212,7 +224,7 @@ async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, 
     summary="创建文本片段",
     description="创建文本片段并返回 UUID",
 )
-async def create_text_segment(request: CreateTextSegmentRequest) -> Dict[str, Any]:
+async def create_text_segment(request: CreateTextSegmentRequest) -> CreateSegmentResponse:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -250,22 +262,30 @@ async def create_text_segment(request: CreateTextSegmentRequest) -> Dict[str, An
 
         if not result["success"]:
             logger.error(f"文本片段创建失败: {result['message']}")
-            error_response = response_manager.error(
+            logger.info("=" * 60)
+            return response_manager.error_response(
+                CreateSegmentResponse,
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]},
+                segment_id=""
             )
-            logger.info("=" * 60)
-            return {"segment_id": "", **error_response}
 
         logger.info(f"文本片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
-        success_response = response_manager.success(message=result["message"])
-        return {"segment_id": result["segment_id"], **success_response}
+        return response_manager.success_response(
+            CreateSegmentResponse,
+            message=result["message"],
+            segment_id=result["segment_id"]
+        )
 
     except Exception as e:
         logger.error(f"创建文本片段时发生错误: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(
+            CreateSegmentResponse,
+            error=e,
+            segment_id=""
+        )
 
 
 @router.post(
@@ -277,7 +297,7 @@ async def create_text_segment(request: CreateTextSegmentRequest) -> Dict[str, An
 )
 async def create_sticker_segment(
     request: CreateStickerSegmentRequest,
-) -> Dict[str, Any]:
+) -> CreateSegmentResponse:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -310,22 +330,30 @@ async def create_sticker_segment(
 
         if not result["success"]:
             logger.error(f"贴纸片段创建失败: {result['message']}")
-            error_response = response_manager.error(
+            logger.info("=" * 60)
+            return response_manager.error_response(
+                CreateSegmentResponse,
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]},
+                segment_id=""
             )
-            logger.info("=" * 60)
-            return {"segment_id": "", **error_response}
 
         logger.info(f"贴纸片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
-        success_response = response_manager.success(message=result["message"])
-        return {"segment_id": result["segment_id"], **success_response}
+        return response_manager.success_response(
+            CreateSegmentResponse,
+            message=result["message"],
+            segment_id=result["segment_id"]
+        )
 
     except Exception as e:
         logger.error(f"创建贴纸片段时发生错误: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(
+            CreateSegmentResponse,
+            error=e,
+            segment_id=""
+        )
 
 
 @router.post(
@@ -335,7 +363,7 @@ async def create_sticker_segment(
     summary="创建特效片段",
     description="创建特效片段并返回 UUID",
 )
-async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str, Any]:
+async def create_effect_segment(request: CreateEffectSegmentRequest) -> CreateSegmentResponse:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -372,22 +400,30 @@ async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str
 
         if not result["success"]:
             logger.error(f"特效片段创建失败: {result['message']}")
-            error_response = response_manager.error(
+            logger.info("=" * 60)
+            return response_manager.error_response(
+                CreateSegmentResponse,
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]},
+                segment_id=""
             )
-            logger.info("=" * 60)
-            return {"segment_id": "", **error_response}
 
         logger.info(f"特效片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
-        success_response = response_manager.success(message=result["message"])
-        return {"segment_id": result["segment_id"], **success_response}
+        return response_manager.success_response(
+            CreateSegmentResponse,
+            message=result["message"],
+            segment_id=result["segment_id"]
+        )
 
     except Exception as e:
         logger.error(f"创建特效片段时发生错误: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(
+            CreateSegmentResponse,
+            error=e,
+            segment_id=""
+        )
 
 
 @router.post(
@@ -397,7 +433,7 @@ async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str
     summary="创建滤镜片段",
     description="创建滤镜片段并返回 UUID",
 )
-async def create_filter_segment(request: CreateFilterSegmentRequest) -> Dict[str, Any]:
+async def create_filter_segment(request: CreateFilterSegmentRequest) -> CreateSegmentResponse:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -431,22 +467,30 @@ async def create_filter_segment(request: CreateFilterSegmentRequest) -> Dict[str
 
         if not result["success"]:
             logger.error(f"滤镜片段创建失败: {result['message']}")
-            error_response = response_manager.error(
+            logger.info("=" * 60)
+            return response_manager.error_response(
+                CreateSegmentResponse,
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]},
+                segment_id=""
             )
-            logger.info("=" * 60)
-            return {"segment_id": "", **error_response}
 
         logger.info(f"滤镜片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
-        success_response = response_manager.success(message=result["message"])
-        return {"segment_id": result["segment_id"], **success_response}
+        return response_manager.success_response(
+            CreateSegmentResponse,
+            message=result["message"],
+            segment_id=result["segment_id"]
+        )
 
     except Exception as e:
         logger.error(f"创建滤镜片段时发生错误: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(
+            CreateSegmentResponse,
+            error=e,
+            segment_id=""
+        )
 
 
 # ==================== AudioSegment 操作端点 ====================
