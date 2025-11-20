@@ -10,7 +10,16 @@ from typing import Any, Dict, Optional
 
 import pyJianYingDraft as draft
 import requests
-from pyJianYingDraft import IntroType, TextOutro, TransitionType, tim, trange
+from pyJianYingDraft import (
+    ClipSettings,
+    FilterType,
+    IntroType,
+    TextOutro,
+    TransitionType,
+    VideoSceneEffectType,
+    tim,
+    trange,
+)
 
 from app.config import get_config
 from app.utils.draft_path_manager import get_draft_path_manager
@@ -126,6 +135,9 @@ class DraftSaver:
             if track_type in track_type_map:
                 script.add_track(track_type_map[track_type])
                 self.logger.info(f"添加轨道: {track_type}")
+            elif track_type in ["effect", "filter"]:
+                # effect 和 filter 轨道通过不同方式添加
+                self.logger.info(f"跳过轨道添加（将在片段添加时处理）: {track_type}")
 
         # 处理所有片段
         for track in tracks:
@@ -225,6 +237,94 @@ class DraftSaver:
                     ),
                 )
                 return seg
+
+            elif segment_type == "sticker":
+                # 贴纸片段
+                resource_id = config.get("resource_id", "")
+                if not resource_id:
+                    self.logger.error("贴纸片段缺少 resource_id")
+                    return None
+
+                # 创建贴纸片段
+                position_x = config.get("position_x", 0.0)
+                position_y = config.get("position_y", 0.0)
+                scale_x = config.get("scale_x", 1.0)
+                scale_y = config.get("scale_y", 1.0)
+                rotation = config.get("rotation", 0.0)
+                opacity = config.get("opacity", 1.0)
+                flip_horizontal = config.get("flip_horizontal", False)
+                flip_vertical = config.get("flip_vertical", False)
+
+                seg = draft.StickerSegment(
+                    resource_id,
+                    trange(f"{start_sec}s", f"{duration_sec}s"),
+                    clip_settings=draft.ClipSettings(
+                        transform_x=position_x,
+                        transform_y=position_y,
+                        scale_x=scale_x,
+                        scale_y=scale_y,
+                        rotation=rotation,
+                        alpha=opacity,
+                        flip_horizontal=flip_horizontal,
+                        flip_vertical=flip_vertical,
+                    ),
+                )
+                return seg
+
+            elif segment_type == "effect":
+                # 特效片段
+                effect_type = config.get("effect_type", "")
+                if not effect_type:
+                    self.logger.error("特效片段缺少 effect_type")
+                    return None
+
+                # 尝试从 VideoSceneEffectType 获取特效
+                try:
+                    effect = getattr(VideoSceneEffectType, effect_type, None)
+                    if not effect:
+                        self.logger.warning(f"未知的特效类型: {effect_type}")
+                        return None
+
+                    # 获取特效参数
+                    intensity = config.get("intensity", 1.0)
+                    properties = config.get("properties", {})
+
+                    # 创建特效片段
+                    seg = draft.EffectSegment(
+                        effect, trange(f"{start_sec}s", f"{duration_sec}s")
+                    )
+                    return seg
+                except Exception as e:
+                    self.logger.error(f"创建特效片段失败: {e}")
+                    return None
+
+            elif segment_type == "filter":
+                # 滤镜片段
+                filter_type = config.get("filter_type", "")
+                if not filter_type:
+                    self.logger.error("滤镜片段缺少 filter_type")
+                    return None
+
+                # 尝试从 FilterType 获取滤镜
+                try:
+                    filter_enum = getattr(FilterType, filter_type, None)
+                    if not filter_enum:
+                        self.logger.warning(f"未知的滤镜类型: {filter_type}")
+                        return None
+
+                    # 获取滤镜强度
+                    intensity = config.get("intensity", 1.0)
+
+                    # 创建滤镜片段 - FilterSegment(FilterType, timerange, intensity)
+                    seg = draft.FilterSegment(
+                        filter_enum,
+                        trange(f"{start_sec}s", f"{duration_sec}s"),
+                        intensity=intensity,
+                    )
+                    return seg
+                except Exception as e:
+                    self.logger.error(f"创建滤镜片段失败: {e}")
+                    return None
 
             else:
                 self.logger.warning(f"不支持的片段类型: {segment_type}")
