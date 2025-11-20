@@ -96,6 +96,39 @@ def append_api_call_to_file(file_path: str, api_call_code: str):
         f.write("\n" + api_call_code + "\n")
 
 
+def _is_meaningful_object(obj) -> bool:
+    """
+    检查对象是否包含有意义的数据
+    
+    用于区分空的 CustomNamespace() 对象和包含有效数据的对象
+    避免将空对象视为有效值，导致 Pydantic 验证失败
+    
+    Args:
+        obj: 任意对象
+        
+    Returns:
+        True 如果对象包含有意义的数据，False 如果对象为 None 或为空
+    """
+    # None 值不是有意义的对象
+    if obj is None:
+        return False
+    
+    # 检查是否有 __dict__ 属性（CustomNamespace, SimpleNamespace 等）
+    if hasattr(obj, '__dict__'):
+        obj_dict = obj.__dict__
+        # 空字典意味着空对象
+        if not obj_dict:
+            return False
+        # 检查是否所有值都是 None（也视为空对象）
+        if all(v is None for v in obj_dict.values()):
+            return False
+        # 至少有一个非 None 值，视为有意义的对象
+        return True
+    
+    # 对于基本类型（字符串、数字、布尔值等），非 None 即为有意义
+    return True
+
+
 def _to_type_constructor(obj, type_name: str) -> str:
     """
     将 CustomNamespace/SimpleNamespace 对象转换为类型构造表达式字符串
@@ -190,9 +223,9 @@ req_params_{generated_uuid}['text_content'] = "{args.input.text_content}"
 req_params_{generated_uuid}['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
 if "{args.input.font_family}" is not None:
     req_params_{generated_uuid}['font_family'] = "{args.input.font_family}"
-if {args.input.text_style} is not None:
+if {_is_meaningful_object(args.input.text_style)}:
     req_params_{generated_uuid}['text_style'] = {_to_type_constructor(args.input.text_style, 'TextStyle')}
-if {args.input.clip_settings} is not None:
+if {_is_meaningful_object(args.input.clip_settings)}:
     req_params_{generated_uuid}['clip_settings'] = {_to_type_constructor(args.input.clip_settings, 'ClipSettings')}
 req_{generated_uuid} = CreateTextSegmentRequest(**req_params_{generated_uuid})
 

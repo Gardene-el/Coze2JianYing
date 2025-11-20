@@ -176,8 +176,9 @@ def test_runtime_behavior_simulation():
             "req_params_{generated_uuid}['material_url']" in api_call_code,
         ),
         (
-            "可选字段有 None 检查",
-            "if {args.input.source_timerange} is not None:" in api_call_code,
+            "可选字段有 None 检查或 _is_meaningful_object 检查",
+            "if {args.input.source_timerange} is not None:" in api_call_code
+            or "if {_is_meaningful_object(args.input.source_timerange)}:" in api_call_code,
         ),
         ("使用字典解包", "**req_params_{generated_uuid}" in api_call_code),
         ("字符串类型有引号", '"{args.input.material_url}"' in api_call_code),
