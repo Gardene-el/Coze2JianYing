@@ -135,6 +135,36 @@ class APICallCodeGenerator:
         # 在 Coze 中这些会是 CustomNamespace，需要转换为类型构造调用
         return True
 
+    def _is_id_field(self, field_name: str, field_type: str) -> bool:
+        """
+        判断字段是否为 ID 引用字段（需要引用之前创建的对象）
+        
+        ID 字段的特征：
+        1. 字段名是 draft_id 或 segment_id（这些是引用之前创建的对象）
+        2. 字段类型是 str
+        3. 这些字段在 handler 中应该引用之前创建的对象变量
+        
+        注意：其他以 _id 结尾的字段（如 effect_id, filter_id 等）通常是
+        配置字符串或资源标识符，不是对象引用，因此不应被视为 ID 引用字段
+        
+        Args:
+            field_name: 字段名称
+            field_type: 字段类型
+            
+        Returns:
+            True 如果是 ID 引用字段
+        """
+        # 字段必须是字符串类型
+        if not self._should_quote_type(field_type):
+            return False
+        
+        # 只有 draft_id 和 segment_id 是对象引用
+        # 其他 *_id 字段（effect_id, filter_id, resource_id 等）是配置字符串
+        if field_name in ("draft_id", "segment_id"):
+            return True
+        
+        return False
+
     def _format_param_value(self, field_name: str, field_type: str) -> str:
         """
         根据字段类型格式化参数值
@@ -149,8 +179,15 @@ class APICallCodeGenerator:
         # 构造访问表达式：args.input.field_name
         access_expr = "args.input." + field_name
 
-        if self._should_quote_type(field_type):
-            # 字符串类型：需要在 handler.py 的 f-string 中是 "{args.input.xxx}"
+        # 检查是否为 ID 引用字段
+        if self._is_id_field(field_name, field_type):
+            # ID 字段：引用之前创建的对象变量
+            # 例如：segment_id -> segment_{args.input.segment_id}
+            #      draft_id -> draft_{args.input.draft_id}
+            object_type = field_name.replace("_id", "")  # segment_id -> segment
+            return object_type + "_{" + access_expr + "}"
+        elif self._should_quote_type(field_type):
+            # 普通字符串类型：需要在 handler.py 的 f-string 中是 "{args.input.xxx}"
             # 使用单层大括号，这样在 handler 运行时会插值
             return '"{' + access_expr + '}"'
         elif self._is_complex_type(field_type):
@@ -177,8 +214,13 @@ class APICallCodeGenerator:
         # 构造访问表达式：args.input.field_name
         access_expr = "args.input." + field_name
 
-        if self._should_quote_type(field_type):
-            # 字符串类型：在条件中也需要加引号，避免被解释为变量名
+        # 检查是否为 ID 引用字段
+        if self._is_id_field(field_name, field_type):
+            # ID 字段：在条件中检查原始 ID 值是否为 None
+            # 不需要加引号，因为我们要检查的是输入的 ID 值本身
+            return "{" + access_expr + "}"
+        elif self._should_quote_type(field_type):
+            # 普通字符串类型：在条件中也需要加引号，避免被解释为变量名
             # 例如：if "demo_coze" is not None（而不是 if demo_coze is not None）
             return '"{' + access_expr + '}"'
         elif self._is_complex_type(field_type):

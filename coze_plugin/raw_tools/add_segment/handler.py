@@ -193,7 +193,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
-req_params_{generated_uuid}['segment_id'] = "{args.input.segment_id}"
+req_params_{generated_uuid}['segment_id'] = segment_{args.input.segment_id}
 if {args.input.track_index} is not None:
     req_params_{generated_uuid}['track_index'] = {args.input.track_index}
 req_{generated_uuid} = AddSegmentToDraftRequest(**req_params_{generated_uuid})
