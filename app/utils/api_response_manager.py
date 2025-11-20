@@ -14,9 +14,12 @@ API Response Manager - 统一的 API 响应管理器
 """
 
 from enum import Enum
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Type, TypeVar
 from datetime import datetime
 from pydantic import BaseModel, Field
+
+# Type variable for generic Response types
+ResponseType = TypeVar('ResponseType', bound=BaseModel)
 
 
 class ErrorCategory(str, Enum):
@@ -519,6 +522,161 @@ class APIResponseManager:
                 "error_type": type(error).__name__
             }
         )
+    
+    # ============ Typed Response Methods ============
+    
+    def create_response(
+        self,
+        response_class: Type[ResponseType],
+        **fields
+    ) -> ResponseType:
+        """
+        创建类型化的响应对象
+        
+        使用提供的响应类创建实例，自动填充 response_manager 的标准字段
+        
+        Args:
+            response_class: 响应类（必须是 BaseModel 子类）
+            **fields: 响应字段值，包括特定字段（如 draft_id）和标准字段
+            
+        Returns:
+            响应类的实例
+            
+        Example:
+            response = manager.create_response(
+                CreateDraftResponse,
+                draft_id="xxx",
+                success=True,
+                message="创建成功",
+                error_code="SUCCESS",
+                category="success",
+                level="info",
+                timestamp="2024-01-01T00:00:00"
+            )
+        """
+        # 确保包含 timestamp（如果响应类有这个字段且没有提供）
+        if 'timestamp' not in fields and hasattr(response_class, 'timestamp'):
+            # 检查字段是否接受字符串
+            fields['timestamp'] = datetime.now()
+        
+        return response_class(**fields)
+    
+    def success_response(
+        self,
+        response_class: Type[ResponseType],
+        message: str = "操作成功",
+        **specific_fields
+    ) -> ResponseType:
+        """
+        创建成功的类型化响应
+        
+        Args:
+            response_class: 响应类
+            message: 成功消息
+            **specific_fields: 特定字段（如 draft_id, segment_id 等）
+            
+        Returns:
+            成功响应实例
+            
+        Example:
+            return manager.success_response(
+                CreateDraftResponse,
+                message="草稿创建成功",
+                draft_id="xxx"
+            )
+        """
+        # 获取标准成功响应字段
+        base_response = self.success(message=message)
+        
+        # 合并特定字段
+        all_fields = {**base_response, **specific_fields}
+        
+        return self.create_response(response_class, **all_fields)
+    
+    def error_response(
+        self,
+        response_class: Type[ResponseType],
+        error_code: ErrorCode,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        **specific_fields
+    ) -> ResponseType:
+        """
+        创建错误的类型化响应
+        
+        Args:
+            response_class: 响应类
+            error_code: 错误代码
+            message: 自定义错误消息
+            details: 错误详情
+            **specific_fields: 特定字段（如 draft_id="" 等）
+            
+        Returns:
+            错误响应实例
+            
+        Example:
+            return manager.error_response(
+                CreateDraftResponse,
+                error_code=ErrorCode.DRAFT_CREATE_FAILED,
+                draft_id="",
+                details={"reason": "配置错误"}
+            )
+        """
+        # 获取标准错误响应字段
+        base_response = self.error(
+            error_code=error_code,
+            message=message,
+            details=details
+        )
+        
+        # 合并特定字段
+        all_fields = {**base_response, **specific_fields}
+        
+        return self.create_response(response_class, **all_fields)
+    
+    def not_found_response(
+        self,
+        response_class: Type[ResponseType],
+        resource_type: str,
+        resource_id: str,
+        **specific_fields
+    ) -> ResponseType:
+        """
+        创建资源不存在的类型化响应
+        
+        Args:
+            response_class: 响应类
+            resource_type: 资源类型
+            resource_id: 资源 ID
+            **specific_fields: 特定字段（如 draft_id="" 等）
+            
+        Returns:
+            资源不存在响应实例
+        """
+        base_response = self.format_not_found_error(resource_type, resource_id)
+        all_fields = {**base_response, **specific_fields}
+        return self.create_response(response_class, **all_fields)
+    
+    def internal_error_response(
+        self,
+        response_class: Type[ResponseType],
+        error: Exception,
+        **specific_fields
+    ) -> ResponseType:
+        """
+        创建内部错误的类型化响应
+        
+        Args:
+            response_class: 响应类
+            error: 异常对象
+            **specific_fields: 特定字段（如 draft_id="" 等）
+            
+        Returns:
+            内部错误响应实例
+        """
+        base_response = self.format_internal_error(error)
+        all_fields = {**base_response, **specific_fields}
+        return self.create_response(response_class, **all_fields)
 
 
 # 创建全局单例
