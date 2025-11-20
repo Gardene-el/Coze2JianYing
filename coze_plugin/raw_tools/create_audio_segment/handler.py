@@ -174,7 +174,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
         return repr(obj)
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     create_audio_segment 的主处理函数
 
@@ -182,7 +182,7 @@ def handler(args: Args[Input]) -> Output:
         args: Input arguments
 
     Returns:
-        Output NamedTuple containing response data
+        Dict containing response data (converted from Output NamedTuple for Coze compatibility)
     """
     logger = getattr(args, 'logger', None)
 
@@ -228,7 +228,7 @@ segment_{generated_uuid} = resp_{generated_uuid}.segment_id
         if logger:
             logger.info(f"create_audio_segment 调用成功")
 
-        return Output(segment_id=f"{generated_uuid}", success=True, message="操作成功")
+        return Output(segment_id=f"{generated_uuid}", success=True, message="操作成功")._asdict()
 
     except Exception as e:
         error_msg = f"调用 create_audio_segment 时发生错误: {str(e)}"
@@ -237,5 +237,5 @@ segment_{generated_uuid} = resp_{generated_uuid}.segment_id
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
 
-        return Output(success=False, message=error_msg)
+        return Output(success=False, message=error_msg)._asdict()
 

@@ -164,7 +164,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
         return repr(obj)
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     add_segment 的主处理函数
 
@@ -172,7 +172,7 @@ def handler(args: Args[Input]) -> Output:
         args: Input arguments
 
     Returns:
-        Output NamedTuple containing response data
+        Dict containing response data (converted from Output NamedTuple for Coze compatibility)
     """
     logger = getattr(args, 'logger', None)
 
@@ -193,7 +193,7 @@ def handler(args: Args[Input]) -> Output:
 
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
-req_params_{generated_uuid}['segment_id'] = "{args.input.segment_id}"
+req_params_{generated_uuid}['segment_id'] = segment_{args.input.segment_id}
 if {args.input.track_index} is not None:
     req_params_{generated_uuid}['track_index'] = {args.input.track_index}
 req_{generated_uuid} = AddSegmentToDraftRequest(**req_params_{generated_uuid})
@@ -209,7 +209,7 @@ resp_{generated_uuid} = await add_segment(draft_{args.input.draft_id}, req_{gene
         if logger:
             logger.info(f"add_segment 调用成功")
 
-        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None)
+        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None)._asdict()
 
     except Exception as e:
         error_msg = f"调用 add_segment 时发生错误: {str(e)}"
@@ -218,5 +218,5 @@ resp_{generated_uuid} = await add_segment(draft_{args.input.draft_id}, req_{gene
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
 
-        return Output(success=False, message=error_msg)
+        return Output(success=False, message=error_msg)._asdict()
 
