@@ -163,7 +163,7 @@ def handler(args: Args[Input]) -> Output:
 
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
-if {args.input.draft_name} is not None:
+if "{args.input.draft_name}" is not None:
     req_params_{generated_uuid}['draft_name'] = "{args.input.draft_name}"
 if {args.input.width} is not None:
     req_params_{generated_uuid}['width'] = {args.input.width}
