@@ -82,7 +82,7 @@ segment_manager = get_segment_manager()
     summary="创建音频片段",
     description="创建音频片段并返回 UUID（总是返回 success=True）",
 )
-async def create_audio_segment(request: CreateAudioSegmentRequest) -> CreateSegmentResponse:
+async def create_audio_segment(request: CreateAudioSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -127,18 +127,17 @@ async def create_audio_segment(request: CreateAudioSegmentRequest) -> CreateSegm
                 details={"reason": result["message"]},
             )
             logger.info("=" * 60)
-            return CreateSegmentResponse(segment_id="", **error_response)
+            return {"segment_id": "", **error_response}
 
         logger.info(f"音频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
         success_response = response_manager.success(message=result["message"])
-        return CreateSegmentResponse(segment_id=result["segment_id"], **success_response)
+        return {"segment_id": result["segment_id"], **success_response}
 
     except Exception as e:
         logger.error(f"创建音频片段时发生错误: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return CreateSegmentResponse(segment_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -148,7 +147,7 @@ async def create_audio_segment(request: CreateAudioSegmentRequest) -> CreateSegm
     summary="创建视频片段",
     description="创建视频片段并返回 UUID",
 )
-async def create_video_segment(request: CreateVideoSegmentRequest) -> CreateSegmentResponse:
+async def create_video_segment(request: CreateVideoSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -193,18 +192,17 @@ async def create_video_segment(request: CreateVideoSegmentRequest) -> CreateSegm
                 details={"reason": result["message"]},
             )
             logger.info("=" * 60)
-            return CreateSegmentResponse(segment_id="", **error_response)
+            return {"segment_id": "", **error_response}
 
         logger.info(f"视频片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
         success_response = response_manager.success(message=result["message"])
-        return CreateSegmentResponse(segment_id=result["segment_id"], **success_response)
+        return {"segment_id": result["segment_id"], **success_response}
 
     except Exception as e:
         logger.error(f"创建视频片段时发生错误: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return CreateSegmentResponse(segment_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -214,7 +212,7 @@ async def create_video_segment(request: CreateVideoSegmentRequest) -> CreateSegm
     summary="创建文本片段",
     description="创建文本片段并返回 UUID",
 )
-async def create_text_segment(request: CreateTextSegmentRequest) -> CreateSegmentResponse:
+async def create_text_segment(request: CreateTextSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -257,18 +255,17 @@ async def create_text_segment(request: CreateTextSegmentRequest) -> CreateSegmen
                 details={"reason": result["message"]},
             )
             logger.info("=" * 60)
-            return CreateSegmentResponse(segment_id="", **error_response)
+            return {"segment_id": "", **error_response}
 
         logger.info(f"文本片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
         success_response = response_manager.success(message=result["message"])
-        return CreateSegmentResponse(segment_id=result["segment_id"], **success_response)
+        return {"segment_id": result["segment_id"], **success_response}
 
     except Exception as e:
         logger.error(f"创建文本片段时发生错误: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return CreateSegmentResponse(segment_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -280,7 +277,7 @@ async def create_text_segment(request: CreateTextSegmentRequest) -> CreateSegmen
 )
 async def create_sticker_segment(
     request: CreateStickerSegmentRequest,
-) -> CreateSegmentResponse:
+) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -318,18 +315,17 @@ async def create_sticker_segment(
                 details={"reason": result["message"]},
             )
             logger.info("=" * 60)
-            return CreateSegmentResponse(segment_id="", **error_response)
+            return {"segment_id": "", **error_response}
 
         logger.info(f"贴纸片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
         success_response = response_manager.success(message=result["message"])
-        return CreateSegmentResponse(segment_id=result["segment_id"], **success_response)
+        return {"segment_id": result["segment_id"], **success_response}
 
     except Exception as e:
         logger.error(f"创建贴纸片段时发生错误: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return CreateSegmentResponse(segment_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -339,7 +335,7 @@ async def create_sticker_segment(
     summary="创建特效片段",
     description="创建特效片段并返回 UUID",
 )
-async def create_effect_segment(request: CreateEffectSegmentRequest) -> CreateSegmentResponse:
+async def create_effect_segment(request: CreateEffectSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -381,18 +377,17 @@ async def create_effect_segment(request: CreateEffectSegmentRequest) -> CreateSe
                 details={"reason": result["message"]},
             )
             logger.info("=" * 60)
-            return CreateSegmentResponse(segment_id="", **error_response)
+            return {"segment_id": "", **error_response}
 
         logger.info(f"特效片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
         success_response = response_manager.success(message=result["message"])
-        return CreateSegmentResponse(segment_id=result["segment_id"], **success_response)
+        return {"segment_id": result["segment_id"], **success_response}
 
     except Exception as e:
         logger.error(f"创建特效片段时发生错误: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return CreateSegmentResponse(segment_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -402,7 +397,7 @@ async def create_effect_segment(request: CreateEffectSegmentRequest) -> CreateSe
     summary="创建滤镜片段",
     description="创建滤镜片段并返回 UUID",
 )
-async def create_filter_segment(request: CreateFilterSegmentRequest) -> CreateSegmentResponse:
+async def create_filter_segment(request: CreateFilterSegmentRequest) -> Dict[str, Any]:
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -441,18 +436,17 @@ async def create_filter_segment(request: CreateFilterSegmentRequest) -> CreateSe
                 details={"reason": result["message"]},
             )
             logger.info("=" * 60)
-            return CreateSegmentResponse(segment_id="", **error_response)
+            return {"segment_id": "", **error_response}
 
         logger.info(f"滤镜片段创建成功: {result['segment_id']}")
         logger.info("=" * 60)
 
         success_response = response_manager.success(message=result["message"])
-        return CreateSegmentResponse(segment_id=result["segment_id"], **success_response)
+        return {"segment_id": result["segment_id"], **success_response}
 
     except Exception as e:
         logger.error(f"创建滤镜片段时发生错误: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return CreateSegmentResponse(segment_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== AudioSegment 操作端点 ====================
@@ -465,7 +459,7 @@ async def create_filter_segment(request: CreateFilterSegmentRequest) -> CreateSe
     summary="添加音频特效",
     description="向音频片段添加音效",
 )
-async def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> AddAudioEffectResponse:
+async def add_audio_effect(segment_id: str, request: AddAudioEffectRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -492,16 +486,14 @@ async def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> A
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-            return AddAudioEffectResponse(effect_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "audio":
             logger.error(f"片段类型错误: 期望 audio，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "audio", "actual": segment["segment_type"]},
             )
-            return AddAudioEffectResponse(effect_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -511,11 +503,10 @@ async def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> A
 
         if not success:
             logger.error("添加特效失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加特效失败"},
             )
-            return AddAudioEffectResponse(effect_id="", **error_response)
 
         # 生成特效 ID
         import uuid
@@ -525,12 +516,11 @@ async def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> A
         logger.info(f"音频特效添加成功: {effect_id}")
 
         success_response = response_manager.success(message="音频特效添加成功")
-        return AddAudioEffectResponse(effect_id=effect_id, **success_response)
+        return {"effect_id": effect_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加音频特效失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return AddAudioEffectResponse(effect_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -540,7 +530,7 @@ async def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> A
     summary="添加淡入淡出",
     description="向音频片段添加淡入淡出效果",
 )
-async def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAudioFadeResponse:
+async def add_audio_fade(segment_id: str, request: AddAudioFadeRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -566,16 +556,14 @@ async def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAu
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-            return AddAudioFadeResponse(fade_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "audio":
             logger.error(f"片段类型错误: 期望 audio，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "audio", "actual": segment["segment_type"]},
             )
-            return AddAudioFadeResponse(fade_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -583,25 +571,18 @@ async def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAu
 
         if not success:
             logger.error("添加淡入淡出失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加淡入淡出失败"},
             )
-            return AddAudioFadeResponse(fade_id="", **error_response)
-
-        # 生成 fade_id
-        import uuid
-        fade_id = str(uuid.uuid4())
 
         logger.info("淡入淡出添加成功")
 
-        success_response = response_manager.success(message="淡入淡出添加成功")
-        return AddAudioFadeResponse(fade_id=fade_id, **success_response)
+        return response_manager.success(message="淡入淡出添加成功")
 
     except Exception as e:
         logger.error(f"添加淡入淡出失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return AddAudioFadeResponse(fade_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -611,7 +592,7 @@ async def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAu
     summary="添加音量关键帧",
     description="向音频片段添加音量关键帧",
 )
-async def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) -> AddAudioKeyframeResponse:
+async def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -634,17 +615,14 @@ async def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) 
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddAudioKeyframeResponse(keyframe_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "audio":
             logger.error(f"片段类型错误: 期望 audio，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "audio", "actual": segment["segment_type"]},
             )
-            return AddAudioKeyframeResponse(keyframe_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -654,11 +632,10 @@ async def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) 
 
         if not success:
             logger.error("添加关键帧失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
             )
-            return AddAudioKeyframeResponse(keyframe_id="", **error_response)
 
         # 生成关键帧 ID
         import uuid
@@ -668,13 +645,11 @@ async def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) 
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
         success_response = response_manager.success(message="关键帧添加成功")
-        return AddAudioKeyframeResponse(keyframe_id=keyframe_id, **success_response)
+        return {"keyframe_id": keyframe_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddAudioKeyframeResponse(keyframe_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== VideoSegment 操作端点 ====================
@@ -687,7 +662,7 @@ async def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) 
     summary="添加动画",
     description="向视频片段添加入场/出场动画",
 )
-async def add_video_animation(segment_id: str, request: AddVideoAnimationRequest) -> AddVideoAnimationResponse:
+async def add_video_animation(segment_id: str, request: AddVideoAnimationRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -711,17 +686,14 @@ async def add_video_animation(segment_id: str, request: AddVideoAnimationRequest
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoAnimationResponse(animation_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoAnimationResponse(animation_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -731,11 +703,10 @@ async def add_video_animation(segment_id: str, request: AddVideoAnimationRequest
 
         if not success:
             logger.error("添加动画失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加动画失败"},
             )
-            return AddVideoAnimationResponse(animation_id="", **error_response)
 
         # 生成动画 ID
         import uuid
@@ -745,13 +716,11 @@ async def add_video_animation(segment_id: str, request: AddVideoAnimationRequest
         logger.info(f"动画添加成功: {animation_id}")
 
         success_response = response_manager.success(message="动画添加成功")
-        return AddVideoAnimationResponse(animation_id=animation_id, **success_response)
+        return {"animation_id": animation_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加动画失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoAnimationResponse(animation_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -761,7 +730,7 @@ async def add_video_animation(segment_id: str, request: AddVideoAnimationRequest
     summary="添加视频特效",
     description="向视频片段添加视频特效",
 )
-async def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> AddVideoEffectResponse:
+async def add_video_effect(segment_id: str, request: AddVideoEffectRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -788,17 +757,14 @@ async def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> A
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoEffectResponse(effect_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoEffectResponse(effect_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -808,11 +774,10 @@ async def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> A
 
         if not success:
             logger.error("添加特效失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加特效失败"},
             )
-            return AddVideoEffectResponse(effect_id="", **error_response)
 
         # 生成特效 ID
         import uuid
@@ -822,13 +787,11 @@ async def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> A
         logger.info(f"视频特效添加成功: {effect_id}")
 
         success_response = response_manager.success(message="视频特效添加成功")
-        return AddVideoEffectResponse(effect_id=effect_id, **success_response)
+        return {"effect_id": effect_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加视频特效失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoEffectResponse(effect_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -838,7 +801,7 @@ async def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> A
     summary="添加淡入淡出",
     description="向视频片段添加淡入淡出效果",
 )
-async def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVideoFadeResponse:
+async def add_video_fade(segment_id: str, request: AddVideoFadeRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -857,16 +820,14 @@ async def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVi
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-            return AddVideoFadeResponse(fade_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoFadeResponse(fade_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -874,25 +835,18 @@ async def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVi
 
         if not success:
             logger.error("添加淡入淡出失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加淡入淡出失败"},
             )
-            return AddVideoFadeResponse(fade_id="", **error_response)
-
-        # 生成 fade_id
-        import uuid
-        fade_id = str(uuid.uuid4())
 
         logger.info("淡入淡出添加成功")
 
-        success_response = response_manager.success(message="淡入淡出添加成功")
-        return AddVideoFadeResponse(fade_id=fade_id, **success_response)
+        return response_manager.success(message="淡入淡出添加成功")
 
     except Exception as e:
         logger.error(f"添加淡入淡出失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return AddVideoFadeResponse(fade_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -902,7 +856,7 @@ async def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVi
     summary="添加滤镜",
     description="向视频片段添加滤镜",
 )
-async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> AddVideoFilterResponse:
+async def add_video_filter(segment_id: str, request: AddVideoFilterRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -925,17 +879,14 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoFilterResponse(filter_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoFilterResponse(filter_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -945,11 +896,10 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
 
         if not success:
             logger.error("添加滤镜失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加滤镜失败"},
             )
-            return AddVideoFilterResponse(filter_id="", **error_response)
 
         # 生成滤镜 ID
         import uuid
@@ -959,13 +909,11 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
         logger.info(f"滤镜添加成功: {filter_id}")
 
         success_response = response_manager.success(message="滤镜添加成功")
-        return AddVideoFilterResponse(filter_id=filter_id, **success_response)
+        return {"filter_id": filter_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加滤镜失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoFilterResponse(filter_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -975,7 +923,7 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
     summary="添加蒙版",
     description="向视频片段添加蒙版",
 )
-async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVideoMaskResponse:
+async def add_video_mask(segment_id: str, request: AddVideoMaskRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1008,17 +956,14 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoMaskResponse(mask_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoMaskResponse(mask_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1026,11 +971,10 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
 
         if not success:
             logger.error("添加蒙版失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加蒙版失败"},
             )
-            return AddVideoMaskResponse(mask_id="", **error_response)
 
         # 生成蒙版 ID
         import uuid
@@ -1040,13 +984,11 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
         logger.info(f"蒙版添加成功: {mask_id}")
 
         success_response = response_manager.success(message="蒙版添加成功")
-        return AddVideoMaskResponse(mask_id=mask_id, **success_response)
+        return {"mask_id": mask_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加蒙版失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoMaskResponse(mask_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -1056,7 +998,7 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
     summary="添加转场",
     description="向视频片段添加转场",
 )
-async def add_video_transition(segment_id: str, request: AddVideoTransitionRequest) -> AddVideoTransitionResponse:
+async def add_video_transition(segment_id: str, request: AddVideoTransitionRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1082,17 +1024,14 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoTransitionResponse(transition_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoTransitionResponse(transition_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1102,11 +1041,10 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
 
         if not success:
             logger.error("添加转场失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加转场失败"},
             )
-            return AddVideoTransitionResponse(transition_id="", **error_response)
 
         # 生成转场 ID
         import uuid
@@ -1116,13 +1054,11 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
         logger.info(f"转场添加成功: {transition_id}")
 
         success_response = response_manager.success(message="转场添加成功")
-        return AddVideoTransitionResponse(transition_id=transition_id, **success_response)
+        return {"transition_id": transition_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加转场失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoTransitionResponse(transition_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -1134,7 +1070,7 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
 )
 async def add_video_background_filling(
     segment_id: str, request: AddVideoBackgroundFillingRequest
-) -> AddVideoBackgroundFillingResponse:
+):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1161,17 +1097,14 @@ async def add_video_background_filling(
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoBackgroundFillingResponse(filling_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoBackgroundFillingResponse(filling_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1181,11 +1114,10 @@ async def add_video_background_filling(
 
         if not success:
             logger.error("添加背景填充失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加背景填充失败"},
             )
-            return AddVideoBackgroundFillingResponse(filling_id="", **error_response)
 
         logger.info("背景填充添加成功")
 
@@ -1195,9 +1127,7 @@ async def add_video_background_filling(
 
     except Exception as e:
         logger.error(f"添加背景填充失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoBackgroundFillingResponse(filling_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -1207,7 +1137,7 @@ async def add_video_background_filling(
     summary="添加视频关键帧",
     description="向视频片段添加位置、缩放、旋转等视觉属性关键帧",
 )
-async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) -> AddVideoKeyframeResponse:
+async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1234,17 +1164,14 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddVideoKeyframeResponse(keyframe_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
-            return AddVideoKeyframeResponse(keyframe_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1254,11 +1181,10 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
 
         if not success:
             logger.error("添加关键帧失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
             )
-            return AddVideoKeyframeResponse(keyframe_id="", **error_response)
 
         # 生成关键帧 ID
         import uuid
@@ -1268,13 +1194,11 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
         success_response = response_manager.success(message="关键帧添加成功")
-        return AddAudioKeyframeResponse(keyframe_id=keyframe_id, **success_response)
+        return {"keyframe_id": keyframe_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddVideoKeyframeResponse(keyframe_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== TextSegment 操作端点 ====================
@@ -1290,7 +1214,7 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
     summary="添加视觉属性关键帧",
     description="向贴纸片段添加视觉属性关键帧",
 )
-async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeRequest) -> AddStickerKeyframeResponse:
+async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1317,17 +1241,14 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddStickerKeyframeResponse(keyframe_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "sticker":
             logger.error(f"片段类型错误: 期望 sticker，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "sticker", "actual": segment["segment_type"]},
             )
-            return AddStickerKeyframeResponse(keyframe_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1337,11 +1258,10 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
 
         if not success:
             logger.error("添加关键帧失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
             )
-            return AddStickerKeyframeResponse(keyframe_id="", **error_response)
 
         # 生成关键帧 ID
         import uuid
@@ -1351,13 +1271,11 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
         success_response = response_manager.success(message="关键帧添加成功")
-        return AddAudioKeyframeResponse(keyframe_id=keyframe_id, **success_response)
+        return {"keyframe_id": keyframe_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddStickerKeyframeResponse(keyframe_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== TextSegment 操作端点 ====================
@@ -1370,7 +1288,7 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
     summary="添加文本动画",
     description="向文本片段添加入场/出场动画",
 )
-async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) -> AddTextAnimationResponse:
+async def add_text_animation(segment_id: str, request: AddTextAnimationRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1394,17 +1312,14 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddTextAnimationResponse(animation_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
             )
-            return AddTextAnimationResponse(animation_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1414,11 +1329,10 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
 
         if not success:
             logger.error("添加动画失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加动画失败"},
             )
-            return AddTextAnimationResponse(animation_id="", **error_response)
 
         # 生成动画 ID
         import uuid
@@ -1428,13 +1342,11 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
         logger.info(f"文字动画添加成功: {animation_id}")
 
         success_response = response_manager.success(message="文字动画添加成功")
-        return AddVideoAnimationResponse(animation_id=animation_id, **success_response)
+        return {"animation_id": animation_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加文字动画失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddTextAnimationResponse(animation_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -1444,7 +1356,7 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
     summary="添加气泡",
     description="向文本片段添加气泡",
 )
-async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> AddTextBubbleResponse:
+async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1467,17 +1379,14 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddTextBubbleResponse(bubble_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
             )
-            return AddTextBubbleResponse(bubble_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1487,11 +1396,10 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
 
         if not success:
             logger.error("添加气泡失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加气泡失败"},
             )
-            return AddTextBubbleResponse(bubble_id="", **error_response)
 
         # 生成气泡 ID
         import uuid
@@ -1501,13 +1409,11 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
         logger.info(f"气泡添加成功: {bubble_id}")
 
         success_response = response_manager.success(message="气泡添加成功")
-        return AddTextBubbleResponse(bubble_id=bubble_id, **success_response)
+        return {"bubble_id": bubble_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加气泡失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddTextBubbleResponse(bubble_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -1517,7 +1423,7 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
     summary="添加花字特效",
     description="向文本片段添加花字特效",
 )
-async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> AddTextEffectResponse:
+async def add_text_effect(segment_id: str, request: AddTextEffectRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1539,17 +1445,14 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddTextEffectResponse(effect_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
             )
-            return AddTextEffectResponse(effect_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1559,11 +1462,10 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
 
         if not success:
             logger.error("添加花字特效失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加花字特效失败"},
             )
-            return AddTextEffectResponse(effect_id="", **error_response)
 
         # 生成特效 ID
         import uuid
@@ -1578,9 +1480,7 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
 
     except Exception as e:
         logger.error(f"添加花字特效失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddTextEffectResponse(effect_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 @router.post(
@@ -1590,7 +1490,7 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
     summary="添加视觉属性关键帧",
     description="向文本片段添加视觉属性关键帧",
 )
-async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) -> AddTextKeyframeResponse:
+async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest):
     """
     对应 pyJianYingDraft 代码：
     ```python
@@ -1617,17 +1517,14 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-
-            return AddTextKeyframeResponse(keyframe_id="", **error_response)
+            return response_manager.format_not_found_error("segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
             )
-            return AddTextKeyframeResponse(keyframe_id="", **error_response)
 
         # 记录操作
         operation_data = request.dict()
@@ -1637,11 +1534,10 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
 
         if not success:
             logger.error("添加关键帧失败")
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
             )
-            return AddTextKeyframeResponse(keyframe_id="", **error_response)
 
         # 生成关键帧 ID
         import uuid
@@ -1651,13 +1547,11 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
         success_response = response_manager.success(message="关键帧添加成功")
-        return AddAudioKeyframeResponse(keyframe_id=keyframe_id, **success_response)
+        return {"keyframe_id": keyframe_id, **success_response}
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-
-        return AddTextKeyframeResponse(keyframe_id="", **error_response)
+        return response_manager.format_internal_error(e)
 
 
 # ==================== 查询端点 ====================
@@ -1670,7 +1564,7 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
     summary="查询 Segment 详情",
     description="根据 segment_id 和 segment_type 查询片段的详细信息（总是返回 success=True）",
 )
-async def get_segment_detail(segment_type: str, segment_id: str) -> SegmentDetailResponse:
+async def get_segment_detail(segment_type: str, segment_id: str):
     """
     查询片段详情
 
@@ -1683,34 +1577,16 @@ async def get_segment_detail(segment_type: str, segment_id: str) -> SegmentDetai
 
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            error_response = response_manager.format_not_found_error("segment", segment_id)
-            return SegmentDetailResponse(
-                segment_id=segment_id,
-                segment_type=segment_type,
-                material_url=None,
-                download_status="none",
-                local_path=None,
-                properties={},
-                **error_response
-            )
+            return response_manager.format_not_found_error("segment", segment_id)
 
         # 验证类型匹配
         if segment["segment_type"] != segment_type:
             logger.error(
                 f"片段类型不匹配: 期望 {segment_type}，实际 {segment['segment_type']}"
             )
-            error_response = response_manager.error(
+            return response_manager.error(
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": segment_type, "actual": segment["segment_type"]},
-            )
-            return SegmentDetailResponse(
-                segment_id=segment_id,
-                segment_type=segment_type,
-                material_url=None,
-                download_status="none",
-                local_path=None,
-                properties={},
-                **error_response
             )
 
         # 构建响应
@@ -1727,25 +1603,16 @@ async def get_segment_detail(segment_type: str, segment_id: str) -> SegmentDetai
         }
 
         success_response = response_manager.success(message="查询成功")
-        return SegmentDetailResponse(
-            segment_id=segment_id,
-            segment_type=segment["segment_type"],
-            material_url=material_url,
-            download_status=segment.get("download_status", "none"),
-            local_path=segment.get("local_path"),
-            properties=properties,
+        return {
+            "segment_id": segment_id,
+            "segment_type": segment["segment_type"],
+            "material_url": material_url,
+            "download_status": segment.get("download_status", "none"),
+            "local_path": segment.get("local_path"),
+            "properties": properties,
             **success_response,
-        )
+        }
 
     except Exception as e:
         logger.error(f"查询片段详情失败: {e}", exc_info=True)
-        error_response = response_manager.format_internal_error(e)
-        return SegmentDetailResponse(
-            segment_id=segment_id,
-            segment_type=segment_type,
-            material_url=None,
-            download_status="none",
-            local_path=None,
-            properties={},
-            **error_response
-        )
+        return response_manager.format_internal_error(e)
