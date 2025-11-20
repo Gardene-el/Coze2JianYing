@@ -162,7 +162,7 @@ def handler(args: Args[Input]) -> Output:
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['track_type'] = "{args.input.track_type}"
-if {args.input.track_name} is not None:
+if "{args.input.track_name}" is not None:
     req_params_{generated_uuid}['track_name'] = "{args.input.track_name}"
 req_{generated_uuid} = AddTrackRequest(**req_params_{generated_uuid})
 

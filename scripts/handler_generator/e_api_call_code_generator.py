@@ -162,6 +162,30 @@ class APICallCodeGenerator:
             # 非字符串的基本类型：需要在 handler.py 的 f-string 中是 {args.input.xxx}
             return "{" + access_expr + "}"
 
+    def _format_condition_value(self, field_name: str, field_type: str) -> str:
+        """
+        根据字段类型格式化条件检查中的值
+        用于生成 'if <value> is not None:' 中的 <value> 部分
+
+        Args:
+            field_name: 字段名称
+            field_type: 字段类型
+
+        Returns:
+            格式化后的条件值字符串（用于 if 条件中）
+        """
+        # 构造访问表达式：args.input.field_name
+        access_expr = "args.input." + field_name
+
+        if self._should_quote_type(field_type):
+            # 字符串类型：在条件中也需要加引号，避免被解释为变量名
+            # 例如：if "demo_coze" is not None（而不是 if demo_coze is not None）
+            return '"{' + access_expr + '}"'
+        else:
+            # 非字符串类型：直接使用插值表达式
+            # 例如：if 1080 is not None, if True is not None
+            return "{" + access_expr + "}"
+
     def generate_api_call_code(
         self, endpoint: APIEndpointInfo, output_fields: List[Dict[str, Any]]
     ) -> str:
@@ -212,8 +236,9 @@ class APICallCodeGenerator:
                 field_name = field["name"]
                 field_type = field["type"]
                 formatted_value = self._format_param_value(field_name, field_type)
+                condition_value = self._format_condition_value(field_name, field_type)
                 request_construction += (
-                    "if {args.input." + field_name + "} is not None:\n"
+                    "if " + condition_value + " is not None:\n"
                 )
                 request_construction += (
                     "    req_params_{generated_uuid}['"

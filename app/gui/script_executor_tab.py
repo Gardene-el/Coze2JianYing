@@ -365,11 +365,18 @@ CustomNamespace = SimpleNamespace
         elif script_content.startswith("'") and script_content.endswith("'"):
             script_content = script_content[1:-1]
 
-        # 将用户脚本包装在async main函数中
+        # 分离用户脚本中的 import 语句和其他代码
+        user_imports, user_code = self._extract_imports(script_content)
+        
+        # 如果用户脚本有 import 语句，添加到模块级别
+        if user_imports:
+            imports += "\n# === 用户脚本的导入 ===\n" + user_imports + "\n"
+
+        # 将用户脚本（去除import后）包装在async main函数中
         async_main = f"""
 async def main():
     \"\"\"自动生成的main函数，包含用户脚本\"\"\"
-{self._indent_code(script_content, 4)}
+{self._indent_code(user_code, 4)}
 
 # 运行主函数
 if __name__ == "__main__":
@@ -380,6 +387,39 @@ if __name__ == "__main__":
         full_script = imports + async_main
 
         return full_script
+    
+    def _extract_imports(self, script_content: str) -> tuple[str, str]:
+        """
+        从脚本内容中提取 import 语句
+        
+        Args:
+            script_content: 原始脚本内容
+            
+        Returns:
+            (import语句, 其他代码) 的元组
+        """
+        lines = script_content.split('\n')
+        import_lines = []
+        code_lines = []
+        
+        for line in lines:
+            stripped = line.strip()
+            # 检查是否是 import 语句（包括 from ... import）
+            if stripped.startswith('import ') or stripped.startswith('from '):
+                import_lines.append(line)
+            # 跳过注释和空行
+            elif not stripped or stripped.startswith('#'):
+                # 如果还没有遇到代码，将注释/空行加到import部分
+                # 否则加到代码部分
+                if not code_lines:
+                    import_lines.append(line)
+                else:
+                    code_lines.append(line)
+            else:
+                # 普通代码行
+                code_lines.append(line)
+        
+        return '\n'.join(import_lines), '\n'.join(code_lines)
 
     def _indent_code(self, code: str, spaces: int) -> str:
         """
