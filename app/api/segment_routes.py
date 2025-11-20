@@ -894,11 +894,12 @@ async def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVi
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddVideoFadeResponse, "segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoFadeResponse,
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
@@ -909,18 +910,19 @@ async def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVi
 
         if not success:
             logger.error("添加淡入淡出失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoFadeResponse,
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加淡入淡出失败"},
             )
 
         logger.info("淡入淡出添加成功")
 
-        return response_manager.success(message="淡入淡出添加成功")
+        return response_manager.success_response(AddVideoFadeResponse, message="淡入淡出添加成功")
 
     except Exception as e:
         logger.error(f"添加淡入淡出失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddVideoFadeResponse, e)
 
 
 @router.post(
@@ -953,13 +955,15 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddVideoFilterResponse, "segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoFilterResponse,
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
+                filter_id=""
             )
 
         # 记录操作
@@ -970,9 +974,12 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
 
         if not success:
             logger.error("添加滤镜失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoFilterResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加滤镜失败"},
+                filter_id=""
             )
 
         # 生成滤镜 ID
@@ -982,12 +989,15 @@ async def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> A
 
         logger.info(f"滤镜添加成功: {filter_id}")
 
-        success_response = response_manager.success(message="滤镜添加成功")
-        return {"filter_id": filter_id, **success_response}
+        return response_manager.success_response(
+            AddVideoFilterResponse,
+            message="滤镜添加成功",
+            filter_id=filter_id
+        )
 
     except Exception as e:
         logger.error(f"添加滤镜失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddVideoFilterResponse, e, filter_id="")
 
 
 @router.post(
@@ -1030,13 +1040,16 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddVideoMaskResponse, "segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoMaskResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
+                mask_id=""
             )
 
         # 记录操作
@@ -1045,9 +1058,12 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
 
         if not success:
             logger.error("添加蒙版失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoMaskResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加蒙版失败"},
+                mask_id=""
             )
 
         # 生成蒙版 ID
@@ -1057,12 +1073,15 @@ async def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVi
 
         logger.info(f"蒙版添加成功: {mask_id}")
 
-        success_response = response_manager.success(message="蒙版添加成功")
-        return {"mask_id": mask_id, **success_response}
+        return response_manager.success_response(
+            AddVideoMaskResponse,
+            message="蒙版添加成功",
+            mask_id=mask_id
+        )
 
     except Exception as e:
         logger.error(f"添加蒙版失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddVideoMaskResponse, e, mask_id="")
 
 
 @router.post(
@@ -1098,13 +1117,16 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddVideoTransitionResponse, "segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoTransitionResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
+                transition_id=""
             )
 
         # 记录操作
@@ -1115,9 +1137,12 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
 
         if not success:
             logger.error("添加转场失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoTransitionResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加转场失败"},
+                transition_id=""
             )
 
         # 生成转场 ID
@@ -1127,12 +1152,15 @@ async def add_video_transition(segment_id: str, request: AddVideoTransitionReque
 
         logger.info(f"转场添加成功: {transition_id}")
 
-        success_response = response_manager.success(message="转场添加成功")
-        return {"transition_id": transition_id, **success_response}
+        return response_manager.success_response(
+            AddVideoTransitionResponse,
+            message="转场添加成功",
+            transition_id=transition_id
+        )
 
     except Exception as e:
         logger.error(f"添加转场失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddVideoTransitionResponse, e, transition_id="")
 
 
 @router.post(
@@ -1171,11 +1199,13 @@ async def add_video_background_filling(
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddVideoBackgroundFillingResponse, "segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoBackgroundFillingResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
             )
@@ -1201,7 +1231,7 @@ async def add_video_background_filling(
 
     except Exception as e:
         logger.error(f"添加背景填充失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddVideoBackgroundFillingResponse, e)
 
 
 @router.post(
@@ -1238,13 +1268,16 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddVideoKeyframeResponse, "segment", segment_id)
 
         if segment["segment_type"] != "video":
             logger.error(f"片段类型错误: 期望 video，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoKeyframeResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "video", "actual": segment["segment_type"]},
+                keyframe_id=""
             )
 
         # 记录操作
@@ -1255,9 +1288,12 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
 
         if not success:
             logger.error("添加关键帧失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddVideoKeyframeResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
+                keyframe_id=""
             )
 
         # 生成关键帧 ID
@@ -1267,12 +1303,15 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
 
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
-        success_response = response_manager.success(message="关键帧添加成功")
-        return {"keyframe_id": keyframe_id, **success_response}
+        return response_manager.success_response(
+            AddVideoKeyframeResponse,
+            message="关键帧添加成功",
+            keyframe_id=keyframe_id
+        )
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddStickerKeyframeResponse, e, keyframe_id="")
 
 
 # ==================== TextSegment 操作端点 ====================
@@ -1315,13 +1354,16 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddStickerKeyframeResponse, "segment", segment_id)
 
         if segment["segment_type"] != "sticker":
             logger.error(f"片段类型错误: 期望 sticker，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddStickerKeyframeResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "sticker", "actual": segment["segment_type"]},
+                keyframe_id=""
             )
 
         # 记录操作
@@ -1332,9 +1374,12 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
 
         if not success:
             logger.error("添加关键帧失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddStickerKeyframeResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
+                keyframe_id=""
             )
 
         # 生成关键帧 ID
@@ -1344,12 +1389,15 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
 
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
-        success_response = response_manager.success(message="关键帧添加成功")
-        return {"keyframe_id": keyframe_id, **success_response}
+        return response_manager.success_response(
+            AddStickerKeyframeResponse,
+            message="关键帧添加成功",
+            keyframe_id=keyframe_id
+        )
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddStickerKeyframeResponse, e, keyframe_id="")
 
 
 # ==================== TextSegment 操作端点 ====================
@@ -1386,13 +1434,16 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddTextAnimationResponse, "segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextAnimationResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
+                animation_id=""
             )
 
         # 记录操作
@@ -1403,9 +1454,12 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
 
         if not success:
             logger.error("添加动画失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextAnimationResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加动画失败"},
+                animation_id=""
             )
 
         # 生成动画 ID
@@ -1415,12 +1469,15 @@ async def add_text_animation(segment_id: str, request: AddTextAnimationRequest) 
 
         logger.info(f"文字动画添加成功: {animation_id}")
 
-        success_response = response_manager.success(message="文字动画添加成功")
-        return {"animation_id": animation_id, **success_response}
+        return response_manager.success_response(
+            AddTextAnimationResponse,
+            message="文字动画添加成功",
+            animation_id=animation_id
+        )
 
     except Exception as e:
         logger.error(f"添加文字动画失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddTextAnimationResponse, e, animation_id="")
 
 
 @router.post(
@@ -1453,13 +1510,16 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddTextBubbleResponse, "segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextBubbleResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
+                bubble_id=""
             )
 
         # 记录操作
@@ -1470,9 +1530,12 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
 
         if not success:
             logger.error("添加气泡失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextBubbleResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加气泡失败"},
+                bubble_id=""
             )
 
         # 生成气泡 ID
@@ -1482,12 +1545,15 @@ async def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> Add
 
         logger.info(f"气泡添加成功: {bubble_id}")
 
-        success_response = response_manager.success(message="气泡添加成功")
-        return {"bubble_id": bubble_id, **success_response}
+        return response_manager.success_response(
+            AddTextBubbleResponse,
+            message="气泡添加成功",
+            bubble_id=bubble_id
+        )
 
     except Exception as e:
         logger.error(f"添加气泡失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddTextBubbleResponse, e, bubble_id="")
 
 
 @router.post(
@@ -1519,13 +1585,16 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddTextEffectResponse, "segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextEffectResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
+                effect_id=""
             )
 
         # 记录操作
@@ -1536,9 +1605,12 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
 
         if not success:
             logger.error("添加花字特效失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextEffectResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加花字特效失败"},
+                effect_id=""
             )
 
         # 生成特效 ID
@@ -1554,7 +1626,7 @@ async def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> Add
 
     except Exception as e:
         logger.error(f"添加花字特效失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddTextEffectResponse, e)
 
 
 @router.post(
@@ -1591,13 +1663,16 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
         segment = segment_manager.get_segment(segment_id)
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            return response_manager.not_found_response(AddTextKeyframeResponse, "segment", segment_id)
 
         if segment["segment_type"] != "text":
             logger.error(f"片段类型错误: 期望 text，实际 {segment['segment_type']}")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextKeyframeResponse,
+                
                 error_code=ErrorCode.SEGMENT_TYPE_MISMATCH,
                 details={"expected": "text", "actual": segment["segment_type"]},
+                keyframe_id=""
             )
 
         # 记录操作
@@ -1608,9 +1683,12 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
 
         if not success:
             logger.error("添加关键帧失败")
-            return response_manager.error(
+            return response_manager.error_response(
+                AddTextKeyframeResponse,
+                
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "添加关键帧失败"},
+                keyframe_id=""
             )
 
         # 生成关键帧 ID
@@ -1620,12 +1698,15 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) ->
 
         logger.info(f"关键帧添加成功: {keyframe_id}")
 
-        success_response = response_manager.success(message="关键帧添加成功")
-        return {"keyframe_id": keyframe_id, **success_response}
+        return response_manager.success_response(
+            AddTextKeyframeResponse,
+            message="关键帧添加成功",
+            keyframe_id=keyframe_id
+        )
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        return response_manager.internal_error_response(AddTextKeyframeResponse, e, keyframe_id="")
 
 
 # ==================== 查询端点 ====================
@@ -1651,7 +1732,7 @@ async def get_segment_detail(segment_type: str, segment_id: str):
 
         if not segment:
             logger.error(f"片段不存在: {segment_id}")
-            return response_manager.format_not_found_error("segment", segment_id)
+            raise HTTPException(status_code=404, detail=f"Segment not found: {segment_id}")
 
         # 验证类型匹配
         if segment["segment_type"] != segment_type:
@@ -1689,4 +1770,4 @@ async def get_segment_detail(segment_type: str, segment_id: str):
 
     except Exception as e:
         logger.error(f"查询片段详情失败: {e}", exc_info=True)
-        return response_manager.format_internal_error(e)
+        raise HTTPException(status_code=500, detail=str(e))
