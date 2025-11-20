@@ -199,6 +199,8 @@ req_params_{generated_uuid}['resource_id'] = "{args.input.resource_id}"
 req_{generated_uuid} = AddTextBubbleRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_text_bubble(segment_{args.input.segment_id}, req_{generated_uuid})
+
+bubble_{generated_uuid} = resp_{generated_uuid}.bubble_id
 """
 
         # 写入 API 调用到文件

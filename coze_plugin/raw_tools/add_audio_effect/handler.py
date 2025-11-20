@@ -200,6 +200,8 @@ if {args.input.params} is not None:
 req_{generated_uuid} = AddAudioEffectRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_audio_effect(segment_{args.input.segment_id}, req_{generated_uuid})
+
+effect_{generated_uuid} = resp_{generated_uuid}.effect_id
 """
 
         # 写入 API 调用到文件

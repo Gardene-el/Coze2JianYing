@@ -335,24 +335,32 @@ class APICallCodeGenerator:
         api_call_code += ", ".join(api_call_params)
         api_call_code += ")\n"
 
-        # 检查 output 是否包含 draft_id 或 segment_id
-        # 如果是 create 类型的函数，需要保存创建的对象ID以便后续引用
-        has_output_draft_id = any(f["name"] == "draft_id" for f in output_fields)
-        has_output_segment_id = any(f["name"] == "segment_id" for f in output_fields)
-
-        if has_output_draft_id:
-            # 保存为 draft_{uuid} 而不是 draft_id_{uuid}
-            # 这样后续函数可以通过 draft_{uuid} 引用这个草稿
-            api_call_code += "\n"
-            api_call_code += "draft_{generated_uuid} = resp_{generated_uuid}.draft_id\n"
-
-        if has_output_segment_id:
-            # 保存为 segment_{uuid} 而不是 segment_id_{uuid}
-            # 这样后续函数可以通过 segment_{uuid} 引用这个片段
-            api_call_code += "\n"
-            api_call_code += (
-                "segment_{generated_uuid} = resp_{generated_uuid}.segment_id\n"
-            )
+        # 检查 output 中所有的 ID 字段并保存
+        # 这些 ID 可以在后续的 API 调用中被引用
+        # 支持的 ID 类型：draft_id, segment_id, effect_id, keyframe_id, animation_id, 
+        # filter_id, mask_id, transition_id, bubble_id 等
+        id_fields_to_extract = [
+            "draft_id",
+            "segment_id", 
+            "effect_id",
+            "keyframe_id",
+            "animation_id",
+            "filter_id",
+            "mask_id",
+            "transition_id",
+            "bubble_id",
+            "track_id",
+        ]
+        
+        for id_field in id_fields_to_extract:
+            has_output_id = any(f["name"] == id_field for f in output_fields)
+            if has_output_id:
+                # 保存为 {type}_{uuid} 格式
+                # 例如：effect_{uuid}, keyframe_{uuid} 等
+                # 这样后续函数可以通过这个变量名引用创建的对象
+                id_type = id_field.replace("_id", "")  # draft_id -> draft, effect_id -> effect
+                api_call_code += "\n"
+                api_call_code += f"{id_type}_{{generated_uuid}} = resp_{{generated_uuid}}.{id_field}\n"
 
         api_call_code += '"""\n'
         api_call_code += "\n"

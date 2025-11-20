@@ -200,6 +200,8 @@ if "{args.input.duration}" is not None:
 req_{generated_uuid} = AddVideoTransitionRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_video_transition(segment_{args.input.segment_id}, req_{generated_uuid})
+
+transition_{generated_uuid} = resp_{generated_uuid}.transition_id
 """
 
         # 写入 API 调用到文件

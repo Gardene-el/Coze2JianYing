@@ -201,6 +201,8 @@ req_params_{generated_uuid}['property'] = "{args.input.property}"
 req_{generated_uuid} = AddTextKeyframeRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_text_keyframe(segment_{args.input.segment_id}, req_{generated_uuid})
+
+keyframe_{generated_uuid} = resp_{generated_uuid}.keyframe_id
 """
 
         # 写入 API 调用到文件

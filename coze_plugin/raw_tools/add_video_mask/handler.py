@@ -215,6 +215,8 @@ if {args.input.rotation} is not None:
 req_{generated_uuid} = AddVideoMaskRequest(**req_params_{generated_uuid})
 
 resp_{generated_uuid} = await add_video_mask(segment_{args.input.segment_id}, req_{generated_uuid})
+
+mask_{generated_uuid} = resp_{generated_uuid}.mask_id
 """
 
         # 写入 API 调用到文件
