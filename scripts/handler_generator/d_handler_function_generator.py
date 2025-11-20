@@ -187,7 +187,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
 
         handler_function = (
             helper_functions
-            + f'''def handler(args: Args[Input]) -> Output:
+            + f'''def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     {endpoint.func_name} 的主处理函数
 
@@ -195,7 +195,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
         args: Input arguments
 
     Returns:
-        Output NamedTuple containing response data
+        Dict containing response data (converted from Output NamedTuple for Coze compatibility)
     """
     logger = getattr(args, 'logger', None)
 
@@ -214,7 +214,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
         if logger:
             logger.info(f"{endpoint.func_name} 调用成功")
 
-        return Output({output_construction})
+        return Output({output_construction})._asdict()
 
     except Exception as e:
         error_msg = f"调用 {endpoint.func_name} 时发生错误: {{str(e)}}"
@@ -223,7 +223,7 @@ def _to_type_constructor(obj, type_name: str) -> str:
             import traceback
             logger.error(f"Traceback: {{traceback.format_exc()}}")
 
-        return Output(success=False, message=error_msg)
+        return Output(success=False, message=error_msg)._asdict()
 '''
         )
 
