@@ -166,8 +166,7 @@ if {args.input.intensity} is not None:
     req_params_{generated_uuid}['intensity'] = {args.input.intensity}
 req_{generated_uuid} = AddVideoFilterRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await add_video_filter(segment_{args.input.segment_id}, req_{generated_uuid})
-resp_{generated_uuid} = AddVideoFilterResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await add_video_filter(segment_{args.input.segment_id}, req_{generated_uuid})
 """
 
         # 写入 API 调用到文件

@@ -165,8 +165,7 @@ req_params_{generated_uuid}['time_offset'] = {args.input.time_offset}
 req_params_{generated_uuid}['volume'] = {args.input.volume}
 req_{generated_uuid} = AddAudioKeyframeRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await add_audio_keyframe(segment_{args.input.segment_id}, req_{generated_uuid})
-resp_{generated_uuid} = AddAudioKeyframeResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await add_audio_keyframe(segment_{args.input.segment_id}, req_{generated_uuid})
 """
 
         # 写入 API 调用到文件

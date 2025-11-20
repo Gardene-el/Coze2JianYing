@@ -182,8 +182,7 @@ if {args.input.clip_settings} is not None:
     req_params_{generated_uuid}['clip_settings'] = {_to_type_constructor(args.input.clip_settings, 'ClipSettings')}
 req_{generated_uuid} = CreateStickerSegmentRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await create_sticker_segment(req_{generated_uuid})
-resp_{generated_uuid} = CreateSegmentResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await create_sticker_segment(req_{generated_uuid})
 
 segment_{generated_uuid} = resp_{generated_uuid}.segment_id
 """

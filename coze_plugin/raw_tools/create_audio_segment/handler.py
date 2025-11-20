@@ -182,8 +182,7 @@ if {args.input.change_pitch} is not None:
     req_params_{generated_uuid}['change_pitch'] = {args.input.change_pitch}
 req_{generated_uuid} = CreateAudioSegmentRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await create_audio_segment(req_{generated_uuid})
-resp_{generated_uuid} = CreateSegmentResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await create_audio_segment(req_{generated_uuid})
 
 segment_{generated_uuid} = resp_{generated_uuid}.segment_id
 """

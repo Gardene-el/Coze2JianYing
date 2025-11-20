@@ -164,8 +164,7 @@ req_params_{generated_uuid}['in_duration'] = "{args.input.in_duration}"
 req_params_{generated_uuid}['out_duration'] = "{args.input.out_duration}"
 req_{generated_uuid} = AddVideoFadeRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await add_video_fade(segment_{args.input.segment_id}, req_{generated_uuid})
-resp_{generated_uuid} = AddVideoFadeResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await add_video_fade(segment_{args.input.segment_id}, req_{generated_uuid})
 """
 
         # 写入 API 调用到文件

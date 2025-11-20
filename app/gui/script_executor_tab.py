@@ -330,7 +330,7 @@ from app.api.segment_routes import (
     get_segment_detail
 )
 
-# 导入所有Request和Response模型
+# 导入所有Request模型
 from app.schemas.segment_schemas import (
     # Segment创建请求
     CreateAudioSegmentRequest, CreateVideoSegmentRequest,
@@ -346,15 +346,6 @@ from app.schemas.segment_schemas import (
     AddVideoAnimationRequest, AddTextAnimationRequest,
     AddVideoFilterRequest, AddVideoMaskRequest, AddVideoTransitionRequest,
     AddVideoBackgroundFillingRequest, AddTextBubbleRequest, AddTextEffectRequest,
-    # Response模型
-    CreateSegmentResponse, CreateDraftResponse, AddSegmentToDraftResponse,
-    AddTrackResponse, AddGlobalEffectResponse, AddGlobalFilterResponse, SaveDraftResponse,
-    AddAudioEffectResponse, AddVideoEffectResponse,
-    AddAudioFadeResponse, AddVideoFadeResponse,
-    AddAudioKeyframeResponse, AddVideoKeyframeResponse, AddTextKeyframeResponse, AddStickerKeyframeResponse,
-    AddVideoAnimationResponse, AddTextAnimationResponse,
-    AddVideoFilterResponse, AddVideoMaskResponse, AddVideoTransitionResponse,
-    AddVideoBackgroundFillingResponse, AddTextBubbleResponse, AddTextEffectResponse,
     # 辅助模型
     TimeRange, ClipSettings, TextStyle, CropSettings
 )

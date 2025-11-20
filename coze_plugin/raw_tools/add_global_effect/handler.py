@@ -178,8 +178,7 @@ if {args.input.params} is not None:
     req_params_{generated_uuid}['params'] = {args.input.params}
 req_{generated_uuid} = AddGlobalEffectRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await add_global_effect(draft_{args.input.draft_id}, req_{generated_uuid})
-resp_{generated_uuid} = AddGlobalEffectResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await add_global_effect(draft_{args.input.draft_id}, req_{generated_uuid})
 """
 
         # 写入 API 调用到文件

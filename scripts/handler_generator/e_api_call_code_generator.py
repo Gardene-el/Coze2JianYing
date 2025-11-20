@@ -278,17 +278,9 @@ class APICallCodeGenerator:
             api_call_code += request_construction
 
         api_call_code += "\n"
-        # API 调用返回字典，需要转换为响应模型以使用属性访问
-        api_call_code += "resp_raw_{generated_uuid} = await " + endpoint.func_name + "("
+        api_call_code += "resp_{generated_uuid} = await " + endpoint.func_name + "("
         api_call_code += ", ".join(api_call_params)
         api_call_code += ")\n"
-        
-        # 将字典响应转换为 Pydantic 模型实例，以支持属性访问
-        if endpoint.response_model:
-            api_call_code += "resp_{generated_uuid} = " + endpoint.response_model + "(**resp_raw_{generated_uuid})\n"
-        else:
-            # 如果没有响应模型，直接使用原始响应
-            api_call_code += "resp_{generated_uuid} = resp_raw_{generated_uuid}\n"
 
         # 检查 output 是否包含 draft_id 或 segment_id
         # 如果是 create 类型的函数，需要保存创建的对象ID以便后续引用
@@ -298,14 +290,12 @@ class APICallCodeGenerator:
         if has_output_draft_id:
             # 保存为 draft_{uuid} 而不是 draft_id_{uuid}
             # 这样后续函数可以通过 draft_{uuid} 引用这个草稿
-            # 使用属性访问，因为 resp 现在是 Pydantic 模型实例
             api_call_code += "\n"
             api_call_code += "draft_{generated_uuid} = resp_{generated_uuid}.draft_id\n"
 
         if has_output_segment_id:
             # 保存为 segment_{uuid} 而不是 segment_id_{uuid}
             # 这样后续函数可以通过 segment_{uuid} 引用这个片段
-            # 使用属性访问，因为 resp 现在是 Pydantic 模型实例
             api_call_code += "\n"
             api_call_code += (
                 "segment_{generated_uuid} = resp_{generated_uuid}.segment_id\n"

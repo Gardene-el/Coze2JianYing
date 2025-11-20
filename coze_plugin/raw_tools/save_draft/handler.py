@@ -157,8 +157,7 @@ def handler(args: Args[Input]) -> Output:
 # API 调用: save_draft
 # 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}
 
-resp_raw_{generated_uuid} = await save_draft(draft_{args.input.draft_id})
-resp_{generated_uuid} = SaveDraftResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await save_draft(draft_{args.input.draft_id})
 """
 
         # 写入 API 调用到文件

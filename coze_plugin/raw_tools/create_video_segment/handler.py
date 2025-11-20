@@ -208,8 +208,7 @@ if {args.input.crop_settings} is not None:
     req_params_{generated_uuid}['crop_settings'] = {_to_type_constructor(args.input.crop_settings, 'CropSettings')}
 req_{generated_uuid} = CreateVideoSegmentRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await create_video_segment(req_{generated_uuid})
-resp_{generated_uuid} = CreateSegmentResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await create_video_segment(req_{generated_uuid})
 
 segment_{generated_uuid} = resp_{generated_uuid}.segment_id
 """

@@ -173,8 +173,7 @@ if {args.input.intensity} is not None:
     req_params_{generated_uuid}['intensity'] = {args.input.intensity}
 req_{generated_uuid} = CreateFilterSegmentRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await create_filter_segment(req_{generated_uuid})
-resp_{generated_uuid} = CreateSegmentResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await create_filter_segment(req_{generated_uuid})
 
 segment_{generated_uuid} = resp_{generated_uuid}.segment_id
 """

@@ -166,8 +166,7 @@ if "{args.input.track_name}" is not None:
     req_params_{generated_uuid}['track_name'] = "{args.input.track_name}"
 req_{generated_uuid} = AddTrackRequest(**req_params_{generated_uuid})
 
-resp_raw_{generated_uuid} = await add_track(draft_{args.input.draft_id}, req_{generated_uuid})
-resp_{generated_uuid} = AddTrackResponse(**resp_raw_{generated_uuid})
+resp_{generated_uuid} = await add_track(draft_{args.input.draft_id}, req_{generated_uuid})
 """
 
         # 写入 API 调用到文件
