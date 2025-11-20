@@ -195,7 +195,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['animation_type'] = "{args.input.animation_type}"
-if {args.input.duration} is not None:
+if {repr(args.input.duration)} is not None:
     req_params_{generated_uuid}['duration'] = "{args.input.duration}"
 req_{generated_uuid} = AddVideoAnimationRequest(**req_params_{generated_uuid})
 

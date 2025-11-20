@@ -220,19 +220,21 @@ class APICallCodeGenerator:
             # 不需要加引号，因为我们要检查的是输入的 ID 值本身
             return "{" + access_expr + "}"
         elif self._should_quote_type(field_type):
-            # 普通字符串类型：在条件中不需要加引号
-            # 我们要检查的是字符串的值是否为 None，而不是字符串字面量
-            # 例如：if {args.input.color} is not None（检查变量值）
-            # 而不是：if "{args.input.color}" is not None（检查字符串字面量，总是True）
-            return "{" + access_expr + "}"
+            # 普通字符串类型：使用 repr() 来正确处理 None 和字符串值
+            # repr(None) → None (literal)
+            # repr("value") → 'value' (with quotes)
+            # 这样生成的条件检查语法正确且能正确区分 None 和字符串 "None"
+            return "{repr(" + access_expr + ")}"
         elif self._is_complex_type(field_type):
             # 复杂类型（如 TimeRange, ClipSettings）：需要检查是否为空对象
             # 使用 _is_meaningful_object 辅助函数，避免 CustomNamespace() 空对象被视为有效值
             return "{_is_meaningful_object(" + access_expr + ")}"
         else:
-            # 非字符串类型：直接使用插值表达式
-            # 例如：if 1080 is not None, if True is not None
-            return "{" + access_expr + "}"
+            # 非字符串类型：使用 repr() 来确保生成的值是有效的 Python 字面量
+            # repr(1080) → 1080
+            # repr(True) → True
+            # repr(None) → None
+            return "{repr(" + access_expr + ")}"
 
     def generate_api_call_code(
         self, endpoint: APIEndpointInfo, output_fields: List[Dict[str, Any]]

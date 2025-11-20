@@ -195,7 +195,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['effect_type'] = "{args.input.effect_type}"
-if {args.input.params} is not None:
+if {repr(args.input.params)} is not None:
     req_params_{generated_uuid}['params'] = {args.input.params}
 req_{generated_uuid} = AddVideoEffectRequest(**req_params_{generated_uuid})
 

@@ -196,15 +196,15 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
-if {args.input.draft_name} is not None:
+if {repr(args.input.draft_name)} is not None:
     req_params_{generated_uuid}['draft_name'] = "{args.input.draft_name}"
-if {args.input.width} is not None:
+if {repr(args.input.width)} is not None:
     req_params_{generated_uuid}['width'] = {args.input.width}
-if {args.input.height} is not None:
+if {repr(args.input.height)} is not None:
     req_params_{generated_uuid}['height'] = {args.input.height}
-if {args.input.fps} is not None:
+if {repr(args.input.fps)} is not None:
     req_params_{generated_uuid}['fps'] = {args.input.fps}
-if {args.input.allow_replace} is not None:
+if {repr(args.input.allow_replace)} is not None:
     req_params_{generated_uuid}['allow_replace'] = {args.input.allow_replace}
 req_{generated_uuid} = CreateDraftRequest(**req_params_{generated_uuid})
 

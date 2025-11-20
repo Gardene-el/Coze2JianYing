@@ -195,7 +195,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['filter_type'] = "{args.input.filter_type}"
-if {args.input.intensity} is not None:
+if {repr(args.input.intensity)} is not None:
     req_params_{generated_uuid}['intensity'] = {args.input.intensity}
 req_{generated_uuid} = AddVideoFilterRequest(**req_params_{generated_uuid})
 

@@ -229,11 +229,11 @@ req_params_{generated_uuid}['material_url'] = "{args.input.material_url}"
 req_params_{generated_uuid}['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
 if {_is_meaningful_object(args.input.source_timerange)}:
     req_params_{generated_uuid}['source_timerange'] = {_to_type_constructor(args.input.source_timerange, 'TimeRange')}
-if {args.input.speed} is not None:
+if {repr(args.input.speed)} is not None:
     req_params_{generated_uuid}['speed'] = {args.input.speed}
-if {args.input.volume} is not None:
+if {repr(args.input.volume)} is not None:
     req_params_{generated_uuid}['volume'] = {args.input.volume}
-if {args.input.change_pitch} is not None:
+if {repr(args.input.change_pitch)} is not None:
     req_params_{generated_uuid}['change_pitch'] = {args.input.change_pitch}
 if {_is_meaningful_object(args.input.clip_settings)}:
     req_params_{generated_uuid}['clip_settings'] = {_to_type_constructor(args.input.clip_settings, 'ClipSettings')}

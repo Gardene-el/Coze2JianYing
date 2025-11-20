@@ -200,17 +200,17 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 # 构造 request 对象
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['mask_type'] = "{args.input.mask_type}"
-if {args.input.center_x} is not None:
+if {repr(args.input.center_x)} is not None:
     req_params_{generated_uuid}['center_x'] = {args.input.center_x}
-if {args.input.center_y} is not None:
+if {repr(args.input.center_y)} is not None:
     req_params_{generated_uuid}['center_y'] = {args.input.center_y}
-if {args.input.size} is not None:
+if {repr(args.input.size)} is not None:
     req_params_{generated_uuid}['size'] = {args.input.size}
-if {args.input.feather} is not None:
+if {repr(args.input.feather)} is not None:
     req_params_{generated_uuid}['feather'] = {args.input.feather}
-if {args.input.invert} is not None:
+if {repr(args.input.invert)} is not None:
     req_params_{generated_uuid}['invert'] = {args.input.invert}
-if {args.input.rotation} is not None:
+if {repr(args.input.rotation)} is not None:
     req_params_{generated_uuid}['rotation'] = {args.input.rotation}
 req_{generated_uuid} = AddVideoMaskRequest(**req_params_{generated_uuid})
 

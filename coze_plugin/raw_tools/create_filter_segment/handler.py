@@ -202,7 +202,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 req_params_{generated_uuid} = {{}}
 req_params_{generated_uuid}['filter_type'] = "{args.input.filter_type}"
 req_params_{generated_uuid}['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
-if {args.input.intensity} is not None:
+if {repr(args.input.intensity)} is not None:
     req_params_{generated_uuid}['intensity'] = {args.input.intensity}
 req_{generated_uuid} = CreateFilterSegmentRequest(**req_params_{generated_uuid})
 
