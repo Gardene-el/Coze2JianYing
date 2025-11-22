@@ -79,6 +79,16 @@ class InputOutputGenerator:
                 field for field in all_fields if field["name"] not in excluded_fields
             ]
 
+            # 对于 add_**_** 类型的工具函数，添加 api_call 字段
+            if endpoint.func_name.startswith("add_"):
+                api_call_field = {
+                    "name": "api_call",
+                    "type": "str",
+                    "default": '""',
+                    "description": "生成的 API 调用代码",
+                }
+                filtered_fields.append(api_call_field)
+
             return filtered_fields
         return []
 
