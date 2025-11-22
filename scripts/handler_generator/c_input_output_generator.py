@@ -63,6 +63,25 @@ class InputOutputGenerator:
 
         return class_def
 
+    def _should_have_api_call_field(self, func_name: str) -> bool:
+        """
+        判断函数是否应该有 api_call 字段
+        
+        排除以下函数：
+        - add_track
+        - add_global_effect
+        - add_global_filter
+        - add_segment
+        """
+        excluded_add_functions = {
+            "add_track",
+            "add_global_effect",
+            "add_global_filter",
+            "add_segment",
+        }
+        
+        return func_name.startswith("add_") and func_name not in excluded_add_functions
+
     def get_output_fields(self, endpoint: APIEndpointInfo) -> List[Dict[str, Any]]:
         """获取 Output 字段"""
         if endpoint.response_model:
@@ -79,8 +98,9 @@ class InputOutputGenerator:
                 field for field in all_fields if field["name"] not in excluded_fields
             ]
 
-            # 对于 add_**_** 类型的工具函数，添加 api_call 字段
-            if endpoint.func_name.startswith("add_"):
+            # 对于特定的 add_**_** 类型工具函数，添加 api_call 字段
+            # 排除 add_track, add_global_*, add_segment
+            if self._should_have_api_call_field(endpoint.func_name):
                 api_call_field = {
                     "name": "api_call",
                     "type": "str",

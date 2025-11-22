@@ -233,15 +233,34 @@ class FolderCreator:
         
         return "\n".join(lines)
     
+    def _should_have_api_call_field(self, func_name: str) -> bool:
+        """
+        判断函数是否应该有 api_call 字段
+        
+        排除以下函数：
+        - add_track
+        - add_global_effect
+        - add_global_filter
+        - add_segment
+        """
+        excluded_add_functions = {
+            "add_track",
+            "add_global_effect",
+            "add_global_filter",
+            "add_segment",
+        }
+        
+        return func_name.startswith("add_") and func_name not in excluded_add_functions
+
     def _format_output_parameters(self, endpoint: APIEndpointInfo) -> str:
         """格式化输出参数表格"""
         # 判断是否是 create 函数
         is_create_function = "create" in endpoint.func_name.lower()
-        # 判断是否是 add_ 函数
-        is_add_function = endpoint.func_name.startswith("add_")
+        # 判断是否应该有 api_call 字段（特定的 add_ 函数）
+        should_have_api_call = self._should_have_api_call_field(endpoint.func_name)
         
-        if not is_create_function and not is_add_function:
-            # 非 create 和 add_ 函数，不显示输出参数
+        if not is_create_function and not should_have_api_call:
+            # 非 create 函数且不应该有 api_call 的函数，不显示输出参数
             return "无输出参数"
         
         lines = ["| 参数名称 | 参数描述 | 参数类型 | 是否必填 |",
@@ -255,8 +274,8 @@ class FolderCreator:
             else:
                 lines.append("| segment_id | 返回创建的片段ID | str | 是 |")
         
-        if is_add_function:
-            # add_ 函数，返回 api_call 字段
+        if should_have_api_call:
+            # 特定的 add_ 函数，返回 api_call 字段
             lines.append("| api_call | 生成的 API 调用代码 | str | 是 |")
         
         return "\n".join(lines)

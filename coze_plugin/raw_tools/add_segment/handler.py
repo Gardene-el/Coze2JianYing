@@ -30,7 +30,6 @@ class Output(NamedTuple):
     category: Optional[str] = None  # 错误类别
     level: Optional[str] = None  # 响应级别
     details: Optional[Dict] = None  # 详细信息
-    api_call: str = ""  # 生成的 API 调用代码
 
 
 def ensure_coze2jianying_file() -> str:
@@ -210,7 +209,7 @@ resp_{generated_uuid} = await add_segment(draft_{args.input.draft_id}, req_{gene
         if logger:
             logger.info(f"add_segment 调用成功")
 
-        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None, api_call=api_call)._asdict()
+        return Output(success=True, message="操作成功", error_code=None, category=None, level=None, details=None)._asdict()
 
     except Exception as e:
         error_msg = f"调用 add_segment 时发生错误: {str(e)}"
