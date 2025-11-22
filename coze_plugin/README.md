@@ -59,7 +59,7 @@ coze_plugin/
 提供脚本导出功能的工具，用于实验性的脚本生成方案。从 `/tmp/coze2jianying.py` 读取脚本内容。
 
 ### write_script/
-提供脚本写入功能的工具，用于向 `/tmp/coze2jianying.py` 写入内容。支持追加和覆盖两种写入模式，与 `export_script` 配合使用实现完整的脚本生成、修改和导出流程。
+提供脚本写入功能的工具，用于向 `/tmp/coze2jianying.py` 追加内容。采用与 `raw_tools` 相同的实现方式，与 `export_script` 配合使用实现完整的脚本生成和导出流程。
 
 ## 作为子项目的角色
 
