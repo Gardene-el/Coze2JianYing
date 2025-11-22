@@ -31,8 +31,11 @@ coze_plugin/
 │   ├── add_*_keyframe/        # 添加关键帧工具（audio, video, text, sticker）
 │   ├── add_*_animation/       # 添加动画工具（video, text）
 │   └── ... (共 28 个工具)
-└── export_script/             # 导出脚本工具
-    ├── handler.py            # 导出 /tmp/coze2jianying.py 的工具
+├── export_script/             # 导出脚本工具
+│   ├── handler.py            # 导出 /tmp/coze2jianying.py 的工具
+│   └── README.md             # 工具文档
+└── write_script/              # 写入脚本工具
+    ├── handler.py            # 向 /tmp/coze2jianying.py 写入内容的工具
     └── README.md             # 工具文档
 ```
 
@@ -53,7 +56,10 @@ coze_plugin/
 - `README.md` - 自动生成的文档
 
 ### export_script/
-提供脚本导出功能的工具，用于实验性的脚本生成方案。
+提供脚本导出功能的工具，用于实验性的脚本生成方案。从 `/tmp/coze2jianying.py` 读取脚本内容。
+
+### write_script/
+提供脚本写入功能的工具，用于向 `/tmp/coze2jianying.py` 写入内容。支持追加和覆盖两种写入模式，与 `export_script` 配合使用实现完整的脚本生成、修改和导出流程。
 
 ## 作为子项目的角色
 
