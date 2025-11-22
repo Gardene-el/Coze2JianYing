@@ -237,19 +237,26 @@ class FolderCreator:
         """格式化输出参数表格"""
         # 判断是否是 create 函数
         is_create_function = "create" in endpoint.func_name.lower()
+        # 判断是否是 add_ 函数
+        is_add_function = endpoint.func_name.startswith("add_")
         
-        if not is_create_function:
-            # 非 create 函数，不显示输出参数
+        if not is_create_function and not is_add_function:
+            # 非 create 和 add_ 函数，不显示输出参数
             return "无输出参数"
         
-        # create 函数，只返回对应的 ID
         lines = ["| 参数名称 | 参数描述 | 参数类型 | 是否必填 |",
                 "|---------|---------|---------|---------|"]
         
-        # 判断返回的是 draft_id 还是 segment_id
-        if "draft" in endpoint.func_name.lower():
-            lines.append("| draft_id | 返回创建的草稿ID | str | 是 |")
-        else:
-            lines.append("| segment_id | 返回创建的片段ID | str | 是 |")
+        if is_create_function:
+            # create 函数，只返回对应的 ID
+            # 判断返回的是 draft_id 还是 segment_id
+            if "draft" in endpoint.func_name.lower():
+                lines.append("| draft_id | 返回创建的草稿ID | str | 是 |")
+            else:
+                lines.append("| segment_id | 返回创建的片段ID | str | 是 |")
+        
+        if is_add_function:
+            # add_ 函数，返回 api_call 字段
+            lines.append("| api_call | 生成的 API 调用代码 | str | 是 |")
         
         return "\n".join(lines)

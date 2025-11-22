@@ -1,5 +1,35 @@
 # Handler Generator Changelog
 
+## [2025-01] - add_**_** 工具函数 Output 增强
+
+### 功能增强
+
+#### 为 add_**_** 工具添加 api_call 字段
+
+**需求**: add_**_** 类工具函数的 Output 需要包含生成的 API 调用代码字符串
+
+**实现**:
+- C 脚本 (`c_input_output_generator.py`):
+  - 在 `get_output_fields()` 中为 `add_` 开头的函数添加 `api_call` 字段
+  - 字段定义: `{"name": "api_call", "type": "str", "default": '""', "description": "生成的 API 调用代码"}`
+  
+- D 脚本 (`d_handler_function_generator.py`):
+  - 在 `generate_handler_function()` 中添加对 `api_call` 字段的特殊处理
+  - 当遇到 `api_call` 字段时，返回 `api_call` 变量值而非硬编码默认值
+
+**影响范围**: 
+- 20 个 `add_**_**` 工具函数的 Output 增加了 `api_call` 字段
+- 其他工具函数（create_*, save_*, make_*）不受影响
+
+**效果**:
+```python
+# 修改前
+return Output(success=True, effect_id="", message="操作成功", ...)._asdict()
+
+# 修改后
+return Output(success=True, effect_id="", message="操作成功", ..., api_call=api_call)._asdict()
+```
+
 ## [2024-12] - 类型构造方案实现
 
 ### 重大变更
