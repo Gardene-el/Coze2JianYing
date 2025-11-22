@@ -48,6 +48,32 @@ from app.schemas.segment_schemas import *
     return file_path
 
 
+def format_content(content: str) -> str:
+    """
+    格式化输入内容，处理转义字符
+    
+    将 Coze 传递过来的转义字符串（如 \\n）转换为实际的换行符
+    并清理多余的空行
+    
+    Args:
+        content: 原始内容字符串
+        
+    Returns:
+        格式化后的内容
+    """
+    # 处理转义的换行符
+    formatted = content.replace('\\n', '\n')
+    
+    # 移除开头和结尾的多余空行
+    formatted = formatted.strip('\n')
+    
+    # 将连续3个以上的空行压缩为2个空行
+    while '\n\n\n' in formatted:
+        formatted = formatted.replace('\n\n\n', '\n\n')
+    
+    return formatted
+
+
 def append_content_to_file(file_path: str, content: str):
     """
     将内容追加到 coze2jianying.py 文件
@@ -87,9 +113,12 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
                 "message": error_msg,
             }
 
+        # 格式化内容（处理转义字符和多余空行）
+        formatted_content = format_content(content)
+        
         # 确保文件存在并追加内容
         coze_file = ensure_coze2jianying_file()
-        append_content_to_file(coze_file, content)
+        append_content_to_file(coze_file, formatted_content)
 
         success_message = "成功追加内容到脚本文件"
 
