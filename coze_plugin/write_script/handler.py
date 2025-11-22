@@ -52,26 +52,29 @@ def format_content(content: str) -> str:
     """
     格式化输入内容，处理转义字符
     
-    将 Coze 传递过来的转义字符串（如 \\n）转换为实际的换行符
-    并清理多余的空行
+    将 Coze 传递过来的转义字符串（如 \\n, \\"）转换为实际的字符
+    参考 app/gui/script_executor_tab.py 中的 _decode_escaped_string 实现
     
     Args:
-        content: 原始内容字符串
+        content: 原始内容字符串（可能包含转义序列）
         
     Returns:
         格式化后的内容
     """
-    # 处理转义的换行符
-    formatted = content.replace('\\n', '\n')
+    # 处理常见的转义序列（按照正确的顺序，避免重复替换）
+    replacements = [
+        ('\\n', '\n'),    # 换行
+        ('\\t', '\t'),    # 制表符
+        ('\\r', '\r'),    # 回车
+        ('\\"', '"'),     # 双引号
+        ("\\'", "'"),     # 单引号
+    ]
     
-    # 移除开头和结尾的多余空行
-    formatted = formatted.strip('\n')
+    result = content
+    for escaped, unescaped in replacements:
+        result = result.replace(escaped, unescaped)
     
-    # 将连续3个以上的空行压缩为2个空行
-    while '\n\n\n' in formatted:
-        formatted = formatted.replace('\n\n\n', '\n\n')
-    
-    return formatted
+    return result
 
 
 def append_content_to_file(file_path: str, content: str):

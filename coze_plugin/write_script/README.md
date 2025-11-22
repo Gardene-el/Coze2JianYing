@@ -13,10 +13,14 @@
 - **自动换行**: 自动在内容前后添加换行符，确保格式正确
 
 ### 智能内容格式化
-- **转义字符处理**: 自动将 `\n` 转义字符转换为实际换行符
-- **空行清理**: 移除开头和结尾的多余空行
-- **空行压缩**: 将连续 3 个以上的空行压缩为 2 个空行
+- **转义字符处理**: 自动将转义字符转换为实际字符
+  - `\n` → 换行符
+  - `\t` → 制表符
+  - `\"` → 双引号
+  - `\'` → 单引号
+- **保留格式**: 保留原始内容的空行和缩进格式
 - **Coze 兼容**: 处理从 Coze 平台传递的转义字符串
+- **参考实现**: 与 GUI 中"格式化输入"按钮使用相同的解码逻辑
 
 ### 自动文件管理
 - **文件创建**: 如果文件不存在，自动创建
@@ -43,17 +47,17 @@ class Input(NamedTuple):
 - **格式**: 任意文本字符串，通常是 Python 代码或注释
 - **验证**: 不能为空或 None
 - **自动格式化**: 
-  - 转义的 `\n` 会被转换为实际换行符
-  - 多余的空行会被清理
-  - 从 Coze 传递的转义字符串会被正确处理
+  - 转义字符会被转换为实际字符（`\n` → 换行，`\"` → 引号）
+  - 保留原始内容的所有空行和格式
+  - 从 Coze 传递的转义字符串会被正确解码
 - **示例**: 
   ```python
   # 直接使用换行符
   "# API 调用: create_draft\ndraft_id = 'abc123'"
   
   # 或使用转义字符串（从 Coze 传递）
-  "\\n\\n# API 调用: create_draft\\n# 时间: 2025-11-22\\n\\ndraft_id = 'abc123'"
-  # 上述两种方式都会被正确格式化
+  r"\n\n# API 调用: create_draft\n# 时间: 2025-11-22\n\ndraft_id = 'abc123'\n\n\n\n"
+  # 转义字符会被解码，空行格式会被保留
   ```
 
 ## 输出结果
@@ -209,30 +213,44 @@ def format_content(content: str) -> str:
     """
     格式化输入内容，处理转义字符
     
-    - 将 \\n 转义字符转换为实际换行符
-    - 移除开头和结尾的多余空行
-    - 将连续3个以上的空行压缩为2个空行
+    将 Coze 传递的转义字符串转换为实际字符，保留原始格式
+    参考 app/gui/script_executor_tab.py 中的实现
     """
-    formatted = content.replace('\\n', '\n')
-    formatted = formatted.strip('\n')
-    while '\n\n\n' in formatted:
-        formatted = formatted.replace('\n\n\n', '\n\n')
-    return formatted
+    replacements = [
+        ('\\n', '\n'),    # 换行
+        ('\\t', '\t'),    # 制表符
+        ('\\r', '\r'),    # 回车
+        ('\\"', '"'),     # 双引号
+        ("\\'", "'"),     # 单引号
+    ]
+    
+    result = content
+    for escaped, unescaped in replacements:
+        result = result.replace(escaped, unescaped)
+    
+    return result
 ```
 
 **格式化示例**:
 
 输入（Coze 传递的转义字符串）:
 ```
-\n\n# API 调用: create_draft\n# 时间: 2025-11-22\n\ndraft_id = 'abc123'\n\n\n\n
+\n\n# API 调用: create_draft\n# 时间: 2025-11-22\n\nif \"demo\" is not None:\n    print(\"demo\")\n\n\n\n
 ```
 
-输出（格式化后）:
+输出（格式化后，保留所有空行和格式）:
 ```python
+
+
 # API 调用: create_draft
 # 时间: 2025-11-22
 
-draft_id = 'abc123'
+if "demo" is not None:
+    print("demo")
+
+
+
+
 ```
 
 ### 文件操作
