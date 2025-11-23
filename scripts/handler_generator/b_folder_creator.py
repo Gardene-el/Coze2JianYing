@@ -239,14 +239,10 @@ class FolderCreator:
         
         排除以下函数：
         - add_track
-        - add_global_effect
-        - add_global_filter
         - add_segment
         """
         excluded_add_functions = {
             "add_track",
-            "add_global_effect",
-            "add_global_filter",
             "add_segment",
         }
         

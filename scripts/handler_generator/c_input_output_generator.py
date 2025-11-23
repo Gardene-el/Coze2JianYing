@@ -69,14 +69,10 @@ class InputOutputGenerator:
         
         排除以下函数：
         - add_track
-        - add_global_effect
-        - add_global_filter
         - add_segment
         """
         excluded_add_functions = {
             "add_track",
-            "add_global_effect",
-            "add_global_filter",
             "add_segment",
         }
         
@@ -99,7 +95,7 @@ class InputOutputGenerator:
             ]
 
             # 对于特定的 add_**_** 类型工具函数，添加 api_call 字段
-            # 排除 add_track, add_global_*, add_segment
+            # 排除 add_track, add_segment
             if self._should_have_api_call_field(endpoint.func_name):
                 api_call_field = {
                     "name": "api_call",

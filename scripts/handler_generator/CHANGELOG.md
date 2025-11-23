@@ -12,7 +12,7 @@
 - C 脚本 (`c_input_output_generator.py`):
   - 在 `get_output_fields()` 中为特定 `add_` 函数添加 `api_call` 字段
   - 新增 `_should_have_api_call_field()` 方法判断是否应该添加字段
-  - 排除: `add_track`, `add_global_effect`, `add_global_filter`, `add_segment`
+  - 排除: `add_track`, `add_segment`
   - 字段定义: `{"name": "api_call", "type": "str", "default": '""', "description": "生成的 API 调用代码"}`
   
 - D 脚本 (`d_handler_function_generator.py`):
@@ -24,8 +24,8 @@
   - 在 `_format_output_parameters()` 中使用相同的排除逻辑
 
 **影响范围**: 
-- 16 个 `add_**_**` 工具函数的 Output 增加了 `api_call` 字段
-- 排除的 4 个工具: `add_track`, `add_global_effect`, `add_global_filter`, `add_segment`
+- 18 个 `add_**_**` 工具函数的 Output 增加了 `api_call` 字段
+- 排除的 2 个工具: `add_track`, `add_segment`
 - 其他工具函数（create_*, save_*, make_*）不受影响
 
 **效果**:
