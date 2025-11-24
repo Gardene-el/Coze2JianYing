@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.3.3 (2025-11-24)
+
+### Bug Fixes
+
+- 修复draft saver不支持部分特效添加问题。
+  ([`a511d39`](https://github.com/Gardene-el/Coze2JianYing/commit/a511d39ec86512d950c922129578520987a22c45))
+
+
 ## v0.3.2 (2025-11-20)
 
 ### Bug Fixes
