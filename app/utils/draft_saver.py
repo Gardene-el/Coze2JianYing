@@ -12,13 +12,20 @@ import pyJianYingDraft as draft
 import requests
 from pyJianYingDraft import (
     ClipSettings,
+    CropSettings,
     FilterType,
     IntroType,
+    OutroType,
+    GroupAnimationType,
+    TextIntro,
     TextOutro,
+    TextLoopAnim,
     TransitionType,
     VideoSceneEffectType,
     tim,
     trange,
+    VideoSegment,
+    TextSegment
 )
 
 from app.config import get_config
@@ -195,12 +202,52 @@ class DraftSaver:
                 )
                 return seg
 
-            elif segment_type == "video":
-                # 下载视频
+            elif segment_type == "video" or segment_type == "image":
+                # 下载视频/图片
                 local_path = self.download_material(material_url, assets_dir)
-                seg = draft.VideoSegment(
-                    local_path, trange(f"{start_sec}s", f"{duration_sec}s")
-                )
+                
+                # 获取 ClipSettings
+                clip_config = config.get("clip_settings")
+                clip_settings = None
+                if clip_config:
+                    clip_settings = draft.ClipSettings(
+                        alpha=clip_config.get("alpha", 1.0),
+                        rotation=clip_config.get("rotation", 0.0),
+                        scale_x=clip_config.get("scale_x", 1.0),
+                        scale_y=clip_config.get("scale_y", 1.0),
+                        transform_x=clip_config.get("transform_x", 0.0),
+                        transform_y=clip_config.get("transform_y", 0.0)
+                    )
+
+                # 获取 CropSettings
+                crop_config = config.get("crop_settings")
+                crop_settings = None
+                if crop_config:
+                    crop_settings = draft.CropSettings(
+                        upper_left_x=crop_config.get("upper_left_x", 0.0),
+                        upper_left_y=crop_config.get("upper_left_y", 0.0),
+                        upper_right_x=crop_config.get("upper_right_x", 1.0),
+                        upper_right_y=crop_config.get("upper_right_y", 0.0),
+                        lower_left_x=crop_config.get("lower_left_x", 0.0),
+                        lower_left_y=crop_config.get("lower_left_y", 1.0),
+                        lower_right_x=crop_config.get("lower_right_x", 1.0),
+                        lower_right_y=crop_config.get("lower_right_y", 1.0)
+                    )
+
+                # 如果有 crop_settings，需要先创建 VideoMaterial
+                if crop_settings:
+                    material = draft.VideoMaterial(local_path, crop_settings=crop_settings)
+                    seg = draft.VideoSegment(
+                        material, 
+                        trange(f"{start_sec}s", f"{duration_sec}s"),
+                        clip_settings=clip_settings
+                    )
+                else:
+                    seg = draft.VideoSegment(
+                        local_path, 
+                        trange(f"{start_sec}s", f"{duration_sec}s"),
+                        clip_settings=clip_settings
+                    )
                 return seg
 
             elif segment_type == "text":
@@ -352,33 +399,82 @@ class DraftSaver:
                     # 动画
                     animation_type = op_data.get("animation_type", "")
                     duration = op_data.get("duration", "1s")
+                    
+                    # 处理 "None" 字符串
+                    if duration == "None":
+                        duration = None
 
                     # 尝试获取动画类型
                     try:
-                        if hasattr(seg, "add_animation"):
-                            # 视频或文本动画
-                            if "IntroType" in str(type(seg)):
-                                anim = getattr(IntroType, animation_type, None)
-                            else:
-                                anim = getattr(TextOutro, animation_type, None)
+                        anim = None
+                        
+                        # 1. 尝试解析带前缀的类型 (e.g. "OutroType.斜切")
+                        if "." in animation_type:
+                            type_name, anim_name = animation_type.split(".", 1)
+                            # 视频动画类型
+                            if type_name == "IntroType":
+                                anim = getattr(IntroType, anim_name, None)
+                            elif type_name == "OutroType":
+                                anim = getattr(OutroType, anim_name, None)
+                            elif type_name == "GroupAnimationType":
+                                anim = getattr(GroupAnimationType, anim_name, None)
+                            # 文本动画类型
+                            elif type_name == "TextIntro":
+                                anim = getattr(TextIntro, anim_name, None)
+                            elif type_name == "TextOutro":
+                                anim = getattr(TextOutro, anim_name, None)
+                            elif type_name == "TextLoopAnim":
+                                anim = getattr(TextLoopAnim, anim_name, None)
+                        
+                        # 2. 如果没有前缀或解析失败，且没有找到anim，则进行模糊查找
+                        if not anim:
+                            # 如果输入包含点但没匹配到（可能是错误的前缀），尝试只用后半部分
+                            clean_anim_name = animation_type.split(".")[-1] if "." in animation_type else animation_type
+                            
+                            if isinstance(seg, VideoSegment):
+                                # 视频动画: 依次查找 IntroType, OutroType, GroupAnimationType
+                                # 注意：这里存在优先级，如果有重名且未指定前缀，IntroType 优先
+                                anim = getattr(IntroType, clean_anim_name, None)
+                                if not anim:
+                                    anim = getattr(OutroType, clean_anim_name, None)
+                                if not anim:
+                                    anim = getattr(GroupAnimationType, clean_anim_name, None)
+                            
+                            elif isinstance(seg, TextSegment):
+                                # 文本动画: 依次查找 TextIntro, TextOutro, TextLoopAnim
+                                anim = getattr(TextIntro, clean_anim_name, None)
+                                if not anim:
+                                    anim = getattr(TextOutro, clean_anim_name, None)
+                                if not anim:
+                                    anim = getattr(TextLoopAnim, clean_anim_name, None)
 
-                            if anim:
-                                if duration:
-                                    seg.add_animation(anim, duration=tim(duration))
-                                else:
-                                    seg.add_animation(anim)
-                                self.logger.info(f"应用动画: {animation_type}")
+                        if anim:
+                            if duration:
+                                seg.add_animation(anim, duration=tim(duration))
+                            else:
+                                seg.add_animation(anim)
+                            self.logger.info(f"应用动画: {animation_type}")
+                        else:
+                            self.logger.warning(f"未找到动画类型: {animation_type}")
+                            
                     except Exception as e:
                         self.logger.warning(f"应用动画失败: {e}")
 
                 elif op_type == "add_transition":
                     # 转场
                     transition_type = op_data.get("transition_type", "")
+                    
+                    # 处理 "TransitionType." 前缀
+                    if transition_type.startswith("TransitionType."):
+                        transition_type = transition_type.replace("TransitionType.", "")
+                    
                     try:
                         trans = getattr(TransitionType, transition_type, None)
                         if trans and hasattr(seg, "add_transition"):
                             seg.add_transition(trans)
                             self.logger.info(f"应用转场: {transition_type}")
+                        else:
+                            self.logger.warning(f"未找到转场类型: {transition_type}")
                     except Exception as e:
                         self.logger.warning(f"应用转场失败: {e}")
 
