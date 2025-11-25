@@ -44,6 +44,9 @@ class HandlerFunctionGenerator:
                 return_values.append(f'        "{field_name}": True')
             elif field_name == "message":
                 return_values.append(f'        "{field_name}": "操作成功"')
+            elif field_name == "api_call":
+                # 对于 api_call 字段，返回生成的 API 调用代码字符串
+                return_values.append(f'        "{field_name}": api_call')
             else:
                 # 其他字段使用默认值
                 default = field.get("default", "None")
