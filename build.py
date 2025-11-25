@@ -31,9 +31,9 @@ def clean_build_dirs():
             shutil.rmtree(dir_path)
 
 
-def build_exe():
+def build_exe(fast_mode=False):
     """构建exe文件"""
-    print("开始打包应用程序...")
+    print(f"开始打包应用程序... (模式: {'快速/开发' if fast_mode else '完整/发布'})")
 
     # 根据操作系统确定路径分隔符 (Windows: ';', Linux/Mac: ':')
     import os
@@ -56,14 +56,22 @@ def build_exe():
         "app/main.py",  # 主程序入口
         "--name=CozeJianYingDraftGenerator",  # 应用名称
         "--windowed",  # 不显示控制台窗口
-        "--onefile",  # 打包成单个exe文件
-        "--clean",  # 清理临时文件
         "--hidden-import=tkinter",  # 确保包含tkinter
         "--hidden-import=tkinter.ttk",
         "--hidden-import=tkinter.scrolledtext",
         "--hidden-import=pyJianYingDraft",  # 添加pyJianYingDraft库
         "--noconfirm",  # 不询问确认
     ]
+
+    if fast_mode:
+        # 快速模式：使用文件夹模式，不清理缓存
+        args.append("--onedir")
+        print("使用 --onedir 模式 (构建速度快，生成文件夹)")
+    else:
+        # 发布模式：使用单文件模式，清理缓存
+        args.append("--onefile")
+        args.append("--clean")
+        print("使用 --onefile 模式 (构建速度慢，生成单文件)")
 
     # 添加 pyJianYingDraft assets
     if pyjy_assets and pyjy_assets.exists():
@@ -74,9 +82,13 @@ def build_exe():
         PyInstaller.__main__.run(args)
         print("\n" + "=" * 60)
         print("打包完成！")
-        print(
-            f"可执行文件位于: {Path('dist/CozeJianYingDraftGenerator.exe').absolute()}"
-        )
+
+        if fast_mode:
+            dist_path = Path("dist/CozeJianYingDraftGenerator/CozeJianYingDraftGenerator.exe").absolute()
+        else:
+            dist_path = Path("dist/CozeJianYingDraftGenerator.exe").absolute()
+
+        print(f"可执行文件位于: {dist_path}")
         print("=" * 60)
     except Exception as e:
         print(f"\n打包失败: {e}")
@@ -89,11 +101,17 @@ def main():
     print("Coze剪映草稿生成器 - 打包工具")
     print("=" * 60)
 
-    # 清理旧的构建文件
-    clean_build_dirs()
+    # 检查是否开启快速模式
+    fast_mode = "--fast" in sys.argv
+
+    # 只有在非快速模式下才清理旧的构建文件
+    if not fast_mode:
+        clean_build_dirs()
+    else:
+        print("快速模式：跳过清理构建目录")
 
     # 构建exe
-    build_exe()
+    build_exe(fast_mode=fast_mode)
 
 
 if __name__ == "__main__":
