@@ -10,7 +10,7 @@ Based on EffectSegmentConfig from data_structures/draft_generator_interface/mode
 """
 
 import json
-from typing import NamedTuple, Optional, Dict, Any, Dict, Any
+from typing import NamedTuple, Optional, Dict, Any
 from runtime import Args
 
 
