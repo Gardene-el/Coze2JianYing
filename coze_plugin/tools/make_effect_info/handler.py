@@ -41,7 +41,7 @@ class Output(NamedTuple):
     message: str              # Status message
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建特效信息字符串的主处理函数
     
