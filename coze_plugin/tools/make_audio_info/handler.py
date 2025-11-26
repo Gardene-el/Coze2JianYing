@@ -47,7 +47,7 @@ class Output(NamedTuple):
     message: str              # Status message
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建音频信息字符串的主处理函数
     
@@ -69,21 +69,21 @@ def handler(args: Args[Input]) -> Output:
                 audio_info_string="",
                 success=False,
                 message="缺少必需的 audio_url 参数"
-            )
+            )._asdict()
         
         if args.input.start is None:
             return Output(
                 audio_info_string="",
                 success=False,
                 message="缺少必需的 start 参数"
-            )
+            )._asdict()
         
         if args.input.end is None:
             return Output(
                 audio_info_string="",
                 success=False,
                 message="缺少必需的 end 参数"
-            )
+            )._asdict()
         
         # 验证时间范围
         if args.input.start < 0:
@@ -91,14 +91,14 @@ def handler(args: Args[Input]) -> Output:
                 audio_info_string="",
                 success=False,
                 message="start 时间不能为负数"
-            )
+            )._asdict()
         
         if args.input.end <= args.input.start:
             return Output(
                 audio_info_string="",
                 success=False,
                 message="end 时间必须大于 start 时间"
-            )
+            )._asdict()
         
         # Validate 可选 parameters
         if args.input.volume is not None and (args.input.volume < 0.0 or args.input.volume > 2.0):
@@ -106,28 +106,28 @@ def handler(args: Args[Input]) -> Output:
                 audio_info_string="",
                 success=False,
                 message="volume 必须在 0.0 到 2.0 之间"
-            )
+            )._asdict()
         
         if args.input.speed is not None and (args.input.speed < 0.5 or args.input.speed > 2.0):
             return Output(
                 audio_info_string="",
                 success=False,
                 message="speed 必须在 0.5 到 2.0 之间"
-            )
+            )._asdict()
         
         if args.input.fade_in is not None and args.input.fade_in < 0:
             return Output(
                 audio_info_string="",
                 success=False,
                 message="fade_in 时间不能为负数"
-            )
+            )._asdict()
         
         if args.input.fade_out is not None and args.input.fade_out < 0:
             return Output(
                 audio_info_string="",
                 success=False,
                 message="fade_out 时间不能为负数"
-            )
+            )._asdict()
         
         # 如果提供，验证素材范围
         if args.input.material_start is not None or args.input.material_end is not None:
@@ -136,21 +136,21 @@ def handler(args: Args[Input]) -> Output:
                     audio_info_string="",
                     success=False,
                     message="material_start 和 material_end 必须同时提供"
-                )
+                )._asdict()
             
             if args.input.material_start < 0:
                 return Output(
                     audio_info_string="",
                     success=False,
                     message="material_start 时间不能为负数"
-                )
+                )._asdict()
             
             if args.input.material_end <= args.input.material_start:
                 return Output(
                     audio_info_string="",
                     success=False,
                     message="material_end 时间必须大于 material_start 时间"
-                )
+                )._asdict()
         
         # 使用所有参数构建音频信息字典
         audio_info = {
@@ -197,7 +197,7 @@ def handler(args: Args[Input]) -> Output:
             audio_info_string=audio_info_string,
             success=True,
             message="音频信息字符串生成成功"
-        )
+        )._asdict()
         
     except Exception as e:
         error_msg = f"生成音频信息字符串时发生错误: {str(e)}"
@@ -208,4 +208,4 @@ def handler(args: Args[Input]) -> Output:
             audio_info_string="",
             success=False,
             message=error_msg
-        )
+        )._asdict()

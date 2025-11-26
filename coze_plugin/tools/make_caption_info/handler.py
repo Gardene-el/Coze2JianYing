@@ -70,7 +70,7 @@ class Output(NamedTuple):
     message: str              # Status message
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建字幕信息字符串的主处理函数
     
@@ -92,21 +92,21 @@ def handler(args: Args[Input]) -> Output:
                 caption_info_string="",
                 success=False,
                 message="缺少必需的 content 参数"
-            )
+            )._asdict()
         
         if args.input.start is None:
             return Output(
                 caption_info_string="",
                 success=False,
                 message="缺少必需的 start 参数"
-            )
+            )._asdict()
         
         if args.input.end is None:
             return Output(
                 caption_info_string="",
                 success=False,
                 message="缺少必需的 end 参数"
-            )
+            )._asdict()
         
         # 验证时间范围
         if args.input.start < 0:
@@ -114,14 +114,14 @@ def handler(args: Args[Input]) -> Output:
                 caption_info_string="",
                 success=False,
                 message="start 时间不能为负数"
-            )
+            )._asdict()
         
         if args.input.end <= args.input.start:
             return Output(
                 caption_info_string="",
                 success=False,
                 message="end 时间必须大于 start 时间"
-            )
+            )._asdict()
         
         # Validate numeric ranges (handle None values with defaults)
         position_x = args.input.position_x if args.input.position_x is not None else 0.5
@@ -134,28 +134,28 @@ def handler(args: Args[Input]) -> Output:
                 caption_info_string="",
                 success=False,
                 message="position_x 必须在 -1.0 到 1.0 之间"
-            )
+            )._asdict()
         
         if not (-1.0 <= position_y <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="position_y 必须在 -1.0 到 1.0 之间"
-            )
+            )._asdict()
         
         if not (0.0 <= opacity <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="opacity 必须在 0.0 到 1.0 之间"
-            )
+            )._asdict()
         
         if not (0.0 <= background_opacity <= 1.0):
             return Output(
                 caption_info_string="",
                 success=False,
                 message="background_opacity 必须在 0.0 到 1.0 之间"
-            )
+            )._asdict()
         
         # Validate text alignment (handle None with default)
         alignment = args.input.alignment if args.input.alignment is not None else "center"
@@ -165,7 +165,7 @@ def handler(args: Args[Input]) -> Output:
                 caption_info_string="",
                 success=False,
                 message=f"alignment 必须是以下值之一: {', '.join(valid_alignments)}"
-            )
+            )._asdict()
         
         # Validate font weight and style (handle None with defaults)
         font_weight = args.input.font_weight if args.input.font_weight is not None else "normal"
@@ -175,7 +175,7 @@ def handler(args: Args[Input]) -> Output:
                 caption_info_string="",
                 success=False,
                 message=f"font_weight 必须是以下值之一: {', '.join(valid_weights)}"
-            )
+            )._asdict()
         
         font_style = args.input.font_style if args.input.font_style is not None else "normal"
         valid_styles = ["normal", "italic"]
@@ -184,7 +184,7 @@ def handler(args: Args[Input]) -> Output:
                 caption_info_string="",
                 success=False,
                 message=f"font_style 必须是以下值之一: {', '.join(valid_styles)}"
-            )
+            )._asdict()
         
         # 使用所有参数构建字幕信息字典
         caption_info = {
@@ -309,7 +309,7 @@ def handler(args: Args[Input]) -> Output:
             caption_info_string=caption_info_string,
             success=True,
             message="字幕信息字符串生成成功"
-        )
+        )._asdict()
         
     except Exception as e:
         error_msg = f"生成字幕信息字符串时发生错误: {str(e)}"
@@ -320,4 +320,4 @@ def handler(args: Args[Input]) -> Output:
             caption_info_string="",
             success=False,
             message=error_msg
-        )
+        )._asdict()

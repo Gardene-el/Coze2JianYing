@@ -10,7 +10,7 @@ Based on EffectSegmentConfig from data_structures/draft_generator_interface/mode
 """
 
 import json
-from typing import NamedTuple, Optional, Dict, Any, Dict, Any
+from typing import NamedTuple, Optional, Dict, Any
 from runtime import Args
 
 
@@ -41,7 +41,7 @@ class Output(NamedTuple):
     message: str              # Status message
 
 
-def handler(args: Args[Input]) -> Output:
+def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     创建特效信息字符串的主处理函数
     
@@ -63,21 +63,21 @@ def handler(args: Args[Input]) -> Output:
                 effect_info_string="",
                 success=False,
                 message="缺少必需的 effect_type 参数"
-            )
+            )._asdict()
         
         if args.input.start is None:
             return Output(
                 effect_info_string="",
                 success=False,
                 message="缺少必需的 start 参数"
-            )
+            )._asdict()
         
         if args.input.end is None:
             return Output(
                 effect_info_string="",
                 success=False,
                 message="缺少必需的 end 参数"
-            )
+            )._asdict()
         
         # 验证时间范围
         if args.input.start < 0:
@@ -85,14 +85,14 @@ def handler(args: Args[Input]) -> Output:
                 effect_info_string="",
                 success=False,
                 message="start 时间不能为负数"
-            )
+            )._asdict()
         
         if args.input.end <= args.input.start:
             return Output(
                 effect_info_string="",
                 success=False,
                 message="end 时间必须大于 start 时间"
-            )
+            )._asdict()
         
         # 使用所有参数构建特效信息字典
         effect_info = {
@@ -129,7 +129,7 @@ def handler(args: Args[Input]) -> Output:
                     effect_info_string="",
                     success=False,
                     message=f"properties 参数必须是有效的 JSON 字符串: {str(e)}"
-                )
+                )._asdict()
         
         # 转换为 JSON 字符串，不带额外空格以进行紧凑表示
         effect_info_string = json.dumps(effect_info, ensure_ascii=False, separators=(',', ':'))
@@ -141,7 +141,7 @@ def handler(args: Args[Input]) -> Output:
             effect_info_string=effect_info_string,
             success=True,
             message="特效信息字符串生成成功"
-        )
+        )._asdict()
         
     except Exception as e:
         error_msg = f"生成特效信息字符串时发生错误: {str(e)}"
@@ -152,4 +152,4 @@ def handler(args: Args[Input]) -> Output:
             effect_info_string="",
             success=False,
             message=error_msg
-        )
+        )._asdict()
