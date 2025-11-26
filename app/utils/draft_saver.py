@@ -29,7 +29,7 @@ from pyJianYingDraft import (
 )
 
 from app.config import get_config
-from app.utils.draft_path_manager import get_draft_path_manager
+from app.utils.settings_manager import get_settings_manager
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.logger import get_logger
 from app.utils.segment_manager import get_segment_manager
@@ -49,8 +49,8 @@ class DraftSaver:
 
         # 如果没有指定输出目录，使用全局路径管理器的配置
         if output_dir is None:
-            path_manager = get_draft_path_manager()
-            self.output_dir = path_manager.get_effective_output_path()
+            settings = get_settings_manager()
+            self.output_dir = settings.get_effective_output_path()
         else:
             self.output_dir = output_dir
 
@@ -117,8 +117,8 @@ class DraftSaver:
         self.logger.info(f"项目: {draft_name}, {width}x{height}@{fps}fps")
 
         # 创建素材目录 - 使用全局路径管理器的素材路径配置
-        path_manager = get_draft_path_manager()
-        temp_assets_dir = path_manager.get_effective_assets_path(draft_id)
+        settings = get_settings_manager()
+        temp_assets_dir = settings.get_effective_assets_path(draft_id)
         os.makedirs(temp_assets_dir, exist_ok=True)
 
         # 创建 DraftFolder 和 Script

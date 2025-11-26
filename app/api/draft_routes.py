@@ -24,6 +24,7 @@ from app.schemas.segment_schemas import (
 from app.utils.draft_state_manager import get_draft_state_manager
 from app.utils.segment_manager import get_segment_manager
 from app.utils.draft_saver import get_draft_saver
+from app.utils.settings_manager import get_settings_manager
 from app.utils.logger import get_logger
 from app.utils.api_response_manager import get_response_manager, ErrorCode
 
@@ -474,6 +475,9 @@ async def save_draft(draft_id: str) -> SaveDraftResponse:
                 resource_id=draft_id,
                 draft_path=""
             )
+        
+        # 重新加载设置，确保使用最新的路径配置
+        get_settings_manager().reload()
         
         # 使用 DraftSaver 保存草稿
         draft_saver = get_draft_saver()
