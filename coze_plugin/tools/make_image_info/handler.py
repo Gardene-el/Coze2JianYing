@@ -86,21 +86,21 @@ def handler(args: Args[Input]) -> Output:
                 image_info_string="",
                 success=False,
                 message="缺少必需的 image_url 参数"
-            )
+            )._asdict()
         
         if args.input.start is None:
             return Output(
                 image_info_string="",
                 success=False,
                 message="缺少必需的 start 参数"
-            )
+            )._asdict()
         
         if args.input.end is None:
             return Output(
                 image_info_string="",
                 success=False,
                 message="缺少必需的 end 参数"
-            )
+            )._asdict()
         
         # 验证时间范围
         if args.input.start < 0:
@@ -108,14 +108,14 @@ def handler(args: Args[Input]) -> Output:
                 image_info_string="",
                 success=False,
                 message="start 时间不能为负数"
-            )
+            )._asdict()
         
         if args.input.end <= args.input.start:
             return Output(
                 image_info_string="",
                 success=False,
                 message="end 时间必须大于 start 时间"
-            )
+            )._asdict()
         
         # 使用所有参数构建图片信息字典
         image_info = {
@@ -189,7 +189,7 @@ def handler(args: Args[Input]) -> Output:
             image_info_string=image_info_string,
             success=True,
             message="图片信息字符串生成成功"
-        )
+        )._asdict()
         
     except Exception as e:
         error_msg = f"生成图片信息字符串时发生错误: {str(e)}"
@@ -200,4 +200,4 @@ def handler(args: Args[Input]) -> Output:
             image_info_string="",
             success=False,
             message=error_msg
-        )
+        )._asdict()

@@ -91,21 +91,21 @@ def handler(args: Args[Input]) -> Output:
                 video_info_string="",
                 success=False,
                 message="缺少必需的 video_url 参数"
-            )
+            )._asdict()
         
         if args.input.start is None:
             return Output(
                 video_info_string="",
                 success=False,
                 message="缺少必需的 start 参数"
-            )
+            )._asdict()
         
         if args.input.end is None:
             return Output(
                 video_info_string="",
                 success=False,
                 message="缺少必需的 end 参数"
-            )
+            )._asdict()
         
         # 验证时间范围
         if args.input.start < 0:
@@ -113,14 +113,14 @@ def handler(args: Args[Input]) -> Output:
                 video_info_string="",
                 success=False,
                 message="start 时间不能为负数"
-            )
+            )._asdict()
         
         if args.input.end <= args.input.start:
             return Output(
                 video_info_string="",
                 success=False,
                 message="end 时间必须大于 start 时间"
-            )
+            )._asdict()
         
         # 如果提供，验证素材范围
         if args.input.material_start is not None or args.input.material_end is not None:
@@ -129,21 +129,21 @@ def handler(args: Args[Input]) -> Output:
                     video_info_string="",
                     success=False,
                     message="material_start 和 material_end 必须同时提供"
-                )
+                )._asdict()
             
             if args.input.material_start < 0:
                 return Output(
                     video_info_string="",
                     success=False,
                     message="material_start 时间不能为负数"
-                )
+                )._asdict()
             
             if args.input.material_end <= args.input.material_start:
                 return Output(
                     video_info_string="",
                     success=False,
                     message="material_end 时间必须大于 material_start 时间"
-                )
+                )._asdict()
         
         # 验证速度
         if args.input.speed is not None and (args.input.speed < 0.5 or args.input.speed > 2.0):
@@ -151,7 +151,7 @@ def handler(args: Args[Input]) -> Output:
                 video_info_string="",
                 success=False,
                 message="speed 必须在 0.5 到 2.0 之间"
-            )
+            )._asdict()
         
         # 使用所有参数构建视频信息字典
         video_info = {
@@ -233,7 +233,7 @@ def handler(args: Args[Input]) -> Output:
             video_info_string=video_info_string,
             success=True,
             message="视频信息字符串生成成功"
-        )
+        )._asdict()
         
     except Exception as e:
         error_msg = f"生成视频信息字符串时发生错误: {str(e)}"
@@ -244,4 +244,4 @@ def handler(args: Args[Input]) -> Output:
             video_info_string="",
             success=False,
             message=error_msg
-        )
+        )._asdict()
