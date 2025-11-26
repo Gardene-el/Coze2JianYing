@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.4.0 (2025-11-26)
+
+### Features
+
+- 更新了ui界面
+  ([`dd6376a`](https://github.com/Gardene-el/Coze2JianYing/commit/dd6376a40050fb4c554c08eafab8f602e123a6a4))
+
+
 ## v0.3.3 (2025-11-24)
 
 ### Bug Fixes
