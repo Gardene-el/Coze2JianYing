@@ -51,6 +51,15 @@ def build_exe(fast_mode=False):
         print(f"警告: 无法找到 pyJianYingDraft assets: {e}")
         pyjy_assets = None
 
+    # 获取 customtkinter 的路径
+    try:
+        import customtkinter
+        ctk_path = Path(customtkinter.__file__).parent
+        print(f"找到 customtkinter: {ctk_path}")
+    except Exception as e:
+        print(f"警告: 无法找到 customtkinter: {e}")
+        ctk_path = None
+
     # PyInstaller参数
     args = [
         "app/main.py",  # 主程序入口
@@ -60,6 +69,7 @@ def build_exe(fast_mode=False):
         "--hidden-import=tkinter.ttk",
         "--hidden-import=tkinter.scrolledtext",
         "--hidden-import=pyJianYingDraft",  # 添加pyJianYingDraft库
+        "--hidden-import=customtkinter",  # 添加customtkinter库
         "--noconfirm",  # 不询问确认
     ]
 
@@ -77,6 +87,11 @@ def build_exe(fast_mode=False):
     if pyjy_assets and pyjy_assets.exists():
         args.append(f"--add-data={pyjy_assets}{separator}pyJianYingDraft/assets")
         print("已添加 pyJianYingDraft assets 到打包配置")
+
+    # 添加 customtkinter assets
+    if ctk_path and ctk_path.exists():
+        args.append(f"--add-data={ctk_path}{separator}customtkinter")
+        print("已添加 customtkinter assets 到打包配置")
 
     try:
         PyInstaller.__main__.run(args)

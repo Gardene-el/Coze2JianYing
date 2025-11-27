@@ -8,6 +8,8 @@ requests>=2.31.0
 python-dotenv>=0.19.0
 
 # GUI (Tkinter is included in Python standard library)
+customtkinter>=5.2.0
+packaging>=23.0  # Required by customtkinter
 
 # Build tools
 pyinstaller>=5.0.0
