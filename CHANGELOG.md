@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.4.1 (2025-11-27)
+
+### Bug Fixes
+
+- 修复Release中应用无法启动的问题。
+  ([`a9fdcb3`](https://github.com/Gardene-el/Coze2JianYing/commit/a9fdcb3e2db61180b05fddafde66e61f2eb2a049))
+
+### Chores
+
+- Delete 其他项目的代码示例
+  ([`4cfc2a8`](https://github.com/Gardene-el/Coze2JianYing/commit/4cfc2a85a65667494d478e8bcd38cc04e20256f4))
+
+
 ## v0.4.0 (2025-11-26)
 
 ### Features
