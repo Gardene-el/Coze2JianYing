@@ -70,6 +70,24 @@ def build_exe(fast_mode=False):
         "--hidden-import=tkinter.scrolledtext",
         "--hidden-import=pyJianYingDraft",  # 添加pyJianYingDraft库
         "--hidden-import=customtkinter",  # 添加customtkinter库
+        "--hidden-import=uvicorn",  # 添加uvicorn
+        "--hidden-import=uvicorn.logging",
+        "--hidden-import=uvicorn.loops",
+        "--hidden-import=uvicorn.loops.auto",
+        "--hidden-import=uvicorn.protocols",
+        "--hidden-import=uvicorn.protocols.http",
+        "--hidden-import=uvicorn.protocols.http.auto",
+        "--hidden-import=uvicorn.lifespan",
+        "--hidden-import=uvicorn.lifespan.on",
+        "--hidden-import=fastapi",  # 添加fastapi
+        "--hidden-import=pydantic",  # 添加pydantic
+        "--hidden-import=requests",  # 添加requests
+        "--hidden-import=pyngrok",  # 添加pyngrok
+        "--hidden-import=dotenv",  # 添加python-dotenv
+        "--hidden-import=rich",  # 添加rich
+        "--hidden-import=click",  # 添加click
+        "--hidden-import=multipart",  # 添加python-multipart
+        "--hidden-import=websockets",  # 添加websockets (uvicorn依赖)
         "--noconfirm",  # 不询问确认
     ]
 
