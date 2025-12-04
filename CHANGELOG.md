@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.5.0 (2025-12-01)
+
+### Bug Fixes
+
+- 修复build的潜在问题
+  ([`46b5315`](https://github.com/Gardene-el/Coze2JianYing/commit/46b531532f609b576049ce60a2c5b685a85a1fc5))
+
+
 ## v0.4.1 (2025-11-27)
 
 ### Bug Fixes
