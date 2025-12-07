@@ -7,8 +7,11 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime
+import argparse
+import os
 
 from app.api.router import api_router
+from app.utils.settings_manager import get_settings_manager
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -74,4 +77,50 @@ def start_api_server(host: str = "127.0.0.1", port: int = 8000):
 
 
 if __name__ == "__main__":
-    start_api_server()
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(
+        description="Coze2JianYing API 服务 - 独立运行模式",
+        epilog="示例: python app/api_main.py --port 8000 --draft-dir \"D:\\JianYing\\Drafts\""
+    )
+    # 移除 required=True，改为手动检查以提供中文提示
+    parser.add_argument("--port", type=int, help="[必须] API 服务监听端口 (例如: 8000)")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="API 服务监听地址 (默认: 127.0.0.1)")
+    parser.add_argument("--draft-dir", type=str, help="[必须] 剪映草稿保存路径 (例如: .../JianYingPro/User Data/Projects/com.lveditor.draft)")
+    
+    args = parser.parse_args()
+
+    # 手动检查必要参数
+    missing_args = []
+    if args.port is None:
+        missing_args.append("--port")
+    if args.draft_dir is None:
+        missing_args.append("--draft-dir")
+    
+    if missing_args:
+        parser.print_usage()
+        print(f"\n错误: 缺少必要参数: {', '.join(missing_args)}")
+        print("请使用 --help 查看详细帮助信息。")
+        exit(1)
+
+    # 验证端口范围
+    if not (1 <= args.port <= 65535):
+        print(f"错误: 端口号 {args.port} 无效。")
+        print("端口号必须在 1 到 65535 之间。")
+        exit(1)
+
+    # 更新设置
+    settings = get_settings_manager()
+    
+    # 验证路径是否存在
+    if os.path.exists(args.draft_dir):
+        print(f"配置: 使用命令行指定的草稿路径: {args.draft_dir}")
+        settings.set("draft_folder", args.draft_dir)
+        # 确保启用传输模式，这样 get_effective_output_path 才会使用这个路径
+        settings.set("transfer_enabled", True) 
+    else:
+        print(f"错误: 指定的草稿路径不存在: {args.draft_dir}")
+        print("请检查路径是否正确。")
+        exit(1)
+
+    print(f"启动服务: http://{args.host}:{args.port}")
+    start_api_server(host=args.host, port=args.port)

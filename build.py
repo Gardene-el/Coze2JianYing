@@ -128,6 +128,72 @@ def build_exe(fast_mode=False):
         raise
 
 
+def build_api_exe(fast_mode=False):
+    """构建API服务exe文件"""
+    print(f"\n开始打包 API 服务... (模式: {'快速/开发' if fast_mode else '完整/发布'})")
+
+    import os
+    separator = ";" if os.name == "nt" else ":"
+
+    # 获取 pyJianYingDraft 的 assets 路径
+    try:
+        import pyJianYingDraft
+        pyjy_path = Path(pyJianYingDraft.__file__).parent
+        pyjy_assets = pyjy_path / "assets"
+    except Exception:
+        pyjy_assets = None
+
+    # PyInstaller参数
+    args = [
+        "app/api_main.py",  # API 入口
+        "--name=CozeJianYingAPI",  # API exe 名称
+        "--console",  # 显示控制台窗口
+        "--hidden-import=pyJianYingDraft",
+        "--hidden-import=uvicorn",
+        "--hidden-import=uvicorn.logging",
+        "--hidden-import=uvicorn.loops",
+        "--hidden-import=uvicorn.loops.auto",
+        "--hidden-import=uvicorn.protocols",
+        "--hidden-import=uvicorn.protocols.http",
+        "--hidden-import=uvicorn.protocols.http.auto",
+        "--hidden-import=uvicorn.lifespan",
+        "--hidden-import=uvicorn.lifespan.on",
+        "--hidden-import=fastapi",
+        "--hidden-import=pydantic",
+        "--hidden-import=requests",
+        "--hidden-import=pyngrok",
+        "--hidden-import=dotenv",
+        "--hidden-import=rich",
+        "--hidden-import=click",
+        "--hidden-import=multipart",
+        "--hidden-import=websockets",
+        "--noconfirm",
+    ]
+
+    if fast_mode:
+        args.append("--onedir")
+    else:
+        args.append("--onefile")
+
+    # 添加 pyJianYingDraft assets
+    if pyjy_assets and pyjy_assets.exists():
+        args.append(f"--add-data={pyjy_assets}{separator}pyJianYingDraft/assets")
+
+    try:
+        PyInstaller.__main__.run(args)
+        print("API 服务打包完成！")
+        
+        if fast_mode:
+            dist_path = Path("dist/CozeJianYingAPI/CozeJianYingAPI.exe").absolute()
+        else:
+            dist_path = Path("dist/CozeJianYingAPI.exe").absolute()
+            
+        print(f"API 可执行文件位于: {dist_path}")
+    except Exception as e:
+        print(f"API 服务打包失败: {e}")
+        raise
+
+
 def main():
     """主函数"""
     print("=" * 60)
@@ -145,6 +211,9 @@ def main():
 
     # 构建exe
     build_exe(fast_mode=fast_mode)
+    
+    # 构建API exe
+    build_api_exe(fast_mode=fast_mode)
 
 
 if __name__ == "__main__":
