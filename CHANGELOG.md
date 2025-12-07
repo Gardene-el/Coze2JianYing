@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.6.0 (2025-12-07)
+
+### Chores
+
+- **deps)(deps**: Bump actions/checkout in the github-actions group
+  ([`32973cc`](https://github.com/Gardene-el/Coze2JianYing/commit/32973cceb63b3495c21f037c4bf28b532c68c747))
+
+### Features
+
+- 添加cli工具的支持
+  ([`44a1fb4`](https://github.com/Gardene-el/Coze2JianYing/commit/44a1fb46a86b47998bce8f2c44bcb77304fb8e64))
+
+
 ## v0.5.0 (2025-12-01)
 
 ### Bug Fixes
