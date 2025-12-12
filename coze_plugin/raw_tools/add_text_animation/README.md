@@ -12,7 +12,7 @@
 
 使用步骤：
 1. 调用本工具后，会返回 `api_call` 字段，其中包含生成的 API 调用代码
-2. 将返回的 `api_call` 内容作为输入，传递给 [Coze2剪映 - 在Coze IDE 中创建 基础工具](https://www.coze.cn/store/plugin/7573974660006674486) 插件中的 `write_script` 工具
+2. 将返回的 `api_call` 字段的值作为 `write_script` 工具的输入参数，调用 [Coze2剪映 - 在Coze IDE 中创建 基础工具](https://www.coze.cn/store/plugin/7573974660006674486) 插件中的 `write_script` 工具
 3. `write_script` 工具会将代码写入脚本文件，最终通过导出脚本来执行所有操作
 
 ## 输入参数
