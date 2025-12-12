@@ -14,6 +14,10 @@
 - add_masks: 添加蒙版
 """
 
+import json
+import time
+import uuid
+
 from fastapi import APIRouter, status
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
@@ -181,8 +185,6 @@ async def add_audios(request: AddAudiosRequest) -> AddAudiosResponse:
             )
         
         # 解析音频信息并创建片段
-        import json
-        import uuid
         
         segment_ids = []
         segments = []
@@ -260,7 +262,6 @@ async def add_audios(request: AddAudiosRequest) -> AddAudiosResponse:
         config["tracks"].append(track)
         
         # 更新时间戳
-        import time
         config["last_modified"] = time.time()
         
         # 保存配置
@@ -324,8 +325,6 @@ async def add_captions(request: AddCaptionsRequest) -> AddCaptionsResponse:
             )
         
         # 解析字幕信息并创建片段
-        import json
-        import uuid
         
         segment_ids = []
         segments = []
@@ -440,7 +439,6 @@ async def add_captions(request: AddCaptionsRequest) -> AddCaptionsResponse:
         config["tracks"].append(track)
         
         # 更新时间戳
-        import time
         config["last_modified"] = time.time()
         
         # 保存配置
@@ -504,8 +502,6 @@ async def add_effects(request: AddEffectsRequest) -> AddEffectsResponse:
             )
         
         # 解析特效信息并创建片段
-        import json
-        import uuid
         
         segment_ids = []
         segments = []
@@ -571,7 +567,6 @@ async def add_effects(request: AddEffectsRequest) -> AddEffectsResponse:
         config["tracks"].append(track)
         
         # 更新时间戳
-        import time
         config["last_modified"] = time.time()
         
         # 保存配置
@@ -635,8 +630,6 @@ async def add_images(request: AddImagesRequest) -> AddImagesResponse:
             )
         
         # 解析图片信息并创建片段
-        import json
-        import uuid
         
         segment_ids = []
         segments = []
@@ -729,7 +722,6 @@ async def add_images(request: AddImagesRequest) -> AddImagesResponse:
         config["tracks"].append(track)
         
         # 更新时间戳
-        import time
         config["last_modified"] = time.time()
         
         # 保存配置
@@ -793,8 +785,6 @@ async def add_videos(request: AddVideosRequest) -> AddVideosResponse:
             )
         
         # 解析视频信息并创建片段
-        import json
-        import uuid
         
         segment_ids = []
         segments = []
@@ -912,7 +902,6 @@ async def add_videos(request: AddVideosRequest) -> AddVideosResponse:
         config["tracks"].append(track)
         
         # 更新时间戳
-        import time
         config["last_modified"] = time.time()
         
         # 保存配置
@@ -974,8 +963,6 @@ async def add_sticker(request: AddStickerRequest) -> AddStickerResponse:
             )
         
         # 解析贴纸信息
-        import json
-        import uuid
         
         try:
             sticker_info = json.loads(request.sticker_info)
