@@ -155,6 +155,18 @@ class FolderCreator:
         
         # 获取输出参数信息
         output_params_section = self._format_output_parameters(endpoint)
+        
+        # 检查是否应该有 api_call 字段，如果有则添加使用说明
+        should_have_api_call = self._should_have_api_call_field(endpoint.func_name)
+        api_call_note = ""
+        if should_have_api_call:
+            api_call_note = (
+                '\n\n**重要提示**：本工具仅生成 API 调用代码，需配合使用才能生效。'
+                '\n\n使用步骤：'
+                '\n1. 调用本工具后，会返回 `api_call` 字段，其中包含生成的 API 调用代码'
+                '\n2. 将返回的 `api_call` 字段的值作为 `write_script` 工具的输入参数，调用 [Coze2剪映 - 在Coze IDE 中创建 基础工具](https://www.coze.cn/store/plugin/7573974660006674486) 插件中的 `write_script` 工具'
+                '\n3. `write_script` 工具会将代码写入脚本文件，最终通过导出脚本来执行所有操作'
+            )
 
         return f"""# {endpoint.func_name}
 
@@ -164,7 +176,7 @@ class FolderCreator:
 ## 工具介绍
 此工具对应 FastAPI 端点: `{endpoint.path}`
 
-{doc_info['description']}
+{doc_info['description']}{api_call_note}
 
 ## 输入参数
 
