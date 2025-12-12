@@ -160,7 +160,13 @@ class FolderCreator:
         should_have_api_call = self._should_have_api_call_field(endpoint.func_name)
         api_call_note = ""
         if should_have_api_call:
-            api_call_note = '\n\n受限于Coze本身的运行状态，使用此函数后需使用插件名为"Coze2剪映 - 在Coze IDE 中创建 基础工具"的插件中的write_script工具，将当前工具函数的返回值api_call作为write_script工具的输入值，此函数才起效。'
+            api_call_note = (
+                '\n\n**重要提示**：本工具仅生成 API 调用代码，需配合使用才能生效。'
+                '\n\n使用步骤：'
+                '\n1. 调用本工具后，会返回 `api_call` 字段，其中包含生成的 API 调用代码'
+                '\n2. 将返回的 `api_call` 内容作为输入，传递给 [Coze2剪映 - 在Coze IDE 中创建 基础工具](https://www.coze.cn/store/plugin/7573974660006674486) 插件中的 `write_script` 工具'
+                '\n3. `write_script` 工具会将代码写入脚本文件，最终通过导出脚本来执行所有操作'
+            )
 
         return f"""# {endpoint.func_name}
 
