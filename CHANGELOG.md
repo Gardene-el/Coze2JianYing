@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v0.7.0 (2026-01-17)
+
+### Chores
+
+- **deps)(deps**: Bump actions/upload-artifact
+  ([`92092ca`](https://github.com/Gardene-el/Coze2JianYing/commit/92092ca42bb4a1d5aaec67ffe82c815dc698aa3b))
+
+### Features
+
+- Implement API handler generation workflow
+  ([`2c0ba49`](https://github.com/Gardene-el/Coze2JianYing/commit/2c0ba4997a07140d4c2c89ab7263eef2c60283ee))
+
+
 ## v0.6.0 (2025-12-07)
 
 ### Chores
