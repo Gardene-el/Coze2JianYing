@@ -13,21 +13,25 @@
 系统自动为以下自定义类生成了 handler 工具：
 
 ### 1. make_time_range
+
 - **类**: TimeRange
 - **参数**: start (int), duration (int)
 - **用途**: 创建时间范围对象，用于指定媒体片段的时间区间
 
 ### 2. make_clip_settings
-- **类**: ClipSettings  
+
+- **类**: ClipSettings
 - **参数**: alpha, rotation, scale_x, scale_y, transform_x, transform_y
 - **用途**: 创建图像调节设置对象，控制片段的变换属性
 
 ### 3. make_text_style
+
 - **类**: TextStyle
 - **参数**: font_size, color, bold, italic, underline
 - **用途**: 创建文本样式对象，控制文本的样式属性
 
 ### 4. make_crop_settings
+
 - **类**: CropSettings
 - **参数**: upper_left_x, upper_left_y, upper_right_x, upper_right_y, lower_left_x, lower_left_y, lower_right_x, lower_right_y
 - **用途**: 创建裁剪设置对象，定义裁剪区域的四个角点坐标
@@ -69,9 +73,9 @@
 
 ## 技术实现
 
-### F 脚本模块
+### 附加流程模块
 
-新增的 `f_custom_class_handler_generator.py` 模块负责：
+新增的 `generate_custom_class_handlers.py` 模块负责：
 
 1. **扫描自定义类**: 从 `segment_schemas.py` 识别目标自定义类
 2. **提取字段信息**: 使用 SchemaExtractor 提取类的所有字段和类型
@@ -84,7 +88,7 @@
 ```
 segment_schemas.py
     ↓
-F 脚本: CustomClassHandlerGenerator
+附加流程: CustomClassHandlerGenerator
     ↓
     ├── 扫描目标类 (TimeRange, ClipSettings, TextStyle, CropSettings)
     ├── 提取字段信息
@@ -122,13 +126,13 @@ python scripts/generate_custom_class_handlers.py
 
 ## 与 API Handler 的区别
 
-| 特性 | API Handler | 自定义类 Handler |
-|------|------------|----------------|
-| 用途 | 调用后端 API 端点 | 构造对象 |
-| 输入 | 必需和可选参数混合 | 全部可选参数 |
-| 输出 | API 响应 | 简单的字典对象 |
-| 复杂度 | 包含 API 调用代码生成 | 简单的对象构造 |
-| 文件追加 | 追加到 /tmp/coze2jianying.py | 不追加文件 |
+| 特性     | API Handler                  | 自定义类 Handler |
+| -------- | ---------------------------- | ---------------- |
+| 用途     | 调用后端 API 端点            | 构造对象         |
+| 输入     | 必需和可选参数混合           | 全部可选参数     |
+| 输出     | API 响应                     | 简单的字典对象   |
+| 复杂度   | 包含 API 调用代码生成        | 简单的对象构造   |
+| 文件追加 | 追加到 /tmp/coze2jianying.py | 不追加文件       |
 
 ## 测试
 
@@ -139,6 +143,7 @@ python scripts/test_custom_class_handlers.py
 ```
 
 测试覆盖：
+
 - 验证 handler 文件结构正确
 - 验证 Input/Output 类型定义
 - 验证 handler 函数可调用
@@ -151,7 +156,7 @@ python scripts/test_custom_class_handlers.py
 要为新的自定义类生成 handler：
 
 1. 在 `segment_schemas.py` 中定义新的 Pydantic 模型类
-2. 在 `f_custom_class_handler_generator.py` 的 `TARGET_CLASSES` 列表中添加类名
+2. 在 `generate_custom_class_handlers.py` 的 `TARGET_CLASSES` 列表中添加类名
 3. 运行生成脚本：`python scripts/generate_custom_class_handlers.py`
 
 ### 修改现有类
@@ -164,7 +169,7 @@ python scripts/test_custom_class_handlers.py
 
 ## 相关文件
 
-- `scripts/handler_generator/f_custom_class_handler_generator.py` - F 脚本模块
+- `scripts/handler_generator/generate_custom_class_handlers.py` - 附加流程模块
 - `scripts/generate_custom_class_handlers.py` - 生成脚本主程序
 - `scripts/test_custom_class_handlers.py` - 测试脚本
 - `app/schemas/segment_schemas.py` - 自定义类定义

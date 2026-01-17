@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Handler Generator - 主程序
-使用 A-E 五个脚本模块，从 API 端点自动生成 Coze handler
+使用语义化模块，从 API 端点自动生成 Coze handler
 
 模块说明:
-- A 脚本 (a_api_scanner.py): 扫描 /app/api 下所有 POST API 函数
-- B 脚本 (b_folder_creator.py): 创建工具文件夹，生成 handler.py 和 README.md
-- C 脚本 (c_input_output_generator.py): 定义 Input/Output 类型
-- D 脚本 (d_handler_function_generator.py): 生成 handler 函数
-- E 脚本 (e_api_call_code_generator.py): 生成 API 调用记录代码
+- 步骤 1 (scan_api_endpoints.py): 扫描 /app/api 下所有 POST API 函数
+- 步骤 3 (generate_io_models.py): 定义 Input/Output 类型
+- 步骤 4 (generate_api_call_code.py): 生成 API 调用记录代码
+- 步骤 5 (generate_handler_function.py): 生成 handler 函数
+- 步骤 6 (create_tool_scaffold.py): 创建工具文件夹，生成 handler.py 和 README.md
 """
 
 from pathlib import Path
@@ -28,19 +28,19 @@ def generate_complete_handler(
 ):
     """生成完整的 handler.py 内容"""
 
-    # C 脚本：生成 Input 类
+    # 步骤 3：生成 Input 类
     input_class = input_output_gen.generate_input_class(endpoint)
 
-    # C 脚本：获取 Output 字段
+    # 步骤 3：获取 Output 字段
     output_fields = input_output_gen.get_output_fields(endpoint)
 
-    # C 脚本：生成 Output 类
+    # 步骤 3：生成 Output 类
     output_class = input_output_gen.generate_output_class(endpoint, output_fields)
 
-    # E 脚本：生成 API 调用代码
+    # 步骤 4：生成 API 调用代码
     api_call_code = api_call_gen.generate_api_call_code(endpoint, output_fields)
 
-    # D 脚本：生成 handler 函数
+    # 步骤 5：生成 handler 函数
     handler_func = handler_func_gen.generate_handler_function(
         endpoint, output_fields, api_call_code
     )
@@ -159,8 +159,8 @@ def main():
     # 确保输出目录存在
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # A 脚本：扫描 API 端点
-    print("步骤 1: 扫描 API 端点 (A 脚本)...")
+    # 步骤 1：扫描 API 端点
+    print("步骤 1: 扫描 API 端点...")
     scanner = APIScanner(str(api_dir))
     endpoints = scanner.scan_all()
     print()
@@ -175,16 +175,16 @@ def main():
     print(f"加载了 {len(schema_extractor.schemas)} 个 schema 定义")
     print()
 
-    # 初始化各个脚本模块
+    # 初始化各个模块
     print("步骤 3: 初始化生成器模块...")
-    folder_creator = FolderCreator(str(output_dir), schema_extractor)  # B 脚本
-    input_output_gen = InputOutputGenerator(schema_extractor)  # C 脚本
-    api_call_gen = APICallCodeGenerator(schema_extractor)  # E 脚本
-    handler_func_gen = HandlerFunctionGenerator()  # D 脚本
+    folder_creator = FolderCreator(str(output_dir), schema_extractor)  # 步骤 6
+    input_output_gen = InputOutputGenerator(schema_extractor)  # 步骤 3
+    api_call_gen = APICallCodeGenerator(schema_extractor)  # 步骤 4
+    handler_func_gen = HandlerFunctionGenerator()  # 步骤 5
     print()
 
     # 生成 handler 文件
-    print("步骤 4: 生成 handler.py 文件 (B/C/D/E 脚本)...")
+    print("步骤 4: 生成 handler.py 文件...")
     generated_count = 0
 
     for endpoint in endpoints:
@@ -199,10 +199,10 @@ def main():
                 schema_extractor,
             )
 
-            # B 脚本：生成 README 内容
+            # 步骤 6：生成 README 内容
             readme_content = folder_creator.generate_readme(endpoint)
 
-            # B 脚本：创建文件夹和文件
+            # 步骤 6：创建文件夹和文件
             folder_creator.create_tool_folder(endpoint, handler_content, readme_content)
 
             generated_count += 1

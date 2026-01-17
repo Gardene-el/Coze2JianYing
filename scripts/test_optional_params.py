@@ -12,7 +12,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from scripts.handler_generator.api_endpoint_info import APIEndpointInfo
-from scripts.handler_generator.e_api_call_code_generator import APICallCodeGenerator
+from scripts.handler_generator.generate_api_call_code import APICallCodeGenerator
 from scripts.handler_generator.schema_extractor import SchemaExtractor
 
 

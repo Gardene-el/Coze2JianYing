@@ -1,34 +1,36 @@
 # Handler Generator Changelog
 
-## [2025-01] - add_**_** 工具函数 Output 增强
+## [2025-01] - add*\*\**\*\* 工具函数 Output 增强
 
 ### 功能增强
 
-#### 为 add_**_** 工具添加 api_call 字段
+#### 为 add*\*\**\*\* 工具添加 api_call 字段
 
-**需求**: add_**_** 类工具函数的 Output 需要包含生成的 API 调用代码字符串
+**需求**: add*\*\**\*\* 类工具函数的 Output 需要包含生成的 API 调用代码字符串
 
 **实现**:
-- C 脚本 (`c_input_output_generator.py`):
+
+- 步骤 3 (`generate_io_models.py`):
   - 在 `get_output_fields()` 中为特定 `add_` 函数添加 `api_call` 字段
   - 新增 `_should_have_api_call_field()` 方法判断是否应该添加字段
   - 排除: `add_track`, `add_segment`
   - 字段定义: `{"name": "api_call", "type": "str", "default": '""', "description": "生成的 API 调用代码"}`
-  
-- D 脚本 (`d_handler_function_generator.py`):
+- 步骤 5 (`generate_handler_function.py`):
   - 在 `generate_handler_function()` 中添加对 `api_call` 字段的特殊处理
   - 当遇到 `api_call` 字段时，返回 `api_call` 变量值而非硬编码默认值
 
-- B 脚本 (`b_folder_creator.py`):
+- 步骤 6 (`create_tool_scaffold.py`):
   - 新增 `_should_have_api_call_field()` 方法判断 README 是否应该显示 api_call 参数
   - 在 `_format_output_parameters()` 中使用相同的排除逻辑
 
-**影响范围**: 
+**影响范围**:
+
 - 18 个 `add_**_**` 工具函数的 Output 增加了 `api_call` 字段
 - 排除的 2 个工具: `add_track`, `add_segment`
-- 其他工具函数（create_*, save_*, make_*）不受影响
+- 其他工具函数（create*\*, save*_, make\__）不受影响
 
 **效果**:
+
 ```python
 # 修改前
 return Output(success=True, effect_id="", message="操作成功", ...)._asdict()
@@ -44,37 +46,41 @@ return Output(success=True, effect_id="", message="操作成功", ..., api_call=
 #### CustomNamespace 处理方案重构
 
 **问题**: 原有的 dict 方案存在以下问题：
+
 - f-string 转义导致双大括号问题
 - 运行时 `unhashable type: 'dict'` 错误
 - dict 类型与 Pydantic 模型期望的类型不匹配
 
 **解决方案**: 实现类型构造方案
+
 - 将 CustomNamespace 转换为类型构造表达式（如 `TimeRange(start=0, duration=5000000)`）
 - 生成的代码可在应用端直接执行，构造正确的类型实例
 - 避免 f-string 转义问题，使用关键字参数格式
 
 ### 新增功能
 
-#### E 脚本 (`e_api_call_code_generator.py`)
+#### 步骤 4 (`generate_api_call_code.py`)
 
 **新增方法**:
+
 - `_extract_type_name(field_type: str) -> str`
   - 从类型字符串中提取核心类型名
   - 支持 Optional, List, Dict 等泛型包装
   - 例如: `Optional[TimeRange]` -> `TimeRange`
 
 **修改方法**:
+
 - `_is_complex_type(field_type: str) -> bool`
   - 重构判断逻辑，使用 `_extract_type_name` 提取类型名
   - 更准确地区分自定义类型和基本类型
-  
 - `_format_param_value(field_name: str, field_type: str) -> str`
   - 复杂类型改为调用 `_to_type_constructor(obj, type_name)`
   - 传递类型名作为第二个参数
 
-#### D 脚本 (`d_handler_function_generator.py`)
+#### 步骤 5 (`generate_handler_function.py`)
 
 **重写辅助函数**:
+
 - `_to_dict_repr(obj) -> str` ❌ 已移除
 - `_to_type_constructor(obj, type_name: str) -> str` ✅ 新增
   - 将 CustomNamespace 转换为类型构造表达式字符串
@@ -85,6 +91,7 @@ return Output(success=True, effect_id="", message="操作成功", ..., api_call=
 ### 测试
 
 **新增测试文件**:
+
 - `scripts/test_type_constructor.py`
   - 测试 `_to_type_constructor` 函数逻辑
   - 验证生成代码输出格式
@@ -97,11 +104,13 @@ return Output(success=True, effect_id="", message="操作成功", ..., api_call=
   - 测试参数值格式化输出
 
 **已过时**:
+
 - `scripts/test_customnamespace_handling.py` - 旧的 dict 方案测试，保留供参考
 
 ### 文档
 
 **新增**:
+
 - `docs/handler_generator/CUSTOMNAMESPACE_HANDLING.md`
   - 详细说明类型构造方案的实现
   - 包含两种方案的对比
@@ -109,6 +118,7 @@ return Output(success=True, effect_id="", message="操作成功", ..., api_call=
   - 说明向后兼容性
 
 **更新**:
+
 - `scripts/handler_generator/README.md`
   - 更新 CustomNamespace 处理部分
   - 更新测试运行命令
@@ -117,6 +127,7 @@ return Output(success=True, effect_id="", message="操作成功", ..., api_call=
 ### 示例对比
 
 #### 旧方案（dict 字面量）❌
+
 ```python
 # 生成的代码
 req_params_xxx['target_timerange'] = {"start": 0, "duration": 5000000}
@@ -124,11 +135,13 @@ req_params_xxx['clip_settings'] = {"brightness": 0.5, "contrast": 0.3}
 ```
 
 **问题**:
+
 - 双大括号转义: `{{"start": 0}}`
 - 类型错误: dict 而非 TimeRange 实例
 - 运行时错误: `unhashable type: 'dict'`
 
 #### 新方案（类型构造）✅
+
 ```python
 # 生成的代码
 req_params_xxx['target_timerange'] = TimeRange(start=0, duration=5000000)
@@ -136,6 +149,7 @@ req_params_xxx['clip_settings'] = ClipSettings(brightness=0.5, contrast=0.3)
 ```
 
 **优势**:
+
 - 无转义问题
 - 类型正确
 - 可直接执行
@@ -149,6 +163,7 @@ req_params_xxx['clip_settings'] = ClipSettings(brightness=0.5, contrast=0.3)
 ### 重新生成说明
 
 如需使用新方案，重新运行生成器：
+
 ```bash
 python scripts/generate_handler_from_api.py
 ```
@@ -156,6 +171,7 @@ python scripts/generate_handler_from_api.py
 ### 技术细节
 
 **类型名提取算法**:
+
 ```python
 # 使用正则表达式匹配 PascalCase 类型名
 matches = re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", field_type)
@@ -164,6 +180,7 @@ return matches[-1] if matches else field_type
 ```
 
 **嵌套类型推断规则**:
+
 - `*_settings` -> `ClipSettings`
 - `*_timerange` -> `TimeRange`
 - `*_style` -> `TextStyle`
@@ -183,6 +200,7 @@ return matches[-1] if matches else field_type
 ### [2024-12] - 初始实现
 
 **实现的核心功能**:
+
 - A-E 脚本模块架构
 - API 扫描和解析
 - Input/Output 类型生成
@@ -192,8 +210,10 @@ return matches[-1] if matches else field_type
 - 初始 CustomNamespace 处理（dict 方案）
 
 **测试**:
+
 - `test_optional_params.py` - 可选参数测试
 - `test_customnamespace_handling.py` - dict 方案测试
 
 **文档**:
+
 - `README.md` - 模块架构和使用说明

@@ -61,9 +61,9 @@ req_params['target_timerange'] = TimeRange(start=0, duration=5000000)
 
 ## 实现细节
 
-### 1. 类型名提取 (E 脚本)
+### 1. 类型名提取 (步骤 4)
 
-**位置**：`scripts/handler_generator/e_api_call_code_generator.py`
+**位置**：`scripts/handler_generator/generate_api_call_code.py`
 
 **方法**：`APICallCodeGenerator._extract_type_name()`
 
@@ -78,18 +78,18 @@ def _extract_type_name(self, field_type: str) -> str:
     - "Optional[List[ClipSettings]]" -> "ClipSettings"
     """
     import re
-    
+
     # 提取所有大写字母开头的类型名（PascalCase）
     matches = re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", field_type)
-    
+
     if matches:
         # 返回最后一个匹配（最内层类型）
         return matches[-1]
-    
+
     return field_type
 ```
 
-### 2. 复杂类型判断 (E 脚本)
+### 2. 复杂类型判断 (步骤 4)
 
 **方法**：`APICallCodeGenerator._is_complex_type()`
 
@@ -99,12 +99,12 @@ def _extract_type_name(self, field_type: str) -> str:
 def _is_complex_type(self, field_type: str) -> bool:
     """判断是否为自定义复杂类型"""
     type_name = self._extract_type_name(field_type)
-    
+
     basic_types = {
         "str", "int", "float", "bool", "None", "Any",
         "List", "Dict", "Tuple", "Set", "Optional", "Union",
     }
-    
+
     # 不在基本类型集合中的，视为复杂类型
     return type_name not in basic_types
 ```
@@ -114,7 +114,7 @@ def _is_complex_type(self, field_type: str) -> bool:
 - ✅ 复杂类型：`TimeRange`, `ClipSettings`, `TextStyle`, `Position` 等自定义类型
 - ❌ 基本类型：`str`, `int`, `float`, `bool`, `List`, `Dict` 等 Python 内置类型
 
-### 3. 参数值格式化 (E 脚本)
+### 3. 参数值格式化 (步骤 4)
 
 **方法**：`APICallCodeGenerator._format_param_value()`
 
@@ -123,7 +123,7 @@ def _is_complex_type(self, field_type: str) -> bool:
 ```python
 def _format_param_value(self, field_name: str, field_type: str) -> str:
     access_expr = "args.input." + field_name
-    
+
     if self._should_quote_type(field_type):
         # 字符串类型：加引号
         return '"{' + access_expr + '}"'
@@ -149,9 +149,9 @@ req_params['speed'] = {args.input.speed}
 req_params['target_timerange'] = {_to_type_constructor(args.input.target_timerange, 'TimeRange')}
 ```
 
-### 4. 类型构造转换 (D 脚本)
+### 4. 类型构造转换 (步骤 5)
 
-**位置**：`scripts/handler_generator/d_handler_function_generator.py`
+**位置**：`scripts/handler_generator/generate_handler_function.py`
 
 **函数**：`_to_type_constructor()` (生成到 handler.py 中)
 
@@ -161,25 +161,25 @@ req_params['target_timerange'] = {_to_type_constructor(args.input.target_timeran
 def _to_type_constructor(obj, type_name: str) -> str:
     """
     将 CustomNamespace/SimpleNamespace 对象转换为类型构造表达式字符串
-    
+
     例如：
         CustomNamespace(start=0, duration=5000000)
         -> "TimeRange(start=0, duration=5000000)"
-    
+
     Args:
         obj: CustomNamespace/SimpleNamespace 对象
         type_name: 目标类型名，如 "TimeRange", "ClipSettings"
-    
+
     Returns:
         类型构造表达式字符串
     """
     if obj is None:
         return 'None'
-    
+
     if hasattr(obj, '__dict__'):
         obj_dict = obj.__dict__
         params = []
-        
+
         for key, value in obj_dict.items():
             # 递归处理嵌套对象
             if hasattr(value, '__dict__'):
@@ -199,12 +199,12 @@ def _to_type_constructor(obj, type_name: str) -> str:
                 value_repr = f'"{value}"'
             else:
                 value_repr = repr(value)
-            
+
             params.append(f'{key}={value_repr}')
-        
+
         # 构造：TypeName(param1=value1, param2=value2)
         return f'{type_name}(' + ', '.join(params) + ')'
-    
+
     if isinstance(obj, str):
         return f'"{obj}"'
     else:
@@ -365,8 +365,8 @@ if args.input.source_timerange is not None:
 
 ### 生成器模块
 
-- `scripts/handler_generator/e_api_call_code_generator.py` - API 调用代码生成
-- `scripts/handler_generator/d_handler_function_generator.py` - Handler 函数生成
+- `scripts/handler_generator/generate_api_call_code.py` - API 调用代码生成
+- `scripts/handler_generator/generate_handler_function.py` - Handler 函数生成
 - `scripts/handler_generator/schema_extractor.py` - Schema 字段提取
 
 ### 测试文件
