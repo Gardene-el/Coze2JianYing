@@ -116,6 +116,12 @@ jobs:
             exit 1
           }
 
+      - name: Generate Coze handlers
+        if: steps.check_version.outputs.should_release == 'true'
+        run: |
+          chcp 65001
+          python scripts/handler_generator/main.py --clean
+
       - name: Semantic Release (version + build + publish)
         if: steps.check_version.outputs.should_release == 'true'
         env:
