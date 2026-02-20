@@ -13,8 +13,8 @@ from app.gui.pages.cloud_service_page import CloudServicePage
 from app.gui.pages.script_executor_page import ScriptExecutorPage
 from app.gui.pages.settings_page import SettingsPage
 from app.gui.log_window import LogWindow
-from app.utils.logger import get_logger, set_gui_log_callback
-from app.utils.settings_manager import get_settings_manager
+from backend.utils.logger import get_logger, set_gui_log_callback
+from backend.utils.settings_manager import get_settings_manager
 
 class MainWindow(ctk.CTk):
     """主窗口类"""

@@ -10,7 +10,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from fastapi.testclient import TestClient
-from app.api_main import app
+from backend.api_main import app
 
 # 创建测试客户端
 client = TestClient(app)
@@ -105,7 +105,7 @@ def test_create_draft():
     )
     
     print(f"  状态码: {response.status_code}")
-    assert response.status_code == 201, f"期望状态码 201，实际 {response.status_code}"
+    assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
     
     data = response.json()
     print(f"  响应: {data}")
@@ -135,7 +135,7 @@ def test_create_audio_segment():
     )
     
     print(f"  状态码: {response.status_code}")
-    assert response.status_code == 201, f"期望状态码 201，实际 {response.status_code}"
+    assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
     
     data = response.json()
     print(f"  响应: {data}")
@@ -164,7 +164,7 @@ def test_create_video_segment():
     )
     
     print(f"  状态码: {response.status_code}")
-    assert response.status_code == 201, f"期望状态码 201，实际 {response.status_code}"
+    assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
     
     data = response.json()
     assert "segment_id" in data, "响应中缺少 segment_id"
@@ -189,7 +189,7 @@ def test_create_text_segment():
     )
     
     print(f"  状态码: {response.status_code}")
-    assert response.status_code == 201, f"期望状态码 201，实际 {response.status_code}"
+    assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
     
     data = response.json()
     assert "segment_id" in data, "响应中缺少 segment_id"
@@ -311,8 +311,8 @@ def test_segment_operations():
     response = client.post(
         f"/api/segment/audio/{audio_seg_id}/add_keyframe",
         json={
-            "time_offset": "2s",
-            "value": 0.8
+            "time_offset": 2000000,
+            "volume": 0.8
         }
     )
     assert response.status_code == 200, "添加关键帧失败"

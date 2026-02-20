@@ -21,7 +21,7 @@ def test_app_configuration():
     print("Test 1: 应用配置系统 (Windows)")
     print("=" * 60)
     
-    from app.config import get_config, reset_config
+    from backend.config import get_config, reset_config
     
     # 测试默认配置
     print("\n1.1 测试默认配置")
@@ -67,8 +67,8 @@ def test_draft_state_manager():
     print("Test 2: 草稿状态管理器")
     print("=" * 60)
     
-    from app.utils.draft_state_manager import get_draft_state_manager
-    from app.config import reset_config
+    from backend.utils.draft_state_manager import get_draft_state_manager
+    from backend.config import reset_config
     
     # 重置配置使用默认路径
     reset_config()
@@ -108,8 +108,8 @@ def test_segment_manager():
     print("Test 3: 片段管理器")
     print("=" * 60)
     
-    from app.utils.segment_manager import get_segment_manager
-    from app.config import reset_config
+    from backend.utils.segment_manager import get_segment_manager
+    from backend.config import reset_config
     
     # 重置配置使用默认路径
     reset_config()
@@ -155,7 +155,7 @@ def test_config_dict():
     print("Test 4: 配置字典输出")
     print("=" * 60)
     
-    from app.config import get_config, reset_config
+    from backend.config import get_config, reset_config
     
     print("\n4.1 获取配置信息")
     reset_config()

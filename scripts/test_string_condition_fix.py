@@ -66,7 +66,7 @@ def test_generated_code_with_string_params():
         request_model="CreateDraftRequest",
         response_model="CreateDraftResponse",
         path_params=[],
-        source_file="app/api/draft_routes.py",
+        source_file="backend/api/draft_routes.py",
     )
 
     # 获取 output 字段

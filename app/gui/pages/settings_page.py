@@ -2,7 +2,7 @@ import customtkinter as ctk
 import json
 from tkinter import filedialog, messagebox
 from app.gui.base_page import BasePage
-from app.utils.settings_manager import get_settings_manager
+from backend.utils.settings_manager import get_settings_manager
 
 class SettingsPage(BasePage):
     """设置页面"""

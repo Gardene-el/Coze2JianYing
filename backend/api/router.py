@@ -4,8 +4,8 @@ API 路由汇总
 
 from fastapi import APIRouter
 
-from app.api.draft_routes import router as draft_router  # Draft 操作端点
-from app.api.segment_routes import router as segment_router  # Segment 创建和操作端点
+from backend.api.draft_routes import router as draft_router  # Draft 操作端点
+from backend.api.segment_routes import router as segment_router  # Segment 创建和操作端点
 
 # 创建主路由
 api_router = APIRouter()

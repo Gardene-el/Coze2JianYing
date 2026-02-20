@@ -10,6 +10,7 @@ include coze_openapi.yaml
 
 # Include all README files in subdirectories
 recursive-include app *.md
+recursive-include backend *.md
 recursive-include coze_plugin *.md
 recursive-include docs *.md
 
@@ -18,6 +19,7 @@ recursive-include coze_plugin/examples *.py *.json
 
 # Include YAML and JSON configuration files
 recursive-include app *.yaml *.json
+recursive-include backend *.yaml *.json
 recursive-include coze_plugin *.yaml *.json
 
 # Include test files

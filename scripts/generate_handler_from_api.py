@@ -4,7 +4,7 @@ Handler Generator - 主程序
 使用语义化模块，从 API 端点自动生成 Coze handler
 
 模块说明:
-- 步骤 1 (scan_api_endpoints.py): 扫描 /app/api 下所有 POST API 函数
+- 步骤 1 (scan_api_endpoints.py): 扫描 /backend/api 下所有 POST API 函数
 - 步骤 3 (generate_io_models.py): 定义 Input/Output 类型
 - 步骤 4 (generate_api_call_code.py): 生成 API 调用记录代码
 - 步骤 5 (generate_handler_function.py): 生成 handler 函数
@@ -106,7 +106,7 @@ def ensure_coze2jianying_file() -> str:
 # 记录所有通过 Coze 工具调用的 API 操作
 
 import asyncio
-from app.schemas.segment_schemas import *
+from backend.schemas.segment_schemas import *
 
 # API 调用记录将追加在下方
 """
@@ -146,8 +146,8 @@ def main():
     project_root = script_dir.parent
 
     # 定义路径
-    api_dir = project_root / "app" / "api"
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    api_dir = project_root / "backend" / "api"
+    schema_file = project_root / "backend" / "schemas" / "segment_schemas.py"
     output_dir = project_root / "coze_plugin" / "raw_tools"
 
     print(f"项目根目录: {project_root}")

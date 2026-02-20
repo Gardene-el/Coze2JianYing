@@ -15,8 +15,8 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # 导入 API 函数和 schemas
-from app.api.draft_routes import add_segment, add_track, create_draft, save_draft
-from app.api.segment_routes import (
+from backend.api.draft_routes import add_segment, add_track, create_draft, save_draft
+from backend.api.segment_routes import (
     add_audio_fade,
     add_text_animation,
     add_text_bubble,
@@ -28,7 +28,7 @@ from app.api.segment_routes import (
     create_text_segment,
     create_video_segment,
 )
-from app.schemas.segment_schemas import (
+from backend.schemas.segment_schemas import (
     AddAnimationRequest,
     AddBackgroundFillingRequest,
     AddBubbleRequest,

@@ -23,8 +23,8 @@ api/
 
 ```python
 from fastapi import APIRouter
-from app.schemas.draft import DraftRequest, DraftResponse
-from app.utils.draft_generator import DraftGenerator
+from backend.schemas.draft import DraftRequest, DraftResponse
+from backend.utils.draft_generator import DraftGenerator
 
 router = APIRouter()
 

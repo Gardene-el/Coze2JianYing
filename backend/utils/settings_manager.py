@@ -1,8 +1,8 @@
 import json
 import os
 from typing import Any, Dict, Optional
-from app.config import get_config
-from app.utils.logger import get_logger
+from backend.config import get_config
+from backend.utils.logger import get_logger
 
 class SettingsManager:
     """全局设置管理器"""

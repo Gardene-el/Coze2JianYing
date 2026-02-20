@@ -9,8 +9,8 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from app.utils.logger import get_logger
-from app.config import get_config
+from backend.utils.logger import get_logger
+from backend.config import get_config
 
 
 class DraftStateManager:

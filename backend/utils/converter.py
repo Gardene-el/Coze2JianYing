@@ -9,7 +9,7 @@ from pyJianYingDraft import (
 )
 
 from typing import Dict, Any, Optional
-from app.utils.logger import get_logger
+from backend.utils.logger import get_logger
 
 
 class DraftInterfaceConverter:

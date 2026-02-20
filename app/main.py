@@ -5,11 +5,11 @@ import sys
 import os
 from pathlib import Path
 
-# 添加app目录到Python路径
-sys.path.insert(0, str(Path(__file__).parent))
+# 添加项目根目录到Python路径（用于导入 backend 与 app.gui）
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.gui.main_window import MainWindow
-from app.utils.logger import setup_logger, get_logger
+from backend.utils.logger import setup_logger, get_logger
 
 
 def main():

@@ -36,7 +36,7 @@
 python start_api.py
 
 # 或使用 uvicorn
-uvicorn app.api_main:app --reload
+uvicorn backend.api_main:app --reload
 ```
 
 ### 2. 访问文档

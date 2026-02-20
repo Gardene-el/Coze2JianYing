@@ -5,8 +5,8 @@ from tkinter import messagebox
 import customtkinter as ctk
 
 from app.gui.base_page import BasePage
-from app.utils.draft_generator import DraftGenerator
-from app.utils.settings_manager import get_settings_manager
+from backend.utils.draft_generator import DraftGenerator
+from backend.utils.settings_manager import get_settings_manager
 
 class DraftGeneratorPage(BasePage):
     """手动草稿生成页面"""

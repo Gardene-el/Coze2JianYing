@@ -10,7 +10,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from fastapi.testclient import TestClient
-from app.api_main import app
+from backend.api_main import app
 
 # 创建测试客户端
 client = TestClient(app)
@@ -27,47 +27,48 @@ def test_root_endpoint():
     print("✅ 根路径测试通过\n")
 
 
-def test_draft_health_check():
-    """测试草稿服务健康检查"""
-    print("测试草稿服务健康检查...")
-    response = client.get("/api/draft/health")
-    print(f"状态码: {response.status_code}")
-    print(f"响应: {response.json()}")
-    assert response.status_code == 200
-    data = response.json()
-    assert "status" in data
-    assert "services" in data
-    print("✅ 健康检查测试通过\n")
-
-
-def test_list_drafts_empty():
-    """测试列出草稿（空列表）"""
-    print("测试列出草稿（空列表）...")
-    response = client.get("/api/draft/list")
-    print(f"状态码: {response.status_code}")
-    print(f"响应: {response.json()}")
-    assert response.status_code == 200
-    data = response.json()
-    assert "total" in data
-    assert "drafts" in data
-    assert isinstance(data["drafts"], list)
-    print("✅ 列出草稿测试通过\n")
-
-
-def test_generate_draft_invalid_json():
-    """测试生成草稿（无效JSON）"""
-    print("测试生成草稿（无效JSON）...")
+def test_draft_create_endpoint():
+    """测试草稿创建端点"""
+    print("测试草稿创建端点...")
     response = client.post(
-        "/api/draft/generate",
-        json={
-            "content": "这不是有效的JSON",
-            "output_folder": None
-        }
+        "/api/draft/create",
+        json={"draft_name": "api_test", "width": 1920, "height": 1080, "fps": 30},
     )
     print(f"状态码: {response.status_code}")
     print(f"响应: {response.json()}")
-    assert response.status_code == 400  # Bad Request
-    print("✅ 无效JSON测试通过\n")
+    assert response.status_code == 200
+    data = response.json()
+    assert "draft_id" in data
+    assert data.get("success") is True
+    print("✅ 草稿创建端点测试通过\n")
+
+
+def test_create_draft_invalid_payload():
+    """测试创建草稿参数校验（FastAPI/Pydantic）"""
+    print("测试创建草稿参数校验...")
+    response = client.post(
+        "/api/draft/create",
+        json={
+            "draft_name": "bad",
+            "width": "invalid_width",
+            "height": 1080,
+            "fps": 30,
+        },
+    )
+    print(f"状态码: {response.status_code}")
+    print(f"响应: {response.json()}")
+    assert response.status_code == 422
+    print("✅ 参数校验测试通过\n")
+
+
+def test_draft_status_not_found():
+    """测试查询不存在草稿状态"""
+    print("测试查询不存在草稿状态...")
+    response = client.get("/api/draft/not-exists/status")
+    print(f"状态码: {response.status_code}")
+    print(f"响应: {response.json()}")
+    assert response.status_code == 404
+    print("✅ 不存在草稿状态测试通过\n")
 
 
 def test_api_docs_available():
@@ -90,7 +91,7 @@ def test_api_docs_available():
     assert response.status_code == 200
     openapi_spec = response.json()
     assert "paths" in openapi_spec
-    assert "/api/draft/generate" in openapi_spec["paths"]
+    assert "/api/draft/create" in openapi_spec["paths"]
     print("✅ API 文档测试通过\n")
 
 
@@ -102,9 +103,9 @@ def main():
     
     try:
         test_root_endpoint()
-        test_draft_health_check()
-        test_list_drafts_empty()
-        test_generate_draft_invalid_json()
+        test_draft_create_endpoint()
+        test_create_draft_invalid_payload()
+        test_draft_status_not_found()
         test_api_docs_available()
         
         print("=" * 60)

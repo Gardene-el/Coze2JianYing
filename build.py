@@ -145,7 +145,7 @@ def build_api_exe(fast_mode=False):
 
     # PyInstaller参数
     args = [
-        "app/api_main.py",  # API 入口
+        "backend/api_main.py",  # API 入口
         "--name=CozeJianYingAPI",  # API exe 名称
         "--console",  # 显示控制台窗口
         "--hidden-import=pyJianYingDraft",

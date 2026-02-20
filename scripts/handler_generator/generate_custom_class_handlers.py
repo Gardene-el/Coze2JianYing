@@ -235,3 +235,39 @@ from runtime import Args
 '''
 
         return handler_func
+
+    def _generate_readme_content(self, custom_class: CustomClass) -> str:
+        """生成工具 README 内容"""
+        fields = "\n".join(
+            [f"- `{field['name']}`: `{field['type']}`" for field in custom_class.fields]
+        )
+        return f"""# {custom_class.tool_name}
+
+## 功能
+
+构造 `{custom_class.class_name}` 对象并返回字典结果。
+
+## 输入参数
+
+{fields}
+
+## 输出
+
+- `result`: `{custom_class.class_name}` 对象的字典表示
+- `success`: 是否成功
+- `message`: 处理消息
+"""
+
+    def create_tool_folder(self, custom_class: CustomClass, output_dir: Path) -> None:
+        """创建工具目录并写入 handler.py / README.md"""
+        tool_dir = output_dir / custom_class.tool_name
+        tool_dir.mkdir(parents=True, exist_ok=True)
+
+        handler_content = self.generate_handler_content(custom_class)
+        readme_content = self._generate_readme_content(custom_class)
+
+        with open(tool_dir / "handler.py", "w", encoding="utf-8") as f:
+            f.write(handler_content)
+
+        with open(tool_dir / "README.md", "w", encoding="utf-8") as f:
+            f.write(readme_content)

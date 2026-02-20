@@ -18,7 +18,7 @@ from typing import Dict, Any, List, Optional
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.api_main import app
+from backend.api_main import app
 
 
 def convert_schema_to_openapi_3_0(schema: Any) -> Any:

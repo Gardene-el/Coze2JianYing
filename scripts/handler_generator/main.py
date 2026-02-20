@@ -3,7 +3,7 @@
 一键生成 Coze handler 的入口脚本
 
 功能：
-- 扫描 app/api 中的 POST 端点，生成对应工具到 coze_plugin/raw_tools
+- 扫描 backend/api 中的 POST 端点，生成对应工具到 coze_plugin/raw_tools
 - 扫描 segment_schemas.py 中的自定义类，生成 make_* 工具
 """
 
@@ -123,7 +123,7 @@ def ensure_coze2jianying_file() -> str:
 # 记录所有通过 Coze 工具调用的 API 操作
 
 import asyncio
-from app.schemas.segment_schemas import *
+from backend.schemas.segment_schemas import *
 
 # API 调用记录将追加在下方
 """
@@ -270,8 +270,8 @@ def main() -> None:
         print("参数冲突：--api-only 与 --custom-only 不能同时使用")
         raise SystemExit(1)
 
-    api_dir = PROJECT_ROOT / "app" / "api"
-    schema_file = PROJECT_ROOT / "app" / "schemas" / "segment_schemas.py"
+    api_dir = PROJECT_ROOT / "backend" / "api"
+    schema_file = PROJECT_ROOT / "backend" / "schemas" / "segment_schemas.py"
     output_dir = PROJECT_ROOT / "coze_plugin" / "raw_tools"
 
     print("=" * 60)

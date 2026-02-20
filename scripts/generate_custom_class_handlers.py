@@ -36,7 +36,7 @@ def main():
     project_root = script_dir.parent
 
     # 定义路径
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "backend" / "schemas" / "segment_schemas.py"
     output_dir = project_root / "coze_plugin" / "raw_tools"
 
     print(f"项目根目录: {project_root}")

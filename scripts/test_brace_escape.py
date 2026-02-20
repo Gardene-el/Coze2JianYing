@@ -34,7 +34,7 @@ def check_brace_escaping():
         request_model="CreateAudioSegmentRequest",
         response_model="CreateSegmentResponse",
         path_params=[],
-        source_file="app/api/router.py",
+        source_file="backend/api/router.py",
     )
 
     output_fields = [
