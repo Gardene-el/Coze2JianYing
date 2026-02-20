@@ -1,7 +1,7 @@
 """
-测试 APIResponseManager 与实际 API 响应格式的集成
+测试响应构建工具 (response_builder) 与实际 API 响应格式的集成
 
-这个测试验证响应管理器生成的响应格式是否符合 Coze 要求
+验证 build_success/build_error 等函数生成的响应格式是否符合 Coze 要求
 """
 
 import sys
@@ -11,7 +11,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.backend.api.api_response_manager import get_response_manager, ErrorCode
+from app.backend.utils.response_builder import build_success, build_error, ErrorCode
 
 
 def test_response_format_for_coze():
@@ -20,10 +20,9 @@ def test_response_format_for_coze():
     print("测试响应格式（Coze 兼容性）")
     print("=" * 60)
     
-    manager = get_response_manager()
     
     # 模拟成功的草稿创建响应
-    response = manager.success(
+    response = build_success(
         message="草稿创建成功",
         data={"draft_id": "test-draft-123"}
     )
@@ -47,7 +46,7 @@ def test_response_format_for_coze():
     print("\n✅ 成功响应格式符合 Coze 要求")
     
     # 模拟错误响应
-    error_response = manager.error(
+    error_resp = build_error(
         error_code=ErrorCode.DRAFT_CREATE_FAILED,
         details={"reason": "磁盘空间不足"}
     )
@@ -55,7 +54,7 @@ def test_response_format_for_coze():
     # 构造完整的 API 错误响应
     api_error_response = {
         "draft_id": "",  # 失败时返回空字符串
-        **error_response
+        **error_resp
     }
     
     print("\n错误响应示例:")
@@ -80,7 +79,6 @@ def test_all_error_codes_return_success_true():
     print("测试所有错误代码（验证 success=True）")
     print("=" * 60)
     
-    manager = get_response_manager()
     
     # 测试各种错误代码
     test_cases = [
@@ -94,7 +92,7 @@ def test_all_error_codes_return_success_true():
     print("\n测试错误代码:")
     all_success = True
     for error_code, details in test_cases:
-        response = manager.error(error_code=error_code, details=details)
+        response = build_error(error_code=error_code, details=details)
         success_value = response["success"]
         status = "✓" if success_value is True else "✗"
         print(f"  {status} {error_code}: success={success_value}")
@@ -116,22 +114,21 @@ def test_response_contains_required_fields():
     print("测试响应字段完整性")
     print("=" * 60)
     
-    manager = get_response_manager()
     
     # 成功响应
-    success_response = manager.success(message="测试")
+    success_resp = build_success(message="测试")
     
     required_fields = ["success", "message", "error_code", "category", "level", "timestamp"]
     
     print("\n成功响应字段:")
     for field in required_fields:
-        has_field = field in success_response
+        has_field = field in success_resp
         status = "✓" if has_field else "✗"
-        print(f"  {status} {field}: {success_response.get(field, 'MISSING')}")
+        print(f"  {status} {field}: {success_resp.get(field, 'MISSING')}")
         assert has_field, f"缺少字段: {field}"
     
     # 错误响应
-    error_response = manager.error(
+    error_resp = build_error(
         error_code=ErrorCode.DRAFT_NOT_FOUND,
         details={"draft_id": "test"}
     )
@@ -139,9 +136,9 @@ def test_response_contains_required_fields():
     print("\n错误响应字段:")
     required_fields_with_details = required_fields + ["details"]
     for field in required_fields_with_details:
-        has_field = field in error_response
+        has_field = field in error_resp
         status = "✓" if has_field else "✗"
-        value = error_response.get(field, 'MISSING')
+        value = error_resp.get(field, 'MISSING')
         print(f"  {status} {field}: {value}")
         if field == "details":
             # details 是可选的，但在这个例子中应该存在
@@ -157,7 +154,7 @@ def test_response_contains_required_fields():
 def main():
     """运行所有测试"""
     print("\n" + "=" * 80)
-    print("测试 APIResponseManager 与 API 响应格式集成")
+    print("测试 response_builder 与 API 响应格式集成")
     print("=" * 80)
     
     try:
@@ -173,7 +170,7 @@ def main():
         print("  ✓ 所有错误都返回 success=True")
         print("  ✓ 包含所有必需字段（error_code, category, level 等）")
         print("  ✓ 错误详情通过 details 和 message 传递")
-        print("\nAPIResponseManager 已准备好用于所有 API 端点！")
+        print("\nresponse_builder 已准备好用于所有 API 端点！")
         
         return True
     except AssertionError as e:

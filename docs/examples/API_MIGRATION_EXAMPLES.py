@@ -1,7 +1,7 @@
 """
 API 端点迁移示例
 
-展示如何将现有的 API 端点迁移到使用 APIResponseManager
+展示如何将现有的 API 端点迁移到使用 response_builder 工具函数
 
 本文件包含：
 1. 迁移前后的对比
@@ -36,19 +36,17 @@ async def get_draft_old(draft_id: str):
 
 # --- 迁移后 ---
 from fastapi import APIRouter, status
-from app.utils.api_response_manager import get_response_manager, ErrorCode
-
-response_manager = get_response_manager()
+from app.backend.utils.response_builder import build_success, build_error, wrap_data, build_not_found_error, build_validation_error, build_operation_error, build_internal_error, success_response, error_response, not_found_response, internal_error_response, ErrorCode
 
 @router.get("/api/draft/{draft_id}")
 async def get_draft_new(draft_id: str):
-    """新版本：使用 APIResponseManager"""
+    """新版本：使用 response_builder"""
     draft = draft_manager.get_draft(draft_id)
     
     if draft is None:
-        return response_manager.format_not_found_error("draft", draft_id)
+        return build_not_found_error("draft", draft_id)
     
-    return response_manager.wrap_data(
+    return wrap_data(
         data={"draft": draft},
         message="查询成功"
     )
@@ -101,7 +99,7 @@ async def create_segment_new(request: CreateSegmentRequest):
     try:
         # 参数验证（依然返回 success=True）
         if request.volume < 0 or request.volume > 2:
-            return response_manager.format_validation_error(
+            return build_validation_error(
                 field="volume",
                 value=request.volume,
                 reason="音量必须在 0-2 之间"
@@ -111,13 +109,13 @@ async def create_segment_new(request: CreateSegmentRequest):
         result = segment_manager.create_segment(request)
         
         if not result["success"]:
-            return response_manager.error(
+            return build_error(
                 error_code=ErrorCode.SEGMENT_CREATE_FAILED,
                 details={"reason": result["message"]}
             )
         
         # 成功
-        success_response = response_manager.success(
+        success_response = build_success(
             message="片段创建成功",
             data={"segment_id": result["segment_id"]}
         )
@@ -130,7 +128,7 @@ async def create_segment_new(request: CreateSegmentRequest):
     
     except Exception as e:
         # 捕获所有异常，返回内部错误（依然 success=True）
-        return response_manager.format_internal_error(e)
+        return build_internal_error(e)
 
 
 # ============================================================================
@@ -183,18 +181,18 @@ async def add_segment_new(draft_id: str, segment_id: str):
     try:
         # 验证草稿存在（返回结构化错误）
         if not draft_manager.exists(draft_id):
-            return response_manager.format_not_found_error("draft", draft_id)
+            return build_not_found_error("draft", draft_id)
         
         # 验证片段存在
         if not segment_manager.exists(segment_id):
-            return response_manager.format_not_found_error("segment", segment_id)
+            return build_not_found_error("segment", segment_id)
         
         # 验证类型匹配
         segment = segment_manager.get(segment_id)
         track_type = draft_manager.get_track_type(draft_id)
         
         if not types_match(segment["type"], track_type):
-            return response_manager.error(
+            return build_error(
                 error_code=ErrorCode.TRACK_TYPE_MISMATCH,
                 details={
                     "segment_type": segment["type"],
@@ -204,10 +202,10 @@ async def add_segment_new(draft_id: str, segment_id: str):
         
         # 执行添加
         draft_manager.add_segment(draft_id, segment_id)
-        return response_manager.success(message="片段添加成功")
+        return build_success(message="片段添加成功")
         
     except Exception as e:
-        return response_manager.format_internal_error(e)
+        return build_internal_error(e)
 
 
 # ============================================================================
@@ -217,26 +215,23 @@ async def add_segment_new(draft_id: str, segment_id: str):
 """
 迁移一个端点时的检查清单：
 
-□ 1. 导入 APIResponseManager
-   from app.utils.api_response_manager import get_response_manager, ErrorCode
+□ 1. 导入 response_builder 工具函数
+   from app.backend.utils.response_builder import build_success, build_error, wrap_data, ErrorCode
 
-□ 2. 创建响应管理器实例
-   response_manager = get_response_manager()
-
-□ 3. 替换所有 HTTPException
-   - 404 Not Found -> response_manager.format_not_found_error()
-   - 400 Bad Request -> response_manager.format_validation_error()
-   - 500 Internal Server Error -> response_manager.format_internal_error()
+□ 2. 替换所有 HTTPException
+   - 404 Not Found -> build_not_found_error()
+   - 400 Bad Request -> build_validation_error()
+   - 500 Internal Server Error -> build_internal_error()
 
 □ 4. 替换成功响应
-   - 简单数据 -> response_manager.wrap_data()
-   - 复杂响应 -> response_manager.success()
+   - 简单数据 -> wrap_data()
+   - 复杂响应 -> build_success()
 
 □ 5. 捕获所有异常
    try:
        # 业务逻辑
    except Exception as e:
-       return response_manager.format_internal_error(e)
+       return build_internal_error(e)
 
 □ 6. 更新响应模型（如果有）
    - 添加可选字段：error_code, category, level, details
@@ -268,7 +263,7 @@ async def add_segment_new(draft_id: str, segment_id: str):
 def check_resource_exists(resource_type: str, resource_id: str):
     """统一的资源存在性检查"""
     if not manager.exists(resource_id):
-        return response_manager.format_not_found_error(resource_type, resource_id)
+        return build_not_found_error(resource_type, resource_id)
     return None  # 资源存在，无错误
 
 
@@ -279,7 +274,7 @@ def validate_parameter(name: str, value: Any, validator_func) -> Optional[Dict]:
         validator_func(value)
         return None  # 验证通过
     except ValueError as e:
-        return response_manager.format_validation_error(
+        return build_validation_error(
             field=name,
             value=value,
             reason=str(e)
@@ -290,7 +285,7 @@ def validate_parameter(name: str, value: Any, validator_func) -> Optional[Dict]:
 def check_operation_result(result: Dict, operation_name: str):
     """统一的操作结果检查"""
     if not result.get("success"):
-        return response_manager.format_operation_error(
+        return build_operation_error(
             operation=operation_name,
             reason=result.get("message", "未知错误")
         )
@@ -321,13 +316,13 @@ async def example_endpoint(resource_id: str, param: float):
             return error
         
         # 5. 返回成功
-        return response_manager.success(
+        return build_success(
             message="操作成功",
             data=result
         )
         
     except Exception as e:
-        return response_manager.format_internal_error(e)
+        return build_internal_error(e)
 
 
 # ============================================================================

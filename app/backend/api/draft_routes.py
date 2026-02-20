@@ -3,7 +3,7 @@ Draft API 新路由 - 符合 API_ENDPOINTS_REFERENCE.md 规范
 提供草稿级别的操作端点
 
 更新说明：
-- 所有响应使用 APIResponseManager 统一管理
+- 所有响应使用 response_builder 工具函数统一构建
 - 始终返回 success=True（便于 Coze 插件测试）
 - 错误详情通过 error_code 和 message 字段传递
 """
@@ -26,11 +26,10 @@ from app.backend.core.segment_manager import get_segment_manager
 from app.backend.services.draft_saver import get_draft_saver
 from app.backend.core.settings_manager import get_settings_manager
 from app.backend.utils.logger import get_logger
-from app.backend.api.api_response_manager import get_response_manager, ErrorCode
+from app.backend.utils.response_builder import ErrorCode, success_response, error_response, not_found_response, internal_error_response
 
 router = APIRouter(prefix="/api/draft", tags=["草稿操作"])
 logger = get_logger(__name__)
-response_manager = get_response_manager()
 
 # 获取全局管理器
 draft_manager = get_draft_state_manager()
@@ -85,7 +84,7 @@ async def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
             # 创建失败，但依然返回 success=True
             logger.error(f"草稿创建失败: {result['message']}")
             logger.info("=" * 60)
-            return response_manager.error_response(
+            return error_response(
                 CreateDraftResponse,
                 error_code=ErrorCode.DRAFT_CREATE_FAILED,
                 details={"reason": result["message"]},
@@ -96,7 +95,7 @@ async def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
         logger.info(f"草稿创建成功: {result['draft_id']}")
         logger.info("=" * 60)
         
-        return response_manager.success_response(
+        return success_response(
             CreateDraftResponse,
             message=result["message"],
             draft_id=result["draft_id"]
@@ -105,7 +104,7 @@ async def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
     except Exception as e:
         # 捕获所有异常，返回内部错误（依然 success=True）
         logger.error(f"创建草稿时发生错误: {e}", exc_info=True)
-        return response_manager.internal_error_response(
+        return internal_error_response(
             CreateDraftResponse,
             error=e,
             draft_id=""
@@ -130,7 +129,7 @@ async def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            return response_manager.not_found_response(
+            return not_found_response(
                 AddTrackResponse,
                 resource_type="draft",
                 resource_id=draft_id,
@@ -156,7 +155,7 @@ async def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse
         
         if not success:
             logger.error("添加轨道失败")
-            return response_manager.error_response(
+            return error_response(
                 AddTrackResponse,
                 error_code=ErrorCode.TRACK_OPERATION_FAILED,
                 details={"reason": "更新配置失败"},
@@ -166,7 +165,7 @@ async def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse
         logger.info(f"轨道添加成功: index={track_index}, type={request.track_type}")
         logger.info("=" * 60)
         
-        return response_manager.success_response(
+        return success_response(
             AddTrackResponse,
             message=f"轨道添加成功，索引: {track_index}",
             track_index=track_index
@@ -174,7 +173,7 @@ async def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse
         
     except Exception as e:
         logger.error(f"添加轨道时发生错误: {e}", exc_info=True)
-        return response_manager.internal_error_response(
+        return internal_error_response(
             AddTrackResponse,
             error=e,
             track_index=-1
@@ -199,7 +198,7 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> AddSe
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            return response_manager.not_found_response(
+            return not_found_response(
 
                 AddSegmentToDraftResponse,
 
@@ -213,7 +212,7 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> AddSe
         segment = segment_manager.get_segment(request.segment_id)
         if not segment:
             logger.error(f"片段不存在: {request.segment_id}")
-            return response_manager.not_found_response(
+            return not_found_response(
 
                 AddSegmentToDraftResponse,
 
@@ -260,7 +259,7 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> AddSe
         
         # 验证轨道索引有效性
         if target_track_index >= len(tracks):
-            return response_manager.error_response(
+            return error_response(
                 AddSegmentToDraftResponse,
                 error_code=ErrorCode.TRACK_INDEX_INVALID,
                 details={"track_index": target_track_index}
@@ -277,7 +276,7 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> AddSe
         expected_track_type = track_type_map.get(segment_type)
         
         if track["track_type"] != expected_track_type:
-            return response_manager.error_response(
+            return error_response(
                 AddSegmentToDraftResponse,
                 error_code=ErrorCode.TRACK_TYPE_MISMATCH,
                 details={
@@ -295,7 +294,7 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> AddSe
         
         if not success:
             logger.error("添加片段失败")
-            return response_manager.error_response(
+            return error_response(
                 AddSegmentToDraftResponse,
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "更新配置失败"}
@@ -304,14 +303,14 @@ async def add_segment(draft_id: str, request: AddSegmentToDraftRequest) -> AddSe
         logger.info(f"片段添加成功: segment_id={request.segment_id}, track={target_track_index}")
         logger.info("=" * 60)
         
-        return response_manager.success_response(
+        return success_response(
             AddSegmentToDraftResponse,
             message=f"片段已添加到轨道 {target_track_index}"
         )
         
     except Exception as e:
         logger.error(f"添加片段时发生错误: {e}", exc_info=True)
-        return response_manager.internal_error_response(
+        return internal_error_response(
             AddSegmentToDraftResponse,
             error=e
         )
@@ -333,7 +332,7 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest) -> A
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            return response_manager.not_found_response(
+            return not_found_response(
                 AddGlobalEffectResponse,
                 resource_type="draft",
                 resource_id=draft_id,
@@ -361,7 +360,7 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest) -> A
         
         if not success:
             logger.error("添加全局特效失败")
-            return response_manager.error_response(
+            return error_response(
                 AddGlobalEffectResponse,
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "更新配置失败"},
@@ -370,7 +369,7 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest) -> A
         
         logger.info(f"全局特效添加成功: {effect_id}")
         
-        return response_manager.success_response(
+        return success_response(
             AddGlobalEffectResponse,
             message="全局特效添加成功",
             effect_id=effect_id
@@ -378,7 +377,7 @@ async def add_global_effect(draft_id: str, request: AddGlobalEffectRequest) -> A
         
     except Exception as e:
         logger.error(f"添加全局特效时发生错误: {e}", exc_info=True)
-        return response_manager.internal_error_response(
+        return internal_error_response(
             AddGlobalEffectResponse,
             error=e,
             effect_id=""
@@ -401,7 +400,7 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest) -> A
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            return response_manager.not_found_response(
+            return not_found_response(
                 AddGlobalFilterResponse,
                 resource_type="draft",
                 resource_id=draft_id,
@@ -429,7 +428,7 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest) -> A
         
         if not success:
             logger.error("添加全局滤镜失败")
-            return response_manager.error_response(
+            return error_response(
                 AddGlobalFilterResponse,
                 error_code=ErrorCode.OPERATION_FAILED,
                 details={"reason": "更新配置失败"},
@@ -438,7 +437,7 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest) -> A
         
         logger.info(f"全局滤镜添加成功: {filter_id}")
         
-        return response_manager.success_response(
+        return success_response(
             AddGlobalFilterResponse,
             message="全局滤镜添加成功",
             filter_id=filter_id
@@ -446,7 +445,7 @@ async def add_global_filter(draft_id: str, request: AddGlobalFilterRequest) -> A
         
     except Exception as e:
         logger.error(f"添加全局滤镜时发生错误: {e}", exc_info=True)
-        return response_manager.internal_error_response(
+        return internal_error_response(
             AddGlobalFilterResponse,
             error=e,
             filter_id=""
@@ -469,7 +468,7 @@ async def save_draft(draft_id: str) -> SaveDraftResponse:
         config = draft_manager.get_draft_config(draft_id)
         if config is None:
             logger.error(f"草稿不存在: {draft_id}")
-            return response_manager.not_found_response(
+            return not_found_response(
                 SaveDraftResponse,
                 resource_type="draft",
                 resource_id=draft_id,
@@ -489,7 +488,7 @@ async def save_draft(draft_id: str) -> SaveDraftResponse:
         
         logger.info(f"草稿保存成功: {draft_path}")
         
-        return response_manager.success_response(
+        return success_response(
             SaveDraftResponse,
             message="草稿保存成功",
             draft_path=draft_path
@@ -497,7 +496,7 @@ async def save_draft(draft_id: str) -> SaveDraftResponse:
         
     except Exception as e:
         logger.error(f"保存草稿时发生错误: {e}", exc_info=True)
-        return response_manager.internal_error_response(
+        return internal_error_response(
             SaveDraftResponse,
             error=e,
             draft_path=""
