@@ -20,7 +20,7 @@
 
 #### 步骤 1: `scan_api_endpoints.py`
 
-**功能**: 扫描 `/backend/api` 下所有 POST API 函数
+**功能**: 扫描 `/app/backend/api` 下所有 POST API 函数
 
 - 使用 AST 解析识别 `@router.post` 装饰的函数
 - 提取端点路径、请求/响应模型、路径参数等信息

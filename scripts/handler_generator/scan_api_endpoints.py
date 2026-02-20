@@ -1,5 +1,5 @@
 """
-步骤 1：扫描 /backend/api 下所有 POST API 函数
+步骤 1：扫描 /app/backend/api 下所有 POST API 函数
 负责扫描 FastAPI 路由文件，提取所有 POST 端点的信息
 """
 
@@ -11,7 +11,7 @@ from .api_endpoint_info import APIEndpointInfo
 
 
 class APIScanner:
-    """步骤 1：扫描 /backend/api 下所有 POST API 函数"""
+    """步骤 1：扫描 /app/backend/api 下所有 POST API 函数"""
 
     def __init__(self, api_dir: str):
         self.api_dir = Path(api_dir)

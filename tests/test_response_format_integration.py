@@ -11,7 +11,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.utils.api_response_manager import get_response_manager, ErrorCode
+from app.backend.utils.api_response_manager import get_response_manager, ErrorCode
 
 
 def test_response_format_for_coze():

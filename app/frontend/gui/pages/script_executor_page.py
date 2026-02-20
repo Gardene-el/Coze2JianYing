@@ -8,7 +8,7 @@ from tkinter import messagebox
 from pathlib import Path
 import customtkinter as ctk
 
-from app.gui.base_page import BasePage
+from app.frontend.gui.base_page import BasePage
 
 class ScriptExecutorPage(BasePage):
     """脚本执行页面"""
@@ -175,9 +175,9 @@ project_root = Path(__file__).parent.parent if hasattr(__builtins__, '__file__')
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from backend.api.draft_routes import *
-from backend.api.segment_routes import *
-from backend.schemas.segment_schemas import *
+from app.backend.api.draft_routes import *
+from app.backend.api.segment_routes import *
+from app.backend.schemas.segment_schemas import *
 
 CustomNamespace = SimpleNamespace
 """

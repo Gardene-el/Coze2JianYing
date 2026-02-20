@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from backend.utils.logger import get_logger
+from app.backend.utils.logger import get_logger
 
 class BasePage(ctk.CTkFrame):
     """页面基类"""

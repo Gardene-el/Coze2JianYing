@@ -11,10 +11,10 @@ from pathlib import Path
 import uvicorn
 import customtkinter as ctk
 
-from app.gui.base_page import BasePage
-from backend.utils.draft_generator import DraftGenerator
-from backend.utils.ngrok_manager import NgrokManager
-from backend.utils.settings_manager import get_settings_manager
+from app.frontend.gui.base_page import BasePage
+from app.backend.utils.draft_generator import DraftGenerator
+from app.backend.utils.ngrok_manager import NgrokManager
+from app.backend.utils.settings_manager import get_settings_manager
 
 class CloudServicePage(BasePage):
     """云端服务页面"""
@@ -270,7 +270,7 @@ class CloudServicePage(BasePage):
             messagebox.showerror("错误", f"启动服务失败: {e}")
 
     def _start_embedded_service(self, port):
-        from backend.api_main import app
+        from app.backend.api_main import app
         def run_server():
             config = uvicorn.Config(app=app, host="127.0.0.1", port=port, log_level="info")
             self.uvicorn_server = uvicorn.Server(config)
@@ -282,7 +282,7 @@ class CloudServicePage(BasePage):
 
     def _start_uvicorn_service(self, port):
         project_root = Path(__file__).parent.parent.parent.parent.resolve()
-        cmd = [sys.executable, "-m", "uvicorn", "backend.api_main:app", "--host", "127.0.0.1", "--port", str(port)]
+        cmd = [sys.executable, "-m", "uvicorn", "app.backend.api_main:app", "--host", "127.0.0.1", "--port", str(port)]
         
         self.service_process = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 

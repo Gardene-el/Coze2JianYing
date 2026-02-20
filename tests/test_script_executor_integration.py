@@ -73,13 +73,13 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 # 导入所有API函数
-from backend.api.draft_routes import (
+from app.backend.api.draft_routes import (
     create_draft, add_track, add_segment,
     add_global_effect, add_global_filter,
     save_draft, get_draft_status
 )
 
-from backend.api.segment_routes import (
+from app.backend.api.segment_routes import (
     create_audio_segment, create_video_segment,
     create_text_segment, create_sticker_segment,
     create_effect_segment, create_filter_segment,
@@ -93,7 +93,7 @@ from backend.api.segment_routes import (
 )
 
 # 导入所有Request模型
-from backend.schemas.segment_schemas import (
+from app.backend.schemas.segment_schemas import (
     CreateAudioSegmentRequest, CreateVideoSegmentRequest,
     CreateTextSegmentRequest, CreateStickerSegmentRequest,
     CreateEffectSegmentRequest, CreateFilterSegmentRequest,

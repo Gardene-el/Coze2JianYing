@@ -21,7 +21,7 @@ models/
 
 ```python
 from sqlalchemy import Column, Integer, String, DateTime
-from backend.models.base import Base
+from app.backend.models.base import Base
 
 class Draft(Base):
     __tablename__ = "drafts"

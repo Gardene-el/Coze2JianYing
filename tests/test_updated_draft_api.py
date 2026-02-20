@@ -19,7 +19,7 @@ import subprocess
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "httpx"], check=True)
 
 from fastapi.testclient import TestClient
-from backend.api_main import app
+from app.backend.api_main import app
 
 # 创建测试客户端
 client = TestClient(app)

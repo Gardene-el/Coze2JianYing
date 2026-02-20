@@ -10,7 +10,7 @@ Draft API 新路由 - 符合 API_ENDPOINTS_REFERENCE.md 规范
 from fastapi import APIRouter, HTTPException, status
 from typing import List, Dict, Any
 
-from backend.schemas.segment_schemas import (
+from app.backend.schemas.segment_schemas import (
     # Draft 操作
     CreateDraftRequest, CreateDraftResponse,
     AddTrackRequest, AddTrackResponse,
@@ -21,12 +21,12 @@ from backend.schemas.segment_schemas import (
     # 查询
     DraftStatusResponse, TrackInfo, SegmentInfo, DownloadStatusInfo,
 )
-from backend.utils.draft_state_manager import get_draft_state_manager
-from backend.utils.segment_manager import get_segment_manager
-from backend.utils.draft_saver import get_draft_saver
-from backend.utils.settings_manager import get_settings_manager
-from backend.utils.logger import get_logger
-from backend.utils.api_response_manager import get_response_manager, ErrorCode
+from app.backend.utils.draft_state_manager import get_draft_state_manager
+from app.backend.utils.segment_manager import get_segment_manager
+from app.backend.utils.draft_saver import get_draft_saver
+from app.backend.utils.settings_manager import get_settings_manager
+from app.backend.utils.logger import get_logger
+from app.backend.utils.api_response_manager import get_response_manager, ErrorCode
 
 router = APIRouter(prefix="/api/draft", tags=["草稿操作"])
 logger = get_logger(__name__)

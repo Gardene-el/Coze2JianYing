@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException, status
 
-from backend.schemas.segment_schemas import (
+from app.backend.schemas.segment_schemas import (
     # Segment 操作 - Audio
     AddAudioEffectRequest,
     AddAudioEffectResponse,
@@ -60,9 +60,9 @@ from backend.schemas.segment_schemas import (
     # 查询
     SegmentDetailResponse,
 )
-from backend.utils.api_response_manager import ErrorCode, get_response_manager
-from backend.utils.logger import get_logger
-from backend.utils.segment_manager import get_segment_manager
+from app.backend.utils.api_response_manager import ErrorCode, get_response_manager
+from app.backend.utils.logger import get_logger
+from app.backend.utils.segment_manager import get_segment_manager
 
 router = APIRouter(prefix="/api/segment", tags=["片段管理"])
 logger = get_logger(__name__)

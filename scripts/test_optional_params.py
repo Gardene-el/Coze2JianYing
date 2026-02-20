@@ -58,7 +58,7 @@ def test_generated_request_construction():
         request_model="CreateAudioSegmentRequest",
         response_model="CreateSegmentResponse",
         path_params=[],
-        source_file="backend/api/router.py",
+        source_file="app/backend/api/router.py",
     )
 
     # 获取 output 字段（假设返回 segment_id）
@@ -158,7 +158,7 @@ def test_runtime_behavior_simulation():
         request_model="CreateAudioSegmentRequest",
         response_model="CreateSegmentResponse",
         path_params=[],
-        source_file="backend/api/router.py",
+        source_file="app/backend/api/router.py",
     )
 
     output_fields = [

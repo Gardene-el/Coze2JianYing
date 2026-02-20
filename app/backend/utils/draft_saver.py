@@ -28,11 +28,11 @@ from pyJianYingDraft import (
     TextSegment
 )
 
-from backend.config import get_config
-from backend.utils.settings_manager import get_settings_manager
-from backend.utils.draft_state_manager import get_draft_state_manager
-from backend.utils.logger import get_logger
-from backend.utils.segment_manager import get_segment_manager
+from app.backend.config import get_config
+from app.backend.utils.settings_manager import get_settings_manager
+from app.backend.utils.draft_state_manager import get_draft_state_manager
+from app.backend.utils.logger import get_logger
+from app.backend.utils.segment_manager import get_segment_manager
 
 
 class DraftSaver:

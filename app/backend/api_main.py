@@ -10,8 +10,8 @@ from datetime import datetime
 import argparse
 import os
 
-from backend.api.router import api_router
-from backend.utils.settings_manager import get_settings_manager
+from app.backend.api.router import api_router
+from app.backend.utils.settings_manager import get_settings_manager
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -68,7 +68,7 @@ app.include_router(api_router)
 def start_api_server(host: str = "127.0.0.1", port: int = 8000):
     """启动 FastAPI 服务器"""
     uvicorn.run(
-        "backend.api_main:app",
+        "app.backend.api_main:app",
         host=host,
         port=port,
         reload=True,  # 开发模式下自动重载
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # 解析命令行参数
     parser = argparse.ArgumentParser(
         description="Coze2JianYing API 服务 - 独立运行模式",
-        epilog="示例: python backend/api_main.py --port 8000 --draft-dir \"D:\\JianYing\\Drafts\""
+        epilog="示例: python app/app/backend/api_main.py --port 8000 --draft-dir \"D:\\JianYing\\Drafts\""
     )
     # 移除 required=True，改为手动检查以提供中文提示
     parser.add_argument("--port", type=int, help="[必须] API 服务监听端口 (例如: 8000)")
