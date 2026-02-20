@@ -1310,7 +1310,7 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
 
     except Exception as e:
         logger.error(f"添加关键帧失败: {e}", exc_info=True)
-        return internal_error_response(AddStickerKeyframeResponse, e, keyframe_id="")
+        return internal_error_response(AddVideoKeyframeResponse, e, keyframe_id="")
 
 
 # ==================== StickerSegment 操作端点 ====================
