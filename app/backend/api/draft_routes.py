@@ -21,12 +21,12 @@ from app.backend.schemas.general_schemas import (
     # 查询
     DraftStatusResponse, TrackInfo, SegmentInfo, DownloadStatusInfo,
 )
-from app.backend.utils.draft_state_manager import get_draft_state_manager
-from app.backend.utils.segment_manager import get_segment_manager
-from app.backend.utils.draft_saver import get_draft_saver
-from app.backend.utils.settings_manager import get_settings_manager
+from app.backend.core.draft_state_manager import get_draft_state_manager
+from app.backend.core.segment_manager import get_segment_manager
+from app.backend.services.draft_saver import get_draft_saver
+from app.backend.core.settings_manager import get_settings_manager
 from app.backend.utils.logger import get_logger
-from app.backend.utils.api_response_manager import get_response_manager, ErrorCode
+from app.backend.api.api_response_manager import get_response_manager, ErrorCode
 
 router = APIRouter(prefix="/api/draft", tags=["草稿操作"])
 logger = get_logger(__name__)

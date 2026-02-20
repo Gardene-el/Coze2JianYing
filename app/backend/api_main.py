@@ -11,7 +11,7 @@ import argparse
 import os
 
 from app.backend.api.router import api_router
-from app.backend.utils.settings_manager import get_settings_manager
+from app.backend.core.settings_manager import get_settings_manager
 
 # 创建 FastAPI 应用
 app = FastAPI(

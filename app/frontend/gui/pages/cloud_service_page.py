@@ -12,9 +12,9 @@ import uvicorn
 import customtkinter as ctk
 
 from app.frontend.gui.base_page import BasePage
-from app.backend.utils.draft_generator import DraftGenerator
-from app.backend.utils.ngrok_manager import NgrokManager
-from app.backend.utils.settings_manager import get_settings_manager
+from app.backend.services.draft_generator import DraftGenerator
+from app.backend.core.ngrok_manager import NgrokManager
+from app.backend.core.settings_manager import get_settings_manager
 
 class CloudServicePage(BasePage):
     """云端服务页面"""

@@ -1,6 +1,8 @@
 """
 API Response Manager - 统一的 API 响应管理器
 
+归属：api/ — HTTP 响应格式化层，统一 API 响应格式，确保对 Coze 友好（始终返回 success=True）。
+
 为 Coze 插件测试需求设计的响应管理系统：
 1. 所有响应始终返回 success=True（便于 Coze 测试通过）
 2. 详细的错误信息放在 message 字段中

@@ -1,6 +1,8 @@
 """
 草稿保存器
-将 DraftStateManager 和 SegmentManager 的数据转换为 pyJianYingDraft 调用并保存
+
+归属：services/ — 业务逻辑层，
+将 DraftStateManager 和 SegmentManager 的数据转换为 pyJianYingDraft 调用并保存为剪映草稿。
 """
 
 import os
@@ -29,10 +31,10 @@ from pyJianYingDraft import (
 )
 
 from app.backend.config import get_config
-from app.backend.utils.settings_manager import get_settings_manager
-from app.backend.utils.draft_state_manager import get_draft_state_manager
+from app.backend.core.settings_manager import get_settings_manager
+from app.backend.core.draft_state_manager import get_draft_state_manager
 from app.backend.utils.logger import get_logger
-from app.backend.utils.segment_manager import get_segment_manager
+from app.backend.core.segment_manager import get_segment_manager
 
 
 class DraftSaver:
@@ -205,7 +207,7 @@ class DraftSaver:
             elif segment_type == "video" or segment_type == "image":
                 # 下载视频/图片
                 local_path = self.download_material(material_url, assets_dir)
-                
+
                 # 获取 ClipSettings
                 clip_config = config.get("clip_settings")
                 clip_settings = None
@@ -238,13 +240,13 @@ class DraftSaver:
                 if crop_settings:
                     material = draft.VideoMaterial(local_path, crop_settings=crop_settings)
                     seg = draft.VideoSegment(
-                        material, 
+                        material,
                         trange(f"{start_sec}s", f"{duration_sec}s"),
                         clip_settings=clip_settings
                     )
                 else:
                     seg = draft.VideoSegment(
-                        local_path, 
+                        local_path,
                         trange(f"{start_sec}s", f"{duration_sec}s"),
                         clip_settings=clip_settings
                     )
@@ -292,7 +294,6 @@ class DraftSaver:
                     self.logger.error("贴纸片段缺少 resource_id")
                     return None
 
-                # 创建贴纸片段
                 position_x = config.get("position_x", 0.0)
                 position_y = config.get("position_y", 0.0)
                 scale_x = config.get("scale_x", 1.0)
@@ -325,18 +326,12 @@ class DraftSaver:
                     self.logger.error("特效片段缺少 effect_type")
                     return None
 
-                # 尝试从 VideoSceneEffectType 获取特效
                 try:
                     effect = getattr(VideoSceneEffectType, effect_type, None)
                     if not effect:
                         self.logger.warning(f"未知的特效类型: {effect_type}")
                         return None
 
-                    # 获取特效参数
-                    intensity = config.get("intensity", 1.0)
-                    properties = config.get("properties", {})
-
-                    # 创建特效片段
                     seg = draft.EffectSegment(
                         effect, trange(f"{start_sec}s", f"{duration_sec}s")
                     )
@@ -352,17 +347,14 @@ class DraftSaver:
                     self.logger.error("滤镜片段缺少 filter_type")
                     return None
 
-                # 尝试从 FilterType 获取滤镜
                 try:
                     filter_enum = getattr(FilterType, filter_type, None)
                     if not filter_enum:
                         self.logger.warning(f"未知的滤镜类型: {filter_type}")
                         return None
 
-                    # 获取滤镜强度
                     intensity = config.get("intensity", 1.0)
 
-                    # 创建滤镜片段 - FilterSegment(FilterType, timerange, intensity)
                     seg = draft.FilterSegment(
                         filter_enum,
                         trange(f"{start_sec}s", f"{duration_sec}s"),
@@ -399,49 +391,42 @@ class DraftSaver:
                     # 动画
                     animation_type = op_data.get("animation_type", "")
                     duration = op_data.get("duration", "1s")
-                    
+
                     # 处理 "None" 字符串
                     if duration == "None":
                         duration = None
 
-                    # 尝试获取动画类型
                     try:
                         anim = None
-                        
+
                         # 1. 尝试解析带前缀的类型 (e.g. "OutroType.斜切")
                         if "." in animation_type:
                             type_name, anim_name = animation_type.split(".", 1)
-                            # 视频动画类型
                             if type_name == "IntroType":
                                 anim = getattr(IntroType, anim_name, None)
                             elif type_name == "OutroType":
                                 anim = getattr(OutroType, anim_name, None)
                             elif type_name == "GroupAnimationType":
                                 anim = getattr(GroupAnimationType, anim_name, None)
-                            # 文本动画类型
                             elif type_name == "TextIntro":
                                 anim = getattr(TextIntro, anim_name, None)
                             elif type_name == "TextOutro":
                                 anim = getattr(TextOutro, anim_name, None)
                             elif type_name == "TextLoopAnim":
                                 anim = getattr(TextLoopAnim, anim_name, None)
-                        
-                        # 2. 如果没有前缀或解析失败，且没有找到anim，则进行模糊查找
+
+                        # 2. 如果没有前缀或解析失败，则进行模糊查找
                         if not anim:
-                            # 如果输入包含点但没匹配到（可能是错误的前缀），尝试只用后半部分
                             clean_anim_name = animation_type.split(".")[-1] if "." in animation_type else animation_type
-                            
+
                             if isinstance(seg, VideoSegment):
-                                # 视频动画: 依次查找 IntroType, OutroType, GroupAnimationType
-                                # 注意：这里存在优先级，如果有重名且未指定前缀，IntroType 优先
                                 anim = getattr(IntroType, clean_anim_name, None)
                                 if not anim:
                                     anim = getattr(OutroType, clean_anim_name, None)
                                 if not anim:
                                     anim = getattr(GroupAnimationType, clean_anim_name, None)
-                            
+
                             elif isinstance(seg, TextSegment):
-                                # 文本动画: 依次查找 TextIntro, TextOutro, TextLoopAnim
                                 anim = getattr(TextIntro, clean_anim_name, None)
                                 if not anim:
                                     anim = getattr(TextOutro, clean_anim_name, None)
@@ -456,18 +441,18 @@ class DraftSaver:
                             self.logger.info(f"应用动画: {animation_type}")
                         else:
                             self.logger.warning(f"未找到动画类型: {animation_type}")
-                            
+
                     except Exception as e:
                         self.logger.warning(f"应用动画失败: {e}")
 
                 elif op_type == "add_transition":
                     # 转场
                     transition_type = op_data.get("transition_type", "")
-                    
+
                     # 处理 "TransitionType." 前缀
                     if transition_type.startswith("TransitionType."):
                         transition_type = transition_type.replace("TransitionType.", "")
-                    
+
                     try:
                         trans = getattr(TransitionType, transition_type, None)
                         if trans and hasattr(seg, "add_transition"):

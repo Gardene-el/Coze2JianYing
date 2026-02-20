@@ -60,9 +60,9 @@ from app.backend.schemas.general_schemas import (
     # 查询
     SegmentDetailResponse,
 )
-from app.backend.utils.api_response_manager import ErrorCode, get_response_manager
+from app.backend.api.api_response_manager import ErrorCode, get_response_manager
 from app.backend.utils.logger import get_logger
-from app.backend.utils.segment_manager import get_segment_manager
+from app.backend.core.segment_manager import get_segment_manager
 
 router = APIRouter(prefix="/api/segment", tags=["片段管理"])
 logger = get_logger(__name__)

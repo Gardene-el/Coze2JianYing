@@ -67,7 +67,7 @@ def test_draft_state_manager():
     print("Test 2: 草稿状态管理器")
     print("=" * 60)
     
-    from app.backend.utils.draft_state_manager import get_draft_state_manager
+    from app.backend.core.draft_state_manager import get_draft_state_manager
     from app.backend.config import reset_config
     
     # 重置配置使用默认路径
@@ -108,7 +108,7 @@ def test_segment_manager():
     print("Test 3: 片段管理器")
     print("=" * 60)
     
-    from app.backend.utils.segment_manager import get_segment_manager
+    from app.backend.core.segment_manager import get_segment_manager
     from app.backend.config import reset_config
     
     # 重置配置使用默认路径
