@@ -1314,9 +1314,6 @@ async def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) 
         return response_manager.internal_error_response(AddStickerKeyframeResponse, e, keyframe_id="")
 
 
-# ==================== TextSegment 操作端点 ====================
-
-
 # ==================== StickerSegment 操作端点 ====================
 
 
