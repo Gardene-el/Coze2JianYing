@@ -82,7 +82,7 @@ resp = await create_draft(req)
 
 # 系统自动注入所有导入
 # from app.api.draft_routes import create_draft
-# from app.schemas.segment_schemas import CreateDraftRequest
+# from app.schemas.general_schemas import CreateDraftRequest
 ```
 
 ### 2. 智能异步包装

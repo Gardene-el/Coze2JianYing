@@ -354,7 +354,7 @@ scripts/handler_generator/
 **依赖**：直接依赖（解析 Schema 定义）
 
 **工作方式**：
-1. 读取 `app/schemas/segment_schemas.py` 文件
+1. 读取 `app/schemas/general_schemas.py` 文件
 2. 使用 AST 解析提取所有类定义
 3. 提取每个类的字段信息：
    - 字段名（如 `alpha`）
@@ -554,7 +554,7 @@ if {args.input.clip_settings} is not None:
 ```python
 class SchemaExtractor:
     def get_class_source_code(self, class_name: str) -> str:
-        """从 segment_schemas.py 中提取类的 AST 定义"""
+        """从 general_schemas.py 中提取类的 AST 定义"""
         # 1. 找到类定义节点
         # 2. 提取所有字段的类型注解
         # 3. 提取 Field() 的描述信息
@@ -586,7 +586,7 @@ for type_name in sorted(custom_types):
 # 写入 handler.py
 handler_content = f"""
 # ========== 自定义类型定义 ==========
-# 以下类型定义从 segment_schemas.py 复制而来
+# 以下类型定义从 general_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
 {custom_type_definitions}
@@ -608,7 +608,7 @@ handler_content = f"""
 
 **转换示例**：
 
-Pydantic 格式（segment_schemas.py）：
+Pydantic 格式（general_schemas.py）：
 ```python
 class ClipSettings(BaseModel):
     alpha: float = Field(1.0, description="透明度 (0.0-1.0)")
@@ -752,7 +752,7 @@ elif 'text_style' in key.lower() or key.lower() == 'textstyle':
 ```
 
 **意义**：
-1. 嵌入的类型定义与 segment_schemas.py 一致
+1. 嵌入的类型定义与 general_schemas.py 一致
 2. 类型转换逻辑正确识别所有新类型
 3. 不再引用已删除的 Position 类
 4. 生成的代码可以正确编译和运行
@@ -769,7 +769,7 @@ elif 'text_style' in key.lower() or key.lower() == 'textstyle':
 ```python
 def test_base_models():
     """验证 SchemaExtractor 能正确提取新的基础模型"""
-    extractor = SchemaExtractor('app/schemas/segment_schemas.py')
+    extractor = SchemaExtractor('app/schemas/general_schemas.py')
     
     # 验证 ClipSettings 有 6 个字段
     fields = extractor.get_schema_fields('ClipSettings')

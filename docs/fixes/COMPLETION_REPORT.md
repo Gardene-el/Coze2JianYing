@@ -73,7 +73,7 @@ else:
 使用了自定义类型但没有 import 语句，且 Coze 平台不支持跨文件 import。
 
 **初步方案** (已废弃):
-添加 import 语句：`from app.schemas.segment_schemas import TimeRange`
+添加 import 语句：`from app.schemas.general_schemas import TimeRange`
 
 **最终方案** (已实施):
 将自定义类型的完整定义复制到每个 handler 文件中。
@@ -136,7 +136,7 @@ if custom_types:
     type_defs = schema_extractor.get_multiple_class_sources(sorted_types)
     custom_type_definitions = (
         "\n# ========== 自定义类型定义 ==========\n"
-        "# 以下类型定义从 segment_schemas.py 复制而来\n"
+        "# 以下类型定义从 general_schemas.py 复制而来\n"
         "# Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义\n\n"
         f"{type_defs}\n\n"
     )
@@ -192,7 +192,7 @@ class Input(NamedTuple):
 from runtime import Args
 
 # ========== 自定义类型定义 ==========
-# 以下类型定义从 segment_schemas.py 复制而来
+# 以下类型定义从 general_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
 class TimeRange(NamedTuple):
@@ -217,7 +217,7 @@ class Input(NamedTuple):
 from runtime import Args
 
 # ========== 自定义类型定义 ==========
-# 以下类型定义从 segment_schemas.py 复制而来
+# 以下类型定义从 general_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
 class Position(NamedTuple):

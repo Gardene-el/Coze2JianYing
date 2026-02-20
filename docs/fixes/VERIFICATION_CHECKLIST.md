@@ -48,13 +48,13 @@ class Input(NamedTuple):
 **验证结果**:
 ```python
 # ✅ create_audio_segment/handler.py
-from app.schemas.segment_schemas import TimeRange  # ✅ 单个导入
+from app.schemas.general_schemas import TimeRange  # ✅ 单个导入
 
 # ✅ create_video_segment/handler.py
-from app.schemas.segment_schemas import ClipSettings, TimeRange  # ✅ 多个导入
+from app.schemas.general_schemas import ClipSettings, TimeRange  # ✅ 多个导入
 
 # ✅ create_text_segment/handler.py
-from app.schemas.segment_schemas import Position, TextStyle, TimeRange  # ✅ 多个导入
+from app.schemas.general_schemas import Position, TextStyle, TimeRange  # ✅ 多个导入
 ```
 
 ---
@@ -183,7 +183,7 @@ class Input(NamedTuple):
 ### 场景 2: 单个自定义类型
 **测试工具**: create_audio_segment
 ```python
-from app.schemas.segment_schemas import TimeRange  # ✅ 自动导入
+from app.schemas.general_schemas import TimeRange  # ✅ 自动导入
 class Input(NamedTuple):
     target_timerange: TimeRange  # ✅ 正确使用
 ```
@@ -192,7 +192,7 @@ class Input(NamedTuple):
 ### 场景 3: 多个自定义类型
 **测试工具**: create_text_segment
 ```python
-from app.schemas.segment_schemas import Position, TextStyle, TimeRange  # ✅ 多个导入
+from app.schemas.general_schemas import Position, TextStyle, TimeRange  # ✅ 多个导入
 class Input(NamedTuple):
     target_timerange: TimeRange  # ✅
     text_style: Optional[TextStyle] = None  # ✅

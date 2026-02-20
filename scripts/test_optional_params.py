@@ -21,7 +21,7 @@ def test_optional_params_detection():
     print("=== 测试可选参数检测 ===\n")
 
     # 初始化 SchemaExtractor
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
 
     # 测试 CreateAudioSegmentRequest
@@ -45,7 +45,7 @@ def test_generated_request_construction():
     print("\n=== 测试生成的 Request 构造代码 ===\n")
 
     # 初始化
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     generator = APICallCodeGenerator(extractor)
 
@@ -108,7 +108,7 @@ def test_field_type_formatting():
     """测试字段类型格式化"""
     print("\n=== 测试字段类型格式化 ===\n")
 
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     generator = APICallCodeGenerator(extractor)
 
@@ -145,7 +145,7 @@ def test_runtime_behavior_simulation():
     """测试运行时行为模拟（检查生成的代码逻辑）"""
     print("\n=== 测试运行时行为模拟 ===\n")
 
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     generator = APICallCodeGenerator(extractor)
 

@@ -137,7 +137,7 @@
 
 ### 核心文件 ✅
 
-1. **`app/schemas/segment_schemas.py`**
+1. **`app/schemas/general_schemas.py`**
    - 完成所有 Schema 的拆分和重命名
    - 更新了文档字符串和示例
    - 明确了每个参数的取值范围
@@ -220,7 +220,7 @@
 
 **旧代码**：
 ```python
-from app.schemas.segment_schemas import AddEffectRequest
+from app.schemas.general_schemas import AddEffectRequest
 
 # Audio
 request = AddEffectRequest(effect_type="...", params=[...])
@@ -233,7 +233,7 @@ await add_video_effect(segment_id, request)
 
 **新代码**：
 ```python
-from app.schemas.segment_schemas import (
+from app.schemas.general_schemas import (
     AddAudioEffectRequest,
     AddVideoEffectRequest
 )
@@ -405,7 +405,7 @@ async def test_add_audio_effect_endpoint():
 
 1. ✅ 拆分所有共享的 Request/Response Schema
 2. ✅ 重命名所有 Video/Text 专用的 Schema
-3. ✅ 更新 `segment_schemas.py` 中的所有定义
+3. ✅ 更新 `general_schemas.py` 中的所有定义
 4. ✅ 更新 `segment_routes.py` 中的 imports 和函数签名
 5. ✅ 更新 `__init__.py` 的导出列表
 6. ✅ 创建完整的文档体系

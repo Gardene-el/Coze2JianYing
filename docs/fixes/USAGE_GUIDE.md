@@ -48,7 +48,7 @@ import uuid
 import time
 from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
-from app.schemas.segment_schemas import CustomType1, CustomType2  # ✅ 自动导入
+from app.schemas.general_schemas import CustomType1, CustomType2  # ✅ 自动导入
 
 # Input 类型定义
 class Input(NamedTuple):
@@ -130,23 +130,23 @@ class Input(NamedTuple):
 - `ClipSettings` - 图像调节设置
 - `TextStyle` - 文本样式
 - `Position` - 位置信息
-- 以及 `app/schemas/segment_schemas.py` 中定义的所有其他类型
+- 以及 `app/schemas/general_schemas.py` 中定义的所有其他类型
 
 ### 导入示例
 
 **单个自定义类型**:
 ```python
-from app.schemas.segment_schemas import TimeRange
+from app.schemas.general_schemas import TimeRange
 ```
 
 **多个自定义类型**:
 ```python
-from app.schemas.segment_schemas import ClipSettings, TimeRange
+from app.schemas.general_schemas import ClipSettings, TimeRange
 ```
 
 **复杂嵌套类型**:
 ```python
-from app.schemas.segment_schemas import Position, TextStyle, TimeRange
+from app.schemas.general_schemas import Position, TextStyle, TimeRange
 
 class Input(NamedTuple):
     target_timerange: TimeRange                    # ✅ 直接使用
@@ -162,7 +162,7 @@ class Input(NamedTuple):
 # coze_plugin/raw_tools/create_audio_segment/handler.py
 
 from runtime import Args
-from app.schemas.segment_schemas import TimeRange  # ✅ 自动导入
+from app.schemas.general_schemas import TimeRange  # ✅ 自动导入
 
 class Input(NamedTuple):
     """create_audio_segment 工具的输入参数"""
@@ -188,7 +188,7 @@ def handler(args: Args[Input]) -> Output:
 # coze_plugin/raw_tools/create_text_segment/handler.py
 
 from runtime import Args
-from app.schemas.segment_schemas import Position, TextStyle, TimeRange  # ✅ 多个导入
+from app.schemas.general_schemas import Position, TextStyle, TimeRange  # ✅ 多个导入
 
 class Input(NamedTuple):
     """create_text_segment 工具的输入参数"""
@@ -248,13 +248,13 @@ material_url: str  # 无默认值 = 必需字段
 
 ### Q2: 自定义类型是从哪里导入的？
 
-**A**: 所有自定义类型都从 `app.schemas.segment_schemas` 模块导入。这个模块包含了所有剪映草稿相关的数据模型。
+**A**: 所有自定义类型都从 `app.schemas.general_schemas` 模块导入。这个模块包含了所有剪映草稿相关的数据模型。
 
 ### Q3: 如果需要修改生成的 handler，应该修改哪里？
 
 **A**: 有两种情况：
 
-1. **修改 API 定义本身**: 修改 `app/api/` 下的路由文件和 `app/schemas/segment_schemas.py`，然后重新运行生成器
+1. **修改 API 定义本身**: 修改 `app/api/` 下的路由文件和 `app/schemas/general_schemas.py`，然后重新运行生成器
 
 2. **只修改生成逻辑**: 修改 `scripts/handler_generator/` 下的生成器脚本
 

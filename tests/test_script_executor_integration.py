@@ -93,7 +93,7 @@ from app.backend.api.segment_routes import (
 )
 
 # 导入所有Request模型
-from app.backend.schemas.segment_schemas import (
+from app.backend.schemas.general_schemas import (
     CreateAudioSegmentRequest, CreateVideoSegmentRequest,
     CreateTextSegmentRequest, CreateStickerSegmentRequest,
     CreateEffectSegmentRequest, CreateFilterSegmentRequest,

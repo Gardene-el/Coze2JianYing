@@ -326,7 +326,7 @@ async def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest):  
 
 ## 相关文件
 
-- `app/schemas/segment_schemas.py` - Schema 定义（已完成）
+- `app/schemas/general_schemas.py` - Schema 定义（已完成）
 - `app/api/segment_routes.py` - 需要紧急修复的文件
 - `app/schemas/__init__.py` - 需要导出新 Schema
 - `docs/analysis/SCHEMA_REFACTORING_PLAN.md` - 完整重构计划

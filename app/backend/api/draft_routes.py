@@ -10,7 +10,7 @@ Draft API 新路由 - 符合 API_ENDPOINTS_REFERENCE.md 规范
 from fastapi import APIRouter, HTTPException, status
 from typing import List, Dict, Any
 
-from app.backend.schemas.segment_schemas import (
+from app.backend.schemas.general_schemas import (
     # Draft 操作
     CreateDraftRequest, CreateDraftResponse,
     AddTrackRequest, AddTrackResponse,

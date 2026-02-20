@@ -5,7 +5,7 @@
 
 ## 修改摘要
 
-本次重构将 `app/schemas/segment_schemas.py` 中的数据模型改为完全镜像 pyJianYingDraft 库的真实类定义，移除了 AI 错误生成的自定义类。
+本次重构将 `app/schemas/general_schemas.py` 中的数据模型改为完全镜像 pyJianYingDraft 库的真实类定义，移除了 AI 错误生成的自定义类。
 
 ### 主要修改
 
@@ -18,7 +18,7 @@
 
 ## 问题描述
 
-`app/schemas/segment_schemas.py` 中的 `ClipSettings`、`Position` 和 `TextStyle` 类是 AI 错误生成的，不符合 pyJianYingDraft 库的实际定义。这导致了以下问题：
+`app/schemas/general_schemas.py` 中的 `ClipSettings`、`Position` 和 `TextStyle` 类是 AI 错误生成的，不符合 pyJianYingDraft 库的实际定义。这导致了以下问题：
 
 1. **ClipSettings** 被错误定义为图像调节参数（亮度、对比度等），而实际应该是变换参数（位置、缩放、旋转、透明度）
 2. **Position** 类在 pyJianYingDraft 中根本不存在，位置信息通过 ClipSettings 的 `transform_x` 和 `transform_y` 表示
@@ -153,7 +153,7 @@ class CropSettings(BaseModel):
 
 ## 与 pyJianYingDraft 的对应关系
 
-| segment_schemas.py | pyJianYingDraft | 说明 |
+| general_schemas.py | pyJianYingDraft | 说明 |
 |-------------------|-----------------|------|
 | `ClipSettings` | `ClipSettings` | ✅ 完全镜像 |
 | `TextStyle` | `TextStyle` | ✅ 完全镜像 |
@@ -205,7 +205,7 @@ def convert_clip_settings(self, transform_dict: Dict[str, Any]) -> ClipSettings:
 
 ### 必须完成
 
-1. ✅ 更新 `app/schemas/segment_schemas.py` 
+1. ✅ 更新 `app/schemas/general_schemas.py` 
 2. ⏳ 更新相关 API 文档（`docs/reference/API_ENDPOINTS_REFERENCE.md`）
 3. ⏳ 测试所有受影响的 API 端点
 4. ⏳ 更新 Coze 插件工具以匹配新的 schema
@@ -239,7 +239,7 @@ def convert_clip_settings(self, transform_dict: Dict[str, Any]) -> ClipSettings:
 
 ## 实际修改清单
 
-### segment_schemas.py 文件修改
+### general_schemas.py 文件修改
 
 #### 1. 导入部分 (L11-14)
 - ❌ 移除：`from enum import Enum`（未使用）

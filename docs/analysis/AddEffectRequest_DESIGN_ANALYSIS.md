@@ -315,7 +315,7 @@ class AddEffectRequest(BaseModel):
 
 ## 相关文件
 
-- `app/schemas/segment_schemas.py` - Schema 定义
+- `app/schemas/general_schemas.py` - Schema 定义
 - `app/api/segment_routes.py` - API 端点实现
 - `docs/API_ENDPOINTS_REFERENCE.md` - API 文档
 - `coze_plugin/raw_tools/add_audio_effect/` - Coze 插件工具

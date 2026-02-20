@@ -43,7 +43,7 @@ app/
   api/
     draft_routes.py                  # 已更新的示例端点
   schemas/
-    segment_schemas.py               # 已更新的响应模型
+    general_schemas.py               # 已更新的响应模型
 
 docs/
   API_RESPONSE_STANDARD.md           # 完整的响应标准文档

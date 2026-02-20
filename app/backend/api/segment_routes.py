@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.backend.schemas.segment_schemas import (
+from app.backend.schemas.general_schemas import (
     # Segment 操作 - Audio
     AddAudioEffectRequest,
     AddAudioEffectResponse,

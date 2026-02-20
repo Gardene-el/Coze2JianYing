@@ -97,7 +97,7 @@ def test_readme_format():
     
     # 加载 schema
     project_root = Path(__file__).parent.parent
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     schema_extractor = SchemaExtractor(str(schema_file))
     
     # 创建测试 endpoint

@@ -28,7 +28,7 @@ from app.backend.api.segment_routes import (
     create_text_segment,
     create_video_segment,
 )
-from app.backend.schemas.segment_schemas import (
+from app.backend.schemas.general_schemas import (
     AddAnimationRequest,
     AddBackgroundFillingRequest,
     AddBubbleRequest,

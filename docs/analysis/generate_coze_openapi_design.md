@@ -245,7 +245,7 @@ Schema.paths.post.requestBody.content.schema.properties.properties.title of type
 3. `title` - FastAPI 自动生成的字段
 
 ```python
-# app/schemas/segment_schemas.py
+# app/schemas/general_schemas.py
 class SegmentDetailResponse(BaseModel):
     properties: Dict[str, Any] = Field(..., description="片段属性")
 ```

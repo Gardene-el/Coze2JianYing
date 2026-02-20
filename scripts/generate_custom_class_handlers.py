@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Custom Class Handler Generator - 主程序
-为 segment_schemas.py 中的自定义类生成 Coze handler
+为 general_schemas.py 中的自定义类生成 Coze handler
 
 此脚本专门用于生成自定义类（TimeRange, ClipSettings, TextStyle, CropSettings）的 handler。
 这些 handler 与 API handler 不同，它们只是简单的对象构造器。
@@ -27,7 +27,7 @@ def main():
     """主函数：执行完整的生成流程"""
     print("=" * 60)
     print("自定义类 Handler 生成器")
-    print("为 segment_schemas.py 中的自定义类生成 Coze 工具")
+    print("为 general_schemas.py 中的自定义类生成 Coze 工具")
     print("=" * 60)
     print()
 
@@ -36,7 +36,7 @@ def main():
     project_root = script_dir.parent
 
     # 定义路径
-    schema_file = project_root / "backend" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "backend" / "schemas" / "general_schemas.py"
     output_dir = project_root / "coze_plugin" / "raw_tools"
 
     print(f"项目根目录: {project_root}")

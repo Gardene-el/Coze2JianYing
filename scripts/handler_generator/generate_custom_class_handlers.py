@@ -1,5 +1,5 @@
 """
-附加流程：扫描 segment_schemas.py 中的自定义类，为每个类生成 handler
+附加流程：扫描 general_schemas.py 中的自定义类，为每个类生成 handler
 负责识别自定义类（TimeRange, ClipSettings, TextStyle, CropSettings）
 并生成对应的 make_<class_name> handler 工具
 """
@@ -41,7 +41,7 @@ class CustomClassHandlerGenerator:
         self.custom_classes: List[CustomClass] = []
 
     def scan_custom_classes(self) -> List[CustomClass]:
-        """扫描 segment_schemas.py 中的自定义类"""
+        """扫描 general_schemas.py 中的自定义类"""
         try:
             with open(self.schema_file, 'r', encoding='utf-8') as f:
                 content = f.read()

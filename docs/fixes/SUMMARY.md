@@ -35,7 +35,7 @@ target_timerange: TimeRange  # ✅ 必需字段
 ```python
 # 修复前（使用 import）
 from runtime import Args
-from app.schemas.segment_schemas import TimeRange  # ❌ Coze 不支持跨文件 import
+from app.schemas.general_schemas import TimeRange  # ❌ Coze 不支持跨文件 import
 
 class Input(NamedTuple):
     target_timerange: TimeRange  # ❌ 在 Coze 中会报错
@@ -44,7 +44,7 @@ class Input(NamedTuple):
 from runtime import Args
 
 # ========== 自定义类型定义 ==========
-# 以下类型定义从 segment_schemas.py 复制而来
+# 以下类型定义从 general_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
 class TimeRange(NamedTuple):
@@ -77,7 +77,7 @@ Coze 平台要求每个工具函数脚本必须是**完全独立**的：
 
 ### 我们的解决方案
 1. **自动检测依赖**: 扫描 Input 和 Output 中使用的所有自定义类型
-2. **提取类定义**: 从 `segment_schemas.py` 中提取完整的类定义
+2. **提取类定义**: 从 `general_schemas.py` 中提取完整的类定义
 3. **转换为 NamedTuple**: 将 Pydantic BaseModel 转换为 NamedTuple（避免外部依赖）
 4. **复制到文件**: 将类定义直接复制到每个 handler.py 文件中
 5. **保持同步**: 通过注释标注类型来源，便于后续维护
@@ -123,7 +123,7 @@ from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
 
 # ========== 自定义类型定义 ==========
-# 以下类型定义从 segment_schemas.py 复制而来
+# 以下类型定义从 general_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
 class TimeRange(NamedTuple):
@@ -149,7 +149,7 @@ from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
 
 # ========== 自定义类型定义 ==========
-# 以下类型定义从 segment_schemas.py 复制而来
+# 以下类型定义从 general_schemas.py 复制而来
 # Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
 
 class Position(NamedTuple):

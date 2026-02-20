@@ -58,7 +58,7 @@ def generate_complete_handler(
         if type_defs:
             custom_type_definitions = (
                 "\n# ========== 自定义类型定义 ==========\n"
-                "# 以下类型定义从 segment_schemas.py 复制而来\n"
+                "# 以下类型定义从 general_schemas.py 复制而来\n"
                 "# Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义\n\n"
                 f"{type_defs}\n\n"
             )
@@ -106,7 +106,7 @@ def ensure_coze2jianying_file() -> str:
 # 记录所有通过 Coze 工具调用的 API 操作
 
 import asyncio
-from app.backend.schemas.segment_schemas import *
+from app.backend.schemas.general_schemas import *
 
 # API 调用记录将追加在下方
 """
@@ -147,7 +147,7 @@ def main():
 
     # 定义路径
     api_dir = project_root / "backend" / "api"
-    schema_file = project_root / "backend" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "backend" / "schemas" / "general_schemas.py"
     output_dir = project_root / "coze_plugin" / "raw_tools"
 
     print(f"项目根目录: {project_root}")

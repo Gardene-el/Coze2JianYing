@@ -20,7 +20,7 @@ def test_string_condition_formatting():
     """测试字符串类型参数在条件中的格式化"""
     print("=== 测试字符串条件格式化 ===\n")
 
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     generator = APICallCodeGenerator(extractor)
 
@@ -53,7 +53,7 @@ def test_generated_code_with_string_params():
     """测试生成的代码包含字符串参数的情况"""
     print("\n=== 测试生成的代码（包含字符串参数）===\n")
 
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     generator = APICallCodeGenerator(extractor)
 

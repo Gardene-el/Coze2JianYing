@@ -26,7 +26,7 @@ def test_base_models():
     print("TEST 1: Base Models Extraction")
     print("=" * 60)
     
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     
     base_models = {
@@ -64,7 +64,7 @@ def test_split_schemas():
     print("TEST 2: Split Request Schemas Recognition")
     print("=" * 60)
     
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     
     split_requests = [
@@ -106,7 +106,7 @@ def test_position_removal():
     print("TEST 3: Position Class Removal")
     print("=" * 60)
     
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     
     if 'Position' not in extractor.schemas:

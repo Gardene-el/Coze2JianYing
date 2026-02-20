@@ -21,7 +21,7 @@ def check_brace_escaping():
     print("=== 检查大括号转义 ===\n")
 
     # 初始化
-    schema_file = project_root / "app" / "schemas" / "segment_schemas.py"
+    schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     extractor = SchemaExtractor(str(schema_file))
     generator = APICallCodeGenerator(extractor)
 

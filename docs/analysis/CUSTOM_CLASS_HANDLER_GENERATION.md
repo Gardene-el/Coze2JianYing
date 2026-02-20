@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档描述了为 `segment_schemas.py` 中的自定义类自动生成 Coze handler 工具的系统。
+本文档描述了为 `general_schemas.py` 中的自定义类自动生成 Coze handler 工具的系统。
 
 ## 背景
 
@@ -77,7 +77,7 @@
 
 新增的 `generate_custom_class_handlers.py` 模块负责：
 
-1. **扫描自定义类**: 从 `segment_schemas.py` 识别目标自定义类
+1. **扫描自定义类**: 从 `general_schemas.py` 识别目标自定义类
 2. **提取字段信息**: 使用 SchemaExtractor 提取类的所有字段和类型
 3. **生成 Input 类**: 将所有参数转换为可选参数
 4. **生成 handler 函数**: 创建处理逻辑，仅包含非 None 参数
@@ -86,7 +86,7 @@
 ### 生成流程
 
 ```
-segment_schemas.py
+general_schemas.py
     ↓
 附加流程: CustomClassHandlerGenerator
     ↓
@@ -118,7 +118,7 @@ coze_plugin/raw_tools/
 
 ## 如何重新生成
 
-如果需要重新生成这些 handler（例如，在 segment_schemas.py 中添加了新的自定义类），运行：
+如果需要重新生成这些 handler（例如，在 general_schemas.py 中添加了新的自定义类），运行：
 
 ```bash
 python scripts/generate_custom_class_handlers.py
@@ -155,7 +155,7 @@ python scripts/test_custom_class_handlers.py
 
 要为新的自定义类生成 handler：
 
-1. 在 `segment_schemas.py` 中定义新的 Pydantic 模型类
+1. 在 `general_schemas.py` 中定义新的 Pydantic 模型类
 2. 在 `generate_custom_class_handlers.py` 的 `TARGET_CLASSES` 列表中添加类名
 3. 运行生成脚本：`python scripts/generate_custom_class_handlers.py`
 
@@ -163,7 +163,7 @@ python scripts/test_custom_class_handlers.py
 
 如果修改了现有自定义类的字段：
 
-1. 更新 `segment_schemas.py` 中的类定义
+1. 更新 `general_schemas.py` 中的类定义
 2. 重新运行生成脚本
 3. 生成器会覆盖现有的 handler 文件
 
@@ -172,7 +172,7 @@ python scripts/test_custom_class_handlers.py
 - `scripts/handler_generator/generate_custom_class_handlers.py` - 附加流程模块
 - `scripts/generate_custom_class_handlers.py` - 生成脚本主程序
 - `scripts/test_custom_class_handlers.py` - 测试脚本
-- `app/schemas/segment_schemas.py` - 自定义类定义
+- `app/schemas/general_schemas.py` - 自定义类定义
 - `coze_plugin/raw_tools/make_*/` - 生成的 handler 工具
 
 ## 注意事项
@@ -187,4 +187,4 @@ python scripts/test_custom_class_handlers.py
 - [ ] 支持嵌套的自定义类（当一个类包含另一个自定义类作为字段时）
 - [ ] 添加参数验证逻辑（如范围检查）
 - [ ] 支持生成示例 JSON 数据用于测试
-- [ ] 自动检测 segment_schemas.py 中的新增类并提示生成
+- [ ] 自动检测 general_schemas.py 中的新增类并提示生成

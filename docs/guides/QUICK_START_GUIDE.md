@@ -169,7 +169,7 @@ resp_abc123 = await create_video_segment(req_abc123)
 
 ```python
 # 应用端已导入类型定义
-from app.schemas.segment_schemas import TimeRange, ClipSettings
+from app.schemas.general_schemas import TimeRange, ClipSettings
 
 # 直接执行脚本，所有类型构造都能正确执行
 exec(script_content)  # ✅ 成功

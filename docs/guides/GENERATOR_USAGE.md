@@ -262,7 +262,7 @@ $ python scripts/test_generated_handlers.py
 
 2. **依赖要求**:
    - 需要正确的 FastAPI 路由文件在 `app/api/`
-   - 需要 Pydantic schemas 文件在 `app/schemas/segment_schemas.py`
+   - 需要 Pydantic schemas 文件在 `app/schemas/general_schemas.py`
 
 3. **Coze 平台限制**:
    - 生成的 handler 假设在 Coze 沙盒环境中运行

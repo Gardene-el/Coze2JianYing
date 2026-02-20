@@ -3,7 +3,7 @@ Pydantic Schemas 模块
 包含所有 API 请求/响应数据模型定义
 """
 
-from app.backend.schemas.segment_schemas import *
+from app.backend.schemas.general_schemas import *
 
 __all__ = [
     # Segment schemas

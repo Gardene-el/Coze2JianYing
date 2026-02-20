@@ -186,10 +186,10 @@ warning at line 13: `fastapi.HTTPException` imported but unused
 
 ```python
 # 旧代码（不再工作）
-from app.schemas.segment_schemas import AddKeyframeRequest
+from app.schemas.general_schemas import AddKeyframeRequest
 
 # 新代码（根据段类型选择）
-from app.schemas.segment_schemas import (
+from app.schemas.general_schemas import (
     AddAudioKeyframeRequest,
     AddVideoKeyframeRequest,
     AddTextKeyframeRequest,

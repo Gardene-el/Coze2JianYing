@@ -27,7 +27,7 @@
   - 查询草稿状态
 
 #### 数据模型
-- **`app/schemas/segment_schemas.py`** (18KB) - 完整的 Segment 数据模型
+- **`app/schemas/general_schemas.py`** (18KB) - 完整的 Segment 数据模型
   - Segment 创建请求/响应模型
   - Segment 操作请求/响应模型
   - Draft 操作请求/响应模型
@@ -55,7 +55,7 @@
 
 #### 数据模型
 - **`app/schemas/__init__.py`** - 更新导出列表
-  - 添加 segment_schemas 导入
+  - 添加 general_schemas 导入
   - 导出新的 Segment 相关模型
 
 #### 文档

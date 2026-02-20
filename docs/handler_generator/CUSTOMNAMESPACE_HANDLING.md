@@ -258,7 +258,7 @@ resp_abc123 = await create_video_segment(req_abc123)
 
 ```python
 # 应用端已导入类型定义
-from app.schemas.segment_schemas import TimeRange, ClipSettings, CreateVideoSegmentRequest
+from app.schemas.general_schemas import TimeRange, ClipSettings, CreateVideoSegmentRequest
 
 # 直接执行生成的脚本
 exec(script_content)  # 所有类型构造都能正确执行
@@ -331,7 +331,7 @@ python scripts/generate_handler_from_api.py
 生成的脚本假设执行环境已经导入了所有类型定义：
 
 ```python
-from app.schemas.segment_schemas import (
+from app.schemas.general_schemas import (
     TimeRange,
     ClipSettings,
     TextStyle,

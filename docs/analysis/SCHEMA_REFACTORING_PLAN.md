@@ -140,7 +140,7 @@ class AddTextAnimationRequest(BaseModel):
 ## 需要更新的文件
 
 ### 1. Schema 定义文件 ✅
-- `app/schemas/segment_schemas.py` - 已完成拆分
+- `app/schemas/general_schemas.py` - 已完成拆分
 
 ### 2. API 路由文件 ⚠️ 部分完成
 - `app/api/segment_routes.py` - 已更新 imports 和部分函数签名
@@ -297,7 +297,7 @@ async def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeReque
 
 **旧代码**：
 ```python
-from app.schemas.segment_schemas import AddEffectRequest
+from app.schemas.general_schemas import AddEffectRequest
 
 # Audio
 request = AddEffectRequest(effect_type="...", params=[...])
@@ -310,7 +310,7 @@ await add_video_effect(segment_id, request)
 
 **新代码**：
 ```python
-from app.schemas.segment_schemas import (
+from app.schemas.general_schemas import (
     AddAudioEffectRequest,
     AddVideoEffectRequest
 )
@@ -378,5 +378,5 @@ class AddEffectRequest(AddAudioEffectRequest):
 ## 变更历史
 
 - 2024-XX-XX: 创建重构计划文档
-- 2024-XX-XX: 完成 segment_schemas.py 的 Schema 拆分
+- 2024-XX-XX: 完成 general_schemas.py 的 Schema 拆分
 - 2024-XX-XX: 部分更新 segment_routes.py（待完成）

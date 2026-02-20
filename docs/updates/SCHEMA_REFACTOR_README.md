@@ -2,7 +2,7 @@
 
 ## 📋 修改概述
 
-本次重构将 `app/schemas/segment_schemas.py` 中的数据模型改为**完全镜像 pyJianYingDraft 库的真实类定义**，移除了 AI 错误生成的自定义类。
+本次重构将 `app/schemas/general_schemas.py` 中的数据模型改为**完全镜像 pyJianYingDraft 库的真实类定义**，移除了 AI 错误生成的自定义类。
 
 ## ❌ 发现的问题
 
@@ -171,7 +171,7 @@ request = CreateStickerSegmentRequest(
 
 ## 📊 与 pyJianYingDraft 的对应关系
 
-| segment_schemas.py | pyJianYingDraft | 状态 |
+| general_schemas.py | pyJianYingDraft | 状态 |
 |-------------------|-----------------|------|
 | `TimeRange` | `Timerange` | ⚠️ 名称不同，但结构对应 |
 | `ClipSettings` | `ClipSettings` | ✅ 完全镜像 |
@@ -216,7 +216,7 @@ def convert_clip_settings(self, transform_dict: Dict[str, Any]) -> ClipSettings:
 运行以下命令验证修改：
 
 ```bash
-python -c "from app.schemas.segment_schemas import ClipSettings, TextStyle, CropSettings, TimeRange; print('✅ 所有类成功导入')"
+python -c "from app.schemas.general_schemas import ClipSettings, TextStyle, CropSettings, TimeRange; print('✅ 所有类成功导入')"
 ```
 
 ## 📚 设计原则
@@ -248,7 +248,7 @@ python -c "from app.schemas.segment_schemas import ClipSettings, TextStyle, Crop
 
 ### 必须完成
 
-- [x] 更新 `app/schemas/segment_schemas.py`
+- [x] 更新 `app/schemas/general_schemas.py`
 - [ ] 更新 API 文档（`docs/reference/API_ENDPOINTS_REFERENCE.md`）
 - [ ] 测试所有受影响的 API 端点
 - [ ] 更新 Coze 插件工具以匹配新 schema

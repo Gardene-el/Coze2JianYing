@@ -95,7 +95,7 @@
 
 ### 核心代码文件 ✅
 
-1. **`app/schemas/segment_schemas.py`**
+1. **`app/schemas/general_schemas.py`**
    - ✅ 完成所有 Schema 的拆分和重命名
    - ✅ 更新了文档字符串
    - ✅ 改进了参数描述和示例
@@ -234,7 +234,7 @@ class AddVideoEffectRequest(BaseModel):
 
 **旧代码**：
 ```python
-from app.schemas.segment_schemas import AddEffectRequest
+from app.schemas.general_schemas import AddEffectRequest
 
 request = AddEffectRequest(effect_type="...", params=[...])
 await add_audio_effect(segment_id, request)
@@ -242,7 +242,7 @@ await add_audio_effect(segment_id, request)
 
 **新代码**：
 ```python
-from app.schemas.segment_schemas import AddAudioEffectRequest
+from app.schemas.general_schemas import AddAudioEffectRequest
 
 request = AddAudioEffectRequest(effect_type="...", params=[...])
 await add_audio_effect(segment_id, request)
