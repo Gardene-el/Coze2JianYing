@@ -24,11 +24,16 @@ from pyJianYingDraft import (
     TextLoopAnim,
     TransitionType,
     VideoSceneEffectType,
+    VideoCharacterEffectType,
+    MaskType,
+    TextBorder,
+    TextShadow,
     tim,
     trange,
     VideoSegment,
     TextSegment
 )
+from pyJianYingDraft.keyframe import KeyframeProperty
 
 from app.backend.config import get_config
 from app.backend.core.settings_manager import get_settings_manager
@@ -253,38 +258,101 @@ class DraftSaver:
                 return seg
 
             elif segment_type == "text":
-                # 文本片段
+                # 文本片段 — 完整样式支持
                 text_content = config.get("text_content", "")
                 font_family = config.get("font_family", "文轩体")
-                color = config.get("color", "#FFFFFF")
-                position = config.get("position", {})
+                # text_color 优先，兼容旧 color 字段
+                raw_color = config.get("text_color") or config.get("color", "#FFFFFF")
 
                 # 转换颜色
-                hex_color = color.lstrip("#")
-                r = int(hex_color[0:2], 16) / 255.0
-                g = int(hex_color[2:4], 16) / 255.0
-                b = int(hex_color[4:6], 16) / 255.0
+                def _hex_to_rgb(hex_str: str):
+                    h = hex_str.lstrip("#")
+                    if len(h) == 3:
+                        h = "".join(c * 2 for c in h)
+                    return (int(h[0:2], 16) / 255.0,
+                            int(h[2:4], 16) / 255.0,
+                            int(h[4:6], 16) / 255.0)
 
-                # 创建文本片段
-                text_timerange = trange(f"{start_sec}s", f"{duration_sec}s")
+                r, g, b = _hex_to_rgb(raw_color)
+
+                # TextStyle 参数
+                font_size = float(config.get("font_size", 8.0))
+                bold = bool(config.get("bold", False))
+                italic = bool(config.get("italic", False))
+                underline = bool(config.get("underline", False))
+                alignment = int(config.get("alignment", 1))  # 0=左 1=中 2=右
+                alpha = float(config.get("alpha", 1.0))
+                letter_spacing = int(config.get("letter_spacing", 0))
+                line_spacing = int(config.get("line_spacing", 0))
+
+                text_style = draft.TextStyle(
+                    size=font_size,
+                    bold=bold,
+                    italic=italic,
+                    underline=underline,
+                    color=(r, g, b),
+                    alpha=alpha,
+                    align=alignment,
+                    letter_spacing=letter_spacing,
+                    line_spacing=line_spacing,
+                )
+
+                # TextBorder
+                border_obj = None
+                border_color_hex = config.get("border_color")
+                if border_color_hex:
+                    br, bg, bb = _hex_to_rgb(border_color_hex)
+                    border_obj = TextBorder(color=(br, bg, bb))
+
+                # TextShadow
+                shadow_obj = None
+                shadow_cfg = config.get("shadow")
+                if shadow_cfg and isinstance(shadow_cfg, dict):
+                    sc_hex = shadow_cfg.get("color", "#000000")
+                    sr, sg, sb = _hex_to_rgb(sc_hex)
+                    shadow_obj = TextShadow(
+                        alpha=float(shadow_cfg.get("alpha", 0.9)),
+                        color=(sr, sg, sb),
+                        diffuse=float(shadow_cfg.get("diffuse", 15.0)),
+                        distance=float(shadow_cfg.get("distance", 5.0)),
+                        angle=float(shadow_cfg.get("angle", -45.0)),
+                    )
+
+                # ClipSettings：使用归一化后的 transform
+                scale_x = float(config.get("scale_x", 1.0))
+                scale_y = float(config.get("scale_y", 1.0))
+                transform_x = float(config.get("transform_x", 0.0))
+                transform_y = float(config.get("transform_y", 0.0))
+                # 兼容旧 position.y
+                if transform_y == 0.0 and config.get("position"):
+                    transform_y = float(config["position"].get("y", 0.0))
+
+                clip_settings_kw = dict(
+                    scale_x=scale_x, scale_y=scale_y,
+                    transform_x=transform_x, transform_y=transform_y,
+                )
 
                 # 获取字体类型
                 try:
                     font_type = getattr(draft.FontType, font_family, None)
                     if not font_type:
                         font_type = draft.FontType.文轩体
-                except:
+                except Exception:
                     font_type = draft.FontType.文轩体
 
-                seg = draft.TextSegment(
-                    text_content,
-                    text_timerange,
+                text_timerange = trange(f"{start_sec}s", f"{duration_sec}s")
+
+                seg_kw: dict = dict(
                     font=font_type,
-                    style=draft.TextStyle(color=(r, g, b)),
-                    clip_settings=draft.ClipSettings(
-                        transform_y=position.get("y", 0.0)
-                    ),
+                    style=text_style,
+                    clip_settings=draft.ClipSettings(**clip_settings_kw),
                 )
+                if border_obj is not None:
+                    seg_kw["border"] = border_obj
+                if shadow_obj is not None:
+                    seg_kw["shadow"] = shadow_obj
+
+                seg = draft.TextSegment(text_content, text_timerange, **seg_kw)
                 return seg
 
             elif segment_type == "sticker":
@@ -327,7 +395,24 @@ class DraftSaver:
                     return None
 
                 try:
+                    # 1. 先按属性名精确匹配 VideoSceneEffectType
                     effect = getattr(VideoSceneEffectType, effect_type, None)
+                    # 2. 再按属性名匹配 VideoCharacterEffectType
+                    if not effect:
+                        effect = getattr(VideoCharacterEffectType, effect_type, None)
+                    # 3. 按 .name（显示名称）模糊匹配 VideoSceneEffectType
+                    if not effect:
+                        for member in VideoSceneEffectType:
+                            if hasattr(member.value, 'name') and member.value.name == effect_type:
+                                effect = member
+                                break
+                    # 4. 按 .name 模糊匹配 VideoCharacterEffectType
+                    if not effect:
+                        for member in VideoCharacterEffectType:
+                            if hasattr(member.value, 'name') and member.value.name == effect_type:
+                                effect = member
+                                break
+
                     if not effect:
                         self.logger.warning(f"未知的特效类型: {effect_type}")
                         return None
@@ -485,6 +570,43 @@ class DraftSaver:
                     if hasattr(seg, "add_effect"):
                         seg.add_effect(effect_id)
                         self.logger.info(f"应用特效: {effect_id}")
+
+                elif op_type == "add_keyframe":
+                    # 关键帧
+                    prop_str = op_data.get("property", "")
+                    offset = int(op_data.get("offset", 0))
+                    value = float(op_data.get("value", 0))
+                    try:
+                        prop_enum = KeyframeProperty(prop_str)
+                        if hasattr(seg, "add_keyframe"):
+                            seg.add_keyframe(prop_enum, offset, value)
+                            self.logger.info(f"应用关键帧: {prop_str}@{offset}={value}")
+                    except ValueError:
+                        self.logger.warning(f"未知关键帧属性: {prop_str}")
+
+                elif op_type == "add_mask":
+                    # 遮罩
+                    mask_type_name = op_data.get("mask_type_name", "线性")
+                    try:
+                        mask_type_enum = MaskType[mask_type_name]
+                    except KeyError:
+                        self.logger.warning(f"未知遮罩类型: {mask_type_name}")
+                        continue
+                    mask_kw = dict(
+                        center_x=float(op_data.get("center_x", 0)),
+                        center_y=float(op_data.get("center_y", 0)),
+                        size=float(op_data.get("size", 0.5)),
+                        rotation=float(op_data.get("rotation", 0)),
+                        feather=float(op_data.get("feather", 0)),
+                        invert=bool(op_data.get("invert", False)),
+                    )
+                    if op_data.get("rect_width") is not None:
+                        mask_kw["rect_width"] = float(op_data["rect_width"])
+                    if op_data.get("round_corner") is not None:
+                        mask_kw["round_corner"] = float(op_data["round_corner"])
+                    if hasattr(seg, "add_mask"):
+                        seg.add_mask(mask_type_enum, **mask_kw)
+                        self.logger.info(f"应用遮罩: {mask_type_name}")
 
             except Exception as e:
                 self.logger.error(f"应用操作失败 {op_type}: {e}")
