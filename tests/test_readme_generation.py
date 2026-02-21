@@ -7,8 +7,9 @@
 from pathlib import Path
 import sys
 
-# 添加 handler_generator 到 path
-sys.path.insert(0, str(Path(__file__).parent))
+# 添加 scripts 目录到 path（用于导入 handler_generator 包）
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root / "scripts"))
 
 from handler_generator import FolderCreator, SchemaExtractor, APIEndpointInfo
 
@@ -96,7 +97,6 @@ def test_readme_format():
     print("=" * 60)
     
     # 加载 schema
-    project_root = Path(__file__).parent.parent
     schema_file = project_root / "app" / "schemas" / "general_schemas.py"
     schema_extractor = SchemaExtractor(str(schema_file))
     

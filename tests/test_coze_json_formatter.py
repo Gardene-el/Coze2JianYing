@@ -11,8 +11,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# 导入直接放在 scripts 目录的模块
-sys.path.insert(0, str(Path(__file__).parent))
+# 导入 scripts 目录中的模块
+sys.path.insert(0, str(project_root / "scripts"))
 from coze_json_formatter import (
     convert_coze_to_standard_format,
     extract_output_from_coze_file,

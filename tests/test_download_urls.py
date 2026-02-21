@@ -19,7 +19,7 @@ import shutil
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.backend.services.material_manager import MaterialManager
+from app.backend.services.material import MaterialService
 from app.backend.utils.logger import setup_logger, get_logger
 
 def main():
@@ -48,18 +48,18 @@ def main():
     logger.info(f"创建临时测试目录: {test_dir}")
     
     try:
-        # 初始化 MaterialManager
+        # 初始化 MaterialService
         # 使用临时目录作为草稿根目录
         draft_folder_path = test_dir
         draft_name = "test_draft"
         project_id = "test_project_id"
         
-        logger.info(f"初始化 MaterialManager:")
+        logger.info(f"初始化 MaterialService:")
         logger.info(f"  - draft_folder_path: {draft_folder_path}")
         logger.info(f"  - draft_name: {draft_name}")
         logger.info(f"  - project_id: {project_id}")
         
-        manager = MaterialManager(
+        manager = MaterialService(
             draft_folder_path=draft_folder_path,
             draft_name=draft_name,
             project_id=project_id
