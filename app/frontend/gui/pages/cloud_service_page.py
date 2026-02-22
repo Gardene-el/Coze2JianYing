@@ -12,7 +12,6 @@ import uvicorn
 import customtkinter as ctk
 
 from app.frontend.gui.base_page import BasePage
-from app.backend.services.draft_generator import DraftGenerator
 from app.backend.core.ngrok_manager import NgrokManager
 from app.backend.core.settings_manager import get_settings_manager
 
@@ -22,9 +21,6 @@ class CloudServicePage(BasePage):
     def __init__(self, parent):
         self.settings = get_settings_manager()
         
-        # 初始化草稿生成器
-        self.draft_generator = DraftGenerator()
-
         # 服务状态
         self.service_process = None
         self.service_thread = None
