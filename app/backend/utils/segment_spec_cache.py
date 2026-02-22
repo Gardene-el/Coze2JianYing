@@ -5,6 +5,7 @@ from copy import deepcopy
 from typing import Any, Callable, Dict, List, Literal, Optional, TypedDict, Union
 
 import pyJianYingDraft as draft
+from pyJianYingDraft.segment import BaseSegment
 from pyJianYingDraft.metadata import (
     AudioSceneEffectType,
     ToneEffectType,
@@ -211,7 +212,7 @@ def _encode_params(values: List[float], meta_params: List[Any]) -> List[float]:
     return encoded
 
 
-def _serialize_keyframes(segment: draft.BaseSegment) -> List[Dict[str, Any]]:
+def _serialize_keyframes(segment: BaseSegment) -> List[Dict[str, Any]]:
     serialized: List[Dict[str, Any]] = []
     for kf_list in segment.common_keyframes:
         serialized.append(
@@ -226,7 +227,7 @@ def _serialize_keyframes(segment: draft.BaseSegment) -> List[Dict[str, Any]]:
     return serialized
 
 
-def _apply_keyframes(segment: draft.BaseSegment, keyframes: List[Dict[str, Any]]) -> None:
+def _apply_keyframes(segment: BaseSegment, keyframes: List[Dict[str, Any]]) -> None:
     if not keyframes:
         return
 
@@ -261,7 +262,7 @@ def _material_ref_from_segment(segment: Union[draft.AudioSegment, draft.VideoSeg
 
 
 def segment_to_spec(
-    segment: draft.BaseSegment,
+    segment: BaseSegment,
     *,
     track_hint: Optional[str] = None,
     tags: Optional[List[str]] = None,
@@ -496,7 +497,7 @@ def build_segment_from_spec(
     spec: SegmentSpec,
     *,
     material_resolver: Optional[MaterialResolver] = None,
-) -> draft.BaseSegment:
+) -> BaseSegment:
     if spec.get("version") != SPEC_VERSION:
         raise ValueError(f"Unsupported spec version: {spec.get('version')}")
 
@@ -504,7 +505,7 @@ def build_segment_from_spec(
     payload = spec["payload"]
     resolver = material_resolver or _default_material_resolver
 
-    segment: draft.BaseSegment
+    segment: BaseSegment
 
     if kind == "audio":
         material = resolver(payload["material_ref"])
@@ -712,7 +713,7 @@ def clear_segment_spec_cache() -> None:
 
 def cache_segment(
     key: str,
-    segment: draft.BaseSegment,
+    segment: BaseSegment,
     *,
     track_hint: Optional[str] = None,
     tags: Optional[List[str]] = None,
@@ -726,7 +727,7 @@ def build_segment_from_cache(
     key: str,
     *,
     material_resolver: Optional[MaterialResolver] = None,
-) -> Optional[draft.BaseSegment]:
+) -> Optional[BaseSegment]:
     spec = get_segment_spec(key)
     if spec is None:
         return None
