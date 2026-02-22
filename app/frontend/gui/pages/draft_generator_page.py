@@ -5,7 +5,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 
 from app.frontend.gui.base_page import BasePage
-from app.backend.services.draft_generator import DraftGenerator
+from app.backend.DraftGenerator.draft_generator import DraftGenerator
 from app.backend.core.settings_manager import get_settings_manager
 
 class DraftGeneratorPage(BasePage):
