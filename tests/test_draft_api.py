@@ -58,7 +58,10 @@ def test_create_draft_invalid_payload():
 
 def test_draft_status_not_found():
     """查询不存在草稿应返回中间件映射错误码。"""
-    response = client.get("/api/draft/not-exists/status")
+    response = client.get(
+        "/api/draft/not-exists/status",
+        headers={"Accept-Language": "zh"},
+    )
     assert response.status_code == 200
     body = response.json()
     assert body.get("code") == 1001

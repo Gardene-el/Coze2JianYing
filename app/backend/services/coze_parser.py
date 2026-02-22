@@ -8,6 +8,7 @@ Coze 输出解析器
 
 import json
 from typing import Dict, List, Any, Optional
+from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -36,7 +37,7 @@ class CozeOutputParser:
             解析后的草稿数据字典
 
         Raises:
-            ValueError: 如果解析失败
+            CustomException: 如果解析失败
         """
         try:
             # 第一层解析:获取外层JSON
@@ -51,10 +52,12 @@ class CozeOutputParser:
 
         except json.JSONDecodeError as e:
             logger.error(f"JSON解析失败: {e}")
-            raise ValueError(f"无效的JSON格式: {e}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"无效的JSON格式: {e}")
+        except CustomException:
+            raise
         except Exception as e:
             logger.error(f"解析过程出错: {e}")
-            raise ValueError(f"解析失败: {e}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"解析失败: {e}")
 
     def _detect_and_parse_format(self, parsed_json: Dict[str, Any], original_text: str) -> Dict[str, Any]:
         """
@@ -90,11 +93,11 @@ class CozeOutputParser:
     def _parse_coze_output_format(self, outer_json: Dict[str, Any]) -> Dict[str, Any]:
         """解析Coze输出格式"""
         if 'output' not in outer_json:
-            raise ValueError("JSON中缺少'output'字段")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, "JSON中缺少'output'字段")
 
         self.raw_output = outer_json['output']
         if not self.raw_output:
-            raise ValueError("output字段为空")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, "output字段为空")
 
         inner_json = json.loads(self.raw_output)
         logger.info("成功解析Coze输出格式的内层JSON")
@@ -104,14 +107,14 @@ class CozeOutputParser:
         """解析标准剪映草稿格式"""
         # 验证必要字段
         if 'drafts' not in draft_data:
-            raise ValueError("标准草稿格式中缺少'drafts'字段")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, "标准草稿格式中缺少'drafts'字段")
 
         drafts = draft_data['drafts']
         if not isinstance(drafts, list):
-            raise ValueError("'drafts'字段必须是数组")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, "'drafts'字段必须是数组")
 
         if not drafts:
-            raise ValueError("'drafts'数组为空")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, "'drafts'数组为空")
 
         # 标准化格式，确保包含必要的元信息
         result = {
@@ -156,12 +159,15 @@ class CozeOutputParser:
 
         # 如果都不匹配，抛出错误
         available_keys = list(data.keys())
-        raise ValueError(f"无法识别的输入格式。\n"
-                         f"支持的格式:\n"
-                         f"1. Coze输出格式 (包含'output'字段)\n"
-                         f"2. 标准剪映草稿格式 (包含'drafts'数组)\n"
-                         f"3. 单个草稿对象 (包含'tracks'字段)\n"
-                         f"当前输入包含字段: {available_keys}")
+        raise CustomException(
+            CustomError.PARAM_VALIDATION_FAILED,
+            f"无法识别的输入格式。\n"
+            f"支持的格式:\n"
+            f"1. Coze输出格式 (包含'output'字段)\n"
+            f"2. 标准剪映草稿格式 (包含'drafts'数组)\n"
+            f"3. 单个草稿对象 (包含'tracks'字段)\n"
+            f"当前输入包含字段: {available_keys}",
+        )
 
     def parse_from_file(self, file_path: str) -> Dict[str, Any]:
         """
@@ -180,10 +186,12 @@ class CozeOutputParser:
             return self.parse_from_clipboard(content)
         except FileNotFoundError:
             logger.error(f"文件不存在: {file_path}")
-            raise ValueError(f"文件不存在: {file_path}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"文件不存在: {file_path}")
+        except CustomException:
+            raise
         except Exception as e:
             logger.error(f"读取文件失败: {e}")
-            raise ValueError(f"读取文件失败: {e}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"读取文件失败: {e}")
 
     def get_draft_count(self) -> int:
         """获取草稿数量"""

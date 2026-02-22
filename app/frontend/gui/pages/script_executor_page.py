@@ -177,7 +177,7 @@ if str(project_root) not in sys.path:
 
 from app.backend.api.draft_routes import *
 from app.backend.api.segment_routes import *
-from app.backend.schemas.general_schemas import *
+
 
 CustomNamespace = SimpleNamespace
 """

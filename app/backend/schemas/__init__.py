@@ -3,7 +3,7 @@ Pydantic Schemas 模块
 包含所有 API 请求/响应数据模型定义
 """
 
-from app.backend.schemas.general_schemas import *
+from app.backend.schemas.basic import *
 
 __all__ = [
     # Segment schemas
@@ -11,9 +11,16 @@ __all__ = [
     "CreateVideoSegmentRequest",
     "CreateTextSegmentRequest",
     "CreateStickerSegmentRequest",
-    "CreateSegmentResponse",
-    "AddSegmentToDraftRequest",
-    "AddSegmentToDraftResponse",
+    "CreateAudioSegmentResponse",
+    "CreateVideoSegmentResponse",
+    "CreateTextSegmentResponse",
+    "CreateStickerSegmentResponse",
+    "CreateEffectSegmentRequest",
+    "CreateEffectSegmentResponse",
+    "CreateFilterSegmentRequest",
+    "CreateFilterSegmentResponse",
+    "AddSegmentRequest",
+    "AddSegmentResponse",
     "CreateDraftRequest",
     "CreateDraftResponse",
     "AddTrackRequest",

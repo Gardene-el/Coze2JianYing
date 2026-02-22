@@ -11,10 +11,11 @@ from pathlib import Path
 from typing import Union, Optional, Dict, Any
 from urllib.parse import urlparse, unquote
 import pyJianYingDraft as draft
+from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.logger import get_logger
 
 
-class MaterialManager:
+class MaterialService:
     """
     素材下载和管理器
 
@@ -211,13 +212,13 @@ class MaterialManager:
                 content_start = f.read(200).lower()
                 if '<html' in content_start or '<!doctype html' in content_start:
                     self.logger.error(f"检测到HTML内容，可能下载了错误页面: {file_path.name}")
-                    raise ValueError(f"下载的文件是HTML页面而不是媒体文件: {file_path.name}")
+                    raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"下载的文件是HTML页面而不是媒体文件: {file_path.name}")
         except UnicodeDecodeError:
             pass
-        except ValueError as ve:
+        except CustomException as ve:
             if "HTML页面" in str(ve):
                 raise
-            self.logger.debug(f"HTML内容检查出现ValueError: {ve}")
+            self.logger.debug(f"HTML内容检查出现CustomException: {ve}")
         except Exception as e:
             self.logger.debug(f"HTML内容检查出现异常（可能是正常的二进制文件）: {e}")
 
@@ -355,7 +356,7 @@ class MaterialManager:
                         time.sleep(2)
                         continue
                     else:
-                        raise ValueError("下载的文件过小，可能是错误内容")
+                        raise CustomException(CustomError.PARAM_VALIDATION_FAILED, "下载的文件过小，可能是错误内容")
 
                 # 检查实际文件内容并修正扩展名（如果需要）
                 correct_filename = self._fix_filename_by_content(temp_path, filename)
@@ -445,7 +446,7 @@ class MaterialManager:
             material = draft.VideoMaterial(str(file_path))
             self.logger.info(f"✅ 创建VideoMaterial (图片): {file_path.name}")
         else:
-            raise ValueError(f"不支持的素材类型: {material_type}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"不支持的素材类型: {material_type}")
 
         if source_url:
             self.material_cache[source_url] = material
@@ -461,7 +462,7 @@ class MaterialManager:
         """创建视频素材（快捷方法）"""
         material = self.create_material(url, filename, force_download)
         if not isinstance(material, draft.VideoMaterial):
-            raise ValueError(f"URL指向的不是视频素材: {url}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"URL指向的不是视频素材: {url}")
         return material
 
     def create_audio_material(
@@ -473,7 +474,7 @@ class MaterialManager:
         """创建音频素材（快捷方法）"""
         material = self.create_material(url, filename, force_download)
         if not isinstance(material, draft.AudioMaterial):
-            raise ValueError(f"URL指向的不是音频素材: {url}")
+            raise CustomException(CustomError.PARAM_VALIDATION_FAILED, f"URL指向的不是音频素材: {url}")
         return material
 
     def batch_create_materials(
@@ -536,11 +537,11 @@ class MaterialManager:
 
 # ========== 便捷函数 ==========
 
-def create_material_manager(
+def create_material_service(
     draft_folder: draft.DraftFolder,
     draft_name: str,
     project_id: Optional[str] = None
-) -> MaterialManager:
+) -> MaterialService:
     """
     便捷函数：从DraftFolder对象创建MaterialManager
 
@@ -550,6 +551,7 @@ def create_material_manager(
         project_id: 项目ID (可选，用于素材文件夹命名)
 
     Returns:
-        MaterialManager 实例
+        MaterialService 实例
     """
-    return MaterialManager(draft_folder.folder_path, draft_name, project_id)
+    return MaterialService(draft_folder.folder_path, draft_name, project_id)
+

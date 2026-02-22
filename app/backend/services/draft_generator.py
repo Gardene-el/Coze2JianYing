@@ -3,7 +3,7 @@
 
 归属：services/ — 业务逻辑编排层（门面服务），
 从 Coze 输出完整转换到剪映草稿，
-组合 coze_parser + converter + material_manager + pyJianYingDraft。
+组合 coze_parser + converter + material + pyJianYingDraft。
 """
 from pathlib import Path
 from typing import Optional, Dict, List, Any
@@ -11,7 +11,7 @@ import os
 from app.backend.utils.logger import get_logger
 from app.backend.services.coze_parser import CozeOutputParser
 from app.backend.services.converter import DraftInterfaceConverter
-from app.backend.services.material_manager import MaterialManager, create_material_manager
+from app.backend.services.material import MaterialService, create_material_service
 from app.backend.core.settings_manager import get_settings_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile
@@ -41,7 +41,7 @@ class DraftGenerator:
             self.logger.info(f"使用指定输出目录: {output_base_dir}")
 
         self.parser = CozeOutputParser()
-        self.material_managers: Dict[str, MaterialManager] = {}
+        self.material_managers: Dict[str, MaterialService] = {}
 
         # 确保输出目录存在
         os.makedirs(self.output_base_dir, exist_ok=True)
@@ -215,14 +215,14 @@ class DraftGenerator:
         # 草稿实际路径
         draft_folder = os.path.join(self.output_base_dir, draft_folder_name)
 
-        # 3. 初始化MaterialManager
-        self.logger.info("初始化MaterialManager...")
-        material_manager = create_material_manager(
+        # 3. 初始化MaterialService
+        self.logger.info("初始化MaterialService...")
+        material_service = create_material_service(
             draft_folder=draft_folder_obj,
             draft_name=draft_folder_name,
             project_id=draft_id
         )
-        self.material_managers[draft_id] = material_manager
+        self.material_managers[draft_id] = material_service
 
         # 4. 初始化Converter
         converter = DraftInterfaceConverter()
@@ -249,7 +249,7 @@ class DraftGenerator:
                         track_type=track_type,
                         track_name=track_name,
                         converter=converter,
-                        material_manager=material_manager,
+                        material_service=material_service,
                         script=script,
                         seg_idx=seg_idx
                     )
@@ -261,9 +261,9 @@ class DraftGenerator:
         script.save()
 
         # 8. 打印素材统计
-        downloaded_materials = material_manager.list_downloaded_materials()
+        downloaded_materials = material_service.list_downloaded_materials()
         self.logger.info(f"下载素材数量: {len(downloaded_materials)}")
-        self.logger.info(f"素材文件夹大小: {material_manager.get_assets_folder_size():.2f} MB")
+        self.logger.info(f"素材文件夹大小: {material_service.get_assets_folder_size():.2f} MB")
 
         return draft_folder
 
@@ -310,7 +310,7 @@ class DraftGenerator:
         track_type: str,
         track_name: str,
         converter: DraftInterfaceConverter,
-        material_manager: MaterialManager,
+        material_service: MaterialService,
         script: ScriptFile,
         seg_idx: int
     ):
@@ -322,7 +322,7 @@ class DraftGenerator:
             track_type: 轨道类型
             track_name: 轨道名称
             converter: 转换器实例
-            material_manager: 素材管理器实例
+            material_service: 素材管理器实例
             script: Script对象
             seg_idx: 片段索引(用于日志)
         """
@@ -335,7 +335,7 @@ class DraftGenerator:
         if material_url:
             try:
                 self.logger.info(f"    下载素材 {seg_idx}...")
-                material = material_manager.create_material(material_url)
+                material = material_service.create_material(material_url)
                 segment['_material_object'] = material
 
                 # 对于图片类型，额外保存本地文件路径到 material_path

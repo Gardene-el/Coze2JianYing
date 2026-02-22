@@ -3,7 +3,6 @@ FastAPI 服务主入口
 独立于 GUI，专门用于运行 API 服务
 """
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime
@@ -12,6 +11,7 @@ import os
 
 from app.backend.api.router import api_router
 from app.backend.core.settings_manager import get_settings_manager
+from app.backend.middlewares.response import ResponseMiddleware
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -31,18 +31,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# 全局异常处理
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "message": "Internal server error",
-            "detail": str(exc),
-            "timestamp": datetime.now().isoformat()
-        }
-    )
+# 统一响应中间件（统一 HTTP 200 + 成功/失败契约 + 异常兜底）
+app.add_middleware(ResponseMiddleware)
 
 
 # 根路径
@@ -124,3 +114,4 @@ if __name__ == "__main__":
 
     print(f"启动服务: http://{args.host}:{args.port}")
     start_api_server(host=args.host, port=args.port)
+
