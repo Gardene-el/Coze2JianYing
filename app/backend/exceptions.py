@@ -8,6 +8,8 @@ class CustomError(Enum):
 
     DRAFT_NOT_FOUND = (1001, "草稿不存在", "Draft not found")
     DRAFT_ALREADY_EXISTS = (1002, "草稿已存在", "Draft already exists")
+    INVALID_DRAFT_URL = (1003, "无效的草稿URL", "Invalid draft URL")
+    DRAFT_CREATE_FAILED = (1004, "草稿创建失败", "Draft creation failed")
     SEGMENT_NOT_FOUND = (1101, "片段不存在", "Segment not found")
     TRACK_NOT_FOUND = (1201, "轨道不存在", "Track not found")
     TRACK_TYPE_MISMATCH = (1202, "轨道类型不匹配", "Track type mismatch")

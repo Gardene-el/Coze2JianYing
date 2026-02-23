@@ -25,3 +25,4 @@ def update_segment_cache(key: str, value: BaseSegment) -> None:
     elif len(SEGMENT_CACHE) >= MAX_CACHE_SIZE:
         SEGMENT_CACHE.popitem(last=False)
     SEGMENT_CACHE[key] = value
+
