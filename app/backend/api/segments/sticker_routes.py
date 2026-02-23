@@ -9,10 +9,9 @@ from app.backend.schemas.basic import (
 from app.backend.store.session_store import SessionStore
 from app.backend.dependencies import get_session
 from app.backend.services.segments import sticker_segment
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 router = APIRouter(prefix="/api/segment/sticker", tags=["StickerSegment"])
-logger = get_logger(__name__)
 
 @router.post("/create", response_model=CreateStickerSegmentResponse, status_code=status.HTTP_200_OK,
     summary="创建贴纸片段", description="对应 StickerSegment.__init__")

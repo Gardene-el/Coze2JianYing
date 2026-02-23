@@ -19,10 +19,9 @@ from app.backend.store.session_store import SessionStore
 from app.backend.dependencies import get_session, get_settings
 from app.backend.core.settings_manager import SettingsManager
 from app.backend.services.segments import video_segment
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 router = APIRouter(prefix="/api/segment/video", tags=["VideoSegment"])
-logger = get_logger(__name__)
 
 
 @router.post("/create", response_model=CreateVideoSegmentResponse, status_code=status.HTTP_200_OK,

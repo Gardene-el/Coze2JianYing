@@ -11,9 +11,7 @@ from app.backend.exceptions import CustomError, CustomException
 from app.backend.store.session_store import SessionStore
 from app.backend.services.segments._base import download_material
 from app.backend.adapters import jianying_adapter as conv
-from app.backend.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from app.backend.utils.logger import logger
 
 
 # ---------------------------------------------------------------------------

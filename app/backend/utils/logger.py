@@ -4,9 +4,11 @@
 """
 import logging
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+
+logger = logging.getLogger(__name__)
 
 
 class LogHandler:
@@ -55,11 +57,11 @@ def setup_logger(log_file: Optional[Path] = None, level=logging.INFO):
         level: 日志级别
     """
     # 创建根日志记录器
-    logger = logging.getLogger()
-    logger.setLevel(level)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
     
     # 清除现有的处理器
-    logger.handlers.clear()
+    root_logger.handlers.clear()
     
     # 创建格式化器
     formatter = logging.Formatter(
@@ -71,7 +73,7 @@ def setup_logger(log_file: Optional[Path] = None, level=logging.INFO):
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(level)
     console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
+    root_logger.addHandler(console_handler)
     
     # 文件处理器
     if log_file:
@@ -82,15 +84,15 @@ def setup_logger(log_file: Optional[Path] = None, level=logging.INFO):
         )
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        root_logger.addHandler(file_handler)
     
     # GUI处理器
     gui_handler = GUIHandler()
     gui_handler.setLevel(level)
     gui_handler.setFormatter(formatter)
-    logger.addHandler(gui_handler)
+    root_logger.addHandler(gui_handler)
     
-    return logger
+    return root_logger
 
 
 def get_logger(name: str) -> logging.Logger:

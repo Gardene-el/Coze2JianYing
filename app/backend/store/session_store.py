@@ -23,9 +23,7 @@ import threading
 from typing import Any, Dict, Optional
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from app.backend.utils.logger import logger
 
 
 # ---------------------------------------------------------------------------

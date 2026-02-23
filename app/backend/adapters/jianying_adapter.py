@@ -37,9 +37,7 @@ from pyJianYingDraft import (
 from pyJianYingDraft.keyframe import KeyframeProperty
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from app.backend.utils.logger import logger
 
 
 # ---------------------------------------------------------------------------

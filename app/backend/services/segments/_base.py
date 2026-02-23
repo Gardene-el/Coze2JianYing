@@ -6,9 +6,7 @@ segments/_base.py — 片段模块共用的下载工具函数。
 import os
 from typing import Optional
 
-from app.backend.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from app.backend.utils.logger import logger
 
 
 def download_material(url: str, assets_dir: str) -> str:

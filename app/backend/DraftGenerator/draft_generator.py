@@ -6,7 +6,7 @@
 from pathlib import Path
 from typing import Optional, Dict, List, Any
 import os
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 from .coze_parser import CozeOutputParser
 from .converter import DraftInterfaceConverter
 from .material_manager import MaterialManager, create_material_manager
@@ -26,7 +26,7 @@ class DraftGenerator:
             output_base_dir: 输出根目录(存放所有草稿项目)。
                            如果为None，则使用全局设置管理器的配置
         """
-        self.logger = get_logger(__name__)
+        self.logger = logger
         self.logger.info("初始化草稿生成器")
         
         # 如果未指定输出目录，使用全局设置管理器的配置

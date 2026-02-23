@@ -12,10 +12,9 @@ from app.backend.schemas.basic import (
 from app.backend.store.session_store import SessionStore
 from app.backend.dependencies import get_session
 from app.backend.services.segments import text_segment
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 router = APIRouter(prefix="/api/segment/text", tags=["TextSegment"])
-logger = get_logger(__name__)
 
 @router.post("/create", response_model=CreateTextSegmentResponse, status_code=status.HTTP_200_OK,
     summary="创建文本片段", description="对应 TextSegment.__init__")

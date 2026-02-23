@@ -19,9 +19,7 @@ import pyJianYingDraft as draft
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.store.session_store import SessionStore
 from app.backend.utils.cache import DRAFT_CACHE, update_draft_cache
-from app.backend.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from app.backend.utils.logger import logger
 
 
 # ---------------------------------------------------------------------------

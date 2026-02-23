@@ -20,7 +20,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from app.backend.services.material import MaterialService
-from app.backend.utils.logger import setup_logger, get_logger
+from app.backend.utils.logger import setup_logger, logger
 
 def main():
     """主测试函数"""
@@ -29,7 +29,6 @@ def main():
     log_dir.mkdir(exist_ok=True)  # 确保日志目录存在
     log_file = log_dir / "test_download.log"
     setup_logger(log_file)
-    logger = get_logger(__name__)
     
     logger.info("=" * 80)
     logger.info("开始测试 GitHub Pages 资源下载")

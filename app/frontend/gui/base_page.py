@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 class BasePage(ctk.CTkFrame):
     """页面基类"""
@@ -7,7 +7,7 @@ class BasePage(ctk.CTkFrame):
     def __init__(self, parent, page_name: str):
         super().__init__(parent)
         self.page_name = page_name
-        self.logger = get_logger(f"{__name__}.{page_name}")
+        self.logger = logger.getChild(page_name)
         
         # 页面特定的变量字典
         self._page_variables = {}

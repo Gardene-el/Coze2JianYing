@@ -9,14 +9,14 @@ from pyJianYingDraft import (
 )
 
 from typing import Dict, Any, Optional
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 
 class DraftInterfaceConverter:
     """Draft Generator Interface 到 pyJianYingDraft 的转换器"""
     
     def __init__(self):
-        self.logger = get_logger(__name__)
+        self.logger = logger
     
     # ========== 基础转换函数 ==========
     

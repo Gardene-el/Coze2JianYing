@@ -4,10 +4,9 @@ from app.backend.schemas.basic import CreateFilterSegmentRequest, CreateFilterSe
 from app.backend.store.session_store import SessionStore
 from app.backend.dependencies import get_session
 from app.backend.services.segments import filter_segment
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 router = APIRouter(prefix="/api/segment/filter", tags=["FilterSegment"])
-logger = get_logger(__name__)
 
 @router.post("/create", response_model=CreateFilterSegmentResponse, status_code=status.HTTP_200_OK,
     summary="创建滤镜片段", description="对应 FilterSegment.__init__")

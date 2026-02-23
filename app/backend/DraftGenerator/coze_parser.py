@@ -5,9 +5,7 @@ Coze输出解析器
 
 import json
 from typing import Dict, List, Any, Optional
-from app.backend.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from app.backend.utils.logger import logger
 
 
 class CozeOutputParser:

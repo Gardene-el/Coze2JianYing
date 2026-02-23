@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.frontend.gui.main_window import MainWindow
-from app.backend.utils.logger import setup_logger, get_logger
+from app.backend.utils.logger import setup_logger, logger
 
 
 def main():
@@ -20,7 +20,6 @@ def main():
     
     # 设置日志系统
     setup_logger(log_dir / "app.log")
-    logger = get_logger(__name__)
     
     logger.info("=" * 60)
     logger.info("应用程序启动")

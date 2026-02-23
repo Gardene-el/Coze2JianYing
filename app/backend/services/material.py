@@ -12,7 +12,7 @@ from typing import Union, Optional, Dict, Any
 from urllib.parse import urlparse, unquote
 import pyJianYingDraft as draft
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 
 class MaterialService:
@@ -41,7 +41,7 @@ class MaterialService:
         最终Assets路径: {draft_folder_path}/CozeJianYingAssistantAssets/{project_id}/
         如果未提供project_id，则使用旧路径: {draft_folder_path}/{draft_name}/Assets/
         """
-        self.logger = get_logger(__name__)
+        self.logger = logger
 
         # 草稿路径
         self.draft_folder_path = Path(draft_folder_path)

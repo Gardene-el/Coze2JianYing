@@ -14,10 +14,9 @@ from app.backend.store.session_store import SessionStore
 from app.backend.dependencies import get_session, get_settings
 from app.backend.core.settings_manager import SettingsManager
 from app.backend.services.segments import audio_segment
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 router = APIRouter(prefix="/api/segment/audio", tags=["AudioSegment"])
-logger = get_logger(__name__)
 
 
 @router.post("/create", response_model=CreateAudioSegmentResponse, status_code=status.HTTP_200_OK,

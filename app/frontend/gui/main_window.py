@@ -13,7 +13,7 @@ from app.frontend.gui.pages.cloud_service_page import CloudServicePage
 from app.frontend.gui.pages.script_executor_page import ScriptExecutorPage
 from app.frontend.gui.pages.settings_page import SettingsPage
 from app.frontend.gui.log_window import LogWindow
-from app.backend.utils.logger import get_logger, set_gui_log_callback
+from app.backend.utils.logger import logger, set_gui_log_callback
 from app.backend.core.settings_manager import get_settings_manager
 
 class MainWindow(ctk.CTk):
@@ -22,7 +22,7 @@ class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.logger = get_logger(__name__)
+        self.logger = logger
         self.settings = get_settings_manager()
         
         # 配置窗口

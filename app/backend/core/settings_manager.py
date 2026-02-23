@@ -8,7 +8,7 @@ import json
 import os
 from typing import Any, Dict, Optional
 from app.backend.config import get_config
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 
 class SettingsManager:
@@ -32,7 +32,7 @@ class SettingsManager:
         if self._initialized:
             return
 
-        self.logger = get_logger(__name__)
+        self.logger = logger
         self.config = get_config()
         self.settings_file = os.path.join(self.config.data_root, "settings.json")
         self._settings = self._load_settings()

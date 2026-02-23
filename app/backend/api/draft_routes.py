@@ -20,10 +20,9 @@ from app.backend.dependencies import get_draft_service, get_settings, get_sessio
 from app.backend.store.session_store import SessionStore
 from app.backend.services.draft import DraftService
 from app.backend.core.settings_manager import SettingsManager
-from app.backend.utils.logger import get_logger
+from app.backend.utils.logger import logger
 
 router = APIRouter(prefix="/api/draft", tags=["草稿操作"])
-logger = get_logger(__name__)
 
 
 @router.post(
