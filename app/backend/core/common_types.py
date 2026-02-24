@@ -1,8 +1,20 @@
 """通用数据模型 (Pydantic Common Types)。"""
 
-from typing import List
+from typing import Any, List, Tuple, Type, TypeVar
 
+import pyJianYingDraft as draft
 from pydantic import BaseModel, Field
+
+ModelT = TypeVar("ModelT", bound=BaseModel)
+
+
+def parse_common_model(model_cls: Type[ModelT], value: Any) -> ModelT:
+    """兼容 Pydantic v1/v2 的通用模型解析。"""
+    if isinstance(value, model_cls):
+        return value
+    if hasattr(model_cls, "model_validate"):
+        return model_cls.model_validate(value)
+    return model_cls.parse_obj(value)
 
 
 class TimeRange(BaseModel):
@@ -106,4 +118,86 @@ class CropSettings(BaseModel):
     )
     lower_right_y: float = Field(
         1.0, description="右下角 Y 坐标 (0.0-1.0)", ge=0.0, le=1.0
+    )
+
+
+def to_draft_timerange(timerange: TimeRange) -> draft.Timerange:
+    return draft.Timerange(timerange.start, timerange.duration)
+
+
+def to_draft_clip_settings(clip_settings: ClipSettings) -> draft.ClipSettings:
+    return draft.ClipSettings(
+        alpha=clip_settings.alpha,
+        rotation=clip_settings.rotation,
+        scale_x=clip_settings.scale_x,
+        scale_y=clip_settings.scale_y,
+        transform_x=clip_settings.transform_x,
+        transform_y=clip_settings.transform_y,
+    )
+
+
+def to_draft_crop_settings(crop_settings: CropSettings) -> draft.CropSettings:
+    return draft.CropSettings(
+        upper_left_x=crop_settings.upper_left_x,
+        upper_left_y=crop_settings.upper_left_y,
+        upper_right_x=crop_settings.upper_right_x,
+        upper_right_y=crop_settings.upper_right_y,
+        lower_left_x=crop_settings.lower_left_x,
+        lower_left_y=crop_settings.lower_left_y,
+        lower_right_x=crop_settings.lower_right_x,
+        lower_right_y=crop_settings.lower_right_y,
+    )
+
+
+def _to_rgb(color: Any, default: Tuple[float, float, float]) -> Tuple[float, float, float]:
+    if not isinstance(color, (list, tuple)) or len(color) < 3:
+        return default
+    return float(color[0]), float(color[1]), float(color[2])
+
+
+def to_draft_text_style(text_style: TextStyle) -> draft.TextStyle:
+    return draft.TextStyle(
+        size=text_style.font_size,
+        bold=text_style.bold,
+        italic=text_style.italic,
+        underline=text_style.underline,
+        color=_to_rgb(text_style.color, (1.0, 1.0, 1.0)),
+        alpha=text_style.alpha,
+        align=text_style.align,
+        vertical=text_style.vertical,
+        letter_spacing=text_style.letter_spacing,
+        line_spacing=text_style.line_spacing,
+        auto_wrapping=text_style.auto_wrapping,
+        max_line_width=text_style.max_line_width,
+    )
+
+
+def to_draft_text_border(text_border: TextBorder) -> draft.TextBorder:
+    return draft.TextBorder(
+        color=_to_rgb(text_border.color, (0.0, 0.0, 0.0)),
+        alpha=text_border.alpha,
+        width=text_border.width,
+    )
+
+
+def to_draft_text_shadow(text_shadow: TextShadow) -> draft.TextShadow:
+    return draft.TextShadow(
+        color=_to_rgb(text_shadow.color, (0.0, 0.0, 0.0)),
+        alpha=text_shadow.alpha,
+        diffuse=text_shadow.diffuse,
+        distance=text_shadow.distance,
+        angle=text_shadow.angle,
+    )
+
+
+def to_draft_text_background(text_background: TextBackground) -> draft.TextBackground:
+    return draft.TextBackground(
+        color=text_background.color,
+        style=text_background.style,
+        alpha=text_background.alpha,
+        round_radius=text_background.round_radius,
+        height=text_background.height,
+        width=text_background.width,
+        horizontal_offset=text_background.horizontal_offset,
+        vertical_offset=text_background.vertical_offset,
     )
