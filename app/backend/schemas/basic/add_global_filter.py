@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
-from app.backend.schemas.common_types import TimeRange
+from app.backend.core.common_types import TimeRange
 
 class AddGlobalFilterRequest(BaseModel):
     """添加全局滤镜请求"""

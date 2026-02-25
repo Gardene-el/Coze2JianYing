@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
-from app.backend.schemas.common_types import ClipSettings, TimeRange
+from app.backend.core.common_types import ClipSettings, TimeRange
 
 class CreateStickerSegmentRequest(BaseModel):
     """创建贴纸片段请求"""

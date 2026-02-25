@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
-from app.backend.schemas.common_types import ClipSettings, CropSettings, TimeRange
+from app.backend.core.common_types import ClipSettings, CropSettings, TimeRange
 
 class CreateVideoSegmentRequest(BaseModel):
     """创建视频片段请求"""

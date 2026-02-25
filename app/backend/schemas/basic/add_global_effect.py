@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
-from app.backend.schemas.common_types import TimeRange
+from app.backend.core.common_types import TimeRange
 
 class AddGlobalEffectRequest(BaseModel):
     """添加全局特效请求"""
