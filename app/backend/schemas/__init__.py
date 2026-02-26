@@ -15,10 +15,7 @@ __all__ = [
     "CreateVideoSegmentResponse",
     "CreateTextSegmentResponse",
     "CreateStickerSegmentResponse",
-    "CreateEffectSegmentRequest",
-    "CreateEffectSegmentResponse",
-    "CreateFilterSegmentRequest",
-    "CreateFilterSegmentResponse",
+
     "AddSegmentRequest",
     "AddSegmentResponse",
     "CreateDraftRequest",
@@ -26,8 +23,7 @@ __all__ = [
     "AddTrackRequest",
     "AddTrackResponse",
     "SaveDraftResponse",
-    "DraftStatusResponse",
-    "SegmentDetailResponse",
+
     # Audio segment operation schemas
     "AddAudioEffectRequest",
     "AddAudioEffectResponse",

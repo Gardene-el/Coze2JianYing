@@ -5,7 +5,7 @@ class AddSegmentRequest(BaseModel):
     """添加片段到草稿请求"""
 
     segment_id: str = Field(..., description="Segment UUID")
-    track_index: Optional[int] = Field(
+    track_name: Optional[str] = Field(
         None, description="目标轨道索引，None 则自动选择"
     )
 

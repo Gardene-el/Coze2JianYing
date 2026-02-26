@@ -18,4 +18,4 @@ class AddTrackRequest(BaseModel):
 class AddTrackResponse(BaseModel):
     """添加轨道响应"""
 
-    track_index: int = Field(..., description="轨道索引")
+pass
