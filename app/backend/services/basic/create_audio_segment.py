@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Optional
 
 import pyJianYingDraft as draft
@@ -7,8 +8,8 @@ import pyJianYingDraft as draft
 from app.backend.core.common_types import TimeRange, to_draft_timerange
 from app.backend.core.settings_manager import get_settings_manager
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.services.material import MaterialService
 from app.backend.utils.cache import update_segment_cache
+from app.backend.utils.download import download
 from app.backend.utils.helper import gen_unique_id
 from app.backend.utils.logger import logger
 
@@ -29,12 +30,11 @@ def create_audio_segment(
 		settings = get_settings_manager()
 		settings.reload()
 		output_dir = settings.get_effective_output_path()
-
-		material_service = MaterialService(output_dir, draft_name=segment_id, project_id=segment_id)
-		audio_material = material_service.create_audio_material(material_url)
+		draft_audio_dir = create_audio_directory(output_dir, segment_id)
+		audio_path = download_audio_file(material_url, draft_audio_dir)
 
 		segment = draft.AudioSegment(
-			material=audio_material,
+			material=audio_path,
 			target_timerange=to_draft_timerange(target_timerange),
 			source_timerange=to_draft_timerange(source_timerange) if source_timerange is not None else None,
 			speed=speed,
@@ -49,4 +49,18 @@ def create_audio_segment(
 	update_segment_cache(segment_id, segment)
 	logger.info("create audio segment success: %s", segment_id)
 	return segment_id
+
+
+def create_audio_directory(output_dir: str, segment_id: str) -> str:
+	"""创建音频资源目录。"""
+	draft_audio_dir = os.path.join(output_dir, "CozeJianYingAssistantAssets", segment_id)
+	os.makedirs(name=draft_audio_dir, exist_ok=True)
+	return draft_audio_dir
+
+
+def download_audio_file(material_url: str, draft_audio_dir: str) -> str:
+	"""下载音频文件并返回本地路径。"""
+	audio_path = download(url=material_url, save_dir=draft_audio_dir)
+	logger.info("Downloaded audio from %s to %s", material_url, audio_path)
+	return audio_path
 
