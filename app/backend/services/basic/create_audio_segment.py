@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 import pyJianYingDraft as draft
 
@@ -15,8 +15,8 @@ from app.backend.utils.logger import logger
 
 def create_audio_segment(
 	material_url: str,
-	target_timerange: Any,
-	source_timerange: Optional[Any] = None,
+	target_timerange: TimeRange,
+	source_timerange: Optional[TimeRange] = None,
 	speed: float = 1.0,
 	volume: float = 1.0,
 	change_pitch: bool = False,

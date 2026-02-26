@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 import pyJianYingDraft as draft
 
@@ -11,7 +11,7 @@ from app.backend.utils.helper import gen_unique_id
 from app.backend.utils.logger import logger
 
 
-def _parse_effect_type(effect_type: str) -> Any:
+def _parse_effect_type(effect_type: str) -> draft.VideoSceneEffectType | draft.VideoCharacterEffectType:
 	name = str(effect_type or "").strip()
 	if not name:
 		raise ValueError("effect_type 不能为空")
@@ -26,8 +26,8 @@ def _parse_effect_type(effect_type: str) -> Any:
 
 def create_effect_segment(
 	effect_type: str,
-	target_timerange: Any,
-	params: Optional[list[float]] = None,
+	target_timerange: TimeRange,
+	params: Optional[list[float | None]] = None,
 ) -> str:
 	"""创建全局特效片段并写入缓存。"""
 	segment_id = gen_unique_id()

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import pyJianYingDraft as draft
 
 from app.backend.core.common_types import TimeRange, parse_common_model, to_draft_timerange
@@ -22,7 +20,7 @@ def _parse_filter_type(filter_type: str) -> draft.FilterType:
 
 def create_filter_segment(
 	filter_type: str,
-	target_timerange: Any,
+	target_timerange: TimeRange,
 	intensity: float = 100.0,
 ) -> str:
 	"""创建全局滤镜片段并写入缓存。"""

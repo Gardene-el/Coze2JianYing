@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 import pyJianYingDraft as draft
 
@@ -13,8 +13,8 @@ from app.backend.utils.logger import logger
 
 def create_sticker_segment(
 	material_url: str,
-	target_timerange: Any,
-	clip_settings: Optional[Any] = None,
+	target_timerange: TimeRange,
+	clip_settings: Optional[ClipSettings] = None,
 ) -> str:
 	"""创建贴纸片段并写入缓存。"""
 	segment_id = gen_unique_id()

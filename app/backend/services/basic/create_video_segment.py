@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 import pyJianYingDraft as draft
 
@@ -23,13 +23,13 @@ from app.backend.utils.logger import logger
 
 def create_video_segment(
 	material_url: str,
-	target_timerange: Any,
-	source_timerange: Optional[Any] = None,
+	target_timerange: TimeRange,
+	source_timerange: Optional[TimeRange] = None,
 	speed: float = 1.0,
 	volume: float = 1.0,
 	change_pitch: bool = False,
-	clip_settings: Optional[Any] = None,
-	crop_settings: Optional[Any] = None,
+	clip_settings: Optional[ClipSettings] = None,
+	crop_settings: Optional[CropSettings] = None,
 ) -> str:
 	"""创建视频片段并写入缓存。"""
 	segment_id = gen_unique_id()

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Optional
 
 import pyJianYingDraft as draft
 
@@ -27,13 +27,13 @@ from app.backend.utils.logger import logger
 
 def create_text_segment(
 	text_content: str,
-	target_timerange: Any,
+	target_timerange: TimeRange,
 	font_family: Optional[str] = "文轩体",
-	text_style: Optional[Any] = None,
-	text_border: Optional[Any] = None,
-	text_shadow: Optional[Any] = None,
-	text_background: Optional[Any] = None,
-	clip_settings: Optional[Any] = None,
+	text_style: Optional[TextStyle] = None,
+	text_border: Optional[TextBorder] = None,
+	text_shadow: Optional[TextShadow] = None,
+	text_background: Optional[TextBackground] = None,
+	clip_settings: Optional[ClipSettings] = None,
 ) -> str:
 	"""创建文本片段并写入缓存。"""
 	segment_id = gen_unique_id()

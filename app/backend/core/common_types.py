@@ -9,12 +9,10 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 def parse_common_model(model_cls: Type[ModelT], value: Any) -> ModelT:
-    """兼容 Pydantic v1/v2 的通用模型解析。"""
+    """Pydantic v2 的通用模型解析。"""
     if isinstance(value, model_cls):
         return value
-    if hasattr(model_cls, "model_validate"):
-        return model_cls.model_validate(value)
-    return model_cls.parse_obj(value)
+    return model_cls.model_validate(value)
 
 
 class TimeRange(BaseModel):
