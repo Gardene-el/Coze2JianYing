@@ -5,7 +5,7 @@ import pyJianYingDraft as draft
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
-from app.backend.utils.cache import get_segment_cache, update_segment_cache
+from app.backend.utils.cache import require_segment, update_segment_cache
 
 
 def add_video_background_filling(
@@ -19,12 +19,7 @@ def add_video_background_filling(
 	if not segment_id:
 		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
 
-	raw_segment = get_segment_cache(segment_id)
-	if raw_segment is None:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-	if not isinstance(raw_segment, draft.VideoSegment):
-		raise CustomException(CustomError.INVALID_SEGMENT_TYPE, f"expect VideoSegment, got {type(raw_segment).__name__}")
-	segment = raw_segment
+	segment = require_segment(segment_id, draft.VideoSegment)
 
 	logger.info("segment_id: %s, add video background filling: %s", segment_id, fill_type)
 

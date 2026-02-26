@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional, cast
+from typing import Optional
 
 import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.cache import DRAFT_CACHE, SEGMENT_CACHE, get_segment_cache, update_draft_cache
+from app.backend.utils.cache import DRAFT_CACHE, SEGMENT_CACHE, require_segment, update_draft_cache
 from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 
@@ -19,18 +19,15 @@ def add_segment(draft_url: str, segment_url: str, track_name: Optional[str] = No
 	segment_id = get_url_param(segment_url, "segment_id")
 	if not segment_id:
 		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-	segment = get_segment_cache(segment_id)
-	if segment is None:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
+	segment = require_segment(
+		segment_id,
+		(draft.VideoSegment, draft.StickerSegment, draft.AudioSegment, draft.TextSegment),
+	)
 
 	logger.info("draft_id: %s, add segment: %s", draft_id, segment_id)
 
 	try:
-		typed_segment = cast(
-			draft.VideoSegment | draft.StickerSegment | draft.AudioSegment | draft.TextSegment,
-			segment,
-		)
-		script.add_segment(typed_segment, track_name)
+		script.add_segment(segment, track_name)
 	except CustomException:
 		raise
 	except Exception as e:

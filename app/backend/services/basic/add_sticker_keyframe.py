@@ -5,7 +5,7 @@ import pyJianYingDraft as draft
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
-from app.backend.utils.cache import get_segment_cache, update_segment_cache
+from app.backend.utils.cache import require_segment, update_segment_cache
 
 
 def _parse_keyframe_property(prop: str) -> draft.KeyframeProperty:
@@ -23,12 +23,7 @@ def add_sticker_keyframe(segment_url: str, time_offset: int, value: float, prope
 	if not segment_id:
 		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
 
-	raw_segment = get_segment_cache(segment_id)
-	if raw_segment is None:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-	if not isinstance(raw_segment, draft.StickerSegment):
-		raise CustomException(CustomError.INVALID_SEGMENT_TYPE, f"expect StickerSegment, got {type(raw_segment).__name__}")
-	segment = raw_segment
+	segment = require_segment(segment_id, draft.StickerSegment)
 
 	logger.info("segment_id: %s, add sticker keyframe", segment_id)
 

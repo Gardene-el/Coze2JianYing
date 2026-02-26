@@ -4,6 +4,8 @@ from typing import Optional, Type, TypeVar, overload
 import pyJianYingDraft as draft
 from pyJianYingDraft.segment import BaseSegment
 
+from app.backend.exceptions import CustomError, CustomException
+
 # 全局缓存：draft_id → ScriptFile（OrderedDict 末尾为最近使用）
 DRAFT_CACHE: OrderedDict[str, draft.ScriptFile] = OrderedDict()
 SEGMENT_CACHE: OrderedDict[str, BaseSegment] = OrderedDict()
@@ -41,9 +43,14 @@ def get_segment_cache(key: str, segment_type: Type[SegT]) -> Optional[SegT]:
     ...
 
 
+@overload
+def get_segment_cache(key: str, segment_type: tuple[Type[SegT], ...]) -> Optional[SegT]:
+    ...
+
+
 def get_segment_cache(
     key: str,
-    segment_type: Optional[Type[SegT]] = None,
+    segment_type: Optional[Type[SegT] | tuple[Type[SegT], ...]] = None,
 ) -> Optional[BaseSegment] | Optional[SegT]:
     if key not in SEGMENT_CACHE:
         return None
@@ -53,5 +60,38 @@ def get_segment_cache(
 
     if segment_type is not None and not isinstance(segment, segment_type):
         return None
+    return segment
+
+
+@overload
+def require_segment(key: str) -> BaseSegment:
+    ...
+
+
+@overload
+def require_segment(key: str, segment_type: Type[SegT]) -> SegT:
+    ...
+
+
+@overload
+def require_segment(key: str, segment_type: tuple[Type[SegT], ...]) -> SegT:
+    ...
+
+
+def require_segment(
+    key: str,
+    segment_type: Optional[Type[SegT] | tuple[Type[SegT], ...]] = None,
+) -> BaseSegment | SegT:
+    segment = get_segment_cache(key)
+    if segment is None:
+        raise CustomException(CustomError.SEGMENT_NOT_FOUND)
+
+    if segment_type is not None and not isinstance(segment, segment_type):
+        expect = (
+            ", ".join(seg_t.__name__ for seg_t in segment_type)
+            if isinstance(segment_type, tuple)
+            else segment_type.__name__
+        )
+        raise CustomException(CustomError.INVALID_SEGMENT_TYPE, f"expect {expect}, got {type(segment).__name__}")
     return segment
 
