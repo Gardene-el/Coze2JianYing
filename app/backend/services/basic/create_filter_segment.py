@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pyJianYingDraft as draft
 
-from app.backend.core.common_types import TimeRange, parse_common_model, to_draft_timerange
+from app.backend.core.common_types import TimeRange, to_draft_timerange
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.cache import update_segment_cache
 from app.backend.utils.helper import gen_unique_id
@@ -28,11 +28,9 @@ def create_filter_segment(
 	logger.info("segment_id: %s, create filter segment: %s", segment_id, filter_type)
 
 	try:
-		target_range = parse_common_model(TimeRange, target_timerange)
-
 		segment = draft.FilterSegment(
 			meta=_parse_filter_type(filter_type),
-			target_timerange=to_draft_timerange(target_range),
+			target_timerange=to_draft_timerange(target_timerange),
 			intensity=float(intensity) / 100.0,
 		)
 

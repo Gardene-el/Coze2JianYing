@@ -4,7 +4,7 @@ from typing import Optional
 
 import pyJianYingDraft as draft
 
-from app.backend.core.common_types import TimeRange, parse_common_model, to_draft_timerange
+from app.backend.core.common_types import TimeRange, to_draft_timerange
 from app.backend.core.settings_manager import get_settings_manager
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.services.material import MaterialService
@@ -26,9 +26,6 @@ def create_audio_segment(
 	logger.info("segment_id: %s, create audio segment from: %s", segment_id, material_url)
 
 	try:
-		target_range = parse_common_model(TimeRange, target_timerange)
-		source_range = parse_common_model(TimeRange, source_timerange) if source_timerange is not None else None
-
 		settings = get_settings_manager()
 		settings.reload()
 		output_dir = settings.get_effective_output_path()
@@ -38,8 +35,8 @@ def create_audio_segment(
 
 		segment = draft.AudioSegment(
 			material=audio_material,
-			target_timerange=to_draft_timerange(target_range),
-			source_timerange=to_draft_timerange(source_range) if source_range is not None else None,
+			target_timerange=to_draft_timerange(target_timerange),
+			source_timerange=to_draft_timerange(source_timerange) if source_timerange is not None else None,
 			speed=speed,
 			volume=volume,
 			change_pitch=change_pitch,

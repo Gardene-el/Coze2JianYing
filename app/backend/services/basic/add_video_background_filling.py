@@ -1,0 +1,42 @@
+from __future__ import annotations
+
+import pyJianYingDraft as draft
+
+from app.backend.exceptions import CustomError, CustomException
+from app.backend.utils.helper import get_url_param
+from app.backend.utils.logger import logger
+from app.backend.utils.cache import get_segment_cache, update_segment_cache
+
+
+def add_video_background_filling(
+	segment_url: str,
+	fill_type: str,
+	blur: float = 0.0625,
+	color: str = "#00000000",
+) -> str:
+	"""为视频片段添加背景填充效果。"""
+	segment_id = get_url_param(segment_url, "segment_id")
+	if not segment_id:
+		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
+
+	raw_segment = get_segment_cache(segment_id)
+	if raw_segment is None:
+		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
+	if not isinstance(raw_segment, draft.VideoSegment):
+		raise CustomException(CustomError.INVALID_SEGMENT_TYPE, f"expect VideoSegment, got {type(raw_segment).__name__}")
+	segment = raw_segment
+
+	logger.info("segment_id: %s, add video background filling: %s", segment_id, fill_type)
+
+	try:
+		segment.add_background_filling(fill_type=fill_type, blur=blur, color=color)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video background filling failed: %s", e)
+		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	update_segment_cache(segment_id, segment)
+	logger.info("add video background filling success: %s", segment_id)
+	return segment_url
+

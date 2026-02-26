@@ -11,7 +11,6 @@ from app.backend.core.common_types import (
 	TextShadow,
 	TextStyle,
 	TimeRange,
-	parse_common_model,
 	to_draft_clip_settings,
 	to_draft_text_background,
 	to_draft_text_border,
@@ -40,13 +39,6 @@ def create_text_segment(
 	logger.info("segment_id: %s, create text segment", segment_id)
 
 	try:
-		target_range = parse_common_model(TimeRange, target_timerange)
-		style_model = parse_common_model(TextStyle, text_style) if text_style is not None else None
-		border_model = parse_common_model(TextBorder, text_border) if text_border is not None else None
-		shadow_model = parse_common_model(TextShadow, text_shadow) if text_shadow is not None else None
-		background_model = parse_common_model(TextBackground, text_background) if text_background is not None else None
-		clip_model = parse_common_model(ClipSettings, clip_settings) if clip_settings is not None else None
-
 		font = None
 		if font_family:
 			try:
@@ -56,13 +48,13 @@ def create_text_segment(
 
 		segment = draft.TextSegment(
 			text=text_content,
-			timerange=to_draft_timerange(target_range),
+			timerange=to_draft_timerange(target_timerange),
 			font=font,
-			style=to_draft_text_style(style_model) if style_model is not None else None,
-			clip_settings=to_draft_clip_settings(clip_model) if clip_model is not None else None,
-			border=to_draft_text_border(border_model) if border_model is not None else None,
-			background=to_draft_text_background(background_model) if background_model is not None else None,
-			shadow=to_draft_text_shadow(shadow_model) if shadow_model is not None else None,
+			style=to_draft_text_style(text_style) if text_style is not None else None,
+			clip_settings=to_draft_clip_settings(clip_settings) if clip_settings is not None else None,
+			border=to_draft_text_border(text_border) if text_border is not None else None,
+			background=to_draft_text_background(text_background) if text_background is not None else None,
+			shadow=to_draft_text_shadow(text_shadow) if text_shadow is not None else None,
 		)
 
 	except Exception as e:

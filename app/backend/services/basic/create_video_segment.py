@@ -8,7 +8,6 @@ from app.backend.core.common_types import (
 	ClipSettings,
 	CropSettings,
 	TimeRange,
-	parse_common_model,
 	to_draft_clip_settings,
 	to_draft_crop_settings,
 	to_draft_timerange,
@@ -36,31 +35,26 @@ def create_video_segment(
 	logger.info("segment_id: %s, create video segment from: %s", segment_id, material_url)
 
 	try:
-		target_range = parse_common_model(TimeRange, target_timerange)
-		source_range = parse_common_model(TimeRange, source_timerange) if source_timerange is not None else None
-		clip_model = parse_common_model(ClipSettings, clip_settings) if clip_settings is not None else None
-		crop_model = parse_common_model(CropSettings, crop_settings) if crop_settings is not None else None
-
 		settings = get_settings_manager()
 		settings.reload()
 		output_dir = settings.get_effective_output_path()
 
 		material_service = MaterialService(output_dir, draft_name=segment_id, project_id=segment_id)
 
-		if crop_model is not None:
+		if crop_settings is not None:
 			local_path = material_service.download_material(material_url)
-			video_material = draft.VideoMaterial(local_path, crop_settings=to_draft_crop_settings(crop_model))
+			video_material = draft.VideoMaterial(local_path, crop_settings=to_draft_crop_settings(crop_settings))
 		else:
 			video_material = material_service.create_video_material(material_url)
 
 		segment = draft.VideoSegment(
 			material=video_material,
-			target_timerange=to_draft_timerange(target_range),
-			source_timerange=to_draft_timerange(source_range) if source_range is not None else None,
+			target_timerange=to_draft_timerange(target_timerange),
+			source_timerange=to_draft_timerange(source_timerange) if source_timerange is not None else None,
 			speed=speed,
 			volume=volume,
 			change_pitch=change_pitch,
-			clip_settings=to_draft_clip_settings(clip_model) if clip_model is not None else None,
+			clip_settings=to_draft_clip_settings(clip_settings) if clip_settings is not None else None,
 		)
 
 	except Exception as e:

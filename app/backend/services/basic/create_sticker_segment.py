@@ -4,7 +4,7 @@ from typing import Optional
 
 import pyJianYingDraft as draft
 
-from app.backend.core.common_types import ClipSettings, TimeRange, parse_common_model, to_draft_clip_settings, to_draft_timerange
+from app.backend.core.common_types import ClipSettings, TimeRange, to_draft_clip_settings, to_draft_timerange
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.cache import update_segment_cache
 from app.backend.utils.helper import gen_unique_id
@@ -21,13 +21,10 @@ def create_sticker_segment(
 	logger.info("segment_id: %s, create sticker segment from: %s", segment_id, material_url)
 
 	try:
-		target_range = parse_common_model(TimeRange, target_timerange)
-		clip_model = parse_common_model(ClipSettings, clip_settings) if clip_settings is not None else None
-
 		segment = draft.StickerSegment(
 			resource_id=material_url,
-			target_timerange=to_draft_timerange(target_range),
-			clip_settings=to_draft_clip_settings(clip_model) if clip_model is not None else None,
+			target_timerange=to_draft_timerange(target_timerange),
+			clip_settings=to_draft_clip_settings(clip_settings) if clip_settings is not None else None,
 		)
 
 	except Exception as e:
