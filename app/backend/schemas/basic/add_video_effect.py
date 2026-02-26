@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddVideoEffectRequest(BaseModel):
     """添加视频特效请求（用于 VideoSegment）"""
@@ -9,13 +9,14 @@ class AddVideoEffectRequest(BaseModel):
     )
     params: Optional[List[float]] = Field(None, description="特效参数列表")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "effect_type": "VideoSceneEffectType.GLITCH",
                 "params": [50.0],
             }
         }
+    )
 
 class AddVideoEffectResponse(BaseModel):
     """添加视频特效响应"""

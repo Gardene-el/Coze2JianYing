@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddTextAnimationRequest(BaseModel):
     """添加文本动画请求（用于 TextSegment）"""
@@ -7,13 +7,14 @@ class AddTextAnimationRequest(BaseModel):
     animation_type: str = Field(..., description="动画类型: TextAnimationType")
     duration: Optional[str] = Field("1s", description="动画时长")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "animation_type": "TextAnimationType.TYPEWRITER",
                 "duration": "1s",
             }
         }
+    )
 
 class AddTextAnimationResponse(BaseModel):
     """添加文本动画响应"""

@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddStickerKeyframeRequest(BaseModel):
     """添加贴纸关键帧请求（用于 StickerSegment）"""
@@ -12,10 +12,11 @@ class AddStickerKeyframeRequest(BaseModel):
         ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"time_offset": 2000000, "value": 1.0, "property": "scale"}
         }
+    )
 
 class AddStickerKeyframeResponse(BaseModel):
     """添加贴纸关键帧响应"""

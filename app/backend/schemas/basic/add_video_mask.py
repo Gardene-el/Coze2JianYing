@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddVideoMaskRequest(BaseModel):
     """添加视频蒙版请求（用于 VideoSegment）"""
@@ -18,8 +18,8 @@ class AddVideoMaskRequest(BaseModel):
         None, description="矩形蒙版圆角 0-100，仅在 mask_type=矩形 时生效"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "mask_type": "线性",
                 "center_x": 0.0,
@@ -32,6 +32,7 @@ class AddVideoMaskRequest(BaseModel):
                 "round_corner": None,
             }
         }
+    )
 
 class AddVideoMaskResponse(BaseModel):
     """添加视频蒙版响应"""

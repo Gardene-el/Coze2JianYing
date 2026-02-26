@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.backend.core.common_types import (
     ClipSettings,
     TextBackground,
@@ -25,8 +25,8 @@ class CreateTextSegmentRequest(BaseModel):
         None, description="图像调节设置（位置、缩放、旋转、透明度）"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "text_content": "Hello World",
                 "target_timerange": {"start": 0, "duration": 3000000},
@@ -58,15 +58,17 @@ class CreateTextSegmentRequest(BaseModel):
                 },
             }
         }
+    )
 
 class CreateTextSegmentResponse(BaseModel):
     """创建片段响应"""
 
     segment_id: str = Field(..., description="Segment UUID")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "segment_id": "87654321-4321-4321-4321-cba987654321",
             }
         }
+    )

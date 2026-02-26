@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.backend.core.common_types import TimeRange
 
 class AddGlobalFilterRequest(BaseModel):
@@ -9,14 +9,15 @@ class AddGlobalFilterRequest(BaseModel):
     target_timerange: TimeRange = Field(..., description="时间范围")
     intensity: float = Field(100.0, description="滤镜强度 0-100", ge=0, le=100)
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "filter_type": "FilterType.XXX",
                 "target_timerange": {"start": 0, "duration": 5000000},
                 "intensity": 100.0,
             }
         }
+    )
 
 class AddGlobalFilterResponse(BaseModel):
     """添加全局滤镜响应"""

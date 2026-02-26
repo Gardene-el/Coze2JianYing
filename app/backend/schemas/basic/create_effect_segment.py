@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.backend.core.common_types import TimeRange
 
 class CreateEffectSegmentRequest(BaseModel):
@@ -13,23 +13,25 @@ class CreateEffectSegmentRequest(BaseModel):
         None, description="特效参数列表（范围 0-100）"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "effect_type": "VideoSceneEffectType.XXX",
                 "target_timerange": {"start": 0, "duration": 5000000},
                 "params": [50.0, 75.0],
             }
         }
+    )
 
 class CreateEffectSegmentResponse(BaseModel):
     """创建片段响应"""
 
     segment_id: str = Field(..., description="Segment UUID")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "segment_id": "87654321-4321-4321-4321-cba987654321",
             }
         }
+    )

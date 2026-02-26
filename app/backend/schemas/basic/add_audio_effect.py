@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddAudioEffectRequest(BaseModel):
     """添加音频特效请求（用于 AudioSegment）"""
@@ -12,13 +12,14 @@ class AddAudioEffectRequest(BaseModel):
         None, description="特效参数列表（范围 0-100）"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "effect_type": "AudioSceneEffectType.VOICE_CHANGER",
                 "params": [50.0, 75.0],
             }
         }
+    )
 
 class AddAudioEffectResponse(BaseModel):
     """添加音频特效响应"""

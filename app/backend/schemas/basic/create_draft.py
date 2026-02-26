@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class CreateDraftRequest(BaseModel):
     """创建草稿请求"""
@@ -10,8 +10,8 @@ class CreateDraftRequest(BaseModel):
     fps: int = Field(30, description="帧率", gt=0, le=120)
     allow_replace: bool = Field(True, description="是否允许替换同名草稿")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "draft_name": "我的视频项目",
                 "width": 1920,
@@ -20,15 +20,17 @@ class CreateDraftRequest(BaseModel):
                 "allow_replace": True,
             }
         }
+    )
 
 class CreateDraftResponse(BaseModel):
     """创建草稿响应"""
 
     draft_id: str = Field(..., description="草稿 UUID")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "draft_id": "12345678-1234-1234-1234-123456789abc",
             }
         }
+    )

@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddTextKeyframeRequest(BaseModel):
     """添加文本关键帧请求（用于 TextSegment）"""
@@ -12,10 +12,11 @@ class AddTextKeyframeRequest(BaseModel):
         ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"time_offset": 2000000, "value": 0.5, "property": "position_x"}
         }
+    )
 
 class AddTextKeyframeResponse(BaseModel):
     """添加文本关键帧响应"""

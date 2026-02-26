@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddVideoKeyframeRequest(BaseModel):
     """添加视频关键帧请求（用于 VideoSegment）"""
@@ -12,10 +12,11 @@ class AddVideoKeyframeRequest(BaseModel):
         ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"time_offset": 2000000, "value": 0.8, "property": "position_x"}
         }
+    )
 
 class AddVideoKeyframeResponse(BaseModel):
     """添加视频关键帧响应"""

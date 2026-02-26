@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddVideoAnimationRequest(BaseModel):
     """添加视频动画请求（用于 VideoSegment）"""
@@ -9,10 +9,11 @@ class AddVideoAnimationRequest(BaseModel):
     )
     duration: Optional[str] = Field("1s", description="动画时长")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"animation_type": "IntroType.FADE_IN", "duration": "1s"}
         }
+    )
 
 class AddVideoAnimationResponse(BaseModel):
     """添加视频动画响应"""

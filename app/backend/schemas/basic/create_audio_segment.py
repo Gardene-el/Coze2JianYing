@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.backend.core.common_types import TimeRange
 
 class CreateAudioSegmentRequest(BaseModel):
@@ -12,8 +12,8 @@ class CreateAudioSegmentRequest(BaseModel):
     volume: float = Field(1.0, description="音量 0-2", ge=0, le=2)
     change_pitch: bool = Field(False, description="是否跟随变速改变音调")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "material_url": "https://example.com/audio.mp3",
                 "target_timerange": {"start": 0, "duration": 5000000},
@@ -23,15 +23,17 @@ class CreateAudioSegmentRequest(BaseModel):
                 "change_pitch": False,
             }
         }
+    )
 
 class CreateAudioSegmentResponse(BaseModel):
     """创建片段响应"""
 
     segment_id: str = Field(..., description="Segment UUID")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "segment_id": "87654321-4321-4321-4321-cba987654321",
             }
         }
+    )

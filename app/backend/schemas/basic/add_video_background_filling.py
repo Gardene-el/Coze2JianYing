@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddVideoBackgroundFillingRequest(BaseModel):
     """添加视频背景填充请求（用于 VideoSegment）"""
@@ -10,8 +10,9 @@ class AddVideoBackgroundFillingRequest(BaseModel):
         "#00000000", description="填充颜色（fill_type=color 时）"
     )
 
-    class Config:
-        json_schema_extra = {"example": {"fill_type": "blur", "blur": 0.0625}}
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"fill_type": "blur", "blur": 0.0625}}
+    )
 
 class AddVideoBackgroundFillingResponse(BaseModel):
     """添加视频背景填充响应"""

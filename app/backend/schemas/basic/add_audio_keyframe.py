@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AddAudioKeyframeRequest(BaseModel):
     """添加音频关键帧请求（用于 AudioSegment）"""
@@ -9,8 +9,9 @@ class AddAudioKeyframeRequest(BaseModel):
     )
     volume: float = Field(..., description="音量值 0-2")
 
-    class Config:
-        json_schema_extra = {"example": {"time_offset": 2000000, "value": 0.8}}
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"time_offset": 2000000, "value": 0.8}}
+    )
 
 class AddAudioKeyframeResponse(BaseModel):
     """添加音频关键帧响应"""
