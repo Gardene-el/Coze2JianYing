@@ -63,5 +63,5 @@ def create_text_segment(
 
 	update_segment_cache(segment_id, segment)
 	logger.info("create text segment success: %s", segment_id)
-	return f"draft://coze2jianying/basic/create_text_segment?segment_id={segment_id}"
+	return segment_id
 

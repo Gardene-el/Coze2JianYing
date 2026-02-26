@@ -48,5 +48,5 @@ def create_audio_segment(
 
 	update_segment_cache(segment_id, segment)
 	logger.info("create audio segment success: %s", segment_id)
-	return f"draft://coze2jianying/basic/create_audio_segment?segment_id={segment_id}"
+	return segment_id
 

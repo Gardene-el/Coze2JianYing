@@ -5,7 +5,6 @@ from typing import Optional
 import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 from app.backend.utils.cache import require_segment, update_segment_cache
 
@@ -23,12 +22,8 @@ def _parse_video_effect_type(effect_type: str):
 		return draft.VideoCharacterEffectType.from_name(name)
 
 
-def add_video_effect(segment_url: str, effect_type: str, params: Optional[list[float]] = None) -> str:
+def add_video_effect(segment_id: str, effect_type: str, params: Optional[list[float]] = None) -> None:
 	"""为视频片段添加特效。"""
-	segment_id = get_url_param(segment_url, "segment_id")
-	if not segment_id:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-
 	segment = require_segment(segment_id, draft.VideoSegment)
 
 	logger.info("segment_id: %s, add video effect: %s", segment_id, effect_type)
@@ -44,5 +39,4 @@ def add_video_effect(segment_url: str, effect_type: str, params: Optional[list[f
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video effect success: %s", segment_id)
-	return segment_url
 

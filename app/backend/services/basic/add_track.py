@@ -6,7 +6,6 @@ import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.cache import DRAFT_CACHE, update_draft_cache
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 
 
@@ -20,16 +19,15 @@ def _parse_track_type(track_type: str) -> draft.TrackType:
 
 
 def add_track(
-	draft_url: str,
+	draft_id: str,
 	track_type: str,
 	track_name: Optional[str] = None,
 	*,
 	mute: bool = False,
 	relative_index: int = 0,
 	absolute_index: Optional[int] = None,
-) -> str:
+) -> None:
 	"""向草稿添加轨道。"""
-	draft_id = get_url_param(draft_url, "draft_id")
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 	script = DRAFT_CACHE[draft_id]
@@ -53,5 +51,4 @@ def add_track(
 
 	update_draft_cache(draft_id, script)
 	logger.info("add track success: %s", draft_id)
-	return draft_url
 

@@ -5,7 +5,6 @@ from typing import Optional
 import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 from app.backend.utils.cache import require_segment, update_segment_cache
 
@@ -19,12 +18,8 @@ def _parse_transition_type(transition_type: str) -> draft.TransitionType:
 	return draft.TransitionType.from_name(name)
 
 
-def add_video_transition(segment_url: str, transition_type: str, duration: Optional[str] = "1s") -> str:
+def add_video_transition(segment_id: str, transition_type: str, duration: Optional[str] = "1s") -> None:
 	"""为视频片段添加转场。"""
-	segment_id = get_url_param(segment_url, "segment_id")
-	if not segment_id:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-
 	segment = require_segment(segment_id, draft.VideoSegment)
 
 	logger.info("segment_id: %s, add video transition: %s", segment_id, transition_type)
@@ -40,5 +35,4 @@ def add_video_transition(segment_url: str, transition_type: str, duration: Optio
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video transition success: %s", segment_id)
-	return segment_url
 

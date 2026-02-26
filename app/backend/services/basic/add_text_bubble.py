@@ -3,17 +3,12 @@ from __future__ import annotations
 import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 from app.backend.utils.cache import require_segment, update_segment_cache
 
 
-def add_text_bubble(segment_url: str, effect_id: str, resource_id: str) -> str:
+def add_text_bubble(segment_id: str, effect_id: str, resource_id: str) -> None:
 	"""为文本片段添加气泡效果。"""
-	segment_id = get_url_param(segment_url, "segment_id")
-	if not segment_id:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-
 	segment = require_segment(segment_id, draft.TextSegment)
 
 	logger.info("segment_id: %s, add text bubble", segment_id)
@@ -28,5 +23,4 @@ def add_text_bubble(segment_url: str, effect_id: str, resource_id: str) -> str:
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add text bubble success: %s", segment_id)
-	return segment_url
 

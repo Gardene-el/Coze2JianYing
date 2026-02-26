@@ -5,7 +5,6 @@ from typing import Optional
 import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 from app.backend.utils.cache import require_segment, update_segment_cache
 
@@ -20,7 +19,7 @@ def _parse_mask_type(mask_type: str) -> draft.MaskType:
 
 
 def add_video_mask(
-	segment_url: str,
+	segment_id: str,
 	mask_type: str,
 	center_x: float = 0.0,
 	center_y: float = 0.0,
@@ -30,12 +29,8 @@ def add_video_mask(
 	rotation: float = 0.0,
 	rect_width: Optional[float] = None,
 	round_corner: Optional[float] = None,
-) -> str:
+) -> None:
 	"""为视频片段添加蒙版。"""
-	segment_id = get_url_param(segment_url, "segment_id")
-	if not segment_id:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-
 	segment = require_segment(segment_id, draft.VideoSegment)
 
 	logger.info("segment_id: %s, add video mask: %s", segment_id, mask_type)
@@ -61,5 +56,4 @@ def add_video_mask(
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video mask success: %s", segment_id)
-	return segment_url
 

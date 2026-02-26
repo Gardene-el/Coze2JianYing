@@ -5,7 +5,6 @@ import pyJianYingDraft as draft
 from app.backend.core.common_types import TimeRange, to_draft_timerange
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.cache import DRAFT_CACHE, update_draft_cache
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 
 
@@ -35,13 +34,12 @@ def _first_track_name_by_type(script: draft.ScriptFile, track_type: draft.TrackT
 
 
 def add_global_filter(
-	draft_url: str,
+	draft_id: str,
 	filter_type: str,
 	target_timerange: TimeRange,
 	intensity: float = 100.0,
-) -> str:
+) -> None:
 	"""向草稿添加全局滤镜片段。"""
-	draft_id = get_url_param(draft_url, "draft_id")
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 	script = DRAFT_CACHE[draft_id]
@@ -65,5 +63,4 @@ def add_global_filter(
 
 	update_draft_cache(draft_id, script)
 	logger.info("add global filter success: %s", draft_id)
-	return draft_url
 

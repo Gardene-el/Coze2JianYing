@@ -3,22 +3,17 @@ from __future__ import annotations
 import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 from app.backend.utils.cache import require_segment, update_segment_cache
 
 
 def add_video_background_filling(
-	segment_url: str,
+	segment_id: str,
 	fill_type: str,
 	blur: float = 0.0625,
 	color: str = "#00000000",
-) -> str:
+) -> None:
 	"""为视频片段添加背景填充效果。"""
-	segment_id = get_url_param(segment_url, "segment_id")
-	if not segment_id:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
-
 	segment = require_segment(segment_id, draft.VideoSegment)
 
 	logger.info("segment_id: %s, add video background filling: %s", segment_id, fill_type)
@@ -33,5 +28,4 @@ def add_video_background_filling(
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video background filling success: %s", segment_id)
-	return segment_url
 

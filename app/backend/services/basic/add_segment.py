@@ -6,19 +6,14 @@ import pyJianYingDraft as draft
 
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.cache import DRAFT_CACHE, SEGMENT_CACHE, require_segment, update_draft_cache
-from app.backend.utils.helper import get_url_param
 from app.backend.utils.logger import logger
 
 
-def add_segment(draft_url: str, segment_url: str, track_name: Optional[str] = None) -> str:
-	draft_id = get_url_param(draft_url, "draft_id")
+def add_segment(draft_id: str, segment_id: str, track_name: Optional[str] = None) -> None:
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 	script = DRAFT_CACHE[draft_id]
 
-	segment_id = get_url_param(segment_url, "segment_id")
-	if not segment_id:
-		raise CustomException(CustomError.SEGMENT_NOT_FOUND)
 	segment = require_segment(
 		segment_id,
 		(draft.VideoSegment, draft.StickerSegment, draft.AudioSegment, draft.TextSegment),
@@ -37,5 +32,4 @@ def add_segment(draft_url: str, segment_url: str, track_name: Optional[str] = No
 	update_draft_cache(draft_id, script)
 	SEGMENT_CACHE.pop(segment_id, None)
 	logger.info("add segment success: draft=%s, segment=%s", draft_id, segment_id)
-	return draft_url
 

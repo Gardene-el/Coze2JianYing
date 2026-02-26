@@ -21,7 +21,7 @@ def create_draft(width: int, height: int) -> str:
 		height: 草稿高度
 
 	Returns:
-		草稿URL（包含 draft_id 查询参数）
+		草稿ID
 
 	Raises:
 		CustomException: 草稿创建失败
@@ -64,5 +64,5 @@ def create_draft(width: int, height: int) -> str:
 
 	update_draft_cache(draft_id, script)
 	logger.info("create draft success: %s", draft_id)
-	return f"draft://coze2jianying/basic/create_draft?draft_id={draft_id}"
+	return draft_id
 
