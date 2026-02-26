@@ -175,8 +175,8 @@ project_root = Path(__file__).parent.parent if hasattr(__builtins__, '__file__')
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from app.backend.api.draft_routes import *
-from app.backend.api.segment_routes import *
+from app.backend.api.easy import *
+from app.backend.api.basic import *
 
 
 CustomNamespace = SimpleNamespace
