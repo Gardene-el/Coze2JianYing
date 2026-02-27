@@ -21,6 +21,6 @@ from .add_video_background_filling import *
 from .add_text_bubble import *
 from .add_text_effect import *
 from .create_draft import *
-from .add_global_effect import *
-from .add_global_filter import *
+from .add_effect import *
+from .add_filter import *
 from .save_draft import *

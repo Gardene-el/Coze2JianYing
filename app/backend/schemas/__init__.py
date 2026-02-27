@@ -61,8 +61,8 @@ __all__ = [
     "AddStickerKeyframeRequest",
     "AddStickerKeyframeResponse",
     # Draft-level operation schemas
-    "AddGlobalEffectRequest",
-    "AddGlobalEffectResponse",
-    "AddGlobalFilterRequest",
-    "AddGlobalFilterResponse",
+    "AddEffectRequest",
+    "AddEffectResponse",
+    "AddFilterRequest",
+    "AddFilterResponse",
 ]

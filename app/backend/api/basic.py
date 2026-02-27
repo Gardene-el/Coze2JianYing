@@ -9,8 +9,8 @@ from app.backend.config import get_config
 from app.backend.schemas.basic.add_audio_effect import AddAudioEffectRequest, AddAudioEffectResponse
 from app.backend.schemas.basic.add_audio_fade import AddAudioFadeRequest, AddAudioFadeResponse
 from app.backend.schemas.basic.add_audio_keyframe import AddAudioKeyframeRequest, AddAudioKeyframeResponse
-from app.backend.schemas.basic.add_global_effect import AddGlobalEffectRequest, AddGlobalEffectResponse
-from app.backend.schemas.basic.add_global_filter import AddGlobalFilterRequest, AddGlobalFilterResponse
+from app.backend.schemas.basic.add_effect import AddEffectRequest, AddEffectResponse
+from app.backend.schemas.basic.add_filter import AddFilterRequest, AddFilterResponse
 from app.backend.schemas.basic.add_segment import AddSegmentRequest, AddSegmentResponse
 from app.backend.schemas.basic.add_sticker_keyframe import AddStickerKeyframeRequest, AddStickerKeyframeResponse
 from app.backend.schemas.basic.add_text_animation import AddTextAnimationRequest, AddTextAnimationResponse
@@ -146,32 +146,32 @@ def add_audio_keyframe(
 	return AddAudioKeyframeResponse(keyframe_id=gen_unique_id())
 
 
-@router.post(path="/add_global_effect", response_model=AddGlobalEffectResponse)
+@router.post(path="/add_global_effect", response_model=AddEffectResponse)
 def add_global_effect(
 	draft_id: str = Body(..., embed=True, description="草稿ID"),
-	request: AddGlobalEffectRequest = Body(...),
-) -> AddGlobalEffectResponse:
+	request: AddEffectRequest = Body(...),
+) -> AddEffectResponse:
 	service.add_global_effect(
 		draft_id=draft_id,
 		effect_type=request.effect_type,
 		target_timerange=request.target_timerange,
 		params=request.params,
 	)
-	return AddGlobalEffectResponse(effect_id=gen_unique_id())
+	return AddEffectResponse(effect_id=gen_unique_id())
 
 
-@router.post(path="/add_global_filter", response_model=AddGlobalFilterResponse)
+@router.post(path="/add_global_filter", response_model=AddFilterResponse)
 def add_global_filter(
 	draft_id: str = Body(..., embed=True, description="草稿ID"),
-	request: AddGlobalFilterRequest = Body(...),
-) -> AddGlobalFilterResponse:
+	request: AddFilterRequest = Body(...),
+) -> AddFilterResponse:
 	service.add_global_filter(
 		draft_id=draft_id,
 		filter_type=request.filter_type,
 		target_timerange=request.target_timerange,
 		intensity=request.intensity,
 	)
-	return AddGlobalFilterResponse(filter_id=gen_unique_id())
+	return AddFilterResponse(filter_id=gen_unique_id())
 
 
 @router.post(path="/add_sticker_keyframe", response_model=AddStickerKeyframeResponse)

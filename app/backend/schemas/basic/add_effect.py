@@ -2,7 +2,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict
 from app.backend.core.common_types import TimeRange
 
-class AddGlobalEffectRequest(BaseModel):
+class AddEffectRequest(BaseModel):
     """添加全局特效请求"""
 
     effect_type: str = Field(..., description="特效类型")
@@ -19,7 +19,7 @@ class AddGlobalEffectRequest(BaseModel):
         }
     )
 
-class AddGlobalEffectResponse(BaseModel):
+class AddEffectResponse(BaseModel):
     """添加全局特效响应"""
 
     effect_id: str = Field(..., description="特效 UUID")

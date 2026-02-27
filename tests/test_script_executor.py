@@ -70,7 +70,7 @@ from app.backend.schemas.general_schemas import (
     CreateTextSegmentRequest, CreateStickerSegmentRequest,
     CreateEffectSegmentRequest, CreateFilterSegmentRequest,
     CreateDraftRequest, AddTrackRequest, AddSegmentToDraftRequest,
-    AddGlobalEffectRequest, AddGlobalFilterRequest,
+    AddEffectRequest, AddFilterRequest,
     AddEffectRequest, AddFadeRequest, AddKeyframeRequest,
     AddAnimationRequest, AddFilterRequest, AddMaskRequest,
     AddTransitionRequest, AddBackgroundFillingRequest,

@@ -2,7 +2,7 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict
 from app.backend.core.common_types import TimeRange
 
-class AddGlobalFilterRequest(BaseModel):
+class AddFilterRequest(BaseModel):
     """添加全局滤镜请求"""
 
     filter_type: str = Field(..., description="滤镜类型")
@@ -19,7 +19,7 @@ class AddGlobalFilterRequest(BaseModel):
         }
     )
 
-class AddGlobalFilterResponse(BaseModel):
+class AddFilterResponse(BaseModel):
     """添加全局滤镜响应"""
 
     filter_id: str = Field(..., description="滤镜 UUID")
