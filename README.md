@@ -309,7 +309,7 @@ venv\Scripts\activate
 **3. 安装依赖**
 
 ```bash
-pip install -r requirements.txt
+pip install ".[build,gui]"
 ```
 
 **4. 执行编译脚本**
@@ -371,8 +371,7 @@ Coze2JianYing/
 │   └── test_coze_json_formatter.py  # 测试脚本
 ├── test_ui_improvement.py    # UI改进测试脚本
 ├── build.py                  # PyInstaller 打包脚本
-├── requirements.txt          # 项目依赖列表
-└── setup.py                  # 项目安装配置
+└── pyproject.toml            # 项目依赖与构建配置
 ```
 
 ### 🎨 UI 改进说明

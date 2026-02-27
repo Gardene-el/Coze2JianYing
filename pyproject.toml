@@ -51,8 +51,15 @@ dev = [
 build = [
     "pyinstaller>=5.0.0",
 ]
+gui = [
+    "customtkinter>=5.2.0",
+    "packaging>=23.0",
+]
+release = [
+    "python-semantic-release>=8.0.0",
+]
 all = [
-    "coze-2-jianying[dev,build]",
+    "coze-2-jianying[dev,build,gui,release]",
 ]
 
 [project.urls]

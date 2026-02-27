@@ -202,7 +202,7 @@ python scripts/generate_handler_from_api.py
 **解决**：
 
 1. 检查 Python 版本（需要 3.7+）
-2. 确认项目依赖已安装：`pip install -r requirements.txt`
+2. 确认项目依赖已安装：`pip install ".[dev]"`
 3. 查看测试输出的详细错误信息
 
 ### 问题：类型名提取不正确
