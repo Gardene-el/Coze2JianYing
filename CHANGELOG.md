@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v0.7.1 (2026-02-28)
+
+### Bug Fixes
+
+- Address review comments - icon path, file handle leak, grid column config, build.py add-data
+  ([`8362dc2`](https://github.com/Gardene-el/Coze2JianYing/commit/8362dc200cbc2169fd8f9fd457b4de203dde7980))
+
+- 美化UI界面
+  ([`fa25dae`](https://github.com/Gardene-el/Coze2JianYing/commit/fa25dae64cc2165f09bb6a7e27c62781aa765e3e))
+
+### Chores
+
+- 添加生成 Coze 处理程序的步骤
+  ([`9b60127`](https://github.com/Gardene-el/Coze2JianYing/commit/9b601273d79329a1390ecbd40ca60951b0e49068))
+
+### Documentation
+
+- 移除错误注释
+  ([`64f6410`](https://github.com/Gardene-el/Coze2JianYing/commit/64f64108b6ac0112bd6c502ec3f93f43ece71a9c))
+
+### Refactoring
+
+- 分离出后端
+  ([`7c9ca1a`](https://github.com/Gardene-el/Coze2JianYing/commit/7c9ca1a275ba93608aebb0d65d7ad75544ccc119))
+
+- 重构backend架构
+  ([`de40b68`](https://github.com/Gardene-el/Coze2JianYing/commit/de40b68f47a206cd0a0ca46e537ad06b12344fd5))
+
+
 ## v0.7.0 (2026-01-17)
 
 ### Chores
