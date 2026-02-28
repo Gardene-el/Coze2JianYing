@@ -28,6 +28,7 @@ class SettingsPage(BasePage):
         # 滚动区域
         scrollable_frame = ctk.CTkScrollableFrame(main_frame, fg_color="transparent")
         scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        scrollable_frame.grid_columnconfigure(1, weight=1)
 
         # ==================== 路径设置 ====================
         ctk.CTkLabel(
