@@ -54,161 +54,190 @@ class CloudServicePage(BasePage):
             pass
 
     def _create_widgets(self):
-        # 说明区域
-        self.info_frame = ctk.CTkFrame(self)
-        self.info_frame.pack(fill="x", padx=20, pady=(20, 10))
-        
+        # 主容器
+        main_frame = ctk.CTkFrame(self, corner_radius=15, fg_color=("white", "#2D2D2D"))
+        main_frame.pack(fill="both", expand=True, padx=8, pady=(8, 4))
+
+        # 标题区域
+        header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        header_frame.pack(fill="x", padx=20, pady=(20, 10))
         ctk.CTkLabel(
-            self.info_frame, 
-            text="云端服务模式说明", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).pack(anchor="w", padx=10, pady=(10, 5))
-        
+            header_frame,
+            text="云端服务设定",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=26, weight="bold")
+        ).pack(side="left")
+
+        # 滚动区域
+        scrollable_frame = ctk.CTkScrollableFrame(main_frame, fg_color="transparent")
+        scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # 说明区域
+        self.info_frame = ctk.CTkFrame(scrollable_frame, fg_color=("gray97", "#363636"), corner_radius=10)
+        self.info_frame.pack(fill="x", padx=10, pady=(0, 20))
+
         ctk.CTkLabel(
             self.info_frame,
-            text="启动 FastAPI 服务，在 Coze 平台配置\"云侧插件 - 基于已有服务\"。\nCoze 通过 HTTP API 直接调用本服务，无需 cozepy SDK 或 Coze Token。",
+            text="云端服务模式说明",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).pack(anchor="w", padx=15, pady=(15, 5))
+
+        ctk.CTkLabel(
+            self.info_frame,
+            text="启动 FastAPI 服务，在 Coze 平台配置'云侧插件 - 基于已有服务'。\nCoze 通过 HTTP API 直接调用本服务，无需 cozepy SDK 或 Coze Token。",
             justify="left",
-            text_color="gray"
-        ).pack(anchor="w", padx=10, pady=(0, 10))
+            text_color=("gray30", "gray70"),
+            font=ctk.CTkFont(family='Microsoft YaHei', size=13)
+        ).pack(anchor="w", padx=15, pady=(0, 15))
 
         # 服务管理区域
-        self.service_frame = ctk.CTkFrame(self)
-        self.service_frame.pack(fill="x", padx=20, pady=10)
-        
+        self.service_frame = ctk.CTkFrame(scrollable_frame, corner_radius=10, fg_color=("gray97", "#363636"))
+        self.service_frame.pack(fill="x", padx=10, pady=(0, 20))
+
         ctk.CTkLabel(
-            self.service_frame, 
-            text="FastAPI 服务管理", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).pack(anchor="w", padx=10, pady=(10, 5))
+            self.service_frame,
+            text="FastAPI 服务管理",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).pack(anchor="w", padx=15, pady=(15, 5))
 
         # 端口配置
         config_frame = ctk.CTkFrame(self.service_frame, fg_color="transparent")
-        config_frame.pack(fill="x", padx=10, pady=5)
-        
-        ctk.CTkLabel(config_frame, text="端口:").pack(side="left", padx=(0, 10))
+        config_frame.pack(fill="x", padx=15, pady=(5, 5))
+
+        ctk.CTkLabel(config_frame, text="端口:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).pack(side="left", padx=(0, 10))
         self.port_var = ctk.StringVar(value=str(self.service_port))
-        self.port_entry = ctk.CTkEntry(config_frame, textvariable=self.port_var, width=100)
+        self.port_entry = ctk.CTkEntry(config_frame, textvariable=self.port_var, width=100, corner_radius=8, fg_color=("white", "#3B3B3B"), border_color=("gray70", "gray40"))
         self.port_entry.pack(side="left", padx=(0, 10))
-        
-        self.check_port_btn = ctk.CTkButton(config_frame, text="检测端口", command=self._check_port_available, width=100)
+
+        self.check_port_btn = ctk.CTkButton(config_frame, text="检测端口", command=self._check_port_available, width=100, corner_radius=8)
         self.check_port_btn.pack(side="left")
-        
-        self.port_status_label = ctk.CTkLabel(config_frame, text="未检测", text_color="gray")
-        self.port_status_label.pack(side="left", padx=10)
+
+        self.port_status_label = ctk.CTkLabel(config_frame, text="未检测", text_color="gray", font=ctk.CTkFont(family='Microsoft YaHei', size=13))
+        self.port_status_label.pack(side="left", padx=15)
 
         # 控制按钮
         control_frame = ctk.CTkFrame(self.service_frame, fg_color="transparent")
-        control_frame.pack(fill="x", padx=10, pady=10)
-        
+        control_frame.pack(fill="x", padx=15, pady=(5, 10))
+
         self.start_service_btn = ctk.CTkButton(
-            control_frame, 
-            text="启动服务", 
+            control_frame,
+            text="启动服务",
             command=self._start_service,
-            fg_color="green",
-            hover_color="darkgreen"
+            fg_color="#2E8B57",
+            hover_color="#1F633E",
+            corner_radius=8,
+            font=ctk.CTkFont(family='Microsoft YaHei', weight="bold")
         )
         self.start_service_btn.pack(side="left", padx=(0, 10))
-        
+
         self.stop_service_btn = ctk.CTkButton(
-            control_frame, 
-            text="停止服务", 
+            control_frame,
+            text="停止服务",
             command=self._stop_service,
             state="disabled",
-            fg_color="red",
-            hover_color="darkred"
+            fg_color="#D32F2F",
+            hover_color="#9A0007",
+            corner_radius=8,
+            font=ctk.CTkFont(family='Microsoft YaHei', weight="bold")
         )
         self.stop_service_btn.pack(side="left")
-        
-        self.service_status_label = ctk.CTkLabel(control_frame, text="服务未启动", text_color="gray")
+
+        self.service_status_label = ctk.CTkLabel(control_frame, text="服务未启动", text_color="gray", font=ctk.CTkFont(family='Microsoft YaHei', size=13))
         self.service_status_label.pack(side="left", padx=20)
 
         # 服务日志
-        self.log_textbox = ctk.CTkTextbox(self.service_frame, height=150)
-        self.log_textbox.pack(fill="x", padx=10, pady=10)
+        self.log_textbox = ctk.CTkTextbox(self.service_frame, height=150, corner_radius=10, fg_color=("gray97", "#383838"), border_width=1, border_color=("gray70", "gray40"))
+        self.log_textbox.pack(fill="x", padx=15, pady=(5, 15))
         self.log_textbox.configure(state="disabled")
 
         # ngrok 管理区域
-        self.ngrok_frame = ctk.CTkFrame(self)
-        self.ngrok_frame.pack(fill="x", padx=20, pady=10)
-        
+        self.ngrok_frame = ctk.CTkFrame(scrollable_frame, corner_radius=10, fg_color=("gray97", "#363636"))
+        self.ngrok_frame.pack(fill="x", padx=10, pady=(0, 20))
+
         ctk.CTkLabel(
-            self.ngrok_frame, 
-            text="ngrok 内网穿透", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).pack(anchor="w", padx=10, pady=(10, 5))
+            self.ngrok_frame,
+            text="ngrok 内网穿透",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).pack(anchor="w", padx=15, pady=(15, 5))
 
         # ngrok 配置
         ngrok_config_frame = ctk.CTkFrame(self.ngrok_frame, fg_color="transparent")
-        ngrok_config_frame.pack(fill="x", padx=10, pady=5)
-        
-        ctk.CTkLabel(ngrok_config_frame, text="Authtoken:").pack(side="left", padx=(0, 10))
+        ngrok_config_frame.pack(fill="x", padx=15, pady=(5, 5))
+
+        ctk.CTkLabel(ngrok_config_frame, text="Authtoken:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).pack(side="left", padx=(0, 10))
         self.ngrok_token_var = ctk.StringVar(value=self.settings.get("ngrok_auth_token", ""))
-        self.ngrok_token_entry = ctk.CTkEntry(ngrok_config_frame, textvariable=self.ngrok_token_var, show="*", width=300)
+        self.ngrok_token_entry = ctk.CTkEntry(ngrok_config_frame, textvariable=self.ngrok_token_var, show="*", width=300, corner_radius=8, fg_color=("white", "#3B3B3B"), border_color=("gray70", "gray40"))
         self.ngrok_token_entry.pack(side="left", padx=(0, 10))
-        
+
         self.show_token_var = ctk.BooleanVar(value=False)
         self.show_token_check = ctk.CTkCheckBox(
-            ngrok_config_frame, 
-            text="显示", 
+            ngrok_config_frame,
+            text="显示",
             variable=self.show_token_var,
             command=self._toggle_token,
-            width=60
+            width=60,
+            font=ctk.CTkFont(family='Microsoft YaHei', size=13)
         )
         self.show_token_check.pack(side="left", padx=(0, 20))
-        
-        ctk.CTkLabel(ngrok_config_frame, text="区域:").pack(side="left", padx=(0, 10))
+
+        ctk.CTkLabel(ngrok_config_frame, text="区域:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).pack(side="left", padx=(0, 10))
         self.ngrok_region_var = ctk.StringVar(value=self.settings.get("ngrok_region", "us"))
         self.ngrok_region_menu = ctk.CTkOptionMenu(
             ngrok_config_frame,
             variable=self.ngrok_region_var,
             values=["us", "eu", "ap", "au", "sa", "jp", "in"],
-            width=80
+            width=80,
+            corner_radius=8
         )
         self.ngrok_region_menu.pack(side="left")
 
         # ngrok 控制
         ngrok_control_frame = ctk.CTkFrame(self.ngrok_frame, fg_color="transparent")
-        ngrok_control_frame.pack(fill="x", padx=10, pady=10)
-        
+        ngrok_control_frame.pack(fill="x", padx=15, pady=(5, 5))
+
         self.start_ngrok_btn = ctk.CTkButton(
-            ngrok_control_frame, 
-            text="启动 ngrok", 
+            ngrok_control_frame,
+            text="启动 ngrok",
             command=self._start_ngrok,
-            state="disabled"
+            state="disabled",
+            corner_radius=8,
+            font=ctk.CTkFont(family='Microsoft YaHei', weight="bold")
         )
         self.start_ngrok_btn.pack(side="left", padx=(0, 10))
-        
+
         self.stop_ngrok_btn = ctk.CTkButton(
-            ngrok_control_frame, 
-            text="停止 ngrok", 
+            ngrok_control_frame,
+            text="停止 ngrok",
             command=self._stop_ngrok,
             state="disabled",
-            fg_color="red",
-            hover_color="darkred"
+            fg_color="#D32F2F",
+            hover_color="#9A0007",
+            corner_radius=8,
+            font=ctk.CTkFont(family='Microsoft YaHei', weight="bold")
         )
         self.stop_ngrok_btn.pack(side="left")
-        
-        self.ngrok_status_label = ctk.CTkLabel(ngrok_control_frame, text="ngrok 未启动", text_color="gray")
+
+        self.ngrok_status_label = ctk.CTkLabel(ngrok_control_frame, text="ngrok 未启动", text_color="gray", font=ctk.CTkFont(family='Microsoft YaHei', size=13))
         self.ngrok_status_label.pack(side="left", padx=20)
 
         # 公网地址
         url_frame = ctk.CTkFrame(self.ngrok_frame, fg_color="transparent")
-        url_frame.pack(fill="x", padx=10, pady=(0, 10))
-        
-        ctk.CTkLabel(url_frame, text="公网地址:").pack(side="left", padx=(0, 10))
-        self.ngrok_url_entry = ctk.CTkEntry(url_frame, width=400)
+        url_frame.pack(fill="x", padx=15, pady=(5, 15))
+
+        ctk.CTkLabel(url_frame, text="公网地址:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).pack(side="left", padx=(0, 10))
+
+        self.ngrok_url_entry = ctk.CTkEntry(url_frame, width=400, corner_radius=8, fg_color=("white", "#3B3B3B"), border_color=("gray70", "gray40"))
         self.ngrok_url_entry.pack(side="left", padx=(0, 10))
         self.ngrok_url_entry.configure(state="readonly")
-        
+
         self.copy_url_btn = ctk.CTkButton(
-            url_frame, 
-            text="复制", 
+            url_frame,
+            text="复制",
             command=self._copy_ngrok_url,
             width=80,
-            state="disabled"
+            state="disabled",
+            corner_radius=8
         )
         self.copy_url_btn.pack(side="left")
-
     def _toggle_token(self):
         if self.show_token_var.get():
             self.ngrok_token_entry.configure(show="")

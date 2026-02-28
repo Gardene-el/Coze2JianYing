@@ -12,125 +12,136 @@ class SettingsPage(BasePage):
         super().__init__(parent, "系统设置")
 
     def _create_widgets(self):
-        # 标题
-        ctk.CTkLabel(
-            self, 
-            text="系统设置", 
-            font=ctk.CTkFont(size=20, weight="bold")
-        ).pack(pady=(20, 30))
+        # 主容器
+        main_frame = ctk.CTkFrame(self, corner_radius=15, fg_color=("white", "#2D2D2D"))
+        main_frame.pack(fill="both", expand=True, padx=8, pady=(8, 4))
 
-        # 设置容器
-        settings_frame = ctk.CTkFrame(self)
-        settings_frame.pack(fill="both", expand=True, padx=40, pady=20)
+        # 标题
+        header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        header_frame.pack(fill="x", padx=20, pady=(20, 10))
+        ctk.CTkLabel(
+            header_frame,
+            text="系统设置",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=26, weight="bold")
+        ).pack(side="left")
+
+        # 滚动区域
+        scrollable_frame = ctk.CTkScrollableFrame(main_frame, fg_color="transparent")
+        scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         # ==================== 路径设置 ====================
         ctk.CTkLabel(
-            settings_frame, 
-            text="📁 路径设置", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).grid(row=0, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=20)
+            scrollable_frame,
+            text="📁 路径设置",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).grid(row=0, column=0, columnspan=3, pady=(10, 10), sticky="w", padx=10)
+        ctk.CTkLabel(scrollable_frame, text="剪映草稿文件夹:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        path_frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
+        path_frame.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
 
-        ctk.CTkLabel(settings_frame, text="剪映草稿文件夹:").grid(row=1, column=0, padx=20, pady=10, sticky="w")
-        
-        path_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
-        path_frame.grid(row=1, column=1, padx=20, pady=10, sticky="ew")
-        
         self.draft_path_var = ctk.StringVar(value=self.settings.get("draft_folder", ""))
-        self.draft_path_entry = ctk.CTkEntry(path_frame, textvariable=self.draft_path_var, width=300)
+        self.draft_path_entry = ctk.CTkEntry(path_frame, textvariable=self.draft_path_var, width=300, corner_radius=8, fg_color=("white", "#3B3B3B"), border_color=("gray70", "gray40"))
         self.draft_path_entry.pack(side="left", padx=(0, 10))
-        
-        ctk.CTkButton(path_frame, text="浏览", command=self._select_draft_folder, width=80).pack(side="left", padx=(0, 5))
-        ctk.CTkButton(path_frame, text="自动检测", command=self._auto_detect_draft_folder, width=80).pack(side="left")
+
+        ctk.CTkButton(path_frame, text="浏览", command=self._select_draft_folder, width=80, corner_radius=8).pack(side="left", padx=(0, 5))
+        ctk.CTkButton(path_frame, text="自动检测", command=self._auto_detect_draft_folder, width=80, corner_radius=8).pack(side="left")
 
         # 传输选项
         self.transfer_var = ctk.BooleanVar(value=self.settings.get("transfer_enabled", False))
         ctk.CTkCheckBox(
-            settings_frame, 
-            text="传输草稿到指定文件夹（启用后草稿将直接保存到剪映草稿文件夹）", 
+            scrollable_frame,
+            text="传输草稿到指定文件夹（启用后草稿将自动保存至剪映草稿目录）",
             variable=self.transfer_var,
-            command=self._on_transfer_change
-        ).grid(row=2, column=1, padx=20, pady=10, sticky="w")
+            command=self._on_transfer_change,
+            font=ctk.CTkFont(family='Microsoft YaHei', size=13)
+        ).grid(row=2, column=1, padx=10, pady=10, sticky="w")
 
         # ==================== API 设置 ====================
         ctk.CTkLabel(
-            settings_frame, 
-            text="🌐 API 设置", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).grid(row=3, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=20)
-
-        ctk.CTkLabel(settings_frame, text="API 端口:").grid(row=4, column=0, padx=20, pady=10, sticky="w")
+            scrollable_frame,
+            text="🌐 API 设置",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).grid(row=3, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
+        
+        ctk.CTkLabel(scrollable_frame, text="API 端口:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=4, column=0, padx=10, pady=10, sticky="w")
         self.api_port_var = ctk.StringVar(value=self.settings.get("api_port", "8000"))
-        self.api_port_entry = ctk.CTkEntry(settings_frame, textvariable=self.api_port_var, width=100)
-        self.api_port_entry.grid(row=4, column=1, padx=20, pady=10, sticky="w")
+        self.api_port_entry = ctk.CTkEntry(scrollable_frame, textvariable=self.api_port_var, width=100, corner_radius=8, fg_color=("white", "#3B3B3B"), border_color=("gray70", "gray40"))
+        self.api_port_entry.grid(row=4, column=1, padx=10, pady=10, sticky="w")
 
-        ctk.CTkLabel(settings_frame, text="ngrok Authtoken:").grid(row=5, column=0, padx=20, pady=10, sticky="w")
+        ctk.CTkLabel(scrollable_frame, text="ngrok Authtoken:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=5, column=0, padx=10, pady=10, sticky="w")
         self.ngrok_token_var = ctk.StringVar(value=self.settings.get("ngrok_auth_token", ""))
-        self.ngrok_token_entry = ctk.CTkEntry(settings_frame, textvariable=self.ngrok_token_var, width=300, show="*")
-        self.ngrok_token_entry.grid(row=5, column=1, padx=20, pady=10, sticky="w")
+        self.ngrok_token_entry = ctk.CTkEntry(scrollable_frame, textvariable=self.ngrok_token_var, width=300, show="*", corner_radius=8, fg_color=("white", "#3B3B3B"), border_color=("gray70", "gray40"))
+        self.ngrok_token_entry.grid(row=5, column=1, padx=10, pady=10, sticky="w")
 
-        ctk.CTkLabel(settings_frame, text="ngrok 区域:").grid(row=6, column=0, padx=20, pady=10, sticky="w")
+        ctk.CTkLabel(scrollable_frame, text="ngrok 区域:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=6, column=0, padx=10, pady=10, sticky="w")
         self.ngrok_region_var = ctk.StringVar(value=self.settings.get("ngrok_region", "us"))
         self.ngrok_region_menu = ctk.CTkOptionMenu(
-            settings_frame,
+            scrollable_frame,
             variable=self.ngrok_region_var,
             values=["us", "eu", "ap", "au", "sa", "jp", "in"],
-            width=100
+            width=100,
+            corner_radius=8
         )
-        self.ngrok_region_menu.grid(row=6, column=1, padx=20, pady=10, sticky="w")
+        self.ngrok_region_menu.grid(row=6, column=1, padx=10, pady=10, sticky="w")
 
         # ==================== 外观设置 ====================
         ctk.CTkLabel(
-            settings_frame, 
-            text="🎨 外观设置", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).grid(row=7, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=20)
-
-        ctk.CTkLabel(settings_frame, text="主题模式:").grid(row=8, column=0, padx=20, pady=10, sticky="w")
+            scrollable_frame,
+            text="🎨 外观设置",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).grid(row=7, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
+        
+        ctk.CTkLabel(scrollable_frame, text="主题模式:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=8, column=0, padx=10, pady=10, sticky="w")
         self.theme_mode_var = ctk.StringVar(value=self.settings.get("theme_mode", "System"))
         self.theme_mode_menu = ctk.CTkOptionMenu(
-            settings_frame,
+            scrollable_frame,
             variable=self.theme_mode_var,
             values=["System", "Dark", "Light"],
-            command=self._change_appearance_mode
+            command=self._change_appearance_mode,
+            corner_radius=8
         )
-        self.theme_mode_menu.grid(row=8, column=1, padx=20, pady=10, sticky="w")
+        self.theme_mode_menu.grid(row=8, column=1, padx=10, pady=10, sticky="w")
 
         # 按钮区域
-        btn_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
-        btn_frame.grid(row=9, column=0, columnspan=3, pady=30)
-
+        btn_frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
+        btn_frame.grid(row=9, column=0, columnspan=3, pady=30, sticky="w", padx=10)
+        
         ctk.CTkButton(
-            btn_frame, 
-            text="保存设置", 
+            btn_frame,
+            text="保存设置",
             command=self._save_settings,
             width=150,
-            height=40
-        ).pack(side="left", padx=10)
+            height=40,
+            corner_radius=8,
+            font=ctk.CTkFont(family='Microsoft YaHei', size=14, weight="bold")
+        ).pack(side="left", padx=(0,10))
 
         ctk.CTkButton(
-            btn_frame, 
-            text="重置默认", 
+            btn_frame,
+            text="重置默认",
             command=self._reset_settings,
             width=150,
             height=40,
-            fg_color="gray",
-            hover_color="darkgray"
+            corner_radius=8,
+            fg_color=("gray75", "gray25"),
+            text_color=("gray10", "gray90"),
+            hover_color=("gray65", "gray35"),
+            font=ctk.CTkFont(family='Microsoft YaHei', size=14)
         ).pack(side="left", padx=10)
 
         # ==================== 当前配置概览 ====================
         ctk.CTkLabel(
-            settings_frame, 
-            text="ℹ️ 当前生效配置 (调试信息)", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).grid(row=10, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=20)
-
-        self.config_display = ctk.CTkTextbox(settings_frame, height=150, width=600)
-        self.config_display.grid(row=11, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="ew")
-        self.config_display.configure(state="disabled")
+            scrollable_frame,
+            text="ℹ️ 当前生效配置 (调试信息)",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).grid(row=10, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
         
+        self.config_display = ctk.CTkTextbox(scrollable_frame, height=150, width=600, corner_radius=10, fg_color=("gray97", "#383838"), border_width=1, border_color=("gray70", "gray40"))
+        self.config_display.grid(row=11, column=0, columnspan=3, padx=10, pady=(0, 20), sticky="ew")
+        self.config_display.configure(state="disabled")
+
         # 初始化显示
         self._update_config_display()
-
     def _update_config_display(self):
         settings_data = self.settings.get_all()
         # 隐藏敏感信息

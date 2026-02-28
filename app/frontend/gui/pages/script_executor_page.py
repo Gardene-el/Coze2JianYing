@@ -20,67 +20,110 @@ class ScriptExecutorPage(BasePage):
         super().__init__(parent, "脚本执行")
 
     def _create_widgets(self):
-        # 标题
-        ctk.CTkLabel(
-            self, 
-            text="脚本执行 (新版)", 
-            font=ctk.CTkFont(size=20, weight="bold")
-        ).pack(pady=(20, 10))
-        
-        ctk.CTkLabel(
-            self,
-            text="在此处粘贴 Coze 导出的 Python 脚本",
-            text_color="gray"
-        ).pack(pady=(0, 20))
+        # 统一设置字体
+        title_font = ctk.CTkFont(family="Microsoft YaHei", size=26, weight="bold")
+        label_font = ctk.CTkFont(family="Microsoft YaHei", size=13)
+        btn_font = ctk.CTkFont(family="Microsoft YaHei", size=14, weight="bold")
+        text_font = ctk.CTkFont(family="Consolas", size=14)
 
-        # 输入区域
-        self.input_textbox = ctk.CTkTextbox(self, height=300, font=("Consolas", 12))
-        self.input_textbox.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # 主容器框架
+        main_frame = ctk.CTkFrame(self, corner_radius=15, fg_color=("white", "#2D2D2D"))
+        main_frame.pack(fill="both", expand=True, padx=8, pady=(8, 4))
 
-        # 按钮区域
-        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=20, pady=20)
-        
+        # 1. 顶部标题区域
+        header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        header_frame.pack(fill="x", padx=25, pady=(25, 5))
+
+        ctk.CTkLabel(
+            header_frame,
+            text="脚本执行 (新版)",
+            font=title_font
+        ).pack(side="left")
+
+        ctk.CTkLabel(
+            main_frame,
+            text="在此处粘贴 Coze 导出的 Python 脚本以自动化执行",
+            text_color="gray",
+            font=label_font
+        ).pack(anchor="w", padx=25, pady=(0, 15))
+
+        # 2. 底部区域：优先 pack 底部防止隐藏
+        # 状态显示 (最下面)
+        self.status_label = ctk.CTkLabel(main_frame, text="状态: 就绪", text_color="gray", font=label_font)
+        self.status_label.pack(side="bottom", pady=(5, 20))
+
+        # 按钮区域 (倒数第二下)
+        btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        btn_frame.pack(side="bottom", fill="x", padx=25, pady=(15, 5))
+
         self.format_btn = ctk.CTkButton(
-            btn_frame, 
-            text="格式化输入", 
+            btn_frame,
+            text="格式化输入",
             command=self._format_input,
-            width=100
+            width=110,
+            height=45,
+            corner_radius=8,
+            font=btn_font,
+            fg_color="#0067C0",
+            hover_color="#005A9E"
         )
         self.format_btn.pack(side="left", padx=(0, 10))
-        
+
         self.validate_btn = ctk.CTkButton(
-            btn_frame, 
-            text="验证脚本", 
+            btn_frame,
+            text="验证脚本",
             command=self._validate_script,
-            width=100
+            width=110,
+            height=45,
+            corner_radius=8,
+            font=btn_font,
+            fg_color="#0067C0",
+            hover_color="#005A9E"
         )
         self.validate_btn.pack(side="left", padx=(0, 10))
-        
+
         self.execute_btn = ctk.CTkButton(
-            btn_frame, 
-            text="执行脚本", 
+            btn_frame,
+            text="执行脚本",
             command=self._execute_script,
-            fg_color="green",
-            hover_color="darkgreen",
-            width=120
+            fg_color="#2E8B57",
+            hover_color="#1F633E",
+            width=120,
+            height=45,
+            corner_radius=8,
+            font=btn_font
         )
         self.execute_btn.pack(side="left", padx=(0, 10))
-        
+
+        # 间隔以推右面的清空按钮
+        spacer = ctk.CTkFrame(btn_frame, width=1, height=1, fg_color="transparent")
+        spacer.pack(side="left", expand=True, fill="x")
+
         self.clear_btn = ctk.CTkButton(
-            btn_frame, 
-            text="清空", 
+            btn_frame,
+            text="清空内容",
             command=self._clear_input,
-            fg_color="gray",
-            hover_color="darkgray",
-            width=80
+            fg_color=("gray75", "gray25"),
+            text_color=("gray10", "gray90"),
+            hover_color=("gray65", "gray35"),
+            width=100,
+            height=45,
+            corner_radius=8,
+            font=btn_font
         )
-        self.clear_btn.pack(side="left")
+        self.clear_btn.pack(side="right")
 
-        # 状态显示
-        self.status_label = ctk.CTkLabel(self, text="就绪", text_color="gray")
-        self.status_label.pack(pady=(0, 10))
-
+        # 3. 中间输入区域 (最后 pack，自动占据剩余空间)
+        self.input_textbox = ctk.CTkTextbox(
+            main_frame, 
+            height=300,
+            font=text_font, 
+            corner_radius=10,
+            fg_color=("white", "#3B3B3B"),
+            border_width=1, 
+            border_color=("gray70", "gray40")
+        )
+        self.input_textbox.pack(fill="both", expand=True, padx=25, pady=(0, 0))
     def _format_input(self):
         content = self.input_textbox.get("1.0", "end").strip()
         if not content:

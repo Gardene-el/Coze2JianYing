@@ -41,56 +41,68 @@ class LogWindow:
     def _create_widgets(self):
         """创建UI组件"""
         # 主框架
-        self.main_frame = ctk.CTkFrame(self.window)
-        self.main_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        
+        self.main_frame = ctk.CTkFrame(self.window, corner_radius=15, fg_color=("white", "#2D2D2D"))
+        self.main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  
+
         # 工具栏
-        self.toolbar = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        
+        self.toolbar = ctk.CTkFrame(self.main_frame, fg_color="transparent")    
+
         # 按钮
         self.clear_btn = ctk.CTkButton(
             self.toolbar,
             text="清空日志",
             command=self._clear_logs,
-            width=100
+            width=100,
+            corner_radius=8,
+            fg_color=("gray75", "gray25"),
+            text_color=("gray10", "gray90"),
+            hover_color=("gray65", "gray35")
         )
         self.save_btn = ctk.CTkButton(
             self.toolbar,
             text="保存日志",
             command=self._save_logs,
-            width=100
+            width=100,
+            corner_radius=8,
+            fg_color=("gray75", "gray25"),
+            text_color=("gray10", "gray90"),
+            hover_color=("gray65", "gray35")
         )
         self.auto_scroll_var = ctk.BooleanVar(value=True)
         self.auto_scroll_check = ctk.CTkCheckBox(
             self.toolbar,
             text="自动滚动",
-            variable=self.auto_scroll_var
+            variable=self.auto_scroll_var,
+            font=ctk.CTkFont(family='Microsoft YaHei', size=13)
         )
-        
+
         # 日志文本框
         self.log_text = ctk.CTkTextbox(
             self.main_frame,
-            font=("Consolas", 12),
-            state="disabled"
+            font=("Consolas", 13),
+            state="disabled",
+            corner_radius=10,
+            fg_color=("gray97", "#383838"),
+            border_width=1,
+            border_color=("gray70", "gray40")
         )
-        
+
         # 配置网格权重
         self.window.grid_columnconfigure(0, weight=1)
         self.window.grid_rowconfigure(0, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid_rowconfigure(1, weight=1)
-    
+
     def _setup_layout(self):
         """设置布局"""
         # 工具栏
-        self.toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        self.toolbar.grid(row=0, column=0, sticky="ew", padx=15, pady=(15, 10))
         self.clear_btn.pack(side="left", padx=(0, 10))
         self.save_btn.pack(side="left", padx=(0, 10))
         self.auto_scroll_check.pack(side="left")
-        
+
         # 日志文本框
-        self.log_text.grid(row=1, column=0, sticky="nsew")
-    
+        self.log_text.grid(row=1, column=0, sticky="nsew", padx=15, pady=(0, 15))
     def append_log(self, message: str):
         """
         添加日志消息
