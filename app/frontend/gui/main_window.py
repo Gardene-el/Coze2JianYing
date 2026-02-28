@@ -3,6 +3,7 @@
 """
 
 import os
+import sys
 import customtkinter as ctk
 from datetime import datetime
 from tkinter import messagebox, filedialog
@@ -117,11 +118,11 @@ class MainWindow(ctk.CTk):
     def _load_icons(self):
         """加载导航栏图标"""
         icons = {}
-        icon_dir = os.path.join(os.path.dirname(__file__), "assets", "icons")
-        
-        # 确保目录存在
-        if not os.path.exists(icon_dir):
-            os.makedirs(icon_dir, exist_ok=True)
+        # 支持 PyInstaller onefile/onedir 模式：优先从 _MEIPASS 读取资源
+        if hasattr(sys, "_MEIPASS"):
+            icon_dir = os.path.join(sys._MEIPASS, "frontend", "gui", "assets", "icons")
+        else:
+            icon_dir = os.path.join(os.path.dirname(__file__), "assets", "icons")
             
         icon_files = {
             "draft": "draft.png",
@@ -136,7 +137,8 @@ class MainWindow(ctk.CTk):
                 try:
                     # 使用 PIL 图像创建 CTkImage，这样可以渲染真实图片/透明度
                     # CTkImage 可以支持 light/dark 两种图片，这里我们使用同一张
-                    image = Image.open(path)
+                    with Image.open(path) as img:
+                        image = img.copy()
                     icons[key] = ctk.CTkImage(light_image=image, dark_image=image, size=(24, 24))
                 except Exception as e:
                     self.logger.error(f"无法加载图标 {path}: {e}")
