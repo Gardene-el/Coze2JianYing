@@ -20,50 +20,78 @@ class DraftGeneratorPage(BasePage):
         super().__init__(parent, "手动草稿生成")
 
     def _create_widgets(self):
-        # 标题
+        # 统一设置字体
+        title_font = ctk.CTkFont(family="Microsoft YaHei", size=26, weight="bold")
+        label_font = ctk.CTkFont(family="Microsoft YaHei", size=13)
+        btn_font = ctk.CTkFont(family="Microsoft YaHei", size=14, weight="bold")
+        text_font = ctk.CTkFont(family="Consolas", size=14)
+
+        # 主容器框架
+        main_frame = ctk.CTkFrame(self, corner_radius=15, fg_color=("white", "#2D2D2D"))
+        main_frame.pack(fill="both", expand=True, padx=8, pady=(8, 4))
+
+        # 1. 顶部区域：标题和说明
+        header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        header_frame.pack(fill="x", padx=25, pady=(25, 5))
+
         ctk.CTkLabel(
-            self, 
-            text="手动草稿生成 (旧版)", 
-            font=ctk.CTkFont(size=20, weight="bold")
-        ).pack(pady=(20, 10))
-        
+            header_frame,
+            text="手动草稿生成 (旧版)",
+            font=title_font
+        ).pack(side="left")
+
         ctk.CTkLabel(
-            self,
+            main_frame,
             text="在此处粘贴 Coze 插件生成的 JSON 数据",
-            text_color="gray"
-        ).pack(pady=(0, 20))
+            text_color="gray",
+            font=label_font
+        ).pack(anchor="w", padx=25, pady=(0, 15))
 
-        # 输入区域
-        self.input_textbox = ctk.CTkTextbox(self, height=300)
-        self.input_textbox.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # 2. 底部区域：优先 pack 底部，保证由于文本框扩展不再将底部挤出可视范围
+        # 状态显示 (最下面)
+        self.status_label = ctk.CTkLabel(main_frame, text="状态: 就绪", text_color="gray", font=label_font)  
+        self.status_label.pack(side="bottom", pady=(5, 20))
 
-        # 按钮区域
-        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=20, pady=20)
-        
+        # 按钮区域 (倒数第二下)
+        btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        btn_frame.pack(side="bottom", fill="x", padx=25, pady=(15, 5))
+
         self.generate_btn = ctk.CTkButton(
-            btn_frame, 
-            text="生成草稿", 
+            btn_frame,
+            text="生成草稿",
             command=self._generate_draft,
-            height=40,
-            font=ctk.CTkFont(size=14, weight="bold")
+            height=45,
+            corner_radius=8,
+            font=btn_font,
+            fg_color="#0067C0",
+            hover_color="#005A9E"
         )
         self.generate_btn.pack(side="left", padx=(0, 10), expand=True, fill="x")
-        
+
         self.clear_btn = ctk.CTkButton(
-            btn_frame, 
-            text="清空内容", 
+            btn_frame,
+            text="清空内容",
             command=self._clear_input,
-            height=40,
-            fg_color="gray",
-            hover_color="darkgray"
+            height=45,
+            corner_radius=8,
+            fg_color=("gray75", "gray25"),
+            text_color=("gray10", "gray90"),
+            hover_color=("gray65", "gray35"),
+            font=btn_font
         )
-        self.clear_btn.pack(side="left", padx=(10, 0), expand=True, fill="x")
+        self.clear_btn.pack(side="left", padx=(10, 0), expand=True, fill="x")   
 
-        # 状态显示
-        self.status_label = ctk.CTkLabel(self, text="就绪", text_color="gray")
-        self.status_label.pack(pady=(0, 10))
-
+        # 3. 中间输入区域 (最后 pack，自动占据剩余空间)
+        self.input_textbox = ctk.CTkTextbox(
+            main_frame, 
+            height=300, 
+            font=text_font, 
+            corner_radius=10,
+            fg_color=("white", "#3B3B3B"),
+            border_width=1, 
+            border_color=("gray70", "gray40")
+        )
+        self.input_textbox.pack(fill="both", expand=True, padx=25, pady=(0, 0))
     def _generate_draft(self):
         if self.is_generating:
             messagebox.showwarning("警告", "正在生成草稿，请稍候...")

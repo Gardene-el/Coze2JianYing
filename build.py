@@ -111,6 +111,12 @@ def build_exe(fast_mode=False):
         args.append(f"--add-data={ctk_path}{separator}customtkinter")
         print("已添加 customtkinter assets 到打包配置")
 
+    # 添加导航栏图标资源
+    icons_dir = Path("app/frontend/gui/assets/icons")
+    if icons_dir.exists():
+        args.append(f"--add-data={icons_dir}{separator}frontend/gui/assets/icons")
+        print("已添加导航栏图标资源到打包配置")
+
     try:
         PyInstaller.__main__.run(args)
         print("\n" + "=" * 60)

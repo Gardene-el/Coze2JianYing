@@ -5,7 +5,7 @@ class BasePage(ctk.CTkFrame):
     """页面基类"""
     
     def __init__(self, parent, page_name: str):
-        super().__init__(parent)
+        super().__init__(parent, fg_color='transparent')
         self.page_name = page_name
         self.logger = get_logger(f"{__name__}.{page_name}")
         
