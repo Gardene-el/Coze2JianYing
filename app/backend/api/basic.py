@@ -42,7 +42,7 @@ from app.backend.services import basic as service
 from app.backend.utils.helper import gen_unique_id
 
 
-router = APIRouter(prefix="/basic", tags=["basic"])
+router = APIRouter(tags=["basic"])
 
 
 @router.post(path="/create_draft", response_model=CreateDraftResponse)
@@ -146,12 +146,12 @@ def add_audio_keyframe(
 	return AddAudioKeyframeResponse(keyframe_id=gen_unique_id())
 
 
-@router.post(path="/add_global_effect", response_model=AddEffectResponse)
-def add_global_effect(
+@router.post(path="/add_effect", response_model=AddEffectResponse)
+def add_effect(
 	draft_id: str = Body(..., embed=True, description="草稿ID"),
 	request: AddEffectRequest = Body(...),
 ) -> AddEffectResponse:
-	service.add_global_effect(
+	service.add_effect(
 		draft_id=draft_id,
 		effect_type=request.effect_type,
 		target_timerange=request.target_timerange,
@@ -160,12 +160,12 @@ def add_global_effect(
 	return AddEffectResponse(effect_id=gen_unique_id())
 
 
-@router.post(path="/add_global_filter", response_model=AddFilterResponse)
-def add_global_filter(
+@router.post(path="/add_filter", response_model=AddFilterResponse)
+def add_filter(
 	draft_id: str = Body(..., embed=True, description="草稿ID"),
 	request: AddFilterRequest = Body(...),
 ) -> AddFilterResponse:
-	service.add_global_filter(
+	service.add_filter(
 		draft_id=draft_id,
 		filter_type=request.filter_type,
 		target_timerange=request.target_timerange,

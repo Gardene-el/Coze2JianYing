@@ -33,7 +33,7 @@ def _first_track_name_by_type(script: draft.ScriptFile, track_type: draft.TrackT
 	return new_track_name
 
 
-def add_global_filter(
+def add_filter(
 	draft_id: str,
 	filter_type: str,
 	target_timerange: TimeRange,

@@ -39,7 +39,7 @@ def _first_track_name_by_type(script: draft.ScriptFile, track_type: draft.TrackT
 	return new_track_name
 
 
-def add_global_effect(
+def add_effect(
 	draft_id: str,
 	effect_type: str,
 	target_timerange: TimeRange,

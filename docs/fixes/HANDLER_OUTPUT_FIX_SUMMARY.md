@@ -9,11 +9,21 @@
 ### 原始问题示例
 
 **Coze 端看到的格式（❌ 错误）:**
+
 ```json
-["7156f95b_a827_491e_9a6c_a7b2d338471e", true, "操作成功", null, null, null, null]
+[
+  "7156f95b_a827_491e_9a6c_a7b2d338471e",
+  true,
+  "操作成功",
+  null,
+  null,
+  null,
+  null
+]
 ```
 
 **Coze 期望的格式（✅ 正确）:**
+
 ```json
 {
   "draft_id": "7156f95b_a827_491e_9a6c_a7b2d338471e",
@@ -52,19 +62,20 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 
 ### 更新的文件
 
-| 类别 | 文件数 | 说明 |
-|------|--------|------|
-| 生成器核心 | 1 | `d_handler_function_generator.py` |
-| Handler 文件 | 28 | 所有 `raw_tools/*/handler.py` |
-| 测试文件 | 2 | 单元测试 + 演示脚本 |
-| 文档文件 | 1 | 详细修复文档 |
+| 类别         | 文件数 | 说明                              |
+| ------------ | ------ | --------------------------------- |
+| 生成器核心   | 1      | `d_handler_function_generator.py` |
+| Handler 文件 | 28     | 所有 `raw_tools/*/handler.py`     |
+| 测试文件     | 2      | 单元测试 + 演示脚本               |
+| 文档文件     | 1      | 详细修复文档                      |
 
 ### 受影响的 Handler 列表
 
 所有 28 个自动生成的 handler：
+
 - `create_draft`, `create_audio_segment`, `create_video_segment`, `create_text_segment`
 - `create_sticker_segment`, `create_effect_segment`, `create_filter_segment`
-- `add_track`, `add_segment`, `add_global_effect`, `add_global_filter`
+- `add_track`, `add_segment`, `add_effect`, `add_filter`
 - `save_draft`, `add_audio_*`, `add_video_*`, `add_text_*`, `add_sticker_keyframe`
 - 等 28 个 handler
 
@@ -92,6 +103,7 @@ return output._asdict()
 ```
 
 **好处**:
+
 - ✅ IDE 自动补全和类型检查
 - ✅ 编译时发现字段名错误
 - ✅ 代码可读性和可维护性
@@ -99,6 +111,7 @@ return output._asdict()
 ### 2. Coze 平台兼容
 
 修复后 Coze 可以：
+
 - ✅ 通过字段名访问: `result.draft_id`
 - ✅ 在工作流中正确传递和使用
 - ✅ 显示有意义的字段名
@@ -139,7 +152,15 @@ $ python tests/test_handler_output_format.py
 ### Before (数组格式 - 错误)
 
 ```json
-["7156f95b_a827_491e_9a6c_a7b2d338471e", true, "操作成功", null, null, null, null]
+[
+  "7156f95b_a827_491e_9a6c_a7b2d338471e",
+  true,
+  "操作成功",
+  null,
+  null,
+  null,
+  null
+]
 ```
 
 **问题**: Coze 不知道哪个元素是什么字段
@@ -205,6 +226,7 @@ $ python tests/test_handler_output_format.py
 ### 对新 Handler 的影响
 
 未来添加新的 API 端点时：
+
 1. 运行 `python scripts/generate_handler_from_api.py`
 2. 新生成的 handler 会自动应用这个修复
 3. 无需手动修改
@@ -218,6 +240,7 @@ $ python tests/test_handler_output_format.py
 ## ✨ 总结
 
 这个修复：
+
 - ✅ 解决了 Coze 平台无法识别返回值的问题
 - ✅ 保持了代码的类型安全性
 - ✅ 不影响现有功能和代码逻辑
@@ -234,4 +257,4 @@ $ python tests/test_handler_output_format.py
 
 ---
 
-*最后更新: 2025-11-20*
+_最后更新: 2025-11-20_

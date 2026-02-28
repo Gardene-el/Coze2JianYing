@@ -106,8 +106,8 @@ python scripts/generate_handler_from_api.py
 - `create_filter_segment`
 - `add_track`
 - `add_segment`
-- `add_global_effect`
-- `add_global_filter`
+- `add_effect`
+- `add_filter`
 - `save_draft`
 - 以及其他 16 个 handler
 

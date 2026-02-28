@@ -47,7 +47,7 @@ from types import SimpleNamespace
 # 导入所有API函数
 from app.backend.api.draft_routes import (
     create_draft, add_track, add_segment,
-    add_global_effect, add_global_filter,
+    add_effect, add_filter,
     save_draft, get_draft_status
 )
 

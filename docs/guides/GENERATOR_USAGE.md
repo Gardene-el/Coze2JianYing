@@ -193,8 +193,8 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 - `create_draft` - 创建草稿
 - `add_track` - 添加轨道
 - `add_segment` - 添加片段到草稿
-- `add_global_effect` - 添加全局特效
-- `add_global_filter` - 添加全局滤镜
+- `add_effect` - 添加全局特效
+- `add_filter` - 添加全局滤镜
 - `save_draft` - 保存草稿
 
 ### Segment 创建工具 (6个)
