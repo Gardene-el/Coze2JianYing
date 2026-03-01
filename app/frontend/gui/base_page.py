@@ -1,13 +1,13 @@
 import customtkinter as ctk
-from app.backend.utils.logger import logger
+from app.backend.utils.logger import get_logger
 
 class BasePage(ctk.CTkFrame):
     """页面基类"""
     
     def __init__(self, parent, page_name: str):
-        super().__init__(parent)
+        super().__init__(parent, fg_color='transparent')
         self.page_name = page_name
-        self.logger = logger.getChild(page_name)
+        self.logger = get_logger(f"{__name__}.{page_name}")
         
         # 页面特定的变量字典
         self._page_variables = {}
