@@ -26,7 +26,7 @@ class CloudServicePage(BasePage):
         self.service_thread = None
         self.uvicorn_server = None
         self.service_running = False
-        self.service_port = int(self.settings.get("api_port", "8000"))
+        self.service_port = int(self.settings.get("api_port", "20211"))
         self.log_queue = queue.Queue()
         self.log_reader_thread = None
         self.stop_event = threading.Event()
@@ -414,7 +414,7 @@ class CloudServicePage(BasePage):
     def update_settings(self):
         """更新页面设置显示"""
         # 重新从 SettingsManager 读取值
-        self.service_port = int(self.settings.get("api_port", "8000"))
+        self.service_port = int(self.settings.get("api_port", "20211"))
         
         # 只有在服务未运行时才更新端口显示，避免干扰
         if not self.service_running:

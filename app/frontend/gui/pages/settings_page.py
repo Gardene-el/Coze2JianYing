@@ -59,7 +59,7 @@ class SettingsPage(BasePage):
         ).grid(row=3, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=20)
 
         ctk.CTkLabel(settings_frame, text="API 端口:").grid(row=4, column=0, padx=20, pady=10, sticky="w")
-        self.api_port_var = ctk.StringVar(value=self.settings.get("api_port", "8000"))
+        self.api_port_var = ctk.StringVar(value=self.settings.get("api_port", "20211"))
         self.api_port_entry = ctk.CTkEntry(settings_frame, textvariable=self.api_port_var, width=100)
         self.api_port_entry.grid(row=4, column=1, padx=20, pady=10, sticky="w")
 

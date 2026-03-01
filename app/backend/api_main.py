@@ -55,7 +55,7 @@ app.include_router(api_router)
 
 
 # 启动服务的函数
-def start_api_server(host: str = "127.0.0.1", port: int = 8000):
+def start_api_server(host: str = "127.0.0.1", port: int = 20211):
     """启动 FastAPI 服务器"""
     uvicorn.run(
         "app.backend.api_main:app",
@@ -70,10 +70,10 @@ if __name__ == "__main__":
     # 解析命令行参数
     parser = argparse.ArgumentParser(
         description="Coze2JianYing API 服务 - 独立运行模式",
-        epilog="示例: python app/app/backend/api_main.py --port 8000 --draft-dir \"D:\\JianYing\\Drafts\""
+        epilog="示例: python app/app/backend/api_main.py --port 20211 --draft-dir \"D:\\JianYing\\Drafts\""
     )
     # 移除 required=True，改为手动检查以提供中文提示
-    parser.add_argument("--port", type=int, help="[必须] API 服务监听端口 (例如: 8000)")
+    parser.add_argument("--port", type=int, help="[必须] API 服务监听端口 (例如: 20211)")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="API 服务监听地址 (默认: 127.0.0.1)")
     parser.add_argument("--draft-dir", type=str, help="[必须] 剪映草稿保存路径 (例如: .../JianYingPro/User Data/Projects/com.lveditor.draft)")
     

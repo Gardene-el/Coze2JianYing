@@ -53,7 +53,7 @@ class SettingsManager:
         """获取默认设置"""
         return {
             "draft_folder": "",
-            "api_port": "8000",
+            "api_port": "20211",
             "ngrok_auth_token": "",
             "ngrok_region": "us",
             "theme_mode": "System",  # System, Dark, Light

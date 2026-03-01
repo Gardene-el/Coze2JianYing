@@ -134,7 +134,7 @@ def simplify_operation_id(operation_id: str) -> str:
         return operation_id
 
 
-def create_coze_openapi_spec(server_url: str = "http://localhost:8000") -> Dict[str, Any]:
+def create_coze_openapi_spec(server_url: str = "http://localhost:20211") -> Dict[str, Any]:
     """
     创建适配 Coze 平台的 OpenAPI 规范
     
@@ -259,8 +259,8 @@ def main():
     )
     parser.add_argument(
         '--server-url',
-        default='http://localhost:8000',
-        help='API 服务器 URL（默认: http://localhost:8000）'
+        default='http://localhost:20211',
+        help='API 服务器 URL（默认: http://localhost:20211）'
     )
     parser.add_argument(
         '--output',

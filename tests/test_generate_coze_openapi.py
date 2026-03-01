@@ -30,7 +30,7 @@ def test_yaml_generation():
     
     try:
         # 生成 OpenAPI schema
-        schema = create_coze_openapi_spec("http://localhost:8000")
+        schema = create_coze_openapi_spec("http://localhost:20211")
         
         # 保存为 YAML
         with open(temp_file, 'w', encoding='utf-8') as f:
@@ -72,7 +72,7 @@ def test_json_generation():
     
     try:
         # 生成 OpenAPI schema
-        schema = create_coze_openapi_spec("http://localhost:8000")
+        schema = create_coze_openapi_spec("http://localhost:20211")
         
         # 保存为 JSON
         with open(temp_file, 'w', encoding='utf-8') as f:
