@@ -1,0 +1,638 @@
+import json
+from typing import List, Dict, Any, Tuple, Optional, Literal
+import uuid
+
+from app.backend.utils.logger import logger
+from pyJianYingDraft import ScriptFile, TrackType, TextSegment, TextStyle, ClipSettings, Timerange, FontType, TextBorder, TextShadow
+from pyJianYingDraft.metadata import TextIntro, TextOutro, TextLoopAnim
+from app.backend.utils.cache import DRAFT_CACHE
+from app.backend.exceptions import CustomException, CustomError
+from app.backend.schemas.easy.add_captions import ShadowInfo
+
+
+def add_captions(
+    draft_id: str,
+    captions: str,
+    text_color: str = "#ffffff",
+    border_color: Optional[str] = None,
+    alignment: int = 1,
+    alpha: float = 1.0,
+    font: Optional[str] = None,
+    font_size: int = 15,
+    letter_spacing: Optional[float] = None,
+    line_spacing: Optional[float] = None,
+    scale_x: float = 1.0,
+    scale_y: float = 1.0,
+    transform_x: float = 0.0,
+    transform_y: float = 0.0,
+    style_text: bool = False,
+    underline: bool = False,
+    italic: bool = False,
+    bold: bool = False,
+    has_shadow: bool = False,
+    shadow_info: Optional[ShadowInfo] = None
+) -> Tuple[str, str, List[str], List[str], List[dict]]:
+    """
+    批量添加字幕到剪映草稿的业务逻辑
+    
+    Args:
+        draft_id: 草稿ID
+        captions: 字幕信息列表的JSON字符串，格式如下：
+            [
+                {
+                    "start": 0,  # 字幕开始时间（微秒）
+                    "end": 10000000,  # 字幕结束时间（微秒）
+                    "text": "你好，剪映",  # 字幕文本内容
+                    "keyword": "好",  # 关键词（用|分隔多个关键词），可选参数
+                    "keyword_color": "#457616",  # 关键词颜色，可选参数
+                    "keyword_font_size": 15,  # 关键词字体大小，可选参数
+                    "font_size": 15,  # 文本字体大小，可选参数
+                    "in_animation": None,  # 入场动画，可选参数
+                    "out_animation": None,  # 出场动画，可选参数
+                    "loop_animation": None,  # 循环动画，可选参数
+                    "in_animation_duration": None,  # 入场动画时长，可选参数
+                    "out_animation_duration": None,  # 出场动画时长，可选参数
+                    "loop_animation_duration": None  # 循环动画时长，可选参数
+                }
+            ]
+        text_color: 文本颜色（十六进制），默认"#ffffff"
+        border_color: 边框颜色（十六进制），默认None
+        alignment: 文本对齐方式（0-5），默认1
+        alpha: 文本透明度（0.0-1.0），默认1.0
+        font: 字体名称，默认None
+        font_size: 字体大小，默认15
+        letter_spacing: 字间距，默认None
+        line_spacing: 行间距，默认None
+        scale_x: 水平缩放，默认1.0
+        scale_y: 垂直缩放，默认1.0
+        transform_x: 水平位移，默认0.0
+        transform_y: 垂直位移，默认0.0
+        style_text: 是否使用样式文本，默认False
+        underline: 文字下划线开关，默认False
+        italic: 文本斜体开关，默认False
+        bold: 文本加粗开关，默认False
+    
+    Returns:
+        draft_id: 草稿ID
+        track_id: 字幕轨道ID
+        text_ids: 字幕ID列表
+        segment_ids: 字幕片段ID列表
+        segment_infos: 片段信息列表
+    
+    Raises:
+        CustomException: 字幕添加失败
+    """
+    # 记录函数入口参数，便于调试
+    logger.info(f"add_captions started, draft_id: {draft_id}")
+    logger.debug(f"Function parameters - text_color: {text_color}, border_color: {border_color}, "
+                 f"alignment: {alignment}, alpha: {alpha}, font: {font}, font_size: {font_size}, "
+                 f"scale_x: {scale_x}, scale_y: {scale_y}, transform_x: {transform_x}, transform_y: {transform_y}, "
+                 f"style_text: {style_text}, underline: {underline}, italic: {italic}, bold: {bold}, has_shadow: {has_shadow}, shadow_info: {shadow_info}")
+    
+    try:
+        # 1. 验证草稿ID
+        if (not draft_id) or (draft_id not in DRAFT_CACHE):
+            logger.error(f"Invalid draft_id or draft not found in cache: {draft_id}")
+            raise CustomException(CustomError.INVALID_DRAFT_URL)
+
+        # 2. 解析字幕信息
+        caption_items = parse_captions_data(json_str=captions)
+        if len(caption_items) == 0:
+            logger.info(f"No caption info provided, draft_id: {draft_id}")
+            raise CustomException(CustomError.INVALID_CAPTION_INFO)
+
+        logger.info(f"Parsed {len(caption_items)} caption items")
+
+        # 3. 从缓存中获取草稿
+        script: ScriptFile = DRAFT_CACHE[draft_id]
+
+        # 4. 添加字幕轨道
+        track_name = f"caption_track_{uuid.uuid4().hex[:12]}"
+        script.add_track(track_type=TrackType.text, track_name=track_name)
+        logger.info(f"Added caption track: {track_name}")
+
+        # 5. 遍历字幕信息，添加字幕到草稿中的指定轨道，收集片段ID
+        segment_ids = []
+        text_ids = []
+        segment_infos = []
+        for i, caption in enumerate(caption_items):
+            try:
+                logger.info(f"Processing caption {i+1}/{len(caption_items)}, text: {caption['text'][:20]}...")
+                
+                segment_id, text_id, segment_info = add_caption_to_draft(
+                    script, track_name,
+                    caption=caption,
+                    text_color=text_color,
+                    border_color=border_color,
+                    alignment=alignment,
+                    alpha=alpha,
+                    font=font,
+                    font_size=font_size,
+                    letter_spacing=letter_spacing,
+                    line_spacing=line_spacing,
+                    scale_x=scale_x,
+                    scale_y=scale_y,
+                    transform_x=transform_x,
+                    transform_y=transform_y,
+                    style_text=style_text,
+                    underline=underline,
+                    italic=italic,
+                    bold=bold,
+                    has_shadow=has_shadow,
+                    shadow_info=shadow_info
+                )
+                segment_ids.append(segment_id)
+                text_ids.append(text_id)
+                segment_infos.append(segment_info)
+                logger.info(f"Added caption {i+1}/{len(caption_items)}, segment_id: {segment_id}")
+            except Exception as e:
+                logger.error(f"Failed to add caption {i+1}/{len(caption_items)}, error: {str(e)}")
+                raise
+
+        # 6. 保存草稿
+        script.save()
+        logger.info(f"Draft saved successfully")
+
+        # 7. 获取当前字幕轨道ID
+        track_id = ""
+        for key in script.tracks.keys():
+            if script.tracks[key].name == track_name:
+                track_id = script.tracks[key].track_id
+                break
+        logger.info(f"Caption track created, draft_id: {draft_id}, track_id: {track_id}")
+
+        logger.info(f"add_captions completed successfully - draft_id: {draft_id}, track_id: {track_id}, captions_added: {len(caption_items)}")
+        
+        return draft_id, track_id, text_ids, segment_ids, segment_infos
+        
+    except CustomException:
+        # 重新抛出自定义异常
+        raise
+    except Exception as e:
+        # 捕获其他未预期的异常并转换为自定义异常
+        logger.error(f"Unexpected error in add_captions: {str(e)}")
+        raise CustomException(CustomError.CAPTION_ADD_FAILED, f"Unexpected error: {str(e)}")
+
+
+def add_caption_to_draft(
+    script: ScriptFile,
+    track_name: str,
+    caption: dict,
+    text_color: str = "#ffffff",
+    border_color: Optional[str] = None,
+    alignment: int = 1,
+    alpha: float = 1.0,
+    font: Optional[str] = None,
+    font_size: int = 15,
+    letter_spacing: Optional[float] = None,
+    line_spacing: Optional[float] = None,
+    scale_x: float = 1.0,
+    scale_y: float = 1.0,
+    transform_x: float = 0.0,
+    transform_y: float = 0.0,
+    style_text: bool = False,
+    underline: bool = False,
+    italic: bool = False,
+    bold: bool = False,
+    has_shadow: bool = False,
+    shadow_info: Optional[ShadowInfo] = None
+) -> Tuple[str, str, dict]:
+    """
+    向剪映草稿中添加单个字幕
+    
+    Args:
+        script: 草稿文件对象
+        track_name: 字幕轨道名称
+        caption: 字幕信息字典，包含以下字段：
+            start: 字幕开始时间（微秒）
+            end: 字幕结束时间（微秒）
+            text: 字幕文本内容
+            keyword: 关键词（用|分隔多个关键词），可选
+            keyword_color: 关键词颜色，可选
+            keyword_font_size: 关键词字体大小，可选
+            font_size: 文本字体大小，可选
+            in_animation: 入场动画，可选
+            out_animation: 出场动画，可选
+            loop_animation: 循环动画，可选
+            in_animation_duration: 入场动画时长，可选
+            out_animation_duration: 出场动画时长，可选
+            loop_animation_duration: 循环动画时长，可选
+        has_shadow: 是否启用文本阴影
+        shadow_info: 文本阴影参数
+        其他参数：字幕样式设置
+    
+    Returns:
+        segment_id: 片段ID
+        text_id: 文本ID（material_id）
+        segment_info: 片段信息字典，包含id、start、end
+    
+    Raises:
+        CustomException: 添加字幕失败
+    """
+    try:
+        # 记录函数入口参数，便于调试
+        logger.debug(f"add_caption_to_draft called with caption: {caption}")
+        
+        # 1. 创建时间范围
+        caption_duration = caption['end'] - caption['start']
+        timerange = Timerange(start=caption['start'], duration=caption_duration)
+        
+        # 2. 解析颜色
+        rgb_color = hex_to_rgb(text_color)
+        
+        # 3. 创建文本样式
+        align_value: Literal[0, 1, 2] = 0
+        if alignment == 1:
+            align_value = 1
+        elif alignment == 2:
+            align_value = 2
+        
+        # 根据需求修改：只有当caption中明确指定了font_size时才使用，否则不设置默认值
+        font_size_value = font_size
+        if 'font_size' in caption and caption['font_size'] is not None:
+            font_size_value = float(caption['font_size'])
+        
+        # 创建TextStyle对象
+        text_style = TextStyle(
+            size=font_size_value,
+            color=rgb_color,
+            alpha=alpha,
+            align=align_value,
+            letter_spacing=int(letter_spacing) if letter_spacing is not None else 0,
+            line_spacing=int(line_spacing) if line_spacing is not None else 0,
+            auto_wrapping=True,  # 字幕默认开启自动换行
+            underline=underline,
+            italic=italic,
+            bold=bold
+        )
+        logger.info(f"Created text style, text_style.size: {text_style.size}, font_size from caption: {font_size}")
+        
+        # 4. 创建文本描边（如果提供了border_color）
+        text_border = None
+        if border_color:
+            border_rgb_color = hex_to_rgb(border_color)
+            text_border = TextBorder(color=border_rgb_color)
+        
+        # 5. 创建字体（如果提供了font）
+        font_type = None
+        if font:
+            try:
+                # 尝试根据字体名称查找对应的FontType
+                font_type = getattr(FontType, font, None)
+                if font_type is None:
+                    logger.warning(f"Font '{font}' not found, using default font")
+            except AttributeError:
+                logger.warning(f"Font '{font}' not found, using default font")
+        
+        # 6. 创建图像调节设置
+        clip_settings = ClipSettings(
+            scale_x=scale_x,
+            scale_y=scale_y,
+            transform_x=transform_x / script.width,  # 转换为画布宽度单位
+            transform_y=transform_y / script.height  # 转换为画布高度单位
+        )
+        
+        # 7. 创建文本阴影（如果启用了阴影）
+        text_shadow = None
+        if has_shadow:
+            # 如果启用了阴影但没有提供shadow_info，则使用默认值
+            if shadow_info is None:
+                # 创建默认的阴影配置
+                shadow_rgb_color = hex_to_rgb("#000000")
+                text_shadow = TextShadow(
+                    alpha=0.9,
+                    color=shadow_rgb_color,
+                    diffuse=15.0,
+                    distance=5.0,
+                    angle=-45.0
+                )
+            else:
+                # 使用提供的shadow_info配置
+                shadow_rgb_color = hex_to_rgb(shadow_info.shadow_color)
+                text_shadow = TextShadow(
+                    alpha=shadow_info.shadow_alpha,
+                    color=shadow_rgb_color,
+                    diffuse=shadow_info.shadow_diffuse,
+                    distance=shadow_info.shadow_distance,
+                    angle=shadow_info.shadow_angle
+                )
+        
+        # 8. 创建文本片段
+        text_segment = TextSegment(
+            text=caption['text'],
+            timerange=timerange,
+            style=text_style,
+            border=text_border,  # 添加边框
+            font=font_type,      # 添加字体
+            shadow=text_shadow,  # 添加阴影
+            clip_settings=clip_settings
+        )
+        
+        logger.info(f"Created text segment, material_id: {text_segment.material_id}")
+        logger.info(f"Text segment details - start: {caption['start']}, duration: {caption_duration}, text: {caption['text'][:50]}")
+
+        # 9. 处理关键词高亮
+        if caption.get('keyword'):
+            keyword_color = caption.get('keyword_color', '#ff7100')  # 默认橙色
+            keyword_rgb_color = hex_to_rgb(keyword_color)
+            keyword_font_size = caption.get('keyword_font_size')  # 获取关键词字体大小
+            # 应用关键词颜色和字体大小到文本样式中
+            apply_keyword_highlight(text_segment, caption['keyword'], keyword_rgb_color, keyword_font_size)
+            logger.info(f"Applied keyword highlighting: {caption['keyword']} with color {keyword_color} and font size {keyword_font_size}")
+        
+        # 10. 处理动画效果
+        if caption.get('in_animation'):
+            in_animation_name = caption['in_animation']
+            in_animation_enum = map_animation_name_to_enum(in_animation_name, "in")
+            if in_animation_enum:
+                # 获取动画时长，优先使用指定时长，否则使用默认时长
+                in_duration = caption.get('in_animation_duration')
+                try:
+                    text_segment.add_animation(in_animation_enum, duration=in_duration)
+                    logger.info(f"Added in animation: {in_animation_name}")
+                except Exception as e:
+                    logger.error(f"Failed to add in animation '{in_animation_name}': {str(e)}")
+            else:
+                logger.warning(f"In animation not found: {in_animation_name}")
+        
+        if caption.get('out_animation'):
+            out_animation_name = caption['out_animation']
+            out_animation_enum = map_animation_name_to_enum(out_animation_name, "out")
+            if out_animation_enum:
+                # 获取动画时长，优先使用指定时长，否则使用默认时长
+                out_duration = caption.get('out_animation_duration')
+                try:
+                    text_segment.add_animation(out_animation_enum, duration=out_duration)
+                    logger.info(f"Added out animation: {out_animation_name}")
+                except Exception as e:
+                    logger.error(f"Failed to add out animation '{out_animation_name}': {str(e)}")
+            else:
+                logger.warning(f"Out animation not found: {out_animation_name}")
+        
+        if caption.get('loop_animation'):
+            loop_animation_name = caption['loop_animation']
+            loop_animation_enum = map_animation_name_to_enum(loop_animation_name, "loop")
+            if loop_animation_enum:
+                # 获取动画时长，优先使用指定时长，否则使用默认时长
+                loop_duration = caption.get('loop_animation_duration')
+                try:
+                    text_segment.add_animation(loop_animation_enum, duration=loop_duration)
+                    logger.info(f"Added loop animation: {loop_animation_name}")
+                except Exception as e:
+                    logger.error(f"Failed to add loop animation '{loop_animation_name}': {str(e)}")
+            else:
+                logger.warning(f"Loop animation not found: {loop_animation_name}")
+
+        # 11. 向指定轨道添加片段
+        script.add_segment(text_segment, track_name)
+
+        # 12. 构造片段信息
+        segment_info = {
+            "id": text_segment.segment_id,
+            "start": caption['start'],
+            "end": caption['end']
+        }
+
+        return text_segment.segment_id, text_segment.material_id, segment_info
+        
+    except CustomException:
+        # 重新抛出自定义异常
+        raise
+    except Exception as e:
+        # 捕获其他未预期的异常并转换为自定义异常
+        logger.error(f"Unexpected error in add_caption_to_draft: {str(e)}")
+        raise CustomException(CustomError.CAPTION_ADD_FAILED)
+
+
+def apply_keyword_highlight(text_segment: TextSegment, keywords: str, keyword_color: tuple, keyword_font_size: float = None):
+    """
+    应用关键词高亮到文本片段
+    
+    Args:
+        text_segment: 文本片段对象
+        keywords: 关键词字符串，用'|'分隔多个关键词
+        keyword_color: 关键词颜色的RGB元组 (0-1范围)
+        keyword_font_size: 关键词字体大小，默认为None，使用文本默认字体大小
+    """
+    # 分割关键词
+    keyword_list = keywords.split('|')
+    text = text_segment.text
+    
+    # 使用关键词字体大小，如果没有指定则使用文本默认字体大小
+    font_size = keyword_font_size if keyword_font_size is not None else text_segment.style.size
+    
+    # 为每个关键词创建高亮样式
+    for keyword in keyword_list:
+        keyword = keyword.strip()
+        if not keyword:
+            continue
+            
+        # 查找所有匹配的关键词位置
+        start_pos = 0
+        while start_pos < len(text):
+            start_pos = text.find(keyword, start_pos)
+            if start_pos == -1:
+                break
+                
+            end_pos = start_pos + len(keyword)
+            
+            # 创建关键词高亮样式
+            highlight_style = {
+                "fill": {
+                    "alpha": 1.0,
+                    "content": {
+                        "render_type": "solid",
+                        "solid": {
+                            "alpha": 1.0,
+                            "color": list(keyword_color)  # 使用关键词颜色
+                        }
+                    }
+                },
+                "range": [start_pos, end_pos],
+                "size": font_size,  # 使用关键词字体大小
+                "bold": text_segment.style.bold,
+                "italic": text_segment.style.italic,
+                "underline": text_segment.style.underline
+            }
+            
+            # 只有在确实有描边时才添加描边信息，避免默认黑色描边的出现
+            if text_segment.border:
+                highlight_style["strokes"] = [text_segment.border.export_json()]
+            
+            # 添加到文本片段的额外样式中
+            text_segment.extra_styles.append(highlight_style)
+            start_pos = end_pos
+
+
+def parse_captions_data(json_str: str) -> List[Dict[str, Any]]:
+    """
+    解析字幕数据的JSON字符串，处理可选字段的默认值
+    
+    Args:
+        json_str: 包含字幕数据的JSON字符串，格式如下：
+        [
+            {
+                "start": 0,  # [必选] 字幕开始时间（微秒）
+                "end": 10000000,  # [必选] 字幕结束时间（微秒）
+                "text": "你好，剪映",  # [必选] 字幕文本内容
+                "keyword": "好",  # [可选] 关键词（用|分隔多个关键词）
+                "keyword_color": "#457616",  # [可选] 关键词颜色，默认"#ff7100"
+                "keyword_font_size": 15,  # [可选] 关键词字体大小，默认15
+                "font_size": 15,  # [可选] 文本字体大小，默认15
+                "in_animation": None,  # [可选] 入场动画，默认None
+                "out_animation": None,  # [可选] 出场动画，默认None
+                "loop_animation": None,  # [可选] 循环动画，默认None
+                "in_animation_duration": None,  # [可选] 入场动画时长，默认None
+                "out_animation_duration": None,  # [可选] 出场动画时长，默认None
+                "loop_animation_duration": None  # [可选] 循环动画时长，默认None
+            }
+        ]
+        
+    Returns:
+        包含字幕对象的数组，每个对象都处理了默认值
+        
+    Raises:
+        CustomException: 当JSON格式错误或缺少必选字段时抛出
+    """
+    try:
+        # 解析JSON字符串
+        data = json.loads(json_str)
+        logger.debug(f"Parsed JSON data: {data}")
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error: {e.msg}")
+        raise CustomException(CustomError.INVALID_CAPTION_INFO, f"JSON parse error: {e.msg}")
+    
+    # 确保输入是列表
+    if not isinstance(data, list):
+        logger.error("captions should be a list")
+        raise CustomException(CustomError.INVALID_CAPTION_INFO, "captions should be a list")
+    
+    result = []
+    
+    for i, item in enumerate(data):
+        if not isinstance(item, dict):
+            logger.error(f"the {i}th item should be a dict")
+            raise CustomException(CustomError.INVALID_CAPTION_INFO, f"the {i}th item should be a dict")
+        
+        # 检查必选字段
+        required_fields = ["start", "end", "text"]
+        missing_fields = [field for field in required_fields if field not in item]
+        
+        if missing_fields:
+            logger.error(f"the {i}th item is missing required fields: {', '.join(missing_fields)}")
+            raise CustomException(CustomError.INVALID_CAPTION_INFO, f"the {i}th item is missing required fields: {', '.join(missing_fields)}")
+        
+        # 创建处理后的对象，设置默认值
+        processed_item = {
+            "start": item["start"],
+            "end": item["end"],
+            "text": item["text"],
+            "keyword": item.get("keyword", None),
+            "keyword_color": item.get("keyword_color", "#ff7100"),
+            "keyword_font_size": item.get("keyword_font_size", 15),
+            "font_size": item.get("font_size", None),
+            "in_animation": item.get("in_animation", None),
+            "out_animation": item.get("out_animation", None),
+            "loop_animation": item.get("loop_animation", None),
+            "in_animation_duration": item.get("in_animation_duration", None),
+            "out_animation_duration": item.get("out_animation_duration", None),
+            "loop_animation_duration": item.get("loop_animation_duration", None)
+        }
+        
+        # 验证数值类型和范围
+        if not isinstance(processed_item["start"], (int, float)) or processed_item["start"] < 0:
+            logger.error(f"the {i}th item has invalid start time: {processed_item['start']}")
+            raise CustomException(CustomError.INVALID_CAPTION_INFO, f"the {i}th item has invalid start time")
+        
+        if not isinstance(processed_item["end"], (int, float)) or processed_item["end"] <= processed_item["start"]:
+            logger.error(f"the {i}th item has invalid end time: {processed_item['end']}")
+            raise CustomException(CustomError.INVALID_CAPTION_INFO, f"the {i}th item has invalid end time")
+        
+        if not isinstance(processed_item["text"], str) or len(processed_item["text"].strip()) == 0:
+            logger.error(f"the {i}th item has invalid text: {processed_item['text']}")
+            raise CustomException(CustomError.INVALID_CAPTION_INFO, f"the {i}th item has invalid text")
+        
+        # 验证keyword_font_size参数
+        if processed_item["keyword_font_size"] is not None and (
+                not isinstance(processed_item["keyword_font_size"], (int, float)) or 
+                processed_item["keyword_font_size"] <= 0):
+            logger.warning(f"the {i}th item has invalid keyword_font_size: {processed_item['keyword_font_size']}, using default value 15")
+            processed_item["keyword_font_size"] = 15
+        
+        result.append(processed_item)
+    
+    logger.info(f"Successfully parsed {len(result)} caption items")
+    return result
+
+
+def map_animation_name_to_enum(animation_name: str, animation_type: str):
+    """
+    将动画名称字符串映射到对应的枚举值
+    
+    Args:
+        animation_name: 动画名称字符串
+        animation_type: 动画类型 ("in", "out", "loop")
+    
+    Returns:
+        对应的动画枚举值，如果未找到则返回None
+    """
+    # 入场动画映射
+    in_animation_map = {}
+    for attr_name in dir(TextIntro):
+        attr = getattr(TextIntro, attr_name)
+        if isinstance(attr, TextIntro):
+            in_animation_map[attr.value.title] = attr
+    
+    # 出场动画映射
+    out_animation_map = {}
+    for attr_name in dir(TextOutro):
+        attr = getattr(TextOutro, attr_name)
+        if isinstance(attr, TextOutro):
+            out_animation_map[attr.value.title] = attr
+    
+    # 循环动画映射
+    loop_animation_map = {}
+    for attr_name in dir(TextLoopAnim):
+        attr = getattr(TextLoopAnim, attr_name)
+        if isinstance(attr, TextLoopAnim):
+            loop_animation_map[attr.value.title] = attr
+    
+    if animation_type == "in":
+        return in_animation_map.get(animation_name)
+    elif animation_type == "out":
+        return out_animation_map.get(animation_name)
+    elif animation_type == "loop":
+        return loop_animation_map.get(animation_name)
+    
+    return None
+
+
+def hex_to_rgb(hex_color: str) -> tuple:
+    """
+    将十六进制颜色值转换为RGB三元组（0-1范围）
+    
+    Args:
+        hex_color: 十六进制颜色值，如"#ffffff"或"ffffff"
+    
+    Returns:
+        RGB三元组，取值范围为[0, 1]
+    """
+    # 移除#号（如果存在）
+    hex_color = hex_color.lstrip('#')
+    
+    # 确保是6位十六进制
+    if len(hex_color) != 6:
+        logger.warning(f"Invalid hex color format: {hex_color}, using white as default")
+        return (1.0, 1.0, 1.0)
+    
+    try:
+        # 转换为RGB值（0-255）
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        
+        # 转换为0-1范围
+        return (r / 255.0, g / 255.0, b / 255.0)
+    except ValueError:
+        logger.warning(f"Invalid hex color format: {hex_color}, using white as default")
+        return (1.0, 1.0, 1.0)

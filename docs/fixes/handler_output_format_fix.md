@@ -22,8 +22,17 @@ def handler(args: Args[Input]) -> Output:
 ```
 
 **Coze 端收到的数据（数组格式）：**
+
 ```json
-["7156f95b_a827_491e_9a6c_a7b2d338471e", true, "操作成功", null, null, null, null]
+[
+  "7156f95b_a827_491e_9a6c_a7b2d338471e",
+  true,
+  "操作成功",
+  null,
+  null,
+  null,
+  null
+]
 ```
 
 ❌ **问题**：Coze 平台无法识别这个数组格式，不知道哪个元素对应哪个字段。
@@ -48,6 +57,7 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 ```
 
 **Coze 端收到的数据（对象格式）：**
+
 ```json
 {
   "draft_id": "7156f95b_a827_491e_9a6c_a7b2d338471e",
@@ -71,19 +81,21 @@ def handler(args: Args[Input]) -> Dict[str, Any]:
 **修改内容**：
 
 1. 更改返回类型注解：
+
    ```python
    # 修改前
    def handler(args: Args[Input]) -> Output:
-   
+
    # 修改后
    def handler(args: Args[Input]) -> Dict[str, Any]:
    ```
 
 2. 在所有返回语句中添加 `._asdict()` 调用：
+
    ```python
    # 修改前
    return Output(draft_id=f"{generated_uuid}", success=True, message="操作成功")
-   
+
    # 修改后
    return Output(draft_id=f"{generated_uuid}", success=True, message="操作成功")._asdict()
    ```
@@ -97,6 +109,7 @@ python scripts/generate_handler_from_api.py
 ```
 
 **受影响的 handler**：
+
 - `create_draft`
 - `create_audio_segment`
 - `create_video_segment`
@@ -138,6 +151,7 @@ return output._asdict()
 ### Coze 平台兼容性
 
 修复后，Coze 可以：
+
 - 通过字段名访问返回值：`result.draft_id`, `result.success`, `result.message`
 - 在工作流中正确传递和使用返回值
 - 显示有意义的字段名而不是数组索引
