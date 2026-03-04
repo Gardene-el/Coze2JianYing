@@ -1,6 +1,6 @@
 """
 统一响应中间件：
-- 成功：{"code":0,"message":"成功","data":{...}}
+- 成功：{"code":0,"message":"成功", ...业务字段}
 - 失败：{"code":<非0>,"message":"错误说明"}
 - HTTP 始终返回 200
 """
@@ -37,7 +37,7 @@ class ResponseMiddleware(BaseHTTPMiddleware):
         lang = self._resolve_lang(request)
         try:
             response = await call_next(request)
-            return await self._normalize_response(response, lang)
+            return await self._normalize_response(request, response, lang)
         except CustomException as exc:
             logger.warning("业务异常: code=%s detail=%s", exc.err.code, exc.detail)
             return JSONResponse(status_code=200, content=exc.err.as_dict(detail=exc.detail, lang=lang))
@@ -55,7 +55,10 @@ class ResponseMiddleware(BaseHTTPMiddleware):
     def _error_response(self, err: CustomError, lang: str, detail: str = "") -> JSONResponse:
         return JSONResponse(status_code=200, content=err.as_dict(detail=detail, lang=lang))
 
-    async def _normalize_response(self, response: Response, lang: str) -> Response:
+    async def _normalize_response(self, request: Request, response: Response, lang: str) -> Response:
+        if self._should_bypass(request, response):
+            return response
+
         body = await self._read_response_body(response)
         payload = self._try_parse_json(body)
 
@@ -79,6 +82,15 @@ class ResponseMiddleware(BaseHTTPMiddleware):
         if payload is None:
             return response
 
+        if isinstance(payload, dict):
+            return JSONResponse(
+                status_code=200,
+                content={
+                    **CustomError.SUCCESS.as_dict(lang=lang),
+                    **payload,
+                },
+            )
+
         return JSONResponse(
             status_code=200,
             content={
@@ -86,6 +98,21 @@ class ResponseMiddleware(BaseHTTPMiddleware):
                 "data": payload,
             },
         )
+
+    @staticmethod
+    def _should_bypass(request: Request, response: Response) -> bool:
+        if request.method == "HEAD":
+            return True
+
+        path = request.url.path or ""
+        if path in {"/docs", "/redoc", "/openapi.json"} or path.startswith("/docs") or path.startswith("/redoc"):
+            return True
+
+        content_type = (response.headers.get("content-type") or "").lower()
+        if content_type and "application/json" not in content_type:
+            return True
+
+        return False
 
     @staticmethod
     async def _read_response_body(response: Response) -> str:
