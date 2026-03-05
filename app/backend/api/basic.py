@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Optional, cast
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
 
 from app.backend.config import get_config
 from app.backend.schemas.basic.add_audio_effect import AddAudioEffectRequest, AddAudioEffectResponse
@@ -45,20 +45,20 @@ from app.backend.utils.helper import gen_unique_id
 router = APIRouter(tags=["basic"])
 
 
-@router.post(path="/create_draft", response_model=CreateDraftResponse)
+@router.post(path="/drafts", response_model=CreateDraftResponse)
 def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
 	draft_id = service.create_draft(width=request.width, height=request.height)
 	return CreateDraftResponse(draft_id=draft_id)
 
 
-@router.post(path="/save_draft", response_model=SaveDraftResponse)
-def save_draft(request: SaveDraftRequest) -> SaveDraftResponse:
-	saved_draft_id = service.save_draft(draft_id=request.draft_id)
+@router.post(path="/drafts/{draft_id}/save_draft", response_model=SaveDraftResponse)
+def save_draft(draft_id: str) -> SaveDraftResponse:
+	saved_draft_id = service.save_draft(draft_id=draft_id)
 	draft_path = os.path.join(get_config().drafts_dir, saved_draft_id)
 	return SaveDraftResponse(draft_path=draft_path)
 
 
-@router.post(path="/create_audio_segment", response_model=CreateAudioSegmentResponse)
+@router.post(path="/segments/create_audio_segment", response_model=CreateAudioSegmentResponse)
 def create_audio_segment(request: CreateAudioSegmentRequest) -> CreateAudioSegmentResponse:
 	segment_id = service.create_audio_segment(
 		material_url=request.material_url,
@@ -71,7 +71,7 @@ def create_audio_segment(request: CreateAudioSegmentRequest) -> CreateAudioSegme
 	return CreateAudioSegmentResponse(segment_id=segment_id)
 
 
-@router.post(path="/create_video_segment", response_model=CreateVideoSegmentResponse)
+@router.post(path="/segments/create_video_segment", response_model=CreateVideoSegmentResponse)
 def create_video_segment(request: CreateVideoSegmentRequest) -> CreateVideoSegmentResponse:
 	segment_id = service.create_video_segment(
 		material_url=request.material_url,
@@ -86,7 +86,7 @@ def create_video_segment(request: CreateVideoSegmentRequest) -> CreateVideoSegme
 	return CreateVideoSegmentResponse(segment_id=segment_id)
 
 
-@router.post(path="/create_text_segment", response_model=CreateTextSegmentResponse)
+@router.post(path="/segments/create_text_segment", response_model=CreateTextSegmentResponse)
 def create_text_segment(request: CreateTextSegmentRequest) -> CreateTextSegmentResponse:
 	segment_id = service.create_text_segment(
 		text_content=request.text_content,
@@ -101,7 +101,7 @@ def create_text_segment(request: CreateTextSegmentRequest) -> CreateTextSegmentR
 	return CreateTextSegmentResponse(segment_id=segment_id)
 
 
-@router.post(path="/create_sticker_segment", response_model=CreateStickerSegmentResponse)
+@router.post(path="/segments/create_sticker_segment", response_model=CreateStickerSegmentResponse)
 def create_sticker_segment(request: CreateStickerSegmentRequest) -> CreateStickerSegmentResponse:
 	segment_id = service.create_sticker_segment(
 		material_url=request.material_url,
@@ -112,45 +112,39 @@ def create_sticker_segment(request: CreateStickerSegmentRequest) -> CreateSticke
 
 
 
-@router.post(path="/add_segment", response_model=AddSegmentResponse)
-def add_segment(draft_id: str = Body(..., embed=True, description="草稿ID"), request: AddSegmentRequest = Body(...)) -> AddSegmentResponse:
+@router.post(path="/drafts/{draft_id}/add_segment", response_model=AddSegmentResponse)
+def add_segment(draft_id: str, request: AddSegmentRequest) -> AddSegmentResponse:
 	service.add_segment(draft_id=draft_id, segment_id=request.segment_id)
 	return AddSegmentResponse()
 
 
-@router.post(path="/add_track", response_model=AddTrackResponse)
-def add_track(draft_id: str = Body(..., embed=True, description="草稿ID"), request: AddTrackRequest = Body(...)) -> AddTrackResponse:
+@router.post(path="/drafts/{draft_id}/add_track", response_model=AddTrackResponse)
+def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse:
 	service.add_track(draft_id=draft_id, track_type=request.track_type, track_name=request.track_name)
 	return AddTrackResponse()
 
 
-@router.post(path="/add_audio_effect", response_model=AddAudioEffectResponse)
-def add_audio_effect(segment_id: str = Body(..., embed=True, description="片段ID"), request: AddAudioEffectRequest = Body(...)) -> AddAudioEffectResponse:
+@router.post(path="/segments/{segment_id}/add_audio_effect", response_model=AddAudioEffectResponse)
+def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> AddAudioEffectResponse:
 	params = cast(Optional[list[float | None]], request.params)
 	service.add_audio_effect(segment_id=segment_id, effect_type=request.effect_type, params=params)
 	return AddAudioEffectResponse(effect_id=gen_unique_id())
 
 
-@router.post(path="/add_audio_fade", response_model=AddAudioFadeResponse)
-def add_audio_fade(segment_id: str = Body(..., embed=True, description="片段ID"), request: AddAudioFadeRequest = Body(...)) -> AddAudioFadeResponse:
+@router.post(path="/segments/{segment_id}/add_audio_fade", response_model=AddAudioFadeResponse)
+def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAudioFadeResponse:
 	service.add_audio_fade(segment_id=segment_id, in_duration=request.in_duration, out_duration=request.out_duration)
 	return AddAudioFadeResponse()
 
 
-@router.post(path="/add_audio_keyframe", response_model=AddAudioKeyframeResponse)
-def add_audio_keyframe(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddAudioKeyframeRequest = Body(...),
-) -> AddAudioKeyframeResponse:
+@router.post(path="/segments/{segment_id}/add_audio_keyframe", response_model=AddAudioKeyframeResponse)
+def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) -> AddAudioKeyframeResponse:
 	service.add_audio_keyframe(segment_id=segment_id, time_offset=request.time_offset, volume=request.volume)
 	return AddAudioKeyframeResponse(keyframe_id=gen_unique_id())
 
 
-@router.post(path="/add_effect", response_model=AddEffectResponse)
-def add_effect(
-	draft_id: str = Body(..., embed=True, description="草稿ID"),
-	request: AddEffectRequest = Body(...),
-) -> AddEffectResponse:
+@router.post(path="/drafts/{draft_id}/add_effect", response_model=AddEffectResponse)
+def add_effect(draft_id: str, request: AddEffectRequest) -> AddEffectResponse:
 	service.add_effect(
 		draft_id=draft_id,
 		effect_type=request.effect_type,
@@ -160,11 +154,8 @@ def add_effect(
 	return AddEffectResponse(effect_id=gen_unique_id())
 
 
-@router.post(path="/add_filter", response_model=AddFilterResponse)
-def add_filter(
-	draft_id: str = Body(..., embed=True, description="草稿ID"),
-	request: AddFilterRequest = Body(...),
-) -> AddFilterResponse:
+@router.post(path="/drafts/{draft_id}/add_filter", response_model=AddFilterResponse)
+def add_filter(draft_id: str, request: AddFilterRequest) -> AddFilterResponse:
 	service.add_filter(
 		draft_id=draft_id,
 		filter_type=request.filter_type,
@@ -174,11 +165,8 @@ def add_filter(
 	return AddFilterResponse(filter_id=gen_unique_id())
 
 
-@router.post(path="/add_sticker_keyframe", response_model=AddStickerKeyframeResponse)
-def add_sticker_keyframe(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddStickerKeyframeRequest = Body(...),
-) -> AddStickerKeyframeResponse:
+@router.post(path="/segments/{segment_id}/add_sticker_keyframe", response_model=AddStickerKeyframeResponse)
+def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeRequest) -> AddStickerKeyframeResponse:
 	service.add_sticker_keyframe(
 		segment_id=segment_id,
 		time_offset=request.time_offset,
@@ -188,11 +176,8 @@ def add_sticker_keyframe(
 	return AddStickerKeyframeResponse(keyframe_id=gen_unique_id())
 
 
-@router.post(path="/add_text_animation", response_model=AddTextAnimationResponse)
-def add_text_animation(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddTextAnimationRequest = Body(...),
-) -> AddTextAnimationResponse:
+@router.post(path="/segments/{segment_id}/add_text_animation", response_model=AddTextAnimationResponse)
+def add_text_animation(segment_id: str, request: AddTextAnimationRequest) -> AddTextAnimationResponse:
 	service.add_text_animation(
 		segment_id=segment_id,
 		animation_type=request.animation_type,
@@ -201,29 +186,20 @@ def add_text_animation(
 	return AddTextAnimationResponse(animation_id=gen_unique_id())
 
 
-@router.post(path="/add_text_bubble", response_model=AddTextBubbleResponse)
-def add_text_bubble(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddTextBubbleRequest = Body(...),
-) -> AddTextBubbleResponse:
+@router.post(path="/segments/{segment_id}/add_text_bubble", response_model=AddTextBubbleResponse)
+def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> AddTextBubbleResponse:
 	service.add_text_bubble(segment_id=segment_id, effect_id=request.effect_id, resource_id=request.resource_id)
 	return AddTextBubbleResponse(bubble_id=gen_unique_id())
 
 
-@router.post(path="/add_text_effect", response_model=AddTextEffectResponse)
-def add_text_effect(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddTextEffectRequest = Body(...),
-) -> AddTextEffectResponse:
+@router.post(path="/segments/{segment_id}/add_text_effect", response_model=AddTextEffectResponse)
+def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> AddTextEffectResponse:
 	service.add_text_effect(segment_id=segment_id, effect_id=request.effect_id)
 	return AddTextEffectResponse(effect_id=gen_unique_id())
 
 
-@router.post(path="/add_text_keyframe", response_model=AddTextKeyframeResponse)
-def add_text_keyframe(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddTextKeyframeRequest = Body(...),
-) -> AddTextKeyframeResponse:
+@router.post(path="/segments/{segment_id}/add_text_keyframe", response_model=AddTextKeyframeResponse)
+def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) -> AddTextKeyframeResponse:
 	service.add_text_keyframe(
 		segment_id=segment_id,
 		time_offset=request.time_offset,
@@ -233,11 +209,8 @@ def add_text_keyframe(
 	return AddTextKeyframeResponse(keyframe_id=gen_unique_id())
 
 
-@router.post(path="/add_video_animation", response_model=AddVideoAnimationResponse)
-def add_video_animation(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoAnimationRequest = Body(...),
-) -> AddVideoAnimationResponse:
+@router.post(path="/segments/{segment_id}/add_video_animation", response_model=AddVideoAnimationResponse)
+def add_video_animation(segment_id: str, request: AddVideoAnimationRequest) -> AddVideoAnimationResponse:
 	service.add_video_animation(
 		segment_id=segment_id,
 		animation_type=request.animation_type,
@@ -246,11 +219,8 @@ def add_video_animation(
 	return AddVideoAnimationResponse(animation_id=gen_unique_id())
 
 
-@router.post(path="/add_video_background_filling", response_model=AddVideoBackgroundFillingResponse)
-def add_video_background_filling(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoBackgroundFillingRequest = Body(...),
-) -> AddVideoBackgroundFillingResponse:
+@router.post(path="/segments/{segment_id}/add_video_background_filling", response_model=AddVideoBackgroundFillingResponse)
+def add_video_background_filling(segment_id: str, request: AddVideoBackgroundFillingRequest) -> AddVideoBackgroundFillingResponse:
 	service.add_video_background_filling(
 		segment_id=segment_id,
 		fill_type=request.fill_type,
@@ -260,35 +230,26 @@ def add_video_background_filling(
 	return AddVideoBackgroundFillingResponse()
 
 
-@router.post(path="/add_video_effect", response_model=AddVideoEffectResponse)
-def add_video_effect(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoEffectRequest = Body(...),
-) -> AddVideoEffectResponse:
+@router.post(path="/segments/{segment_id}/add_video_effect", response_model=AddVideoEffectResponse)
+def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> AddVideoEffectResponse:
 	service.add_video_effect(segment_id=segment_id, effect_type=request.effect_type, params=request.params)
 	return AddVideoEffectResponse(effect_id=gen_unique_id())
 
 
-@router.post(path="/add_video_fade", response_model=AddVideoFadeResponse)
-def add_video_fade(segment_id: str = Body(..., embed=True, description="片段ID"), request: AddVideoFadeRequest = Body(...)) -> AddVideoFadeResponse:
+@router.post(path="/segments/{segment_id}/add_video_fade", response_model=AddVideoFadeResponse)
+def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVideoFadeResponse:
 	service.add_video_fade(segment_id=segment_id, in_duration=request.in_duration, out_duration=request.out_duration)
 	return AddVideoFadeResponse()
 
 
-@router.post(path="/add_video_filter", response_model=AddVideoFilterResponse)
-def add_video_filter(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoFilterRequest = Body(...),
-) -> AddVideoFilterResponse:
+@router.post(path="/segments/{segment_id}/add_video_filter", response_model=AddVideoFilterResponse)
+def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> AddVideoFilterResponse:
 	service.add_video_filter(segment_id=segment_id, filter_type=request.filter_type, intensity=request.intensity)
 	return AddVideoFilterResponse(filter_id=gen_unique_id())
 
 
-@router.post(path="/add_video_keyframe", response_model=AddVideoKeyframeResponse)
-def add_video_keyframe(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoKeyframeRequest = Body(...),
-) -> AddVideoKeyframeResponse:
+@router.post(path="/segments/{segment_id}/add_video_keyframe", response_model=AddVideoKeyframeResponse)
+def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) -> AddVideoKeyframeResponse:
 	service.add_video_keyframe(
 		segment_id=segment_id,
 		time_offset=request.time_offset,
@@ -298,11 +259,8 @@ def add_video_keyframe(
 	return AddVideoKeyframeResponse(keyframe_id=gen_unique_id())
 
 
-@router.post(path="/add_video_mask", response_model=AddVideoMaskResponse)
-def add_video_mask(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoMaskRequest = Body(...),
-) -> AddVideoMaskResponse:
+@router.post(path="/segments/{segment_id}/add_video_mask", response_model=AddVideoMaskResponse)
+def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVideoMaskResponse:
 	service.add_video_mask(
 		segment_id=segment_id,
 		mask_type=request.mask_type,
@@ -318,10 +276,7 @@ def add_video_mask(
 	return AddVideoMaskResponse(mask_id=gen_unique_id())
 
 
-@router.post(path="/add_video_transition", response_model=AddVideoTransitionResponse)
-def add_video_transition(
-	segment_id: str = Body(..., embed=True, description="片段ID"),
-	request: AddVideoTransitionRequest = Body(...),
-) -> AddVideoTransitionResponse:
+@router.post(path="/segments/{segment_id}/add_video_transition", response_model=AddVideoTransitionResponse)
+def add_video_transition(segment_id: str, request: AddVideoTransitionRequest) -> AddVideoTransitionResponse:
 	service.add_video_transition(segment_id=segment_id, transition_type=request.transition_type, duration=request.duration)
 	return AddVideoTransitionResponse(transition_id=gen_unique_id())
