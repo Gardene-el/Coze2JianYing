@@ -42,7 +42,7 @@ jobs:
           python build.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: CozeJianYingDraftGenerator-Windows-${{ github.sha }}
           path: dist/CozeJianYingDraftGenerator.exe
