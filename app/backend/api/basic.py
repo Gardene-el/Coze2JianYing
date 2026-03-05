@@ -45,7 +45,7 @@ from app.backend.utils.helper import gen_unique_id
 router = APIRouter(tags=["basic"])
 
 
-@router.post(path="/drafts", response_model=CreateDraftResponse)
+@router.post(path="/drafts/create_draft", response_model=CreateDraftResponse)
 def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
 	draft_id = service.create_draft(width=request.width, height=request.height)
 	return CreateDraftResponse(draft_id=draft_id)
@@ -56,6 +56,41 @@ def save_draft(draft_id: str) -> SaveDraftResponse:
 	saved_draft_id = service.save_draft(draft_id=draft_id)
 	draft_path = os.path.join(get_config().drafts_dir, saved_draft_id)
 	return SaveDraftResponse(draft_path=draft_path)
+
+
+
+@router.post(path="/drafts/{draft_id}/add_segment", response_model=AddSegmentResponse)
+def add_segment(draft_id: str, request: AddSegmentRequest) -> AddSegmentResponse:
+	service.add_segment(draft_id=draft_id, segment_id=request.segment_id)
+	return AddSegmentResponse()
+
+
+@router.post(path="/drafts/{draft_id}/add_track", response_model=AddTrackResponse)
+def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse:
+	service.add_track(draft_id=draft_id, track_type=request.track_type, track_name=request.track_name)
+	return AddTrackResponse()
+
+
+@router.post(path="/drafts/{draft_id}/add_effect", response_model=AddEffectResponse)
+def add_effect(draft_id: str, request: AddEffectRequest) -> AddEffectResponse:
+	service.add_effect(
+		draft_id=draft_id,
+		effect_type=request.effect_type,
+		target_timerange=request.target_timerange,
+		params=request.params,
+	)
+	return AddEffectResponse(effect_id=gen_unique_id())
+
+
+@router.post(path="/drafts/{draft_id}/add_filter", response_model=AddFilterResponse)
+def add_filter(draft_id: str, request: AddFilterRequest) -> AddFilterResponse:
+	service.add_filter(
+		draft_id=draft_id,
+		filter_type=request.filter_type,
+		target_timerange=request.target_timerange,
+		intensity=request.intensity,
+	)
+	return AddFilterResponse(filter_id=gen_unique_id())
 
 
 @router.post(path="/segments/create_audio_segment", response_model=CreateAudioSegmentResponse)
@@ -111,19 +146,6 @@ def create_sticker_segment(request: CreateStickerSegmentRequest) -> CreateSticke
 	return CreateStickerSegmentResponse(segment_id=segment_id)
 
 
-
-@router.post(path="/drafts/{draft_id}/add_segment", response_model=AddSegmentResponse)
-def add_segment(draft_id: str, request: AddSegmentRequest) -> AddSegmentResponse:
-	service.add_segment(draft_id=draft_id, segment_id=request.segment_id)
-	return AddSegmentResponse()
-
-
-@router.post(path="/drafts/{draft_id}/add_track", response_model=AddTrackResponse)
-def add_track(draft_id: str, request: AddTrackRequest) -> AddTrackResponse:
-	service.add_track(draft_id=draft_id, track_type=request.track_type, track_name=request.track_name)
-	return AddTrackResponse()
-
-
 @router.post(path="/segments/{segment_id}/add_audio_effect", response_model=AddAudioEffectResponse)
 def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> AddAudioEffectResponse:
 	params = cast(Optional[list[float | None]], request.params)
@@ -141,28 +163,6 @@ def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAudioFad
 def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) -> AddAudioKeyframeResponse:
 	service.add_audio_keyframe(segment_id=segment_id, time_offset=request.time_offset, volume=request.volume)
 	return AddAudioKeyframeResponse(keyframe_id=gen_unique_id())
-
-
-@router.post(path="/drafts/{draft_id}/add_effect", response_model=AddEffectResponse)
-def add_effect(draft_id: str, request: AddEffectRequest) -> AddEffectResponse:
-	service.add_effect(
-		draft_id=draft_id,
-		effect_type=request.effect_type,
-		target_timerange=request.target_timerange,
-		params=request.params,
-	)
-	return AddEffectResponse(effect_id=gen_unique_id())
-
-
-@router.post(path="/drafts/{draft_id}/add_filter", response_model=AddFilterResponse)
-def add_filter(draft_id: str, request: AddFilterRequest) -> AddFilterResponse:
-	service.add_filter(
-		draft_id=draft_id,
-		filter_type=request.filter_type,
-		target_timerange=request.target_timerange,
-		intensity=request.intensity,
-	)
-	return AddFilterResponse(filter_id=gen_unique_id())
 
 
 @router.post(path="/segments/{segment_id}/add_sticker_keyframe", response_model=AddStickerKeyframeResponse)
