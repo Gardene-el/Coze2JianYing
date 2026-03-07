@@ -167,3 +167,7 @@ openapi.yaml
 coze_openapi.yaml
 coze_openapi.json
 debug_nested.yaml
+
+# Node.js (backend/)
+node_modules/
+.wrangler/
