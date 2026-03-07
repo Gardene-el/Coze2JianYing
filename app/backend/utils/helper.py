@@ -15,12 +15,13 @@ def get_url_param(url: str, key: str, default=None):
 
 def gen_unique_id() -> str:
     """
-    生成唯一ID
+    生成唯一ID，格式：YYYY-MM-DD-HH-MM-SS-{4位hex}
+    示例：2024-03-08-12-34-56-98ef
     """
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    unique_id = uuid.uuid4().hex[:8]
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    unique_id = uuid.uuid4().hex[:4]
 
-    return f"{timestamp}{unique_id}"
+    return f"{timestamp}-{unique_id}"
 
 
 def get_all_files(dir: str) -> list:

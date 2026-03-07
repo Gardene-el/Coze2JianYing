@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import datetime
 import os
-import uuid
 
 import pyJianYingDraft as draft
 
 from app.backend.core.settings_manager import get_settings_manager
 from app.backend.exceptions import CustomError, CustomException
 from app.backend.utils.cache import update_draft_cache
+from app.backend.utils.helper import gen_unique_id
 from app.backend.utils.logger import logger
 
 
@@ -26,9 +25,7 @@ def create_draft(width: int, height: int) -> str:
 	Raises:
 		CustomException: 草稿创建失败
 	"""
-	timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-	unique_id = uuid.uuid4().hex[:8]
-	draft_id = f"{timestamp}{unique_id}"
+	draft_id = gen_unique_id()
 	logger.info("draft_id: %s, width: %s, height: %s", draft_id, width, height)
 
 	try:

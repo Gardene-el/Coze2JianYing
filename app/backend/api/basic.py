@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import os
 from typing import Optional, cast
 
 from fastapi import APIRouter
 
-from app.backend.config import get_config
 from app.backend.schemas.basic.add_audio_effect import AddAudioEffectRequest, AddAudioEffectResponse
 from app.backend.schemas.basic.add_audio_fade import AddAudioFadeRequest, AddAudioFadeResponse
 from app.backend.schemas.basic.add_audio_keyframe import AddAudioKeyframeRequest, AddAudioKeyframeResponse
@@ -52,9 +50,8 @@ def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
 
 @router.post(path="/drafts/{draft_id}/save_draft", response_model=SaveDraftResponse)
 def save_draft(draft_id: str) -> SaveDraftResponse:
-	saved_draft_id = service.save_draft(draft_id=draft_id)
-	draft_path = os.path.join(get_config().drafts_dir, saved_draft_id)
-	return SaveDraftResponse(draft_path=draft_path)
+	service.save_draft(draft_id=draft_id)
+	return SaveDraftResponse()
 
 
 
