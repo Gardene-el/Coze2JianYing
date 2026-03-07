@@ -22,4 +22,4 @@ class AddEffectRequest(BaseModel):
 class AddEffectResponse(BaseModel):
     """添加全局特效响应"""
 
-    effect_id: str = Field(..., description="特效 UUID")
+    pass

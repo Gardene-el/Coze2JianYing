@@ -21,4 +21,4 @@ class AddVideoEffectRequest(BaseModel):
 class AddVideoEffectResponse(BaseModel):
     """添加视频特效响应"""
 
-    effect_id: str = Field(..., description="特效 UUID")
+    pass

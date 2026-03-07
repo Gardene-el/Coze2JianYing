@@ -16,4 +16,4 @@ class AddVideoTransitionRequest(BaseModel):
 class AddVideoTransitionResponse(BaseModel):
     """添加视频转场响应"""
 
-    transition_id: str = Field(..., description="转场 UUID")
+    pass

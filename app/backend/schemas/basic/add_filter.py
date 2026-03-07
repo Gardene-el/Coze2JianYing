@@ -22,4 +22,4 @@ class AddFilterRequest(BaseModel):
 class AddFilterResponse(BaseModel):
     """添加全局滤镜响应"""
 
-    filter_id: str = Field(..., description="滤镜 UUID")
+    pass

@@ -16,4 +16,4 @@ class AddAudioKeyframeRequest(BaseModel):
 class AddAudioKeyframeResponse(BaseModel):
     """添加音频关键帧响应"""
 
-    keyframe_id: str = Field(..., description="关键帧 UUID")
+    pass

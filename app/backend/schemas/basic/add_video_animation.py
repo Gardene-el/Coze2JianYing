@@ -18,4 +18,4 @@ class AddVideoAnimationRequest(BaseModel):
 class AddVideoAnimationResponse(BaseModel):
     """添加视频动画响应"""
 
-    animation_id: str = Field(..., description="动画 UUID")
+    pass

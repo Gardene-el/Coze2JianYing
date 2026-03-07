@@ -39,7 +39,6 @@ from app.backend.schemas.basic.create_text_segment import CreateTextSegmentReque
 from app.backend.schemas.basic.create_video_segment import CreateVideoSegmentRequest, CreateVideoSegmentResponse
 from app.backend.schemas.basic.save_draft import SaveDraftRequest, SaveDraftResponse
 from app.backend.services import basic as service
-from app.backend.utils.helper import gen_unique_id
 
 
 router = APIRouter(tags=["basic"])
@@ -79,7 +78,7 @@ def add_effect(draft_id: str, request: AddEffectRequest) -> AddEffectResponse:
 		target_timerange=request.target_timerange,
 		params=request.params,
 	)
-	return AddEffectResponse(effect_id=gen_unique_id())
+	return AddEffectResponse()
 
 
 @router.post(path="/drafts/{draft_id}/add_filter", response_model=AddFilterResponse)
@@ -90,7 +89,7 @@ def add_filter(draft_id: str, request: AddFilterRequest) -> AddFilterResponse:
 		target_timerange=request.target_timerange,
 		intensity=request.intensity,
 	)
-	return AddFilterResponse(filter_id=gen_unique_id())
+	return AddFilterResponse()
 
 
 @router.post(path="/segments/create_audio_segment", response_model=CreateAudioSegmentResponse)
@@ -150,7 +149,7 @@ def create_sticker_segment(request: CreateStickerSegmentRequest) -> CreateSticke
 def add_audio_effect(segment_id: str, request: AddAudioEffectRequest) -> AddAudioEffectResponse:
 	params = cast(Optional[list[float | None]], request.params)
 	service.add_audio_effect(segment_id=segment_id, effect_type=request.effect_type, params=params)
-	return AddAudioEffectResponse(effect_id=gen_unique_id())
+	return AddAudioEffectResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_audio_fade", response_model=AddAudioFadeResponse)
@@ -162,7 +161,7 @@ def add_audio_fade(segment_id: str, request: AddAudioFadeRequest) -> AddAudioFad
 @router.post(path="/segments/{segment_id}/add_audio_keyframe", response_model=AddAudioKeyframeResponse)
 def add_audio_keyframe(segment_id: str, request: AddAudioKeyframeRequest) -> AddAudioKeyframeResponse:
 	service.add_audio_keyframe(segment_id=segment_id, time_offset=request.time_offset, volume=request.volume)
-	return AddAudioKeyframeResponse(keyframe_id=gen_unique_id())
+	return AddAudioKeyframeResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_sticker_keyframe", response_model=AddStickerKeyframeResponse)
@@ -173,7 +172,7 @@ def add_sticker_keyframe(segment_id: str, request: AddStickerKeyframeRequest) ->
 		value=request.value,
 		property=request.property,
 	)
-	return AddStickerKeyframeResponse(keyframe_id=gen_unique_id())
+	return AddStickerKeyframeResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_text_animation", response_model=AddTextAnimationResponse)
@@ -183,19 +182,19 @@ def add_text_animation(segment_id: str, request: AddTextAnimationRequest) -> Add
 		animation_type=request.animation_type,
 		duration=request.duration or "1s",
 	)
-	return AddTextAnimationResponse(animation_id=gen_unique_id())
+	return AddTextAnimationResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_text_bubble", response_model=AddTextBubbleResponse)
 def add_text_bubble(segment_id: str, request: AddTextBubbleRequest) -> AddTextBubbleResponse:
 	service.add_text_bubble(segment_id=segment_id, effect_id=request.effect_id, resource_id=request.resource_id)
-	return AddTextBubbleResponse(bubble_id=gen_unique_id())
+	return AddTextBubbleResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_text_effect", response_model=AddTextEffectResponse)
 def add_text_effect(segment_id: str, request: AddTextEffectRequest) -> AddTextEffectResponse:
 	service.add_text_effect(segment_id=segment_id, effect_id=request.effect_id)
-	return AddTextEffectResponse(effect_id=gen_unique_id())
+	return AddTextEffectResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_text_keyframe", response_model=AddTextKeyframeResponse)
@@ -206,7 +205,7 @@ def add_text_keyframe(segment_id: str, request: AddTextKeyframeRequest) -> AddTe
 		value=request.value,
 		property=request.property,
 	)
-	return AddTextKeyframeResponse(keyframe_id=gen_unique_id())
+	return AddTextKeyframeResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_video_animation", response_model=AddVideoAnimationResponse)
@@ -216,7 +215,7 @@ def add_video_animation(segment_id: str, request: AddVideoAnimationRequest) -> A
 		animation_type=request.animation_type,
 		duration=request.duration or "1s",
 	)
-	return AddVideoAnimationResponse(animation_id=gen_unique_id())
+	return AddVideoAnimationResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_video_background_filling", response_model=AddVideoBackgroundFillingResponse)
@@ -233,7 +232,7 @@ def add_video_background_filling(segment_id: str, request: AddVideoBackgroundFil
 @router.post(path="/segments/{segment_id}/add_video_effect", response_model=AddVideoEffectResponse)
 def add_video_effect(segment_id: str, request: AddVideoEffectRequest) -> AddVideoEffectResponse:
 	service.add_video_effect(segment_id=segment_id, effect_type=request.effect_type, params=request.params)
-	return AddVideoEffectResponse(effect_id=gen_unique_id())
+	return AddVideoEffectResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_video_fade", response_model=AddVideoFadeResponse)
@@ -245,7 +244,7 @@ def add_video_fade(segment_id: str, request: AddVideoFadeRequest) -> AddVideoFad
 @router.post(path="/segments/{segment_id}/add_video_filter", response_model=AddVideoFilterResponse)
 def add_video_filter(segment_id: str, request: AddVideoFilterRequest) -> AddVideoFilterResponse:
 	service.add_video_filter(segment_id=segment_id, filter_type=request.filter_type, intensity=request.intensity)
-	return AddVideoFilterResponse(filter_id=gen_unique_id())
+	return AddVideoFilterResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_video_keyframe", response_model=AddVideoKeyframeResponse)
@@ -256,7 +255,7 @@ def add_video_keyframe(segment_id: str, request: AddVideoKeyframeRequest) -> Add
 		value=request.value,
 		property=request.property,
 	)
-	return AddVideoKeyframeResponse(keyframe_id=gen_unique_id())
+	return AddVideoKeyframeResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_video_mask", response_model=AddVideoMaskResponse)
@@ -273,10 +272,10 @@ def add_video_mask(segment_id: str, request: AddVideoMaskRequest) -> AddVideoMas
 		rect_width=request.rect_width,
 		round_corner=request.round_corner,
 	)
-	return AddVideoMaskResponse(mask_id=gen_unique_id())
+	return AddVideoMaskResponse()
 
 
 @router.post(path="/segments/{segment_id}/add_video_transition", response_model=AddVideoTransitionResponse)
 def add_video_transition(segment_id: str, request: AddVideoTransitionRequest) -> AddVideoTransitionResponse:
 	service.add_video_transition(segment_id=segment_id, transition_type=request.transition_type, duration=request.duration)
-	return AddVideoTransitionResponse(transition_id=gen_unique_id())
+	return AddVideoTransitionResponse()

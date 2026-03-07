@@ -21,4 +21,4 @@ class AddVideoKeyframeRequest(BaseModel):
 class AddVideoKeyframeResponse(BaseModel):
     """添加视频关键帧响应"""
 
-    keyframe_id: str = Field(..., description="关键帧 UUID")
+    pass

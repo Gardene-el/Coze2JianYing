@@ -21,4 +21,4 @@ class AddStickerKeyframeRequest(BaseModel):
 class AddStickerKeyframeResponse(BaseModel):
     """添加贴纸关键帧响应"""
 
-    keyframe_id: str = Field(..., description="关键帧 UUID")
+    pass

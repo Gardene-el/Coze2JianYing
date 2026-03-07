@@ -21,4 +21,4 @@ class AddTextKeyframeRequest(BaseModel):
 class AddTextKeyframeResponse(BaseModel):
     """添加文本关键帧响应"""
 
-    keyframe_id: str = Field(..., description="关键帧 UUID")
+    pass

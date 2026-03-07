@@ -16,4 +16,4 @@ class AddTextBubbleRequest(BaseModel):
 class AddTextBubbleResponse(BaseModel):
     """添加文本气泡响应"""
 
-    bubble_id: str = Field(..., description="气泡 UUID")
+    pass

@@ -37,4 +37,4 @@ class AddVideoMaskRequest(BaseModel):
 class AddVideoMaskResponse(BaseModel):
     """添加视频蒙版响应"""
 
-    mask_id: str = Field(..., description="蒙版 UUID")
+    pass

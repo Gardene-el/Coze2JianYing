@@ -24,4 +24,4 @@ class AddAudioEffectRequest(BaseModel):
 class AddAudioEffectResponse(BaseModel):
     """添加音频特效响应"""
 
-    effect_id: str = Field(..., description="特效 UUID")
+    pass

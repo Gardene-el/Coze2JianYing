@@ -13,4 +13,4 @@ class AddTextEffectRequest(BaseModel):
 class AddTextEffectResponse(BaseModel):
     """添加花字特效响应"""
 
-    effect_id: str = Field(..., description="特效 UUID")
+    pass

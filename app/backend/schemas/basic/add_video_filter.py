@@ -16,4 +16,4 @@ class AddVideoFilterRequest(BaseModel):
 class AddVideoFilterResponse(BaseModel):
     """添加视频滤镜响应"""
 
-    filter_id: str = Field(..., description="滤镜 UUID")
+    pass
