@@ -105,7 +105,7 @@ def add_masks(request: AddMasksRequest) -> AddMasksResponse:
 		feather=request.feather,
 		rotation=request.rotation,
 		invert=request.invert,
-		roundCorner=request.roundCorner,
+		round_corner=request.round_corner,
 	)
 	return AddMasksResponse()
 

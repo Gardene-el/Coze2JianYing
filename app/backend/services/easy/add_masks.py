@@ -22,7 +22,7 @@ def add_masks(
 	feather: int = 0,
 	rotation: int = 0,
 	invert: bool = False,
-	roundCorner: int = 0,
+	round_corner: int = 0,
 ) -> None:
 	"""批量添加遮罩。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
@@ -47,7 +47,7 @@ def add_masks(
 			feather=feather,
 			rotation=rotation,
 			invert=invert,
-			round_corner=roundCorner,
+			round_corner=round_corner,
 		)
 
 	script.save()

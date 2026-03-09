@@ -18,7 +18,7 @@ class AddMasksRequest(BaseModel):
 	feather: int = Field(default=0, description="羽化程度（0-100）")
 	rotation: int = Field(default=0, description="旋转角度（度）")
 	invert: bool = Field(default=False, description="是否反转遮罩")
-	roundCorner: int = Field(default=0, description="圆角半径（0-100）")
+	round_corner: int = Field(default=0, description="圆角半径（0-100）")
 
 
 class AddMasksResponse(BaseModel):
