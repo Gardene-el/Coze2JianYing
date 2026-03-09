@@ -26,7 +26,7 @@ def add_audios(draft_id: str, request: AddAudiosRequest) -> AddAudiosResponse:
 
 @router.post(path="/drafts/{draft_id}/add_captions", response_model=AddCaptionsResponse)
 def add_captions(draft_id: str, request: AddCaptionsRequest) -> AddCaptionsResponse:
-	segment_ids, segment_infos = service.add_captions(
+	segment_ids = service.add_captions(
 		draft_id=draft_id,
 		captions=request.captions,
 		text_color=request.text_color,
@@ -50,7 +50,6 @@ def add_captions(draft_id: str, request: AddCaptionsRequest) -> AddCaptionsRespo
 	)
 	return AddCaptionsResponse(
 		segment_ids=segment_ids,
-		segment_infos=segment_infos,
 	)
 
 
@@ -70,7 +69,7 @@ def add_videos(draft_id: str, request: AddVideosRequest) -> AddVideosResponse:
 
 @router.post(path="/drafts/{draft_id}/add_images", response_model=AddImagesResponse)
 def add_images(draft_id: str, request: AddImagesRequest) -> AddImagesResponse:
-	segment_ids, segment_infos = service.add_images(
+	segment_ids = service.add_images(
 		draft_id=draft_id,
 		image_infos=request.image_infos,
 		alpha=request.alpha,
@@ -81,7 +80,6 @@ def add_images(draft_id: str, request: AddImagesRequest) -> AddImagesResponse:
 	)
 	return AddImagesResponse(
 		segment_ids=segment_ids,
-		segment_infos=segment_infos,
 	)
 
 

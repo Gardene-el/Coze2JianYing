@@ -3,14 +3,13 @@ from __future__ import annotations
 import json
 import os
 import uuid
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import pyJianYingDraft as draft
 from pyJianYingDraft.metadata import GroupAnimationType, IntroType, OutroType, TransitionType
 
 from app.backend.core.settings_manager import get_settings_manager
 from app.backend.exceptions import CustomError, CustomException
-from app.backend.schemas.easy.add_images import SegmentInfo
 from app.backend.utils.cache import DRAFT_CACHE
 from app.backend.utils.download import download
 from app.backend.utils.logger import logger
@@ -24,7 +23,7 @@ def add_images(
 	scale_y: float = 1.0,
 	transform_x: int = 0,
 	transform_y: int = 0,
-) -> Tuple[List[str], List[SegmentInfo]]:
+) -> List[str]:
 	"""批量添加图片。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -44,9 +43,8 @@ def add_images(
 	script.add_track(track_type=draft.TrackType.video, track_name=track_name, relative_index=10)
 
 	segment_ids: List[str] = []
-	segment_infos: List[SegmentInfo] = []
 	for image in images:
-		segment_id, segment_info = add_image_to_draft(
+		segment_id = add_image_to_draft(
 			script,
 			track_name,
 			draft_image_dir=draft_image_dir,
@@ -58,11 +56,10 @@ def add_images(
 			transform_y=transform_y,
 		)
 		segment_ids.append(segment_id)
-		segment_infos.append(segment_info)
 
 	script.save()
 
-	return segment_ids, segment_infos
+	return segment_ids
 
 
 def add_image_to_draft(
@@ -75,7 +72,7 @@ def add_image_to_draft(
 	scale_y: float = 1.0,
 	transform_x: int = 0,
 	transform_y: int = 0,
-) -> Tuple[str, SegmentInfo]:
+) -> str:
 	"""向草稿添加单张图片。"""
 	try:
 		image_path = download(url=image["image_url"], save_dir=draft_image_dir)
@@ -125,8 +122,7 @@ def add_image_to_draft(
 				video_segment.add_transition(transition_enum, duration=int(transition_duration) if transition_duration is not None else None)
 
 		script.add_segment(video_segment, track_name)
-		segment_info = SegmentInfo(id=video_segment.segment_id, start=image["start"], end=image["end"])
-		return video_segment.segment_id, segment_info
+		return video_segment.segment_id
 	except CustomException:
 		raise
 	except Exception as e:

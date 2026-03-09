@@ -15,14 +15,6 @@ class ShadowInfo(BaseModel):
 	shadow_angle: float = Field(default=-45.0, ge=-180.0, le=180.0, description="阴影角度")
 
 
-class SegmentInfo(BaseModel):
-	"""字幕片段信息。"""
-
-	id: str = Field(..., description="片段ID")
-	start: int = Field(..., description="片段开始时间（微秒）")
-	end: int = Field(..., description="片段结束时间（微秒）")
-
-
 class AddCaptionsRequest(BaseModel):
 	"""批量添加字幕请求参数。"""
 
@@ -51,4 +43,3 @@ class AddCaptionsResponse(BaseModel):
 	"""批量添加字幕响应参数。"""
 
 	segment_ids: List[str] = Field(default_factory=list, description="字幕片段ID列表")
-	segment_infos: List[SegmentInfo] = Field(default_factory=list, description="片段信息列表")

@@ -5,14 +5,6 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
-class SegmentInfo(BaseModel):
-	"""片段信息。"""
-
-	id: str = Field(..., description="片段ID")
-	start: int = Field(..., description="开始时间(微秒)")
-	end: int = Field(..., description="结束时间(微秒)")
-
-
 class AddImagesRequest(BaseModel):
 	"""批量添加图片请求参数。"""
 
@@ -28,4 +20,3 @@ class AddImagesResponse(BaseModel):
 	"""添加图片响应参数。"""
 
 	segment_ids: List[str] = Field(default_factory=list, description="片段ID列表")
-	segment_infos: List[SegmentInfo] = Field(default_factory=list, description="片段信息列表")

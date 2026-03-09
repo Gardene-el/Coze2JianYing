@@ -31,7 +31,7 @@ def add_captions(
     bold: bool = False,
     has_shadow: bool = False,
     shadow_info: Optional[ShadowInfo] = None
-) -> Tuple[List[str], List[dict]]:
+) -> List[str]:
     """
     批量添加字幕到剪映草稿的业务逻辑
     
@@ -77,7 +77,6 @@ def add_captions(
         track_id: 字幕轨道ID
         text_ids: 字幕ID列表
         segment_ids: 字幕片段ID列表
-        segment_infos: 片段信息列表
     
     Raises:
         CustomException: 字幕添加失败
@@ -113,12 +112,11 @@ def add_captions(
 
         # 5. 遍历字幕信息，添加字幕到草稿中的指定轨道，收集片段ID
         segment_ids = []
-        segment_infos = []
         for i, caption in enumerate(caption_items):
             try:
                 logger.info(f"Processing caption {i+1}/{len(caption_items)}, text: {caption['text'][:20]}...")
                 
-                segment_id, _, segment_info = add_caption_to_draft(
+                segment_id, _ = add_caption_to_draft(
                     script, track_name,
                     caption=caption,
                     text_color=text_color,
@@ -141,7 +139,6 @@ def add_captions(
                     shadow_info=shadow_info
                 )
                 segment_ids.append(segment_id)
-                segment_infos.append(segment_info)
                 logger.info(f"Added caption {i+1}/{len(caption_items)}, segment_id: {segment_id}")
             except Exception as e:
                 logger.error(f"Failed to add caption {i+1}/{len(caption_items)}, error: {str(e)}")
@@ -161,7 +158,7 @@ def add_captions(
 
         logger.info(f"add_captions completed successfully - draft_id: {draft_id}, captions_added: {len(caption_items)}")
         
-        return segment_ids, segment_infos
+        return segment_ids
         
     except CustomException:
         # 重新抛出自定义异常
@@ -194,7 +191,7 @@ def add_caption_to_draft(
     bold: bool = False,
     has_shadow: bool = False,
     shadow_info: Optional[ShadowInfo] = None
-) -> Tuple[str, str, dict]:
+) -> Tuple[str, str]:
     """
     向剪映草稿中添加单个字幕
     
@@ -222,7 +219,6 @@ def add_caption_to_draft(
     Returns:
         segment_id: 片段ID
         text_id: 文本ID（material_id）
-        segment_info: 片段信息字典，包含id、start、end
     
     Raises:
         CustomException: 添加字幕失败
@@ -384,14 +380,7 @@ def add_caption_to_draft(
         # 11. 向指定轨道添加片段
         script.add_segment(text_segment, track_name)
 
-        # 12. 构造片段信息
-        segment_info = {
-            "id": text_segment.segment_id,
-            "start": caption['start'],
-            "end": caption['end']
-        }
-
-        return text_segment.segment_id, text_segment.material_id, segment_info
+        return text_segment.segment_id, text_segment.material_id
         
     except CustomException:
         # 重新抛出自定义异常
