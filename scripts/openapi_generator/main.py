@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-生成仅包含 basic.py 路由的 Coze 兼容 OpenAPI 文件。
+生成包含 basic.py 和 easy.py 路由的 Coze 兼容 OpenAPI 文件。
 
 核心策略：
 1) 从 FastAPI app.openapi() 获取标准 schema（避免手写字段漂移）
-2) 仅保留 app.backend.api.basic.router 中声明的路径
+2) 保留 app.backend.api.basic.router 和 app.backend.api.easy.router 中声明的路径
 3) 仅保留被这些路径实际引用的 components/schemas
 4) 转换到 OpenAPI 3.0.1 友好格式（移除 title，处理 null/anyOf，简化 allOf+nullable）
 """
@@ -30,6 +30,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from app.backend.api.basic import router as basic_router  # noqa: E402
+from app.backend.api.easy import router as easy_router  # noqa: E402
 from app.backend.api_main import app  # noqa: E402
 import app.backend.core.common_types as _common_types  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
@@ -39,14 +40,15 @@ REF_PATTERN = re.compile(r"^#/components/schemas/(?P<name>[A-Za-z0-9_\-.]+)$")
 
 
 def build_route_operation_id_map() -> dict[tuple[str, str], str]:
-    """构建 (path, method) 到 endpoint 函数名的映射。"""
+    """构建 (path, method) 到 endpoint 函数名的映射（包含 basic + easy）。"""
     mapping: dict[tuple[str, str], str] = {}
-    for route in basic_router.routes:
-        if not isinstance(route, APIRoute):
-            continue
-        endpoint_name = route.endpoint.__name__
-        for method in route.methods:
-            mapping[(route.path, method.lower())] = endpoint_name
+    for router in (basic_router, easy_router):
+        for route in router.routes:
+            if not isinstance(route, APIRoute):
+                continue
+            endpoint_name = route.endpoint.__name__
+            for method in route.methods:
+                mapping[(route.path, method.lower())] = endpoint_name
     return mapping
 
 
@@ -131,19 +133,23 @@ def collect_schema_refs(obj: Any, refs: set[str] | None = None) -> set[str]:
     return refs
 
 
-def build_basic_paths(full_schema: dict[str, Any]) -> dict[str, Any]:
-    """仅保留 basic_router 中声明的路径。"""
-    basic_route_paths: set[str] = set()
+def build_selected_paths(full_schema: dict[str, Any]) -> dict[str, Any]:
+    """保留 basic_router 和 easy_router 中声明的所有路径，basic 在前、easy 在后。"""
     route_operation_id_map = build_route_operation_id_map()
     used_operation_ids: set[str] = set()
+    all_path_items = full_schema.get("paths", {})
 
-    for route in basic_router.routes:
-        if isinstance(route, APIRoute):
-            basic_route_paths.add(route.path)
+    # 按 basic → easy 的路由声明顺序收集路径（保持各 router 内部顺序）
+    ordered_paths: list[str] = []
+    for router in (basic_router, easy_router):
+        for route in router.routes:
+            if isinstance(route, APIRoute) and route.path not in ordered_paths:
+                ordered_paths.append(route.path)
 
     selected_paths: dict[str, Any] = {}
-    for path, path_item in full_schema.get("paths", {}).items():
-        if path not in basic_route_paths:
+    for path in ordered_paths:
+        path_item = all_path_items.get(path)
+        if path_item is None:
             continue
 
         path_item_copy = deepcopy(path_item)
@@ -221,18 +227,16 @@ def normalize_schemas_and_refs(spec: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_dynamic_endpoint_groups() -> list[str]:
-    """从 basic_router 中动态获取 endpoint 顺序。"""
+    """从 basic_router 和 easy_router 中动态获取 endpoint 顺序。"""
     endpoint_groups = []
-    for route in basic_router.routes:
-        if isinstance(route, APIRoute):
-            func_name = route.endpoint.__name__
-            # 转换函数名为对应的 Schema 前缀
-            # create_draft -> CreateDraft
-            # add_segment -> AddSegment
-            words = func_name.split('_')
-            schema_prefix = ''.join(word.capitalize() for word in words)
-            if schema_prefix not in endpoint_groups:
-                endpoint_groups.append(schema_prefix)
+    for router in (basic_router, easy_router):
+        for route in router.routes:
+            if isinstance(route, APIRoute):
+                func_name = route.endpoint.__name__
+                words = func_name.split('_')
+                schema_prefix = ''.join(word.capitalize() for word in words)
+                if schema_prefix not in endpoint_groups:
+                    endpoint_groups.append(schema_prefix)
     return endpoint_groups
 
 
@@ -314,7 +318,7 @@ def build_min_components(selected_paths: dict[str, Any], all_components: dict[st
 def create_spec(server_url: str, title: str, version: str, description: str) -> dict[str, Any]:
     """创建最终 OpenAPI 文档。"""
     full_schema = app.openapi()
-    selected_paths = build_basic_paths(full_schema)
+    selected_paths = build_selected_paths(full_schema)
     min_components = build_min_components(selected_paths, full_schema.get("components", {}))
 
     converted_paths = convert_schema_to_openapi_3_0(selected_paths)
@@ -341,7 +345,7 @@ def create_spec(server_url: str, title: str, version: str, description: str) -> 
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="生成 basic 路由的 Coze 兼容 OpenAPI")
+    parser = argparse.ArgumentParser(description="生成 basic + easy 路由的 Coze 兼容 OpenAPI")
     parser.add_argument(
         "--server-url",
         default="https://api-c2jy.garden-eel.com",
@@ -349,7 +353,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--title",
-        default="Coze2JianYing Basic API (Coze兼容尝试版)",
+        default="Coze2JianYing API",
         help="OpenAPI info.title",
     )
     parser.add_argument(
@@ -359,7 +363,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--description",
-        default="仅基于 basic.py 端点生成，用于 Coze OpenAPI 接纳测试。",
+        default="包含 basic 和 easy 全量端点，用于 Coze OpenAPI 接入。",
         help="OpenAPI info.description",
     )
     parser.add_argument(
@@ -408,7 +412,7 @@ def main() -> None:
     basic_path_count = len(spec.get("paths", {}))
     component_count = len(spec.get("components", {}).get("schemas", {}))
     print(f"✅ OpenAPI 已生成: {output_path}")
-    print(f"📌 basic 路径数量: {basic_path_count}")
+    print(f"📌 路径数量 (basic + easy): {basic_path_count}")
     print(f"📦 引用 schema 数量: {component_count}")
 
 

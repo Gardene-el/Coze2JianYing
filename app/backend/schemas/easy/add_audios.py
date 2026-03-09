@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 class AddAudiosRequest(BaseModel):
 	"""批量添加音频请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	audio_infos: str = Field(..., description="音频信息列表，JSON字符串")
 
 

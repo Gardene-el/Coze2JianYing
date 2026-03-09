@@ -16,7 +16,6 @@ class EffectItem(BaseModel):
 class AddEffectsRequest(BaseModel):
 	"""添加特效请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	effect_infos: str = Field(..., description="特效信息列表，JSON字符串")
 
 

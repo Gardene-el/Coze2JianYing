@@ -26,7 +26,6 @@ class SegmentInfo(BaseModel):
 class AddCaptionsRequest(BaseModel):
 	"""批量添加字幕请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	captions: str = Field(..., description="字幕信息列表，JSON字符串")
 	text_color: str = Field(default="#ffffff", description="文本颜色（十六进制）")
 	border_color: Optional[str] = Field(default=None, description="边框颜色（十六进制）")

@@ -15,19 +15,19 @@ from app.backend.services import easy as service
 router = APIRouter(tags=["easy"])
 
 
-@router.post(path="/add_audios", response_model=AddAudiosResponse)
-def add_audios(request: AddAudiosRequest) -> AddAudiosResponse:
+@router.post(path="/drafts/{draft_id}/add_audios", response_model=AddAudiosResponse)
+def add_audios(draft_id: str, request: AddAudiosRequest) -> AddAudiosResponse:
 	segment_ids = service.add_audios(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		audio_infos=request.audio_infos,
 	)
 	return AddAudiosResponse(segment_ids=segment_ids)
 
 
-@router.post(path="/add_captions", response_model=AddCaptionsResponse)
-def add_captions(request: AddCaptionsRequest) -> AddCaptionsResponse:
+@router.post(path="/drafts/{draft_id}/add_captions", response_model=AddCaptionsResponse)
+def add_captions(draft_id: str, request: AddCaptionsRequest) -> AddCaptionsResponse:
 	segment_ids, segment_infos = service.add_captions(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		captions=request.captions,
 		text_color=request.text_color,
 		border_color=request.border_color,
@@ -54,10 +54,10 @@ def add_captions(request: AddCaptionsRequest) -> AddCaptionsResponse:
 	)
 
 
-@router.post(path="/add_videos", response_model=AddVideosResponse)
-def add_videos(request: AddVideosRequest) -> AddVideosResponse:
+@router.post(path="/drafts/{draft_id}/add_videos", response_model=AddVideosResponse)
+def add_videos(draft_id: str, request: AddVideosRequest) -> AddVideosResponse:
 	segment_ids = service.add_videos(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		video_infos=request.video_infos,
 		alpha=request.alpha,
 		scale_x=request.scale_x,
@@ -68,10 +68,10 @@ def add_videos(request: AddVideosRequest) -> AddVideosResponse:
 	return AddVideosResponse(segment_ids=segment_ids)
 
 
-@router.post(path="/add_images", response_model=AddImagesResponse)
-def add_images(request: AddImagesRequest) -> AddImagesResponse:
+@router.post(path="/drafts/{draft_id}/add_images", response_model=AddImagesResponse)
+def add_images(draft_id: str, request: AddImagesRequest) -> AddImagesResponse:
 	segment_ids, segment_infos = service.add_images(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		image_infos=request.image_infos,
 		alpha=request.alpha,
 		scale_x=request.scale_x,
@@ -85,16 +85,16 @@ def add_images(request: AddImagesRequest) -> AddImagesResponse:
 	)
 
 
-@router.post(path="/add_effects", response_model=AddEffectsResponse)
-def add_effects(request: AddEffectsRequest) -> AddEffectsResponse:
+@router.post(path="/drafts/{draft_id}/add_effects", response_model=AddEffectsResponse)
+def add_effects(draft_id: str, request: AddEffectsRequest) -> AddEffectsResponse:
 	segment_ids = service.add_effects(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		effect_infos=request.effect_infos,
 	)
 	return AddEffectsResponse(segment_ids=segment_ids)
 
 
-@router.post(path="/add_masks", response_model=AddMasksResponse)
+@router.post(path="/segments/add_masks", response_model=AddMasksResponse)
 def add_masks(request: AddMasksRequest) -> AddMasksResponse:
 	service.add_masks(
 		draft_id=request.draft_id,
@@ -112,7 +112,7 @@ def add_masks(request: AddMasksRequest) -> AddMasksResponse:
 	return AddMasksResponse()
 
 
-@router.post(path="/add_keyframes", response_model=AddKeyframesResponse)
+@router.post(path="/segments/add_keyframes", response_model=AddKeyframesResponse)
 def add_keyframes(request: AddKeyframesRequest) -> AddKeyframesResponse:
 	service.add_keyframes(
 		draft_id=request.draft_id,

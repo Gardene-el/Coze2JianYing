@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 class AddVideosRequest(BaseModel):
 	"""批量添加视频请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	video_infos: str = Field(..., description="视频信息列表，JSON字符串")
 	alpha: float = Field(default=1.0, description="全局透明度[0, 1]")
 	scale_x: float = Field(default=1.0, description="X轴缩放比例")

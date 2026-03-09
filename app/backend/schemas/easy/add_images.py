@@ -16,7 +16,6 @@ class SegmentInfo(BaseModel):
 class AddImagesRequest(BaseModel):
 	"""批量添加图片请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	image_infos: str = Field(..., description="图片信息列表，JSON字符串")
 	alpha: float = Field(default=1.0, description="全局透明度[0, 1]")
 	scale_x: float = Field(default=1.0, description="X轴缩放比例")
