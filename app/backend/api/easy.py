@@ -96,7 +96,7 @@ def add_effects(request: AddEffectsRequest) -> AddEffectsResponse:
 
 @router.post(path="/add_masks", response_model=AddMasksResponse)
 def add_masks(request: AddMasksRequest) -> AddMasksResponse:
-	masks_added, affected_segments = service.add_masks(
+	service.add_masks(
 		draft_id=request.draft_id,
 		segment_ids=request.segment_ids,
 		name=request.name,
@@ -109,19 +109,13 @@ def add_masks(request: AddMasksRequest) -> AddMasksResponse:
 		invert=request.invert,
 		roundCorner=request.roundCorner,
 	)
-	return AddMasksResponse(
-		masks_added=masks_added,
-		affected_segments=affected_segments,
-	)
+	return AddMasksResponse()
 
 
 @router.post(path="/add_keyframes", response_model=AddKeyframesResponse)
 def add_keyframes(request: AddKeyframesRequest) -> AddKeyframesResponse:
-	keyframes_added, affected_segments = service.add_keyframes(
+	service.add_keyframes(
 		draft_id=request.draft_id,
 		keyframes=request.keyframes,
 	)
-	return AddKeyframesResponse(
-		keyframes_added=keyframes_added,
-		affected_segments=affected_segments,
-	)
+	return AddKeyframesResponse()

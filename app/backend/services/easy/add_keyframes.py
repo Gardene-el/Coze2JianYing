@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from pyJianYingDraft import ScriptFile
 from pyJianYingDraft.keyframe import KeyframeProperty
@@ -12,7 +12,7 @@ from app.backend.utils.cache import DRAFT_CACHE
 from app.backend.utils.logger import logger
 
 
-def add_keyframes(draft_id: str, keyframes: str) -> Tuple[int, List[str]]:
+def add_keyframes(draft_id: str, keyframes: str) -> None:
 	"""批量添加关键帧。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -22,20 +22,18 @@ def add_keyframes(draft_id: str, keyframes: str) -> Tuple[int, List[str]]:
 		raise CustomException(CustomError.INVALID_KEYFRAME_INFO)
 
 	script: ScriptFile = DRAFT_CACHE[draft_id]
-	keyframes_added = 0
-	affected_segments: List[str] = []
 
 	for keyframe_item in keyframe_items:
 		segment = find_segment_by_id(script, keyframe_item["segment_id"])
 		if segment is None:
-			continue
+			raise CustomException(CustomError.SEGMENT_NOT_FOUND, f"segment_id: {keyframe_item['segment_id']}")
 		if not isinstance(segment, VisualSegment):
-			continue
+			raise CustomException(CustomError.INVALID_SEGMENT_TYPE, f"segment_id: {keyframe_item['segment_id']}")
 
 		try:
 			property_enum = KeyframeProperty(keyframe_item["property"])
 		except ValueError:
-			continue
+			raise CustomException(CustomError.INVALID_KEYFRAME_INFO, f"unsupported property: {keyframe_item['property']}")
 
 		segment_duration = segment.duration
 		offset_value = keyframe_item["offset"]
@@ -43,16 +41,10 @@ def add_keyframes(draft_id: str, keyframes: str) -> Tuple[int, List[str]]:
 		time_offset = int(relative_offset * segment_duration)
 		segment.add_keyframe(property_enum, time_offset, keyframe_item["value"])
 
-		keyframes_added += 1
-		if keyframe_item["segment_id"] not in affected_segments:
-			affected_segments.append(keyframe_item["segment_id"])
-
 	try:
 		script.save()
 	except Exception as e:
 		raise CustomException(CustomError.KEYFRAME_ADD_FAILED, str(e))
-
-	return keyframes_added, affected_segments
 
 
 def find_segment_by_id(script: ScriptFile, segment_id: str) -> Optional[VisualSegment]:

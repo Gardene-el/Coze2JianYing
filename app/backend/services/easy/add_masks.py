@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from pyJianYingDraft import MaskType, ScriptFile
 from pyJianYingDraft.segment import VisualSegment
@@ -23,7 +23,7 @@ def add_masks(
 	rotation: int = 0,
 	invert: bool = False,
 	roundCorner: int = 0,
-) -> Tuple[int, List[str]]:
+) -> None:
 	"""批量添加遮罩。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -34,9 +34,6 @@ def add_masks(
 	mask_type = find_mask_type_by_name(name)
 	if mask_type is None:
 		raise CustomException(CustomError.MASK_NOT_FOUND)
-
-	masks_added = 0
-	affected_segments: List[str] = []
 
 	for segment_id in segment_ids:
 		add_mask_to_segment(
@@ -52,11 +49,8 @@ def add_masks(
 			invert=invert,
 			round_corner=roundCorner,
 		)
-		masks_added += 1
-		affected_segments.append(segment_id)
 
 	script.save()
-	return masks_added, affected_segments
 
 
 def add_mask_to_segment(

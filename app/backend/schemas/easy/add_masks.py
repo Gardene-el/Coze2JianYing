@@ -24,5 +24,4 @@ class AddMasksRequest(BaseModel):
 class AddMasksResponse(BaseModel):
 	"""添加遮罩响应参数。"""
 
-	masks_added: int = Field(default=0, description="成功添加的遮罩数量")
-	affected_segments: List[str] = Field(default_factory=list, description="受影响的片段ID列表")
+	pass

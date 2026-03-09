@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List
-
 from pydantic import BaseModel, Field
 
 
@@ -24,5 +22,4 @@ class AddKeyframesRequest(BaseModel):
 class AddKeyframesResponse(BaseModel):
 	"""添加关键帧响应参数。"""
 
-	keyframes_added: int = Field(default=0, description="添加的关键帧数量")
-	affected_segments: List[str] = Field(default_factory=list, description="受影响的片段ID列表")
+	pass
