@@ -15,6 +15,4 @@ class AddAudiosRequest(BaseModel):
 class AddAudiosResponse(BaseModel):
 	"""批量添加音频响应参数。"""
 
-	draft_id: str = Field(default="", description="草稿ID")
-	track_id: str = Field(default="", description="音频轨道ID")
-	audio_ids: List[str] = Field(default_factory=list, description="音频素材ID列表")
+	segment_ids: List[str] = Field(default_factory=list, description="音频片段ID列表")

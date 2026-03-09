@@ -31,7 +31,7 @@ def add_captions(
     bold: bool = False,
     has_shadow: bool = False,
     shadow_info: Optional[ShadowInfo] = None
-) -> Tuple[str, str, List[str], List[str], List[dict]]:
+) -> Tuple[List[str], List[dict]]:
     """
     批量添加字幕到剪映草稿的业务逻辑
     
@@ -113,13 +113,12 @@ def add_captions(
 
         # 5. 遍历字幕信息，添加字幕到草稿中的指定轨道，收集片段ID
         segment_ids = []
-        text_ids = []
         segment_infos = []
         for i, caption in enumerate(caption_items):
             try:
                 logger.info(f"Processing caption {i+1}/{len(caption_items)}, text: {caption['text'][:20]}...")
                 
-                segment_id, text_id, segment_info = add_caption_to_draft(
+                segment_id, _, segment_info = add_caption_to_draft(
                     script, track_name,
                     caption=caption,
                     text_color=text_color,
@@ -142,7 +141,6 @@ def add_captions(
                     shadow_info=shadow_info
                 )
                 segment_ids.append(segment_id)
-                text_ids.append(text_id)
                 segment_infos.append(segment_info)
                 logger.info(f"Added caption {i+1}/{len(caption_items)}, segment_id: {segment_id}")
             except Exception as e:
@@ -161,9 +159,9 @@ def add_captions(
                 break
         logger.info(f"Caption track created, draft_id: {draft_id}, track_id: {track_id}")
 
-        logger.info(f"add_captions completed successfully - draft_id: {draft_id}, track_id: {track_id}, captions_added: {len(caption_items)}")
+        logger.info(f"add_captions completed successfully - draft_id: {draft_id}, captions_added: {len(caption_items)}")
         
-        return draft_id, track_id, text_ids, segment_ids, segment_infos
+        return segment_ids, segment_infos
         
     except CustomException:
         # 重新抛出自定义异常

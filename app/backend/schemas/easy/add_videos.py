@@ -20,7 +20,4 @@ class AddVideosRequest(BaseModel):
 class AddVideosResponse(BaseModel):
 	"""添加视频响应参数。"""
 
-	draft_id: str = Field(default="", description="草稿ID")
-	track_id: str = Field(default="", description="轨道ID")
-	video_ids: List[str] = Field(default_factory=list, description="视频素材ID列表")
 	segment_ids: List[str] = Field(default_factory=list, description="片段ID列表")

@@ -28,8 +28,5 @@ class AddImagesRequest(BaseModel):
 class AddImagesResponse(BaseModel):
 	"""添加图片响应参数。"""
 
-	draft_id: str = Field(default="", description="草稿ID")
-	track_id: str = Field(default="", description="视频轨道ID")
-	image_ids: List[str] = Field(default_factory=list, description="图片ID列表")
 	segment_ids: List[str] = Field(default_factory=list, description="片段ID列表")
 	segment_infos: List[SegmentInfo] = Field(default_factory=list, description="片段信息列表")

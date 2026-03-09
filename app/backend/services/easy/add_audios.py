@@ -7,14 +7,14 @@ import os
 from app.backend.utils.download import download
 from app.backend.core.settings_manager import get_settings_manager
 import json
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any
 import uuid
 
 
 def add_audios(
     draft_id: str,
     audio_infos: str
-) -> Tuple[str, str, List[str]]:
+) -> List[str]:
     """
     添加音频到剪映草稿的业务逻辑
     
@@ -23,9 +23,7 @@ def add_audios(
         audio_infos: 音频信息JSON字符串
 
     Returns:
-        draft_id: 草稿ID
-        track_id: 音频轨道ID（非主轨道）
-        audio_ids: 音频ID列表
+        segment_ids: 音频片段ID列表
 
     Raises:
         CustomException: 音频批量添加失败
@@ -46,16 +44,14 @@ def add_audios(
     track_name = add_audio_track(script)
     
     # 添加音频到轨道
-    audio_ids = add_audio_segments(script, track_name, draft_audio_dir, audios)
+    segment_ids = add_audio_segments(script, track_name, draft_audio_dir, audios)
     
     # 保存草稿并返回结果
     script.save()
     logger.info(f"Draft saved successfully")
+    logger.info(f"Audio track created, draft_id: {draft_id}")
     
-    track_id = get_track_id(script, track_name)
-    logger.info(f"Audio track created, draft_id: {draft_id}, track_id: {track_id}")
-    
-    return draft_id, track_id, audio_ids
+    return segment_ids
 
 
 def validate_draft_id(draft_id: str) -> None:
@@ -95,16 +91,16 @@ def add_audio_track(script: draft.ScriptFile) -> str:
 
 def add_audio_segments(script: draft.ScriptFile, track_name: str, draft_audio_dir: str, audios: List[Dict[str, Any]]) -> List[str]:
     """批量添加音频片段到指定轨道"""
-    audio_ids = []
+    segment_ids = []
     for i, audio in enumerate(audios):
         try:
-            audio_id = add_audio_to_draft(script, track_name, draft_audio_dir=draft_audio_dir, audio=audio)
-            audio_ids.append(audio_id)
-            logger.info(f"Added audio {i+1}/{len(audios)}, audio_id: {audio_id}")
+            segment_id = add_audio_to_draft(script, track_name, draft_audio_dir=draft_audio_dir, audio=audio)
+            segment_ids.append(segment_id)
+            logger.info(f"Added audio {i+1}/{len(audios)}, segment_id: {segment_id}")
         except Exception as e:
             logger.error(f"Failed to add audio {i+1}/{len(audios)}, error: {str(e)}")
             raise
-    return audio_ids
+    return segment_ids
 
 
 def get_track_id(script: draft.ScriptFile, track_name: str) -> str:
@@ -254,7 +250,7 @@ def add_audio_to_draft(
         # 7. 添加片段到轨道（带重叠处理）
         add_segment_with_overlap_handling(script, track_name, audio_segment, audio_path, start_time, segment_duration, audio)
         
-        return audio_segment.material_instance.material_id
+        return audio_segment.segment_id
         
     except CustomException:
         logger.error(f"Add audio to draft failed, draft_audio_dir: {draft_audio_dir}, audio: {audio}")

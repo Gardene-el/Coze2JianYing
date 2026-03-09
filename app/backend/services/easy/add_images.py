@@ -24,7 +24,7 @@ def add_images(
 	scale_y: float = 1.0,
 	transform_x: int = 0,
 	transform_y: int = 0,
-) -> Tuple[str, str, List[str], List[str], List[SegmentInfo]]:
+) -> Tuple[List[str], List[SegmentInfo]]:
 	"""批量添加图片。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -62,14 +62,7 @@ def add_images(
 
 	script.save()
 
-	track_id = ""
-	for key in script.tracks.keys():
-		if script.tracks[key].name == track_name:
-			track_id = script.tracks[key].track_id
-			break
-
-	image_ids = [video.material_id for video in script.materials.videos if video.material_type == "photo"]
-	return draft_id, track_id, image_ids, segment_ids, segment_infos
+	return segment_ids, segment_infos
 
 
 def add_image_to_draft(

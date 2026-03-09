@@ -12,7 +12,7 @@ from app.backend.utils.cache import DRAFT_CACHE
 from app.backend.utils.logger import logger
 
 
-def add_keyframes(draft_id: str, keyframes: str) -> Tuple[str, int, List[str]]:
+def add_keyframes(draft_id: str, keyframes: str) -> Tuple[int, List[str]]:
 	"""批量添加关键帧。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -52,7 +52,7 @@ def add_keyframes(draft_id: str, keyframes: str) -> Tuple[str, int, List[str]]:
 	except Exception as e:
 		raise CustomException(CustomError.KEYFRAME_ADD_FAILED, str(e))
 
-	return draft_id, keyframes_added, affected_segments
+	return keyframes_added, affected_segments
 
 
 def find_segment_by_id(script: ScriptFile, segment_id: str) -> Optional[VisualSegment]:

@@ -23,7 +23,4 @@ class AddEffectsRequest(BaseModel):
 class AddEffectsResponse(BaseModel):
 	"""添加特效响应参数。"""
 
-	draft_id: str = Field(default="", description="草稿ID")
-	track_id: str = Field(default="", description="特效轨道ID")
-	effect_ids: List[str] = Field(default_factory=list, description="特效ID列表")
 	segment_ids: List[str] = Field(default_factory=list, description="特效片段ID列表")

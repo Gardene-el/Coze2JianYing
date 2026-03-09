@@ -51,8 +51,5 @@ class AddCaptionsRequest(BaseModel):
 class AddCaptionsResponse(BaseModel):
 	"""批量添加字幕响应参数。"""
 
-	draft_id: str = Field(default="", description="草稿ID")
-	track_id: str = Field(default="", description="字幕轨道ID")
-	text_ids: List[str] = Field(default_factory=list, description="文本素材ID列表")
 	segment_ids: List[str] = Field(default_factory=list, description="字幕片段ID列表")
 	segment_infos: List[SegmentInfo] = Field(default_factory=list, description="片段信息列表")

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 import uuid
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import pyJianYingDraft as draft
 
@@ -22,7 +22,7 @@ def add_videos(
 	scale_y: float = 1.0,
 	transform_x: int = 0,
 	transform_y: int = 0,
-) -> Tuple[str, str, List[str], List[str]]:
+) -> List[str]:
 	"""批量添加视频。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -58,14 +58,7 @@ def add_videos(
 
 	script.save()
 
-	track_id = ""
-	for key in script.tracks.keys():
-		if script.tracks[key].name == track_name:
-			track_id = script.tracks[key].track_id
-			break
-
-	video_ids = [video.material_id for video in script.materials.videos]
-	return draft_id, track_id, video_ids, segment_ids
+	return segment_ids
 
 
 def add_video_to_draft(

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pyJianYingDraft import EffectSegment, Timerange, TrackType
 from pyJianYingDraft.metadata import VideoCharacterEffectType, VideoSceneEffectType
@@ -12,7 +12,7 @@ from app.backend.utils.cache import DRAFT_CACHE
 from app.backend.utils.logger import logger
 
 
-def add_effects(draft_id: str, effect_infos: str) -> Tuple[str, str, List[str], List[str]]:
+def add_effects(draft_id: str, effect_infos: str) -> List[str]:
 	"""批量添加特效。"""
 	logger.info("add_effects started, draft_id: %s", draft_id)
 
@@ -28,21 +28,13 @@ def add_effects(draft_id: str, effect_infos: str) -> Tuple[str, str, List[str], 
 	script.add_track(track_type=TrackType.effect, track_name=track_name)
 
 	segment_ids: List[str] = []
-	effect_ids: List[str] = []
 	for effect in effect_items:
-		segment_id, effect_id = add_effect_to_draft(script, track_name, effect)
+		segment_id, _ = add_effect_to_draft(script, track_name, effect)
 		segment_ids.append(segment_id)
-		effect_ids.append(effect_id)
 
 	script.save()
 
-	track_id = ""
-	for key in script.tracks.keys():
-		if script.tracks[key].name == track_name:
-			track_id = script.tracks[key].track_id
-			break
-
-	return draft_id, track_id, effect_ids, segment_ids
+	return segment_ids
 
 
 def add_effect_to_draft(script, track_name: str, effect: Dict[str, Any]) -> Tuple[str, str]:

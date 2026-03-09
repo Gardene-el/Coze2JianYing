@@ -24,6 +24,5 @@ class AddKeyframesRequest(BaseModel):
 class AddKeyframesResponse(BaseModel):
 	"""添加关键帧响应参数。"""
 
-	draft_id: str = Field(default="", description="草稿ID")
 	keyframes_added: int = Field(default=0, description="添加的关键帧数量")
 	affected_segments: List[str] = Field(default_factory=list, description="受影响的片段ID列表")

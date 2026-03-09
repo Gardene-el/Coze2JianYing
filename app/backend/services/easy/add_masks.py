@@ -23,7 +23,7 @@ def add_masks(
 	rotation: int = 0,
 	invert: bool = False,
 	roundCorner: int = 0,
-) -> Tuple[str, int, List[str], List[str]]:
+) -> Tuple[int, List[str]]:
 	"""批量添加遮罩。"""
 	if (not draft_id) or (draft_id not in DRAFT_CACHE):
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
@@ -37,10 +37,9 @@ def add_masks(
 
 	masks_added = 0
 	affected_segments: List[str] = []
-	mask_ids: List[str] = []
 
 	for segment_id in segment_ids:
-		mask_id = add_mask_to_segment(
+		add_mask_to_segment(
 			script=script,
 			segment_id=segment_id,
 			mask_type=mask_type,
@@ -55,10 +54,9 @@ def add_masks(
 		)
 		masks_added += 1
 		affected_segments.append(segment_id)
-		mask_ids.append(mask_id)
 
 	script.save()
-	return draft_id, masks_added, affected_segments, mask_ids
+	return masks_added, affected_segments
 
 
 def add_mask_to_segment(
