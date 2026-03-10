@@ -92,10 +92,10 @@ def add_effects(draft_id: str, request: AddEffectsRequest) -> AddEffectsResponse
 	return AddEffectsResponse(segment_ids=segment_ids)
 
 
-@router.post(path="/segments/add_masks", response_model=AddMasksResponse)
-def add_masks(request: AddMasksRequest) -> AddMasksResponse:
+@router.post(path="/drafts/{draft_id}/add_masks", response_model=AddMasksResponse)
+def add_masks(draft_id: str, request: AddMasksRequest) -> AddMasksResponse:
 	service.add_masks(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		segment_ids=request.segment_ids,
 		name=request.name,
 		X=request.X,
@@ -110,10 +110,10 @@ def add_masks(request: AddMasksRequest) -> AddMasksResponse:
 	return AddMasksResponse()
 
 
-@router.post(path="/segments/add_keyframes", response_model=AddKeyframesResponse)
-def add_keyframes(request: AddKeyframesRequest) -> AddKeyframesResponse:
+@router.post(path="/drafts/{draft_id}/add_keyframes", response_model=AddKeyframesResponse)
+def add_keyframes(draft_id: str, request: AddKeyframesRequest) -> AddKeyframesResponse:
 	service.add_keyframes(
-		draft_id=request.draft_id,
+		draft_id=draft_id,
 		keyframes=request.keyframes,
 	)
 	return AddKeyframesResponse()

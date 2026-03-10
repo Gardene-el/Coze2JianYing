@@ -15,7 +15,6 @@ class KeyframeItem(BaseModel):
 class AddKeyframesRequest(BaseModel):
 	"""添加关键帧请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	keyframes: str = Field(..., description="关键帧信息列表，JSON字符串")
 
 

@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 class AddMasksRequest(BaseModel):
 	"""添加遮罩请求参数。"""
 
-	draft_id: str = Field(..., description="草稿ID")
 	segment_ids: List[str] = Field(default_factory=list, description="要应用遮罩的片段ID数组")
 	name: str = Field(default="线性", description="遮罩类型名称")
 	X: int = Field(default=0, description="遮罩中心X坐标（像素）")
