@@ -1,0 +1,24 @@
+{
+  "name": "coze2jianying-relay",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "db:create": "wrangler d1 create coze-relay",
+    "db:init": "wrangler d1 execute coze-relay --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute coze-relay --remote --file=./schema.sql"
+  },
+  "dependencies": {
+    "itty-router": "^5.0.18"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@cloudflare/workers-types": "^4.0.0",
+    "typescript": "^5.4.0",
+    "wrangler": "^3.0.0"
+  }
+}
