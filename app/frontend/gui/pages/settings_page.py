@@ -26,9 +26,10 @@ class SettingsPage(BasePage):
         ).pack(side="left")
 
         # 滚动区域
-        scrollable_frame = ctk.CTkScrollableFrame(main_frame, fg_color="transparent")
-        scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
-        scrollable_frame.grid_columnconfigure(1, weight=1)
+        self.scrollable_frame = ctk.CTkScrollableFrame(main_frame, fg_color="transparent")
+        self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.scrollable_frame.grid_columnconfigure(1, weight=1)
+        scrollable_frame = self.scrollable_frame
 
         # ==================== 路径设置 ====================
         ctk.CTkLabel(
@@ -58,10 +59,10 @@ class SettingsPage(BasePage):
             font=ctk.CTkFont(family='Microsoft YaHei', size=13)
         ).grid(row=2, column=1, padx=10, pady=10, sticky="w")
 
-        # ==================== API 设置 ====================
+        # ==================== 直连设置 ====================
         ctk.CTkLabel(
             scrollable_frame,
-            text="🌐 API 设置",
+            text="🔗 直连设置 (ngrok)",
             font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
         ).grid(row=3, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
 
@@ -86,14 +87,34 @@ class SettingsPage(BasePage):
         )
         self.ngrok_region_menu.grid(row=6, column=1, padx=10, pady=10, sticky="w")
 
+        # ==================== 云服务设置 ====================
+        ctk.CTkLabel(
+            scrollable_frame,
+            text="☁️ 云服务设置 (Cloudflare Worker)",
+            font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
+        ).grid(row=7, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
+
+        ctk.CTkLabel(scrollable_frame, text="Worker URL:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=8, column=0, padx=10, pady=10, sticky="w")
+        self.relay_worker_url_var = ctk.StringVar(value=self.settings.get("relay_worker_url", ""))
+        self.relay_worker_url_entry = ctk.CTkEntry(
+            scrollable_frame,
+            textvariable=self.relay_worker_url_var,
+            placeholder_text="https://api.garden-eel.com/coze2jianying",
+            width=400,
+            corner_radius=8,
+            fg_color=("white", "#3B3B3B"),
+            border_color=("gray70", "gray40")
+        )
+        self.relay_worker_url_entry.grid(row=8, column=1, padx=10, pady=10, sticky="ew")
+
         # ==================== 外观设置 ====================
         ctk.CTkLabel(
             scrollable_frame,
             text="🎨 外观设置",
             font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
-        ).grid(row=7, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
+        ).grid(row=9, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
 
-        ctk.CTkLabel(scrollable_frame, text="主题模式:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=8, column=0, padx=10, pady=10, sticky="w")
+        ctk.CTkLabel(scrollable_frame, text="主题模式:", font=ctk.CTkFont(family='Microsoft YaHei', size=13)).grid(row=10, column=0, padx=10, pady=10, sticky="w")
         self.theme_mode_var = ctk.StringVar(value=self.settings.get("theme_mode", "System"))
         self.theme_mode_menu = ctk.CTkOptionMenu(
             scrollable_frame,
@@ -102,11 +123,11 @@ class SettingsPage(BasePage):
             command=self._change_appearance_mode,
             corner_radius=8
         )
-        self.theme_mode_menu.grid(row=8, column=1, padx=10, pady=10, sticky="w")
+        self.theme_mode_menu.grid(row=10, column=1, padx=10, pady=10, sticky="w")
 
         # 按钮区域
         btn_frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
-        btn_frame.grid(row=9, column=0, columnspan=3, pady=30, sticky="w", padx=10)
+        btn_frame.grid(row=11, column=0, columnspan=3, pady=30, sticky="w", padx=10)
 
         ctk.CTkButton(
             btn_frame,
@@ -136,10 +157,10 @@ class SettingsPage(BasePage):
             scrollable_frame,
             text="ℹ️ 当前生效配置 (调试信息)",
             font=ctk.CTkFont(family='Microsoft YaHei', size=16, weight="bold")
-        ).grid(row=10, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
+        ).grid(row=12, column=0, columnspan=3, pady=(20, 10), sticky="w", padx=10)
 
         self.config_display = ctk.CTkTextbox(scrollable_frame, height=150, width=600, corner_radius=10, fg_color=("gray97", "#383838"), border_width=1, border_color=("gray70", "gray40"))
-        self.config_display.grid(row=11, column=0, columnspan=3, padx=10, pady=(0, 20), sticky="ew")
+        self.config_display.grid(row=13, column=0, columnspan=3, padx=10, pady=(0, 20), sticky="ew")
         self.config_display.configure(state="disabled")
 
         # 初始化显示
@@ -191,6 +212,7 @@ class SettingsPage(BasePage):
         self.settings.set("api_port", self.api_port_var.get())
         self.settings.set("ngrok_auth_token", self.ngrok_token_var.get())
         self.settings.set("ngrok_region", self.ngrok_region_var.get())
+        self.settings.set("relay_worker_url", self.relay_worker_url_var.get().strip().rstrip("/"))
         self.settings.set("theme_mode", self.theme_mode_var.get())
         
         self._update_config_display()

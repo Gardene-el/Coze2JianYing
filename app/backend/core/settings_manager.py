@@ -39,15 +39,17 @@ class SettingsManager:
         self._initialized = True
 
     def _load_settings(self) -> Dict[str, Any]:
-        """加载设置"""
+        """加载设置，并用默认值补全缺失的键"""
+        defaults = self._get_default_settings()
         if not os.path.exists(self.settings_file):
-            return self._get_default_settings()
+            return defaults
 
         try:
             with open(self.settings_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                loaded = json.load(f)
+            return {**defaults, **loaded}
         except Exception:
-            return self._get_default_settings()
+            return defaults
 
     def _get_default_settings(self) -> Dict[str, Any]:
         """获取默认设置"""
@@ -56,6 +58,7 @@ class SettingsManager:
             "api_port": "20211",
             "ngrok_auth_token": "",
             "ngrok_region": "us",
+            "relay_worker_url": "https://api.garden-eel.com/coze2jianying",
             "theme_mode": "System",  # System, Dark, Light
             "color_theme": "blue",   # blue, green, dark-blue
             "transfer_enabled": False

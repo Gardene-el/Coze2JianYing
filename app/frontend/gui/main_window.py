@@ -12,6 +12,7 @@ from PIL import Image
 from app.frontend.gui.pages.draft_generator_page import DraftGeneratorPage
 from app.frontend.gui.pages.cloud_service_page import CloudServicePage
 from app.frontend.gui.pages.script_executor_page import ScriptExecutorPage
+from app.frontend.gui.pages.replay_page import ReplayPage
 from app.frontend.gui.pages.settings_page import SettingsPage
 from app.frontend.gui.log_window import LogWindow
 from app.backend.utils.logger import get_logger, set_gui_log_callback
@@ -68,7 +69,7 @@ class MainWindow(ctk.CTk):
         """创建侧边栏"""
         self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color=("#F3F3F3", "#202020"))
         self.sidebar_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(5, weight=1)
+        self.sidebar_frame.grid_rowconfigure(6, weight=1)
 
         # Logo / 标题
         self.logo_label = ctk.CTkLabel(
@@ -85,7 +86,8 @@ class MainWindow(ctk.CTk):
         self.btn_draft = self._create_nav_button(" 草稿生成", "draft_generator", 1, self.icons.get('draft'))
         self.btn_cloud = self._create_nav_button(" 云端服务", "cloud_service", 2, self.icons.get('cloud'))
         self.btn_script = self._create_nav_button(" 脚本执行", "script_executor", 3, self.icons.get('script'))
-        self.btn_settings = self._create_nav_button(" 系统设置", "settings", 4, self.icons.get('settings'))
+        self.btn_replay = self._create_nav_button(" 回放查看", "replay", 4, self.icons.get('cloud'))
+        self.btn_settings = self._create_nav_button(" 系统设置", "settings", 5, self.icons.get('settings'))
 
         # 底部按钮
         self.btn_log_window = ctk.CTkButton(
@@ -99,18 +101,18 @@ class MainWindow(ctk.CTk):
             border_color=("gray70", "gray30"),
             corner_radius=8
         )
-        self.btn_log_window.grid(row=6, column=0, padx=12, pady=8)
+        self.btn_log_window.grid(row=7, column=0, padx=12, pady=8)
 
         # 外观模式
         self.appearance_mode_label = ctk.CTkLabel(self.sidebar_frame, text="主题模式:", anchor="w", font=ctk.CTkFont(family='Microsoft YaHei', size=13))
-        self.appearance_mode_label.grid(row=7, column=0, padx=12, pady=(8, 0))
+        self.appearance_mode_label.grid(row=8, column=0, padx=12, pady=(8, 0))
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(
             self.sidebar_frame,
             values=["System", "Light", "Dark"],
             command=self._change_appearance_mode,
             corner_radius=8
         )
-        self.appearance_mode_optionemenu.grid(row=8, column=0, padx=12, pady=(6, 12))
+        self.appearance_mode_optionemenu.grid(row=9, column=0, padx=12, pady=(6, 12))
         
         # 设置初始值
         self.appearance_mode_optionemenu.set(self.settings.get("theme_mode", "System"))
@@ -215,6 +217,7 @@ class MainWindow(ctk.CTk):
         self.pages["draft_generator"] = DraftGeneratorPage(self)
         self.pages["cloud_service"] = CloudServicePage(self)
         self.pages["script_executor"] = ScriptExecutorPage(self)
+        self.pages["replay"] = ReplayPage(self)
         self.pages["settings"] = SettingsPage(self)
 
     def select_frame_by_name(self, name):
@@ -224,6 +227,7 @@ class MainWindow(ctk.CTk):
             ("draft_generator", self.btn_draft),
             ("cloud_service", self.btn_cloud),
             ("script_executor", self.btn_script),
+            ("replay", self.btn_replay),
             ("settings", self.btn_settings)
         ]:
             if name == btn_name:
