@@ -220,7 +220,7 @@
 
 **旧代码**：
 ```python
-from app.schemas.general_schemas import AddEffectRequest
+from src.schemas.general_schemas import AddEffectRequest
 
 # Audio
 request = AddEffectRequest(effect_type="...", params=[...])
@@ -233,7 +233,7 @@ await add_video_effect(segment_id, request)
 
 **新代码**：
 ```python
-from app.schemas.general_schemas import (
+from src.schemas.general_schemas import (
     AddAudioEffectRequest,
     AddVideoEffectRequest
 )

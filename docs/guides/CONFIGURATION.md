@@ -73,7 +73,7 @@ set JIANYING_ASSETS_DIR=D:\MyData\assets
 
 ### 通过 Python
 ```python
-from app.config import get_config
+from src.config import get_config
 
 config = get_config()
 print(config.to_dict())

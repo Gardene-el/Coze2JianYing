@@ -29,10 +29,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from app.backend.api.basic import router as basic_router  # noqa: E402
-from app.backend.api.easy import router as easy_router  # noqa: E402
-from app.backend.api_main import app  # noqa: E402
-import app.backend.core.common_types as _common_types  # noqa: E402
+from src.backend.api.basic import router as basic_router  # noqa: E402
+from src.backend.api.easy import router as easy_router  # noqa: E402
+from src.backend.api_main import app  # noqa: E402
+import src.backend.core.common_types as _common_types  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
 

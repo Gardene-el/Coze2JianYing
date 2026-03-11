@@ -150,7 +150,7 @@ from 'C:\\Users\\...\\Temp\\_MEIXXXXX\\CozeJianYingDraftGenerator.exe'>
 def _start_embedded_service(self, port: int):
     def run_server():  # 嵌套函数，无法 pickle
         import uvicorn
-        from app.api_main import app
+        from src.api_main import app
         uvicorn.run(app, host="127.0.0.1", port=port)
     
     # Windows spawn 模式下会失败
@@ -164,7 +164,7 @@ def _start_embedded_service(self, port: int):
 def _start_embedded_service(self, port: int):
     def run_server():  # 嵌套函数，可以直接访问
         import uvicorn
-        from app.api_main import app
+        from src.api_main import app
         
         # 使用 Config + Server 模式以便优雅停止
         config = uvicorn.Config(

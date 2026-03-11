@@ -73,7 +73,7 @@ else:
 使用了自定义类型但没有 import 语句，且 Coze 平台不支持跨文件 import。
 
 **初步方案** (已废弃):
-添加 import 语句：`from app.schemas.general_schemas import TimeRange`
+添加 import 语句：`from src.schemas.general_schemas import TimeRange`
 
 **最终方案** (已实施):
 将自定义类型的完整定义复制到每个 handler 文件中。

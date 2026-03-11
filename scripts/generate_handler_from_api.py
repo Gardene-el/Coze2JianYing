@@ -106,7 +106,7 @@ def ensure_coze2jianying_file() -> str:
 # 记录所有通过 Coze 工具调用的 API 操作
 
 import asyncio
-from app.backend.schemas.general_schemas import *
+from src.backend.schemas.general_schemas import *
 
 # API 调用记录将追加在下方
 """

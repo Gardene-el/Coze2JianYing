@@ -6,7 +6,7 @@ include LICENSE
 include pyproject.toml
 
 # Include all README files in subdirectories
-recursive-include app *.md
+recursive-include src *.md
 recursive-include coze_plugin *.md
 recursive-include docs *.md
 
@@ -14,7 +14,7 @@ recursive-include docs *.md
 recursive-include coze_plugin/examples *.py *.json
 
 # Include YAML and JSON configuration files
-recursive-include app *.yaml *.json
+recursive-include src *.yaml *.json
 recursive-include coze_plugin *.yaml *.json
 
 # Include test files

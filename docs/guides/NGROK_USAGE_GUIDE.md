@@ -172,7 +172,7 @@ PyngrokNgrokURLError: ngrok client exception, URLError: timed out
 ### NgrokManager 类
 
 ```python
-from app.utils.ngrok_manager import NgrokManager
+from src.utils.ngrok_manager import NgrokManager
 
 # 创建管理器实例
 manager = NgrokManager(logger=your_logger)

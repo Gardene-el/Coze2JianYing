@@ -174,7 +174,7 @@ custom_imports = ""
 if custom_types:
     sorted_types = sorted(custom_types)
     custom_imports = (
-        f"\nfrom app.schemas.general_schemas import {', '.join(sorted_types)}\n"
+        f"\nfrom src.schemas.general_schemas import {', '.join(sorted_types)}\n"
     )
 
 # 在生成的 handler.py 中添加导入
@@ -298,7 +298,7 @@ class Input(NamedTuple):
 # handler.py
 from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
-from app.schemas.general_schemas import TimeRange  # ✅ 自动导入
+from src.schemas.general_schemas import TimeRange  # ✅ 自动导入
 
 class Input(NamedTuple):
     """create_audio_segment 工具的输入参数"""
@@ -317,7 +317,7 @@ class Input(NamedTuple):
 # handler.py
 from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
-from app.schemas.general_schemas import ClipSettings, TimeRange  # ✅ 多个导入
+from src.schemas.general_schemas import ClipSettings, TimeRange  # ✅ 多个导入
 
 class Input(NamedTuple):
     """create_video_segment 工具的输入参数"""
@@ -337,7 +337,7 @@ class Input(NamedTuple):
 # handler.py
 from typing import NamedTuple, Dict, Any, Optional, List
 from runtime import Args
-from app.schemas.general_schemas import Position, TextStyle, TimeRange  # ✅ 三个导入
+from src.schemas.general_schemas import Position, TextStyle, TimeRange  # ✅ 三个导入
 
 class Input(NamedTuple):
     """create_text_segment 工具的输入参数"""

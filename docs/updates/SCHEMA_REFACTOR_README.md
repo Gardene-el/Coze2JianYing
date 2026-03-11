@@ -216,7 +216,7 @@ def convert_clip_settings(self, transform_dict: Dict[str, Any]) -> ClipSettings:
 运行以下命令验证修改：
 
 ```bash
-python -c "from app.schemas.general_schemas import ClipSettings, TextStyle, CropSettings, TimeRange; print('✅ 所有类成功导入')"
+python -c "from src.schemas.general_schemas import ClipSettings, TextStyle, CropSettings, TimeRange; print('✅ 所有类成功导入')"
 ```
 
 ## 📚 设计原则

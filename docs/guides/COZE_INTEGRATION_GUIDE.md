@@ -601,7 +601,7 @@ app.add_middleware(
 使用项目内置的日志系统记录 API 调用：
 
 ```python
-from app.utils.logger import get_logger
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

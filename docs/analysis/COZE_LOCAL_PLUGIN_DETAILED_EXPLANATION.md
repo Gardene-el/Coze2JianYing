@@ -391,7 +391,7 @@ class LocalPlugin:
     def generate_draft(self, tool_call_id: str, arguments: str) -> ToolOutput:
         """本地实现草稿生成"""
         import json
-        from app.utils.draft_generator import DraftGenerator
+        from src.utils.draft_generator import DraftGenerator
         
         args = json.loads(arguments)
         generator = DraftGenerator()
@@ -534,7 +534,7 @@ def execute_function(name: str, arguments: str) -> str:
 #### 集成现有代码
 
 ```python
-from app.utils.draft_generator import DraftGenerator
+from src.utils.draft_generator import DraftGenerator
 
 def generate_draft_handler(args: dict) -> str:
     """草稿生成处理器"""
@@ -652,7 +652,7 @@ from cozepy import (
     TokenAuth,
     ToolOutput,
 )
-from app.utils.draft_generator import DraftGenerator
+from src.utils.draft_generator import DraftGenerator
 
 # 配置
 COZE_API_TOKEN = os.getenv("COZE_API_TOKEN")

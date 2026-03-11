@@ -36,7 +36,7 @@ async def get_draft_old(draft_id: str):
 
 # --- 迁移后 ---
 from fastapi import APIRouter, status
-from app.backend.utils.response_builder import build_success, build_error, wrap_data, build_not_found_error, build_validation_error, build_operation_error, build_internal_error, success_response, error_response, not_found_response, internal_error_response, ErrorCode
+from src.backend.utils.response_builder import build_success, build_error, wrap_data, build_not_found_error, build_validation_error, build_operation_error, build_internal_error, success_response, error_response, not_found_response, internal_error_response, ErrorCode
 
 @router.get("/api/draft/{draft_id}")
 async def get_draft_new(draft_id: str):
@@ -216,7 +216,7 @@ async def add_segment_new(draft_id: str, segment_id: str):
 迁移一个端点时的检查清单：
 
 □ 1. 导入 response_builder 工具函数
-   from app.backend.utils.response_builder import build_success, build_error, wrap_data, ErrorCode
+   from src.backend.utils.response_builder import build_success, build_error, wrap_data, ErrorCode
 
 □ 2. 替换所有 HTTPException
    - 404 Not Found -> build_not_found_error()

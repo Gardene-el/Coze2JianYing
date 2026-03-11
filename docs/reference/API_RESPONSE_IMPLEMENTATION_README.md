@@ -59,7 +59,7 @@ tests/
 ### 在新端点中使用
 
 ```python
-from app.utils.api_response_manager import get_response_manager, ErrorCode
+from src.utils.api_response_manager import get_response_manager, ErrorCode
 
 response_manager = get_response_manager()
 

@@ -234,7 +234,7 @@ class AddVideoEffectRequest(BaseModel):
 
 **旧代码**：
 ```python
-from app.schemas.general_schemas import AddEffectRequest
+from src.schemas.general_schemas import AddEffectRequest
 
 request = AddEffectRequest(effect_type="...", params=[...])
 await add_audio_effect(segment_id, request)
@@ -242,7 +242,7 @@ await add_audio_effect(segment_id, request)
 
 **新代码**：
 ```python
-from app.schemas.general_schemas import AddAudioEffectRequest
+from src.schemas.general_schemas import AddAudioEffectRequest
 
 request = AddAudioEffectRequest(effect_type="...", params=[...])
 await add_audio_effect(segment_id, request)

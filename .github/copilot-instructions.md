@@ -314,7 +314,7 @@
 
 **步骤 1: API 扫描器** (`scan_api_endpoints.py`)
 
-- **职责**: 扫描 `/app/api` 目录下所有 POST API 函数
+- **职责**: 扫描 `/src/api` 目录下所有 POST API 函数
 - **主要类**: `APIScanner`
 - **功能**:
   - 使用 AST 解析识别 `@router.post` 装饰的函数

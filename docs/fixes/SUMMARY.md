@@ -35,7 +35,7 @@ target_timerange: TimeRange  # ✅ 必需字段
 ```python
 # 修复前（使用 import）
 from runtime import Args
-from app.schemas.general_schemas import TimeRange  # ❌ Coze 不支持跨文件 import
+from src.schemas.general_schemas import TimeRange  # ❌ Coze 不支持跨文件 import
 
 class Input(NamedTuple):
     target_timerange: TimeRange  # ❌ 在 Coze 中会报错

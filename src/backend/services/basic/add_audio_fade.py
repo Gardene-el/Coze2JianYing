@@ -1,0 +1,26 @@
+from __future__ import annotations
+
+import pyJianYingDraft as draft
+
+from src.backend.exceptions import CustomError, CustomException
+from src.backend.utils.logger import logger
+from src.backend.utils.cache import require_segment, update_segment_cache
+
+
+def add_audio_fade(segment_id: str, in_duration: str, out_duration: str) -> None:
+	"""为音频片段添加淡入淡出效果。"""
+	segment = require_segment(segment_id, draft.AudioSegment)
+
+	logger.info("segment_id: %s, add audio fade", segment_id)
+
+	try:
+		segment.add_fade(in_duration=in_duration, out_duration=out_duration)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add audio fade failed: %s", e)
+		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	update_segment_cache(segment_id, segment)
+	logger.info("add audio fade success: %s", segment_id)
+

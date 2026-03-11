@@ -62,7 +62,7 @@ def build_exe(fast_mode=False):
 
     # PyInstaller参数
     args = [
-        "app/main.py",  # 主程序入口
+        "src/main.py",  # 主程序入口
         "--name=CozeJianYingDraftGenerator",  # 应用名称
         "--windowed",  # 不显示控制台窗口
         "--hidden-import=tkinter",  # 确保包含tkinter
@@ -145,7 +145,7 @@ def build_api_exe(fast_mode=False):
 
     # PyInstaller参数
     args = [
-        "app/backend/api_main.py",  # API 入口
+        "src/backend/api_main.py",  # API 入口
         "--name=CozeJianYingAPI",  # API exe 名称
         "--console",  # 显示控制台窗口
         "--hidden-import=pyJianYingDraft",

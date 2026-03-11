@@ -19,8 +19,8 @@ import shutil
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.backend.services.material import MaterialService
-from app.backend.utils.logger import setup_logger, logger
+from src.backend.services.material import MaterialService
+from src.backend.utils.logger import setup_logger, logger
 
 def main():
     """主测试函数"""

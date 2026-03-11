@@ -92,11 +92,11 @@ from pathlib import Path
 from types import SimpleNamespace
 
 # 导入所有API函数
-from app.api.draft_routes import (...)
-from app.api.segment_routes import (...)
+from src.api.draft_routes import (...)
+from src.api.segment_routes import (...)
 
 # 导入所有Request模型
-from app.schemas.general_schemas import (...)
+from src.schemas.general_schemas import (...)
 
 # 兼容性映射
 CustomNamespace = SimpleNamespace

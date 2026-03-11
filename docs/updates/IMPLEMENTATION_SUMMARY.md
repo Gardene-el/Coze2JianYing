@@ -80,7 +80,7 @@ self.output_dir = path_manager.get_effective_output_path()
 #### draft_generator.py
 ```python
 # 添加导入
-from app.utils.draft_path_manager import get_draft_path_manager
+from src.utils.draft_path_manager import get_draft_path_manager
 
 # generate 方法已支持 output_folder 参数
 # 标签页调用时传入全局管理器的路径
