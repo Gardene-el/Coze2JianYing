@@ -1,16 +1,8 @@
-import { nativeTheme } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { App } from '../../App';
 import { Tray } from '../Tray';
 import { TrayManager } from '../TrayManager';
-
-// Mock electron modules
-vi.mock('electron', () => ({
-  nativeTheme: {
-    shouldUseDarkColorsForSystemIntegratedUI: false,
-  },
-}));
 
 // Mock logger
 vi.mock('@/utils/logger', () => ({
@@ -23,9 +15,7 @@ vi.mock('@/utils/logger', () => ({
 }));
 
 // Mock environment constants
-vi.mock('@/const/env', () => ({
-  isMac: true,
-}));
+vi.mock('@/const/env', () => ({}));
 
 // Mock package.json
 vi.mock('@/../../package.json', () => ({
@@ -89,43 +79,18 @@ describe('TrayManager', () => {
   });
 
   describe('initializeMainTray', () => {
-    it('should create main tray with dark icon on macOS when dark mode is enabled', () => {
-      Object.defineProperty(nativeTheme, 'shouldUseDarkColorsForSystemIntegratedUI', {
-        value: true,
-        writable: true,
-        configurable: true,
-      });
-
+    it('should create main tray with tray.png icon', () => {
       const result = trayManager.initializeMainTray();
 
       expect(Tray).toHaveBeenCalledWith(
         expect.objectContaining({
-          iconPath: 'tray-dark.png',
+          iconPath: 'tray.png',
           identifier: 'main',
           tooltip: 'test-app',
         }),
         mockApp,
       );
       expect(result).toBe(mockTray);
-    });
-
-    it('should create main tray with light icon on macOS when light mode is enabled', () => {
-      Object.defineProperty(nativeTheme, 'shouldUseDarkColorsForSystemIntegratedUI', {
-        value: false,
-        writable: true,
-        configurable: true,
-      });
-
-      trayManager.initializeMainTray();
-
-      expect(Tray).toHaveBeenCalledWith(
-        expect.objectContaining({
-          iconPath: 'tray-light.png',
-          identifier: 'main',
-          tooltip: 'test-app',
-        }),
-        mockApp,
-      );
     });
 
     it('should add created tray to trays map', () => {

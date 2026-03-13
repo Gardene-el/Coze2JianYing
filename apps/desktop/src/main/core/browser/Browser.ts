@@ -7,7 +7,6 @@ import type { BrowserWindowConstructorOptions } from 'electron';
 import { BrowserWindow, ipcMain, screen, session as electronSession, shell } from 'electron';
 
 import { preloadDir, resourcesDir } from '@/const/dir';
-import { isMac } from '@/const/env';
 import { ELECTRON_BE_PROTOCOL_SCHEME } from '@/const/protocol';
 
 import { appendVercelCookie, setResponseHeader } from '@/utils/http-headers';
@@ -295,18 +294,7 @@ export default class Browser {
 
   hide(): void {
     logger.debug(`Hiding window: ${this.identifier}`);
-
-    // Fix for macOS fullscreen black screen issue
-    // See: https://github.com/electron/electron/issues/20263
-    if (isMac && this.browserWindow.isFullScreen()) {
-      logger.debug(`[${this.identifier}] Exiting fullscreen before hiding.`);
-      this.browserWindow.once('leave-full-screen', () => {
-        this.browserWindow.hide();
-      });
-      this.browserWindow.setFullScreen(false);
-    } else {
-      this.browserWindow.hide();
-    }
+    this.browserWindow.hide();
   }
 
   close(): void {

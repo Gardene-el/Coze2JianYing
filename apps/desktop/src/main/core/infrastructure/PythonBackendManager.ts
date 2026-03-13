@@ -93,11 +93,7 @@ export class PythonBackendManager {
 
     logger.info('Stopping Python backend');
     try {
-      if (process.platform === 'win32') {
-        spawn('taskkill', ['/pid', String(this.process.pid), '/f', '/t']);
-      } else {
-        this.process.kill('SIGTERM');
-      }
+      spawn('taskkill', ['/pid', String(this.process.pid), '/f', '/t']);
     } catch (err) {
       logger.warn('Error stopping Python process:', err);
     }
@@ -109,22 +105,16 @@ export class PythonBackendManager {
   private resolveSpawnConfig(): { args: string[]; cmd: string; cwd: string } {
     if (isDev) {
       // In development, run from the monorepo root using the system python
-      const cwd = this.projectRoot;
-      const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
       return {
         args: ['-m', 'src.main', '--gui-only', '--port', String(GUI_PORT), '--host', GUI_HOST],
-        cmd: pythonCmd,
-        cwd,
+        cmd: 'python',
+        cwd: this.projectRoot,
       };
     }
 
     // In production, look for a bundled python executable under resources/
     const resourcesDir = process.resourcesPath;
-    const bundledPython = join(
-      resourcesDir,
-      'python',
-      process.platform === 'win32' ? 'python.exe' : 'python3',
-    );
+    const bundledPython = join(resourcesDir, 'python', 'python.exe');
 
     if (existsSync(bundledPython)) {
       return {
@@ -136,10 +126,9 @@ export class PythonBackendManager {
 
     // Fallback: system python from project root
     logger.warn('Bundled Python not found, falling back to system python');
-    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
     return {
       args: ['-m', 'src.main', '--gui-only', '--port', String(GUI_PORT), '--host', GUI_HOST],
-      cmd: pythonCmd,
+      cmd: 'python',
       cwd: this.projectRoot,
     };
   }

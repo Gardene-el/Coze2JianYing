@@ -20,13 +20,7 @@ export const setupElectronApi = () => {
     onStreamInvoke,
   });
 
-  const os = require('node:os');
-  const osInfo = os.release();
-  const darwinMajorVersion = Number(osInfo.split('.')[0]);
-
   contextBridge.exposeInMainWorld('lobeEnv', {
-    darwinMajorVersion,
-    isMacTahoe: process.platform === 'darwin' && darwinMajorVersion >= 25,
     platform: process.platform,
   });
 };

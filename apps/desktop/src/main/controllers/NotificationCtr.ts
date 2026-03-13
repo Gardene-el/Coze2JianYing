@@ -3,9 +3,7 @@ import type {
   ShowDesktopNotificationParams,
 } from '@lobechat/electron-client-ipc';
 import { app, Notification } from 'electron';
-import { macOS, windows } from 'electron-is';
 
-import { getIpcContext } from '@/utils/ipc';
 import { createLogger } from '@/utils/logger';
 
 import { ControllerModule, IpcMethod } from './index';
@@ -18,18 +16,7 @@ export default class NotificationCtr extends ControllerModule {
   @IpcMethod()
   async getNotificationPermissionStatus(): Promise<string> {
     if (!Notification.isSupported()) return 'denied';
-    // Keep a stable status string for renderer-side UI mapping.
-    // Screen3 expects macOS to return 'authorized' when granted.
-    if (!macOS()) return 'authorized';
-
-    // Electron 38 no longer exposes `systemPreferences.getNotificationSettings()` in types,
-    // and some runtimes don't provide it at all. Use the renderer's Notification.permission
-    // as a reliable fallback.
-    const context = getIpcContext();
-    const sender = context?.sender;
-    if (!sender) return 'notDetermined';
-    const permission = await sender.executeJavaScript('Notification.permission', true);
-    return permission === 'granted' ? 'authorized' : 'denied';
+    return 'authorized';
   }
 
   @IpcMethod()
@@ -39,20 +26,6 @@ export default class NotificationCtr extends ControllerModule {
     if (!Notification.isSupported()) {
       logger.warn('System does not support desktop notifications');
       return;
-    }
-
-    // On macOS, ask permission via Web Notification API first when possible.
-    // This helps keep `Notification.permission` in sync for subsequent status checks.
-    if (macOS()) {
-      try {
-        const mainWindow = this.app.browserManager.getMainWindow().browserWindow;
-        await mainWindow.webContents.executeJavaScript('Notification.requestPermission()', true);
-      } catch (error) {
-        logger.debug(
-          'Notification.requestPermission() failed or is unavailable, continuing with test notification',
-          error,
-        );
-      }
     }
 
     const notification = new Notification({
@@ -82,16 +55,9 @@ export default class NotificationCtr extends ControllerModule {
         return;
       }
 
-      // On macOS, we may need to explicitly request notification permissions
-      if (macOS()) {
-        logger.debug('macOS detected, notification permissions should be handled by system');
-      }
-
-      // Set app user model ID on Windows
-      if (windows()) {
-        app.setAppUserModelId('com.coze2jianying.desktop');
-        logger.debug('Set Windows App User Model ID for notifications');
-      }
+      // Set app user model ID
+      app.setAppUserModelId('com.coze2jianying.desktop');
+      logger.debug('Set Windows App User Model ID for notifications');
 
       logger.info('Desktop notifications setup completed');
     } catch (error) {

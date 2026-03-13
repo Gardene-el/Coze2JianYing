@@ -4,7 +4,7 @@ import { TITLE_BAR_HEIGHT } from '@lobechat/desktop-bridge';
 import { type BrowserWindow, type BrowserWindowConstructorOptions, nativeTheme } from 'electron';
 
 import { buildDir } from '@/const/dir';
-import { isDev, isMac, isMacTahoe, isWindows } from '@/const/env';
+import { isDev, isWindows } from '@/const/env';
 import { createLogger } from '@/utils/logger';
 
 import {
@@ -28,18 +28,6 @@ interface WindowsThemeConfig {
   titleBarStyle: 'hidden';
 }
 
-// Lazy-load liquid glass only on macOS Tahoe to avoid import errors on other platforms.
-// Dynamic require is intentional: native .node addons cannot be loaded via
-// async import() and must be synchronously required at module init time.
-let liquidGlass: typeof import('electron-liquid-glass').default | undefined;
-if (isMacTahoe) {
-  try {
-    liquidGlass = require('electron-liquid-glass');
-  } catch {
-    // Native module not available (e.g. wrong architecture or missing binary)
-  }
-}
-
 /**
  * Manages window theme configuration and visual effects
  */
@@ -48,7 +36,6 @@ export class WindowThemeManager {
   private browserWindow?: BrowserWindow;
   private listenerSetup = false;
   private boundHandleThemeChange: () => void;
-  private liquidGlassViewId?: number;
 
   constructor(identifier: string) {
     this.identifier = identifier;
@@ -74,14 +61,6 @@ export class WindowThemeManager {
     this.browserWindow = browserWindow;
     this.setupThemeListener();
     this.applyVisualEffects();
-
-    // Liquid glass must be applied after window content loads (native view needs
-    // a rendered surface). The effect persists across subsequent in-window navigations.
-    if (this.useLiquidGlass) {
-      browserWindow.webContents.once('did-finish-load', () => {
-        this.applyLiquidGlass();
-      });
-    }
   }
 
   /**
@@ -93,7 +72,6 @@ export class WindowThemeManager {
       this.listenerSetup = false;
       logger.debug(`[${this.identifier}] Theme listener cleaned up.`);
     }
-    this.liquidGlassViewId = undefined;
     this.browserWindow = undefined;
   }
 
@@ -108,38 +86,17 @@ export class WindowThemeManager {
 
   /**
    * Whether liquid glass is available and should be used
+   * Always false on Windows
    */
   get useLiquidGlass(): boolean {
-    return isMacTahoe && !!liquidGlass;
+    return false;
   }
 
   /**
    * Get platform-specific theme configuration for window creation
    */
   getPlatformConfig(): Partial<BrowserWindowConstructorOptions> {
-    if (isWindows) {
-      return this.getWindowsConfig(this.isDarkMode);
-    }
-    if (isMac) {
-      // Calculate traffic light position to center vertically in title bar
-      // Traffic light buttons are approximately 12px tall
-      const trafficLightY = Math.round((TITLE_BAR_HEIGHT - 12) / 2);
-
-      if (this.useLiquidGlass) {
-        // Liquid glass requires transparent window and must NOT use vibrancy — they conflict.
-        return {
-          trafficLightPosition: { x: 12, y: trafficLightY },
-          transparent: true,
-        };
-      }
-
-      return {
-        trafficLightPosition: { x: 12, y: trafficLightY },
-        vibrancy: 'sidebar',
-        visualEffectState: 'active',
-      };
-    }
-    return {};
+    return this.getWindowsConfig(this.isDarkMode);
   }
 
   /**
@@ -204,11 +161,7 @@ export class WindowThemeManager {
     logger.debug(`[${this.identifier}] Applying visual effects (dark: ${isDarkMode})`);
 
     try {
-      if (isWindows) {
-        this.applyWindowsVisualEffects(isDarkMode);
-      } else if (isMac) {
-        this.applyMacVisualEffects();
-      }
+      this.applyWindowsVisualEffects(isDarkMode);
     } catch (error) {
       logger.error(`[${this.identifier}] Failed to apply visual effects:`, error);
     }
@@ -228,45 +181,5 @@ export class WindowThemeManager {
     const config = this.getWindowsConfig(isDarkMode);
     this.browserWindow.setBackgroundColor(config.backgroundColor);
     this.browserWindow.setTitleBarOverlay(config.titleBarOverlay);
-  }
-
-  /**
-   * Apply macOS visual effects.
-   * - Tahoe+: liquid glass auto-adapts to dark mode; ensure it's applied if not yet.
-   * - Pre-Tahoe: vibrancy is managed natively by Electron, no runtime action needed.
-   */
-  private applyMacVisualEffects(): void {
-    if (!this.browserWindow) return;
-
-    if (this.useLiquidGlass) {
-      // Attempt apply if not yet done (e.g. initial load failed, or window recreated)
-      this.applyLiquidGlass();
-    }
-  }
-
-  // ==================== Liquid Glass ====================
-
-  /**
-   * Apply liquid glass native view to the window.
-   * Idempotent — guards against double-application via `liquidGlassViewId`.
-   */
-  applyLiquidGlass(): void {
-    if (!this.useLiquidGlass || !liquidGlass) return;
-    if (!this.browserWindow || this.browserWindow.isDestroyed()) return;
-    if (this.liquidGlassViewId !== undefined) return;
-
-    try {
-      // Ensure traffic light buttons remain visible with transparent window
-      this.browserWindow.setWindowButtonVisibility(true);
-
-      const handle = this.browserWindow.getNativeWindowHandle();
-
-      this.liquidGlassViewId = liquidGlass.addView(handle);
-      liquidGlass.unstable_setVariant(this.liquidGlassViewId, 15);
-
-      logger.info(`[${this.identifier}] Liquid glass applied (viewId: ${this.liquidGlassViewId})`);
-    } catch (error) {
-      logger.error(`[${this.identifier}] Failed to apply liquid glass:`, error);
-    }
   }
 }

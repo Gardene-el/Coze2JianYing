@@ -9,7 +9,6 @@
  * This module automatically resolves the full dependency tree.
  */
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,10 +19,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * During build, electron-builder sets npm_config_platform
  * Falls back to os.platform() for development
  */
-function getTargetPlatform() {
-  return process.env.npm_config_platform || os.platform();
-}
-const isDarwin = getTargetPlatform() === 'darwin';
+const isDarwin = false;
 
 /**
  * List of native modules that need special handling

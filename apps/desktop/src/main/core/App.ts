@@ -3,7 +3,6 @@ import { join } from 'node:path';
 
 import { app, nativeTheme, protocol } from 'electron';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
-import { macOS, windows } from 'electron-is';
 
 import { binDir, buildDir } from '@/const/dir';
 import { isDev } from '@/const/env';
@@ -76,8 +75,7 @@ export class App {
     logger.info('Starting LobeHub...');
 
     // Append bundled binaries directory to PATH for fallback tool resolution
-    const pathSep = process.platform === 'win32' ? ';' : ':';
-    process.env.PATH = `${process.env.PATH}${pathSep}${binDir}`;
+    process.env.PATH = `${process.env.PATH};${binDir}`;
 
     // Use native mode (pure Rust/CDP) so agent-browser works without Node.js
     process.env.AGENT_BROWSER_NATIVE = '1';
@@ -195,9 +193,7 @@ export class App {
     await this.browserManager.initializeBrowsers();
 
     // Initialize tray manager
-    if (process.platform === 'win32') {
-      this.trayManager.initializeTrays();
-    }
+    this.trayManager.initializeTrays();
 
     // Initialize updater manager
     await this.updaterManager.initialize();
@@ -206,10 +202,8 @@ export class App {
     this.isQuiting = false;
 
     app.on('window-all-closed', () => {
-      if (windows()) {
-        logger.info('All windows closed, quitting application (Windows)');
-        app.quit();
-      }
+      logger.info('All windows closed, quitting application');
+      app.quit();
     });
 
     app.on('activate', this.onActivate);
@@ -358,9 +352,6 @@ export class App {
 
     logger.debug('Setting up dev branding');
     app.setName('coze2jianying-dev');
-    if (macOS()) {
-      app.dock!.setIcon(join(buildDir, 'icon-dev.png'));
-    }
   };
 
   /**
@@ -376,9 +367,7 @@ export class App {
     this.isQuiting = true;
 
     // Destroy tray
-    if (process.platform === 'win32') {
-      this.trayManager.destroyAll();
-    }
+    this.trayManager.destroyAll();
 
     // Execute cleanup operations
     this.staticFileServerManager.destroy();
