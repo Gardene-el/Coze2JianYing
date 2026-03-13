@@ -35,9 +35,7 @@
     "typecheck": "tsgo --noEmit -p tsconfig.json",
     "update-server": "sh scripts/update-test/run-test.sh"
   },
-  "dependencies": {
-    "@napi-rs/canvas": "^0.1.70"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
@@ -46,9 +44,6 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@lobechat/desktop-bridge": "workspace:*",
     "@lobechat/electron-client-ipc": "workspace:*",
-    "@lobechat/electron-server-ipc": "workspace:*",
-    "@lobechat/file-loaders": "workspace:*",
-    "@lobechat/local-file-shell": "workspace:*",
     "@lobehub/i18n-cli": "^1.25.1",
     "@modelcontextprotocol/sdk": "^1.24.3",
     "@t3-oss/env-core": "^0.13.8",
