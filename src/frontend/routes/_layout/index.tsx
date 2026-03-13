@@ -8,7 +8,7 @@ import TitleBar from "@/features/Electron/titlebar/TitleBar";
 
 import DesktopLayoutContainer from "./DesktopLayoutContainer";
 import LogPanel from "./LogPanel";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Sidebar/index";
 
 const { Content, Footer } = Layout;
 
