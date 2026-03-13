@@ -1,0 +1,389 @@
+"""
+GUI 管理 API 路由
+
+为 Electron 前端提供所有 /gui/* 端点：
+  - 健康检查
+  - 设置 CRUD
+  - Coze API 服务启停管理
+  - ngrok 隧道管理
+  - 草稿生成
+  - 脚本格式化 / 验证 / 执行
+  - 草稿回放
+  - SSE 日志流
+
+安全约束：/gui/script/execute 仅允许 127.0.0.1 / ::1 调用。
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import os
+import re
+import threading
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import uvicorn
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+
+from src.backend.core.ngrok_manager import NgrokManager
+from src.backend.core.settings_manager import get_settings_manager
+from src.backend.DraftGenerator.draft_generator import DraftGenerator
+from src.backend.utils.logger import logger
+from src.backend.utils.sse_log import register_subscriber, unregister_subscriber
+
+gui_router = APIRouter(tags=["GUI 管理"])
+
+# ─── Coze API 服务管理状态 ────────────────────────────────────────────
+_service_server: Optional[uvicorn.Server] = None
+_service_thread: Optional[threading.Thread] = None
+
+# NgrokManager 实例（模块级单例）
+_ngrok_mgr: NgrokManager = NgrokManager(logger=logger)
+
+
+# ─── Pydantic 请求/响应模型 ───────────────────────────────────────────
+
+class SettingsPayload(BaseModel):
+    draft_folder: str = ""
+    api_port: str = "20211"
+    ngrok_auth_token: str = ""
+    ngrok_region: str = "us"
+    relay_worker_url: str = ""
+    theme_mode: str = "System"
+    transfer_enabled: bool = False
+
+
+class StartServicePayload(BaseModel):
+    port: Optional[int] = None
+
+
+class NgrokStartPayload(BaseModel):
+    authtoken: Optional[str] = None
+    region: str = "us"
+    port: Optional[int] = None
+
+
+class GenerateDraftPayload(BaseModel):
+    content: str
+
+
+class ScriptPayload(BaseModel):
+    script: str
+
+
+class ExecutePayload(BaseModel):
+    script: str
+
+
+# ─── 健康检查 ─────────────────────────────────────────────────────────
+
+@gui_router.get("/health")
+async def health() -> Dict[str, str]:
+    return {"status": "ok"}
+
+
+# ─── 设置 ─────────────────────────────────────────────────────────────
+
+@gui_router.get("/settings")
+async def get_settings() -> Dict[str, Any]:
+    return get_settings_manager().get_all()
+
+
+@gui_router.put("/settings")
+async def update_settings(payload: SettingsPayload) -> Dict[str, bool]:
+    sm = get_settings_manager()
+    for key, value in payload.model_dump().items():
+        sm.set(key, value)
+    return {"ok": True}
+
+
+@gui_router.post("/settings/detect-path")
+async def detect_path() -> Dict[str, str]:
+    sm = get_settings_manager()
+    username = os.environ.get("USERNAME") or os.environ.get("USER") or "User"
+    for template in sm.DEFAULT_DRAFT_PATHS:
+        candidate = template.format(username=username)
+        if os.path.exists(candidate):
+            return {"path": candidate}
+    return {"path": ""}
+
+
+# ─── Coze API 服务管理 ────────────────────────────────────────────────
+
+@gui_router.get("/service/status")
+async def service_status() -> Dict[str, Any]:
+    is_running = (
+        _service_server is not None and not _service_server.should_exit
+    )
+    return {
+        "running": is_running,
+        "port": get_settings_manager().get("api_port", "20211"),
+    }
+
+
+@gui_router.post("/service/start")
+async def start_service(payload: StartServicePayload) -> Dict[str, Any]:
+    global _service_server, _service_thread
+
+    if _service_server is not None and not _service_server.should_exit:
+        raise HTTPException(status_code=400, detail="服务已在运行")
+
+    # 延迟导入避免循环依赖
+    from src.backend.api_main import app as coze_app  # noqa: PLC0415
+
+    port = payload.port or int(get_settings_manager().get("api_port", 20211))
+    config = uvicorn.Config(
+        coze_app, host="127.0.0.1", port=port, log_level="info"
+    )
+    _service_server = uvicorn.Server(config)
+
+    def _run() -> None:
+        global _service_server
+        _service_server.run()
+        _service_server = None  # 服务退出后清理引用
+
+    _service_thread = threading.Thread(target=_run, daemon=True, name="coze-api-server")
+    _service_thread.start()
+
+    return {"ok": True, "port": port}
+
+
+@gui_router.post("/service/stop")
+async def stop_service() -> Dict[str, bool]:
+    global _service_server
+    if _service_server is None:
+        raise HTTPException(status_code=400, detail="服务未在运行")
+    _service_server.should_exit = True
+    return {"ok": True}
+
+
+# ─── Ngrok ────────────────────────────────────────────────────────────
+
+@gui_router.get("/ngrok/status")
+async def ngrok_status() -> Dict[str, Any]:
+    status = _ngrok_mgr.get_status()
+    return {
+        "running": status.get("is_running", False),
+        "public_url": status.get("public_url"),
+    }
+
+
+@gui_router.post("/ngrok/start")
+async def start_ngrok(payload: NgrokStartPayload) -> Dict[str, Any]:
+    sm = get_settings_manager()
+    auth_token = payload.authtoken or sm.get("ngrok_auth_token") or None
+    region = payload.region or sm.get("ngrok_region", "us")
+    port = payload.port or int(sm.get("api_port", 20211))
+
+    url = await asyncio.to_thread(
+        _ngrok_mgr.start_tunnel,
+        port,
+        auth_token,
+        region,
+    )
+    if url is None:
+        raise HTTPException(status_code=500, detail="启动 ngrok 隧道失败")
+    return {"running": True, "public_url": url}
+
+
+@gui_router.post("/ngrok/stop")
+async def stop_ngrok() -> Dict[str, bool]:
+    await asyncio.to_thread(_ngrok_mgr.stop_tunnel)
+    return {"ok": True}
+
+
+# ─── 草稿生成 ──────────────────────────────────────────────────────────
+
+@gui_router.post("/draft/generate")
+async def generate_draft(payload: GenerateDraftPayload) -> Dict[str, Any]:
+    try:
+        gen = DraftGenerator()
+        paths: List[str] = await asyncio.to_thread(gen.generate, payload.content)
+        return {"paths": paths}
+    except Exception as exc:
+        logger.error("草稿生成失败: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# ─── 脚本处理辅助函数（从 ScriptExecutorPage 迁移） ─────────────────────
+
+def _decode_escaped_string(s: str) -> str:
+    for escaped, unescaped in [
+        (r"\n", "\n"),
+        (r"\t", "\t"),
+        (r"\r", "\r"),
+        (r"\"", '"'),
+        (r"\'", "'"),
+    ]:
+        s = s.replace(escaped, unescaped)
+    return s
+
+
+def _extract_script_from_input(content: str) -> str:
+    """提取并解码脚本内容（支持 JSON 包装和转义字符串）。"""
+    content = content.strip()
+    try:
+        data = json.loads(content)
+        if isinstance(data, dict) and "output" in data:
+            return _decode_escaped_string(data["output"])
+    except json.JSONDecodeError:
+        pass
+    if r"\n" in content or "\\n" in content:
+        return _decode_escaped_string(content)
+    return content
+
+
+def _preprocess_script(script_content: str) -> str:
+    """在用户脚本前注入标准导入，并包装成 async main()。"""
+    preamble = """\
+import sys
+import asyncio
+from pathlib import Path
+from types import SimpleNamespace
+
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from src.backend.api.easy import *  # noqa: F401,F403
+from src.backend.api.basic import *  # noqa: F401,F403
+from src.backend.core.common_types import *  # noqa: F401,F403
+
+CustomNamespace = SimpleNamespace
+"""
+    script_content = script_content.strip().strip('"').strip("'")
+
+    import_lines: List[str] = []
+    code_lines: List[str] = []
+    for line in script_content.split("\n"):
+        stripped = line.strip()
+        if stripped.startswith("import ") or stripped.startswith("from "):
+            import_lines.append(line)
+        elif not stripped or stripped.startswith("#"):
+            (import_lines if not code_lines else code_lines).append(line)
+        else:
+            code_lines.append(line)
+
+    user_imports = "\n".join(import_lines)
+    user_code = "\n".join(code_lines)
+    indented = "\n".join(
+        "    " + line if line.strip() else line for line in user_code.split("\n")
+    )
+
+    return (
+        f"{preamble}\n"
+        f"{user_imports}\n"
+        f"async def main():\n"
+        f"{indented}\n\n"
+        f'if __name__ == "__main__":\n'
+        f"    asyncio.run(main())\n"
+    )
+
+
+# ─── 脚本端点 ─────────────────────────────────────────────────────────
+
+@gui_router.post("/script/format")
+async def format_script(payload: ScriptPayload) -> Dict[str, str]:
+    try:
+        result = _extract_script_from_input(payload.script)
+        return {"formatted": result}
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@gui_router.post("/script/validate")
+async def validate_script(payload: ScriptPayload) -> Dict[str, Any]:
+    try:
+        processed = _preprocess_script(_extract_script_from_input(payload.script))
+        compile(processed, "<script>", "exec")
+        return {"valid": True}
+    except SyntaxError as exc:
+        return {"valid": False, "error": f"第 {exc.lineno} 行: {exc.msg}"}
+    except Exception as exc:
+        return {"valid": False, "error": str(exc)}
+
+
+@gui_router.post("/script/execute")
+async def execute_script(payload: ExecutePayload, request: Request) -> Dict[str, bool]:
+    # 安全约束：仅允许本地请求执行任意脚本
+    client_host = request.client.host if request.client else ""
+    if client_host not in ("127.0.0.1", "::1", "localhost"):
+        raise HTTPException(status_code=403, detail="只允许本地连接执行脚本")
+
+    def _run() -> None:
+        script_content = _extract_script_from_input(payload.script)
+        processed = _preprocess_script(script_content)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            exec(processed, {"__name__": "__main__", "__file__": "<script>"})  # noqa: S102
+        finally:
+            loop.close()
+
+    try:
+        await asyncio.to_thread(_run)
+        return {"ok": True}
+    except Exception as exc:
+        logger.error("脚本执行失败: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# ─── 草稿回放 ─────────────────────────────────────────────────────────
+
+@gui_router.get("/replay/{draft_id}")
+async def replay_draft(draft_id: str) -> Dict[str, Any]:
+    sm = get_settings_manager()
+    output_path = sm.get_effective_output_path()
+    draft_dir = Path(output_path) / draft_id
+
+    if not draft_dir.exists():
+        raise HTTPException(status_code=404, detail=f"草稿 {draft_id} 不存在")
+
+    meta_file = draft_dir / "draft_meta_info.json"
+    if not meta_file.exists():
+        json_files = list(draft_dir.glob("*.json"))
+        if not json_files:
+            raise HTTPException(status_code=404, detail="未找到草稿文件")
+        meta_file = json_files[0]
+
+    try:
+        with open(meta_file, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# ─── SSE 日志流 ───────────────────────────────────────────────────────
+
+@gui_router.get("/logs/stream")
+async def logs_stream() -> StreamingResponse:
+    async def event_generator():
+        q: asyncio.Queue[str] = asyncio.Queue(maxsize=500)
+        register_subscriber(q)
+        try:
+            while True:
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=20.0)
+                    # Escape newlines so a multiline message stays as one SSE event
+                    safe_msg = msg.replace("\n", "\\n")
+                    yield f"data: {safe_msg}\n\n"
+                except asyncio.TimeoutError:
+                    # Keep-alive comment prevents browser/proxy timeouts
+                    yield ": keep-alive\n\n"
+        except asyncio.CancelledError:
+            pass
+        finally:
+            unregister_subscriber(q)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
