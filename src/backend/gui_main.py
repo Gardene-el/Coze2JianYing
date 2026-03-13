@@ -61,6 +61,11 @@ async def _on_startup() -> None:
     loop = asyncio.get_running_loop()
     sse_log.set_event_loop(loop)
     sse_log.install(level=logging.INFO)
+    # SSELogHandler 已安装，后续日志才会推送到 LogPanel
+    _gui_logger = logging.getLogger(__name__)
+    _gui_logger.info("=" * 50)
+    _gui_logger.info("Coze2JianYing GUI 管理服务已就绪")
+    _gui_logger.info("监听地址: http://127.0.0.1:20210/gui")
 
 
 def run(host: str = "127.0.0.1", port: int = 20210) -> None:

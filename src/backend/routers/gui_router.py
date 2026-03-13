@@ -143,10 +143,12 @@ async def start_service(payload: StartServicePayload) -> Dict[str, Any]:
     def _run() -> None:
         global _service_server
         _service_server.run()
+        logger.info("Coze API 服务已停止")
         _service_server = None  # 服务退出后清理引用
 
     _service_thread = threading.Thread(target=_run, daemon=True, name="coze-api-server")
     _service_thread.start()
+    logger.info("Coze API 服务已启动，端口: %d", port)
 
     return {"ok": True, "port": port}
 
@@ -157,6 +159,7 @@ async def stop_service() -> Dict[str, bool]:
     if _service_server is None:
         raise HTTPException(status_code=400, detail="服务未在运行")
     _service_server.should_exit = True
+    logger.info("Coze API 服务正在停止...")
     return {"ok": True}
 
 
@@ -178,6 +181,7 @@ async def start_ngrok(payload: NgrokStartPayload) -> Dict[str, Any]:
     region = payload.region or sm.get("ngrok_region", "us")
     port = payload.port or int(sm.get("api_port", 20211))
 
+    logger.info("正在启动 ngrok 隧道 (port=%d, region=%s)...", port, region)
     url = await asyncio.to_thread(
         _ngrok_mgr.start_tunnel,
         port,
@@ -185,13 +189,17 @@ async def start_ngrok(payload: NgrokStartPayload) -> Dict[str, Any]:
         region,
     )
     if url is None:
+        logger.error("ngrok 隧道启动失败")
         raise HTTPException(status_code=500, detail="启动 ngrok 隧道失败")
+    logger.info("ngrok 隧道已启动: %s", url)
     return {"running": True, "public_url": url}
 
 
 @gui_router.post("/ngrok/stop")
 async def stop_ngrok() -> Dict[str, bool]:
+    logger.info("正在停止 ngrok 隧道...")
     await asyncio.to_thread(_ngrok_mgr.stop_tunnel)
+    logger.info("ngrok 隧道已停止")
     return {"ok": True}
 
 
@@ -199,9 +207,11 @@ async def stop_ngrok() -> Dict[str, bool]:
 
 @gui_router.post("/draft/generate")
 async def generate_draft(payload: GenerateDraftPayload) -> Dict[str, Any]:
+    logger.info("开始生成草稿...")
     try:
         gen = DraftGenerator()
         paths: List[str] = await asyncio.to_thread(gen.generate, payload.content)
+        logger.info("草稿生成成功，共 %d 个文件: %s", len(paths), paths)
         return {"paths": paths}
     except Exception as exc:
         logger.error("草稿生成失败: %s", exc, exc_info=True)
@@ -323,8 +333,10 @@ async def execute_script(payload: ExecutePayload, request: Request) -> Dict[str,
         finally:
             loop.close()
 
+    logger.info("开始执行脚本...")
     try:
         await asyncio.to_thread(_run)
+        logger.info("脚本执行成功")
         return {"ok": True}
     except Exception as exc:
         logger.error("脚本执行失败: %s", exc, exc_info=True)
@@ -363,6 +375,7 @@ async def logs_stream() -> StreamingResponse:
     async def event_generator():
         q: asyncio.Queue[str] = asyncio.Queue(maxsize=500)
         register_subscriber(q)
+        logger.info("SSE 日志客户端已连接")
         try:
             while True:
                 try:
@@ -377,6 +390,7 @@ async def logs_stream() -> StreamingResponse:
             pass
         finally:
             unregister_subscriber(q)
+            logger.info("SSE 日志客户端已断开")
 
     return StreamingResponse(
         event_generator(),
