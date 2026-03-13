@@ -77,7 +77,7 @@ const MainLayout = () => {
           className={dynStyles.panel}
           defaultSize={{ width: sidebarWidth, height: "100%" }}
           expandable={false}
-          maxWidth={400}
+          maxWidth={200}
           minWidth={132}
           placement="left"
           showBorder={false}
