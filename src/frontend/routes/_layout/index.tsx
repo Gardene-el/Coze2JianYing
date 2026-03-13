@@ -78,7 +78,7 @@ const MainLayout = () => {
           defaultSize={{ width: sidebarWidth, height: "100%" }}
           expandable={false}
           maxWidth={400}
-          minWidth={220}
+          minWidth={132}
           placement="left"
           showBorder={false}
           onSizeChange={handleSizeChange}

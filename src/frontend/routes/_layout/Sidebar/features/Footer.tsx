@@ -20,7 +20,7 @@ const SidebarFooter = () => {
   return (
     <div className={styles.footer}>
       <FluentEmoji emoji="📸" size={48} type="anim" />
-      <span>COZE2JIANYING</span>
+      <span>扣子2剪映</span>
     </div>
   );
 };
