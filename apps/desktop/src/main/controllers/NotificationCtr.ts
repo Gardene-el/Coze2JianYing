@@ -56,7 +56,7 @@ export default class NotificationCtr extends ControllerModule {
     }
 
     const notification = new Notification({
-      body: 'LobeHub can now send you notifications.',
+      body: 'Coze2JianYing can now send you notifications.',
       title: 'Notification Permission',
     });
 
@@ -89,7 +89,7 @@ export default class NotificationCtr extends ControllerModule {
 
       // Set app user model ID on Windows
       if (windows()) {
-        app.setAppUserModelId('com.lobehub.chat');
+        app.setAppUserModelId('com.coze2jianying.desktop');
         logger.debug('Set Windows App User Model ID for notifications');
       }
 

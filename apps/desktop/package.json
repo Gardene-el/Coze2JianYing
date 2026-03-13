@@ -1,14 +1,14 @@
 {
-  "name": "lobehub-desktop-dev",
+  "name": "coze2jianying-desktop",
   "version": "0.0.0",
   "private": true,
-  "description": "LobeHub Desktop Application",
-  "homepage": "https://lobehub.com",
+  "description": "Coze2JianYing Desktop Application",
+  "homepage": "https://github.com/Gardene-el/Coze2JianYing",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lobehub/lobe-chat.git"
+    "url": "https://github.com/Gardene-el/Coze2JianYing.git"
   },
-  "author": "LobeHub",
+  "author": "Gardene-el",
   "main": "./dist/main/index.js",
   "scripts": {
     "build:main": "cross-env NODE_OPTIONS=--max-old-space-size=8192 electron-vite build",
