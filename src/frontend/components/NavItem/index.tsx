@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cx } from "antd-style";
 
-import { useNavItemStyles } from "./style";
+import { navItemStyles } from "./style";
 
 interface NavItemProps {
   to: string;
@@ -11,7 +11,6 @@ interface NavItemProps {
 }
 
 const NavItem = ({ to, icon, label }: NavItemProps) => {
-  const { styles } = useNavItemStyles();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -19,13 +18,13 @@ const NavItem = ({ to, icon, label }: NavItemProps) => {
 
   return (
     <div
-      className={cx(styles.item, { [styles.active]: isActive })}
+      className={cx(navItemStyles.item, { [navItemStyles.active]: isActive })}
       onClick={() => navigate(to)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && navigate(to)}
     >
-      <span className={styles.icon}>{icon}</span>
+      <span className={navItemStyles.icon}>{icon}</span>
       <span>{label}</span>
     </div>
   );

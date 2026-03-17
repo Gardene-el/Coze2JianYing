@@ -1,6 +1,6 @@
 import { ClearOutlined, DownOutlined, PauseOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useLogStore } from "@/store/log/store";
@@ -23,12 +23,12 @@ const LEVEL_COLORS: Record<LogEntry["level"], string> = {
   CRITICAL: "#ff4d4f",
 };
 
-const useStyles = createStyles(({ token, css }) => ({
+const styles = createStaticStyles(({ css, cssVar }) => ({
   panel: css`
     display: flex;
     flex-direction: column;
-    border-top: 1px solid ${token.colorBorderSecondary};
-    background: ${token.colorBgContainer};
+    border-top: 1px solid ${cssVar.colorBorderSecondary};
+    background: ${cssVar.colorBgContainer};
     position: relative;
     overflow: hidden;
   `,
@@ -50,13 +50,13 @@ const useStyles = createStyles(({ token, css }) => ({
     height: 28px;
     cursor: row-resize;
     user-select: none;
-    border-top: 2px solid ${token.colorBorderSecondary};
-    background: ${token.colorBgLayout};
+    border-top: 2px solid ${cssVar.colorBorderSecondary};
+    background: ${cssVar.colorBgLayout};
     font-size: 12px;
-    color: ${token.colorTextSecondary};
+    color: ${cssVar.colorTextSecondary};
     transition: background 0.15s;
     &:hover {
-      background: ${token.colorFillSecondary};
+      background: ${cssVar.colorFillSecondary};
     }
   `,
   gripper: css`
@@ -80,9 +80,9 @@ const useStyles = createStyles(({ token, css }) => ({
     gap: 4px;
     padding: 4px 8px;
     flex-shrink: 0;
-    border-bottom: 1px solid ${token.colorBorderSecondary};
+    border-bottom: 1px solid ${cssVar.colorBorderSecondary};
     font-size: 12px;
-    color: ${token.colorTextSecondary};
+    color: ${cssVar.colorTextSecondary};
     user-select: none;
   `,
   dot: css`
@@ -108,13 +108,13 @@ const useStyles = createStyles(({ token, css }) => ({
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: ${token.colorTextQuaternary};
+    background: ${cssVar.colorTextQuaternary};
   `,
   log: css`
     flex: 1;
     overflow-y: auto;
     padding: 4px 12px;
-    font-family: ${token.fontFamilyCode};
+    font-family: ${cssVar.fontFamilyCode};
     font-size: 12px;
     line-height: 1.8;
     scrollbar-width: thin;
@@ -128,7 +128,6 @@ const useStyles = createStyles(({ token, css }) => ({
 }));
 
 const LogPanel = () => {
-  const { styles } = useStyles();
   const entries = useLogStore((s) => s.entries);
   const isStreaming = useLogStore((s) => s.isStreaming);
   const autoScroll = useLogStore((s) => s.autoScroll);

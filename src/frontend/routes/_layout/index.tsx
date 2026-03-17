@@ -1,6 +1,6 @@
 import { DraggablePanel } from "@lobehub/ui";
 import { Layout } from "antd";
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 import { useCallback, useState } from "react";
 import { Outlet } from "react-router-dom";
 
@@ -17,19 +17,19 @@ const DEFAULT_SIDEBAR_WIDTH = 260;
 
 const isElectron = typeof window !== "undefined" && !!window.electron;
 
-const useStyles = createStyles(({ token, css }) => ({
+const styles = createStaticStyles(({ css, cssVar }) => ({
   layout: css`
     /* width: 100% 对抗父容器 ThemeProvider.div 上的 align-items: center，防止布局收缩为侧边栏宽度 */
     width: 100%;
     height: 100dvh;
     max-height: 100dvh;
     overflow: hidden;
-    background: ${token.colorBgLayout};
+    background: ${cssVar.colorBgLayout};
   `,
   /** 侧边栏样式：为 DraggablePanel 提供高度和背景色 */
   panel: css`
     height: 100%;
-    background: ${token.colorBgLayout};
+    background: ${cssVar.colorBgLayout};
   `,
   content: css`
     /* 在 DesktopLayoutContainer Flexbox 列中自动伸长；min-height: 0 允许垂直滚动 */
@@ -46,8 +46,6 @@ const useStyles = createStyles(({ token, css }) => ({
 }));
 
 const MainLayout = () => {
-  const { styles: dynStyles } = useStyles();
-
   /** localStorage 持久化侧边栏宽度，与 LobeChat globalStore.leftPanelWidth 对齐 */
   const [sidebarWidth] = useState(() => {
     const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY);
@@ -67,14 +65,14 @@ const MainLayout = () => {
   );
 
   return (
-    <Layout className={dynStyles.layout} style={{ flexDirection: "column" }}>
+    <Layout className={styles.layout} style={{ flexDirection: "column" }}>
       {/* Electron 无边框窗口：自定义标题栏（含导航按钮 + Win 原生按钮占位） */}
       {isElectron && <TitleBar />}
       {/* 侧边栏 + 内容区水平排列 */}
       <Layout style={{ flex: 1, overflow: "hidden", flexDirection: "row" }}>
         {/* 可拖拽调宽的导航侧边栏，对齐 LobeChat NavPanelDraggable */}
         <DraggablePanel
-          className={dynStyles.panel}
+          className={styles.panel}
           defaultSize={{ width: sidebarWidth, height: "100%" }}
           expandable={false}
           maxWidth={200}
@@ -86,10 +84,10 @@ const MainLayout = () => {
           <Sidebar />
         </DraggablePanel>
         <DesktopLayoutContainer>
-          <Content className={dynStyles.content}>
+          <Content className={styles.content}>
             <Outlet />
           </Content>
-          <Footer className={dynStyles.footer}>
+          <Footer className={styles.footer}>
             <LogPanel />
           </Footer>
         </DesktopLayoutContainer>

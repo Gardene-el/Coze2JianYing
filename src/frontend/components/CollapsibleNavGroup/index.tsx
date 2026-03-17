@@ -1,8 +1,8 @@
 import type { Key, ReactNode } from "react";
 import { AccordionItem, Flexbox } from "@lobehub/ui";
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 
-const useStyles = createStyles(({ css }) => ({
+const styles = createStaticStyles(({ css }) => ({
   icon: css`
     display: flex;
     align-items: center;
@@ -29,8 +29,6 @@ const CollapsibleNavGroup = ({
   icon,
   children,
 }: CollapsibleNavGroupProps) => {
-  const { styles } = useStyles();
-
   return (
     <AccordionItem
       itemKey={groupKey}

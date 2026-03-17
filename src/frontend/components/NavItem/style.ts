@@ -1,6 +1,6 @@
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 
-export const useNavItemStyles = createStyles(({ css, token }) => ({
+export const navItemStyles = createStaticStyles(({ css, cssVar }) => ({
   item: css`
     display: flex;
     align-items: center;
@@ -11,7 +11,7 @@ export const useNavItemStyles = createStyles(({ css, token }) => ({
     padding: 0 12px;
     height: 40px;
     cursor: pointer;
-    color: ${token.colorText};
+    color: ${cssVar.colorText};
     font-size: 14px;
     transition:
       background-color 0.15s ease,
@@ -19,16 +19,16 @@ export const useNavItemStyles = createStyles(({ css, token }) => ({
     user-select: none;
 
     &:hover {
-      background-color: ${token.colorBgTextHover};
+      background-color: ${cssVar.colorBgTextHover};
     }
   `,
   active: css`
-    background-color: ${token.colorPrimaryBg};
-    color: ${token.colorPrimary};
+    background-color: ${cssVar.colorPrimaryBg};
+    color: ${cssVar.colorPrimary};
     font-weight: 500;
 
     &:hover {
-      background-color: ${token.colorPrimaryBgHover};
+      background-color: ${cssVar.colorPrimaryBgHover};
     }
   `,
   icon: css`

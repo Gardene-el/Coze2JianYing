@@ -1,30 +1,29 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Card, Input, message, Spin, Typography } from "antd";
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 import { useState } from "react";
 
 import { guiReplayAPI } from "@/services/gui/replay";
 
 const { Title, Text } = Typography;
 
-const useStyles = createStyles(({ token, css }) => ({
+const styles = createStaticStyles(({ css, cssVar }) => ({
   json: css`
     width: 100%;
     max-height: 500px;
     overflow: auto;
     padding: 12px;
-    font-family: ${token.fontFamilyCode};
+    font-family: ${cssVar.fontFamilyCode};
     font-size: 12px;
     line-height: 1.6;
-    background: ${token.colorBgLayout};
-    border: 1px solid ${token.colorBorderSecondary};
-    border-radius: ${token.borderRadius}px;
+    background: ${cssVar.colorBgLayout};
+    border: 1px solid ${cssVar.colorBorderSecondary};
+    border-radius: ${cssVar.borderRadius};
     white-space: pre;
   `,
 }));
 
 const ReplayPage = () => {
-  const { styles } = useStyles();
   const [msgApi, ctx] = message.useMessage();
   const [draftId, setDraftId] = useState("");
   const [loading, setLoading] = useState(false);

@@ -20,7 +20,7 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 import { useEffect } from "react";
 
 import { useServiceStatus } from "@/hooks/useServiceStatus";
@@ -29,7 +29,7 @@ import { useSettingsStore } from "@/store/settings/store";
 
 const { Title, Text } = Typography;
 
-const useStyles = createStyles(({ css }) => ({
+const styles = createStaticStyles(({ css }) => ({
   row: css`
     display: flex;
     align-items: center;
@@ -39,7 +39,6 @@ const useStyles = createStyles(({ css }) => ({
 }));
 
 const CloudServicePage = () => {
-  const { styles } = useStyles();
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
 

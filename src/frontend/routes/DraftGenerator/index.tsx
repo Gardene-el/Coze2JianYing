@@ -1,35 +1,34 @@
 import { ClearOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Button, Card, message, Space, Spin, Typography } from "antd";
-import { createStyles } from "antd-style";
+import { createStaticStyles } from "antd-style";
 import { useRef, useState } from "react";
 
 import { guiDraftAPI } from "@/services/gui/draft";
 
 const { Title, Text } = Typography;
 
-const useStyles = createStyles(({ token, css }) => ({
+const styles = createStaticStyles(({ css, cssVar }) => ({
   textarea: css`
     flex: 1;
     width: 100%;
     min-height: 320px;
     padding: 12px;
-    font-family: ${token.fontFamilyCode};
+    font-family: ${cssVar.fontFamilyCode};
     font-size: 13px;
     line-height: 1.6;
-    border: 1px solid ${token.colorBorder};
-    border-radius: ${token.borderRadius}px;
-    background: ${token.colorBgContainer};
-    color: ${token.colorText};
+    border: 1px solid ${cssVar.colorBorder};
+    border-radius: ${cssVar.borderRadius};
+    background: ${cssVar.colorBgContainer};
+    color: ${cssVar.colorText};
     resize: vertical;
     outline: none;
     &:focus {
-      border-color: ${token.colorPrimary};
+      border-color: ${cssVar.colorPrimary};
     }
   `,
 }));
 
 const DraftGeneratorPage = () => {
-  const { styles } = useStyles();
   const [msgApi, ctx] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("就绪");
