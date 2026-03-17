@@ -4,4 +4,5 @@ packages:
   - '../../packages/file-loaders'
   - '../../packages/desktop-bridge'
   - '../../packages/local-file-shell'
+  - '../../packages/tunnel-core'
   - '.'

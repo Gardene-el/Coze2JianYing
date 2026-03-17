@@ -5,7 +5,6 @@ GUI 管理 API 路由
   - 健康检查
   - 设置 CRUD
   - Coze API 服务启停管理
-  - ngrok 隧道管理
   - 草稿生成
   - 脚本格式化 / 验证 / 执行
   - 草稿回放
@@ -28,7 +27,6 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from src.backend.core.ngrok_manager import NgrokManager
 from src.backend.core.settings_manager import get_settings_manager
 from src.backend.DraftGenerator.draft_generator import DraftGenerator
 from src.backend.utils.logger import logger
@@ -40,17 +38,12 @@ gui_router = APIRouter(tags=["GUI 管理"])
 _service_server: Optional[uvicorn.Server] = None
 _service_thread: Optional[threading.Thread] = None
 
-# NgrokManager 实例（模块级单例）
-_ngrok_mgr: NgrokManager = NgrokManager(logger=logger)
-
 
 # ─── Pydantic 请求/响应模型 ───────────────────────────────────────────
 
 class SettingsPayload(BaseModel):
     draft_folder: str = ""
     api_port: str = "20211"
-    ngrok_auth_token: str = ""
-    ngrok_region: str = "us"
     relay_worker_url: str = ""
     theme_mode: str = "System"
     transfer_enabled: bool = False
@@ -59,11 +52,6 @@ class SettingsPayload(BaseModel):
 class StartServicePayload(BaseModel):
     port: Optional[int] = None
 
-
-class NgrokStartPayload(BaseModel):
-    authtoken: Optional[str] = None
-    region: str = "us"
-    port: Optional[int] = None
 
 
 class GenerateDraftPayload(BaseModel):
@@ -131,26 +119,35 @@ async def start_service(payload: StartServicePayload) -> Dict[str, Any]:
     if _service_server is not None and not _service_server.should_exit:
         raise HTTPException(status_code=400, detail="服务已在运行")
 
-    # 延迟导入避免循环依赖
-    from src.backend.api_main import app as coze_app  # noqa: PLC0415
+    try:
+        # 延迟导入避免循环依赖
+        from src.backend.api_main import app as coze_app  # noqa: PLC0415
 
-    port = payload.port or int(get_settings_manager().get("api_port", 20211))
-    config = uvicorn.Config(
-        coze_app, host="127.0.0.1", port=port, log_level="info"
-    )
-    _service_server = uvicorn.Server(config)
+        port = payload.port or int(get_settings_manager().get("api_port", 20211))
+        config = uvicorn.Config(
+            coze_app, host="127.0.0.1", port=port, log_level="info"
+        )
+        _service_server = uvicorn.Server(config)
 
-    def _run() -> None:
-        global _service_server
-        _service_server.run()
-        logger.info("Coze API 服务已停止")
-        _service_server = None  # 服务退出后清理引用
+        def _run() -> None:
+            global _service_server
+            try:
+                _service_server.run()
+            except Exception as exc:
+                logger.error("Coze API 服务运行异常: %s", exc, exc_info=True)
+            finally:
+                logger.info("Coze API 服务已停止")
+                _service_server = None  # 服务退出后清理引用
 
-    _service_thread = threading.Thread(target=_run, daemon=True, name="coze-api-server")
-    _service_thread.start()
-    logger.info("Coze API 服务已启动，端口: %d", port)
-
-    return {"ok": True, "port": port}
+        _service_thread = threading.Thread(target=_run, daemon=True, name="coze-api-server")
+        _service_thread.start()
+        logger.info("Coze API 服务已启动，端口: %d", port)
+        return {"ok": True, "port": port}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("启动 Coze API 服务失败: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @gui_router.post("/service/stop")
@@ -162,45 +159,6 @@ async def stop_service() -> Dict[str, bool]:
     logger.info("Coze API 服务正在停止...")
     return {"ok": True}
 
-
-# ─── Ngrok ────────────────────────────────────────────────────────────
-
-@gui_router.get("/ngrok/status")
-async def ngrok_status() -> Dict[str, Any]:
-    status = _ngrok_mgr.get_status()
-    return {
-        "running": status.get("is_running", False),
-        "public_url": status.get("public_url"),
-    }
-
-
-@gui_router.post("/ngrok/start")
-async def start_ngrok(payload: NgrokStartPayload) -> Dict[str, Any]:
-    sm = get_settings_manager()
-    auth_token = payload.authtoken or sm.get("ngrok_auth_token") or None
-    region = payload.region or sm.get("ngrok_region", "us")
-    port = payload.port or int(sm.get("api_port", 20211))
-
-    logger.info("正在启动 ngrok 隧道 (port=%d, region=%s)...", port, region)
-    url = await asyncio.to_thread(
-        _ngrok_mgr.start_tunnel,
-        port,
-        auth_token,
-        region,
-    )
-    if url is None:
-        logger.error("ngrok 隧道启动失败")
-        raise HTTPException(status_code=500, detail="启动 ngrok 隧道失败")
-    logger.info("ngrok 隧道已启动: %s", url)
-    return {"running": True, "public_url": url}
-
-
-@gui_router.post("/ngrok/stop")
-async def stop_ngrok() -> Dict[str, bool]:
-    logger.info("正在停止 ngrok 隧道...")
-    await asyncio.to_thread(_ngrok_mgr.stop_tunnel)
-    logger.info("ngrok 隧道已停止")
-    return {"ok": True}
 
 
 # ─── 草稿生成 ──────────────────────────────────────────────────────────

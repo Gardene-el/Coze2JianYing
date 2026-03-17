@@ -7,12 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "vite",
-    "dev:desktop": "cd apps/desktop && bun run dev",
-    "build": "tsc && vite build",
-    "build:desktop": "bun --cwd apps/desktop run build",
-    "preview": "vite preview",
-    "start-desktop": "cd apps/desktop && bun run dev"
+    "dev": "cd apps/desktop && bun run dev",
+    "build": "cd apps/desktop && bun run package:win"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",

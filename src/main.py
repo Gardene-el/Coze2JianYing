@@ -11,7 +11,9 @@ import os
 from pathlib import Path
 
 # 添加项目根目录到Python路径（用于导入 backend 与 app.gui）
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# 冻结（PyInstaller）时模块已内嵌，无需手动插入
+if not getattr(sys, 'frozen', False):
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.backend.utils.logger import setup_logger, logger
 
@@ -36,7 +38,18 @@ def main() -> None:
     args = parser.parse_args()
 
     # 确保logs目录存在
-    log_dir = Path(__file__).parent.parent / "logs"
+    # 优先使用 Electron 通过 COZE2JY_LOG_DIR 环境变量传入的路径；
+    # embed 模式（CPython embed + pip install）下 __file__ 在 site-packages 内，
+    # 不能用 __file__ 定位；PyInstaller 冻结模式保留原逻辑兜底。
+    log_dir_env = os.environ.get("COZE2JY_LOG_DIR")
+    if log_dir_env:
+        log_dir = Path(log_dir_env)
+    elif getattr(sys, 'frozen', False):
+        # PyInstaller: sys.executable 是 backend.exe，$parent 是可写的 onedir 根
+        log_dir = Path(sys.executable).parent / "logs"
+    else:
+        # 开发模式：__file__ 在 monorepo/src/main.py，../../ 即项目根
+        log_dir = Path(__file__).parent.parent / "logs"
     log_dir.mkdir(exist_ok=True)
 
     # 设置日志系统

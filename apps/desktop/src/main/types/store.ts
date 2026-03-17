@@ -3,6 +3,7 @@ import type {
   NetworkProxySettings,
   UpdateChannel,
 } from '@lobechat/electron-client-ipc';
+import type { TunnelProviderSettings } from '@c2jy/tunnel-core';
 
 export interface ElectronMainStore {
   dataSyncConfig: DataSyncConfig;
@@ -17,6 +18,7 @@ export interface ElectronMainStore {
   shortcuts: Record<string, string>;
   storagePath: string;
   themeMode: 'dark' | 'light' | 'system';
+  tunnelSettings?: TunnelProviderSettings;
   updateChannel: UpdateChannel;
 }
 

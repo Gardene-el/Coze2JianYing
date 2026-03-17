@@ -27,7 +27,8 @@
     "lint:md": "remark . --silent --output",
     "lint:style": "stylelint \"{src,tests}/**/*.{js,jsx,ts,tsx}\" --fix",
     "lint:ts": "eslint \"{src,tests}/**/*.{js,jsx,ts,tsx}\" --fix",
-    "package:win": "npm run build:main && electron-builder --win --config electron-builder.mjs  --publish never",
+    "build:backend": "python ../../scripts/build_workflow/build_python.py",
+    "package:win": "npm run build:backend && npm run build:main && electron-builder --win --config electron-builder.mjs  --publish never",
     "start": "electron-vite preview",
     "stylelint": "stylelint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "test": "vitest --run",
@@ -35,8 +36,11 @@
     "typecheck": "tsgo --noEmit -p tsconfig.json",
     "update-server": "sh scripts/update-test/run-test.sh"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ngrok/ngrok": "^1.4.1"
+  },
   "devDependencies": {
+    "@c2jy/tunnel-core": "workspace:*",
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/preload": "^3.0.2",

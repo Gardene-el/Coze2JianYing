@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 
-import { guiNgrokAPI } from "@/services/gui/ngrok";
+import { ngrokTunnelService } from "@/services/tunnels/ngrok";
 import type { ServiceState } from "../initialState";
 
 export interface NgrokAction {
@@ -22,8 +22,11 @@ export const createNgrokSlice: StateCreator<
   startNgrok: async (authtoken, region, port) => {
     set({ ngrokLoading: true });
     try {
-      const data = await guiNgrokAPI.start({ authtoken, region, port });
-      const url = data.public_url ?? "";
+      const data = await ngrokTunnelService.startTunnel(port, {
+        authToken: authtoken,
+        region,
+      });
+      const url = data.publicUrl ?? "";
       set({ ngrokRunning: true, ngrokUrl: url });
       return url;
     } finally {
@@ -34,7 +37,7 @@ export const createNgrokSlice: StateCreator<
   stopNgrok: async () => {
     set({ ngrokLoading: true });
     try {
-      await guiNgrokAPI.stop();
+      await ngrokTunnelService.stopTunnel();
       set({ ngrokRunning: false, ngrokUrl: "" });
     } finally {
       set({ ngrokLoading: false });
@@ -43,8 +46,8 @@ export const createNgrokSlice: StateCreator<
 
   fetchNgrokStatus: async () => {
     try {
-      const data = await guiNgrokAPI.getStatus();
-      set({ ngrokRunning: data.running, ngrokUrl: data.public_url ?? "" });
+      const data = await ngrokTunnelService.getStatus();
+      set({ ngrokRunning: data.isRunning, ngrokUrl: data.publicUrl ?? "" });
     } catch {
       // 静默处理
     }

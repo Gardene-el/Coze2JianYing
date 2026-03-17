@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const packageJSON = JSON.parse(await fs.readFile(path.join(__dirname, 'package.json'), 'utf8'));
 
 const channel = process.env.UPDATE_CHANNEL;
+const arch = os.arch();
 
 // 自定义更新服务器 URL (用于 stable 频道)
 const updateServerUrl = process.env.UPDATE_SERVER_URL;
@@ -156,7 +158,12 @@ const config = {
     releaseNotes: process.env.RELEASE_NOTES || undefined,
   },
 
-  extraResources: [{ from: 'resources/bin', to: 'bin' }],
+  extraResources: [
+    { from: 'resources/bin', to: 'bin' },
+    // CPython embed 产物目录：整体映射到安装包 resources/python/
+    // python.exe 位于 resources/python/python.exe（替代旧 PyInstaller backend.exe）
+    { from: 'resources/python', to: 'python' },
+  ],
 
   win: {
     executableName: 'LobeHub',

@@ -30,7 +30,14 @@ const isDarwin = false;
 export const nativeModules = [
   // macOS-only native modules
   ...(isDarwin ? ['node-mac-permissions', 'electron-liquid-glass'] : []),
-  // Add more native modules here as needed
+  // Native module with binary bindings — cannot be bundled by Rollup
+  '@ngrok/ngrok',
+  // `ajv` and `ajv-formats` are kept as external because electron-updater and
+  // electron-store compile JSON-schema validators at runtime via `new Function()`,
+  // whose generated code contains `require('ajv/dist/runtime/...')` calls that
+  // Rollup cannot statically resolve or inline.
+  'ajv',
+  'ajv-formats',
 ];
 
 /**

@@ -56,8 +56,6 @@ class SettingsManager:
         return {
             "draft_folder": "",
             "api_port": "20211",
-            "ngrok_auth_token": "",
-            "ngrok_region": "us",
             "relay_worker_url": "https://api.garden-eel.com/coze2jianying",
             "theme_mode": "System",  # System, Dark, Light
             "color_theme": "blue",   # blue, green, dark-blue

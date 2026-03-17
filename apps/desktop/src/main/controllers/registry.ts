@@ -8,6 +8,7 @@ import NotificationCtr from './NotificationCtr';
 import ShortcutController from './ShortcutCtr';
 import SystemController from './SystemCtr';
 import TrayMenuCtr from './TrayMenuCtr';
+import TunnelCtr from './TunnelCtr';
 import UpdaterCtr from './UpdaterCtr';
 import UploadFileCtr from './UploadFileCtr';
 
@@ -20,6 +21,7 @@ export const controllerIpcConstructors = [
   ShortcutController,
   SystemController,
   TrayMenuCtr,
+  TunnelCtr,
   UpdaterCtr,
   UploadFileCtr,
 ] as const satisfies readonly IpcServiceConstructor[];

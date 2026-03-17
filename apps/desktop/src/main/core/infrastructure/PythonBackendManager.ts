@@ -1,6 +1,7 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { app } from 'electron';
@@ -19,9 +20,15 @@ const HEALTH_TIMEOUT_MS = 30_000;
 /**
  * Manages the Python FastAPI backend process lifecycle.
  *
- * In development, spawns `python -m src.main --gui-only --port 20210` from the
- * monorepo root (two levels up from the Electron app directory).
- * In production the binary or venv should be co-located under resources/python/.
+ * Both development and production use the CPython Embeddable Package located at
+ * apps/desktop/resources/python/ (dev) or resources/python/ (prod).
+ *
+ * In development, PythonBackendManager automatically rebuilds the embed when the
+ * pyproject.toml hash changes (stamp check).  The rebuild is synchronous so the
+ * window only opens after the backend is ready.
+ *
+ * In production the embed is pre-built by `npm run build:backend` and bundled by
+ * electron-builder; no automatic rebuild is attempted.
  */
 export class PythonBackendManager {
   private process: ChildProcess | null = null;
@@ -39,6 +46,87 @@ export class PythonBackendManager {
     logger.debug(`Python project root: ${this.projectRoot}`);
   }
 
+  /** Directory that contains python.exe + Lib/site-packages */
+  private get embedDir(): string {
+    if (isDev) return join(app.getAppPath(), 'resources', 'python');
+    return join(process.resourcesPath, 'python');
+  }
+
+  /** Full path to the embedded python.exe */
+  private get embedPythonExe(): string {
+    return join(this.embedDir, 'python.exe');
+  }
+
+  /** Compute the log directory passed to Python via COZE2JY_LOG_DIR env var */
+  private get logDir(): string {
+    if (isDev) return join(this.projectRoot, 'logs');
+    return join(process.resourcesPath, 'python', 'logs');
+  }
+
+  /**
+   * Compute the expected stamp string for the current pyproject.toml.
+   * Must match the format written by scripts/build_workflow/build_python.py.
+   */
+  private computeStamp(): string {
+    const pyprojectPath = join(this.projectRoot, 'pyproject.toml');
+    const hash = createHash('sha256').update(readFileSync(pyprojectPath)).digest('hex');
+    // PYTHON_VERSION mirrors the value in build_python.py; bump both together.
+    return `python_version=3.12.9\nhash=${hash}\n`;
+  }
+
+  /**
+   * Check whether the embed needs to be (re)built.
+   * Returns [needsBuild, reason].
+   */
+  private needsRebuild(): [boolean, string] {
+    if (!existsSync(this.embedPythonExe)) return [true, 'python.exe missing'];
+    const stampPath = join(this.embedDir, '.stamp');
+    if (!existsSync(stampPath)) return [true, '.stamp missing'];
+    const existing = readFileSync(stampPath, 'utf8');
+    if (existing !== this.computeStamp()) return [true, 'stamp mismatch (dependencies changed)'];
+    return [false, 'up to date'];
+  }
+
+  /**
+   * Ensure the CPython embed is built and up to date.
+   * Only runs in development; production embeds are pre-built.
+   * Uses spawnSync so the caller blocks until the build finishes.
+   */
+  private ensureEmbedReady(): void {
+    if (!isDev) return;
+
+    const [needs, reason] = this.needsRebuild();
+    if (!needs) {
+      logger.info(`Embed is ${reason}, skipping build`);
+      return;
+    }
+
+    logger.info(`Embed needs rebuild: ${reason}`);
+    logger.info('Running build_python.py — this may take a few minutes on first run...');
+
+    const buildScript = join(this.projectRoot, 'scripts', 'build_workflow', 'build_python.py');
+    const result = spawnSync('python', [buildScript], {
+      cwd: this.projectRoot,
+      stdio: 'inherit',
+      timeout: 600_000, // 10 min upper bound
+    });
+
+    if (result.error) {
+      throw new Error(
+        `Failed to start build_python.py: ${result.error.message}\n` +
+          `Make sure 'python' (3.8+) is available on PATH.`,
+      );
+    }
+    if (result.status !== 0) {
+      throw new Error(
+        `build_python.py exited with code ${result.status}. ` +
+          `Check the output above for details.`,
+      );
+    }
+
+    logger.info('Embed build completed successfully');
+  }
+
   /**
    * Spawn the Python backend and wait until it reports healthy.
    * Returns a Promise that resolves once the process is ready.
@@ -49,12 +137,15 @@ export class PythonBackendManager {
       return;
     }
 
+    // Ensure the CPython embed is present and up to date before spawning.
+    this.ensureEmbedReady();
+
     const { cmd, args, cwd } = this.resolveSpawnConfig();
     logger.info(`Starting Python backend: ${cmd} ${args.join(' ')} (cwd: ${cwd})`);
 
     this.process = spawn(cmd, args, {
       cwd,
-      env: { ...process.env },
+      env: { ...process.env, COZE2JY_LOG_DIR: this.logDir },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
@@ -103,33 +194,21 @@ export class PythonBackendManager {
   // ---------------------------------------------------------------------------
 
   private resolveSpawnConfig(): { args: string[]; cmd: string; cwd: string } {
-    if (isDev) {
-      // In development, run from the monorepo root using the system python
-      return {
-        args: ['-m', 'src.main', '--gui-only', '--port', String(GUI_PORT), '--host', GUI_HOST],
-        cmd: 'python',
-        cwd: this.projectRoot,
-      };
+    const pythonExe = this.embedPythonExe;
+
+    if (!existsSync(pythonExe)) {
+      // Should never happen in production (embed is pre-bundled).
+      // In dev this means ensureEmbedReady() failed silently — surface a clear error.
+      throw new Error(
+        `Embedded python.exe not found at: ${pythonExe}\n` +
+          `Run 'npm run build:backend' from apps/desktop to build the CPython embed.`,
+      );
     }
 
-    // In production, look for a bundled python executable under resources/
-    const resourcesDir = process.resourcesPath;
-    const bundledPython = join(resourcesDir, 'python', 'python.exe');
-
-    if (existsSync(bundledPython)) {
-      return {
-        args: ['-m', 'src.main', '--gui-only', '--port', String(GUI_PORT), '--host', GUI_HOST],
-        cmd: bundledPython,
-        cwd: join(resourcesDir, 'python'),
-      };
-    }
-
-    // Fallback: system python from project root
-    logger.warn('Bundled Python not found, falling back to system python');
     return {
       args: ['-m', 'src.main', '--gui-only', '--port', String(GUI_PORT), '--host', GUI_HOST],
-      cmd: 'python',
-      cwd: this.projectRoot,
+      cmd: pythonExe,
+      cwd: this.embedDir,
     };
   }
 

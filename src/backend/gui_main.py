@@ -16,8 +16,9 @@ import asyncio
 import logging
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from src.backend.routers.gui_router import gui_router
 from src.backend.utils import sse_log
@@ -49,6 +50,16 @@ def create_gui_app() -> FastAPI:
     )
 
     app.include_router(gui_router, prefix="/gui")
+
+    @app.exception_handler(Exception)
+    async def _unhandled_exception(request: Request, exc: Exception) -> JSONResponse:
+        _logger = logging.getLogger(__name__)
+        _logger.exception("未处理的异常 [%s %s]: %s", request.method, request.url.path, exc)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": str(exc) or "Internal Server Error"},
+        )
+
     return app
 
 

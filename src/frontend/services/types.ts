@@ -27,21 +27,6 @@ export interface ServiceStatusResponse {
   port: number;
 }
 
-export interface NgrokStartPayload {
-  authtoken: string;
-  region: string;
-  port: number;
-}
-
-export interface NgrokStatusResponse {
-  running: boolean;
-  public_url?: string;
-}
-
-export interface NgrokStartResponse {
-  public_url: string;
-}
-
 export interface DetectPathResponse {
   path: string | null;
 }

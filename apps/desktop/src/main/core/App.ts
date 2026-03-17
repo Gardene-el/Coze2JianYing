@@ -2,7 +2,6 @@ import os from 'node:os';
 import { join } from 'node:path';
 
 import { app, nativeTheme, protocol } from 'electron';
-import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 import { binDir, buildDir } from '@/const/dir';
 import { isDev } from '@/const/env';
@@ -296,11 +295,16 @@ export class App {
 
   /**
    * Development only: install React DevTools extension into Electron's devtools.
+   * Uses a dynamic import so that `electron-devtools-installer` (and its
+   * transitive dependency `yaku`) is never loaded in production builds.
    */
   private installReactDevtools = async () => {
     if (!isDev) return;
 
     try {
+      const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
+        'electron-devtools-installer'
+      );
       const name = await installExtension(REACT_DEVELOPER_TOOLS);
 
       logger.info(`Installed DevTools extension: ${name}`);
@@ -372,5 +376,10 @@ export class App {
     // Execute cleanup operations
     this.staticFileServerManager.destroy();
     this.pythonBackendManager.stop();
+
+    // Stop all active tunnel providers (fire-and-forget; app is quitting)
+    import('../modules/tunnels/TunnelRegistry').then(({ tunnelRegistry }) => {
+      tunnelRegistry.stopAll().catch(() => void 0);
+    });
   };
 }
