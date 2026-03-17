@@ -1,48 +1,77 @@
+import type { Key } from "react";
 import {
+  ApiOutlined,
+  ClockCircleOutlined,
   CloudServerOutlined,
   CodeOutlined,
+  EditOutlined,
   HistoryOutlined,
   SettingOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Menu, type MenuProps } from "antd";
-import { createStyles } from "antd-style";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Accordion, Flexbox } from "@lobehub/ui";
 
-const useStyles = createStyles(({ css }) => ({
-  menu: css`
-    border-inline-end: none !important;
-    background: transparent;
-
-    .ant-menu-item {
-      border-radius: 8px;
-      margin-inline: 8px;
-      width: calc(100% - 16px);
-    }
-  `,
-}));
-
-const items: MenuProps["items"] = [
-  { key: "/cloud-service", icon: <CloudServerOutlined />, label: "云端服务" },
-  { key: "/draft-generator", icon: <CodeOutlined />, label: "草稿生成" },
-  { key: "/script-executor", icon: <CodeOutlined />, label: "脚本执行" },
-  { key: "/replay", icon: <HistoryOutlined />, label: "回放查看" },
-  { key: "/settings", icon: <SettingOutlined />, label: "系统设置" },
-];
+import { useGlobalStore } from "@/store/global/store";
+import { systemStatusSelectors } from "@/store/global/selectors/systemStatus";
+import CollapsibleNavGroup from "@/components/CollapsibleNavGroup";
+import NavItem from "@/components/NavItem";
 
 const SidebarBody = () => {
-  const { styles } = useStyles();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const expandedGroups = useGlobalStore(
+    systemStatusSelectors.expandedSidebarGroups,
+  );
+  const updateSystemStatus = useGlobalStore((s) => s.updateSystemStatus);
 
   return (
-    <Menu
-      className={styles.menu}
-      mode="inline"
-      selectedKeys={[location.pathname]}
-      items={items}
-      onClick={({ key }) => navigate(key)}
-      inlineIndent={16}
-    />
+    <Flexbox gap={4} style={{ paddingBlock: 4 }}>
+      <Accordion
+        expandedKeys={expandedGroups}
+        onExpandedChange={(keys) =>
+          updateSystemStatus({ expandedSidebarGroups: keys as string[] })
+        }
+        gap={4}
+        indicatorPlacement="end"
+      >
+        <CollapsibleNavGroup
+          groupKey="auto"
+          title="自动方案"
+          icon={<ApiOutlined />}
+        >
+          <NavItem
+            to="/cloud-service"
+            icon={<CloudServerOutlined />}
+            label="云端服务"
+          />
+          <NavItem to="/replay" icon={<HistoryOutlined />} label="回放查看" />
+        </CollapsibleNavGroup>
+
+        <CollapsibleNavGroup
+          groupKey="manual"
+          title="手动方案"
+          icon={<ThunderboltOutlined />}
+        >
+          <NavItem
+            to="/script-executor"
+            icon={<CodeOutlined />}
+            label="脚本执行"
+          />
+        </CollapsibleNavGroup>
+
+        <CollapsibleNavGroup
+          groupKey="legacy"
+          title="过时方案"
+          icon={<ClockCircleOutlined />}
+        >
+          <NavItem
+            to="/draft-generator"
+            icon={<EditOutlined />}
+            label="草稿生成"
+          />
+        </CollapsibleNavGroup>
+      </Accordion>
+
+      <NavItem to="/settings" icon={<SettingOutlined />} label="系统设置" />
+    </Flexbox>
   );
 };
 
