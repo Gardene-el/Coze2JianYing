@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev": "cd apps/desktop && bun run dev",
+    "dev:quick": "cd apps/desktop && bun run package:quick:win",
     "build": "cd apps/desktop && bun run package:win"
   },
   "dependencies": {
