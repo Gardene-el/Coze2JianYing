@@ -49,7 +49,12 @@ const TitleBar = memo(() => {
       style={{ minHeight: TITLE_BAR_HEIGHT, padding }}
       width="100%"
     >
-      <Flexbox horizontal align="center" className={electronStylish.nodrag} gap={2}>
+      <Flexbox
+        horizontal
+        align="center"
+        className={electronStylish.nodrag}
+        gap={2}
+      >
         <NavigationBar />
         <ThemeButton placement="bottomLeft" size={16} />
       </Flexbox>
