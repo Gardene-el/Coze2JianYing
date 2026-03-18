@@ -1,8 +1,4 @@
-import {
-  FolderOpenOutlined,
-  ReloadOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
+import { FolderOpenOutlined, ReloadOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -15,7 +11,8 @@ import {
   Switch,
   Typography,
 } from "antd";
-import { useEffect } from "react";
+import { useTheme as useNextThemesTheme } from "next-themes";
+import { useEffect, useRef } from "react";
 
 import { useSettingsStore } from "@/store/settings/store";
 
@@ -25,19 +22,22 @@ const SettingsPage = () => {
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
 
+  const { theme: currentTheme, setTheme } = useNextThemesTheme();
+
   const {
     draftFolder,
     apiPort,
     ngrokAuthToken,
     ngrokRegion,
     relayWorkerUrl,
-    themeMode,
     transferEnabled,
-    isSaving,
     loadSettings,
     saveSettings,
     detectDraftPath,
   } = useSettingsStore();
+
+  // debounce 计时器，500ms 内无操作才真正保存
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     void loadSettings();
@@ -50,7 +50,6 @@ const SettingsPage = () => {
       ngrokAuthToken,
       ngrokRegion,
       relayWorkerUrl,
-      themeMode,
       transferEnabled,
     });
   }, [
@@ -59,27 +58,31 @@ const SettingsPage = () => {
     ngrokAuthToken,
     ngrokRegion,
     relayWorkerUrl,
-    themeMode,
     transferEnabled,
     form,
   ]);
 
-  const handleSave = async () => {
-    const values = await form.validateFields();
-    try {
-      await saveSettings({
-        draftFolder: values.draftFolder,
-        apiPort: values.apiPort,
-        ngrokAuthToken: values.ngrokAuthToken,
-        ngrokRegion: values.ngrokRegion,
-        relayWorkerUrl: values.relayWorkerUrl,
-        themeMode: values.themeMode,
-        transferEnabled: values.transferEnabled,
-      });
-      msgApi.success("设置已保存");
-    } catch (e: unknown) {
-      msgApi.error(`保存失败: ${(e as Error).message}`);
-    }
+  /** 表单任意字段变化时 debounce 500ms 自动保存到 Python 后端 */
+  const handleValuesChange = (
+    _: unknown,
+    allValues: Record<string, unknown>,
+  ) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await saveSettings({
+          draftFolder: allValues.draftFolder as string,
+          apiPort: allValues.apiPort as string,
+          ngrokAuthToken: allValues.ngrokAuthToken as string,
+          ngrokRegion: allValues.ngrokRegion as string,
+          relayWorkerUrl: allValues.relayWorkerUrl as string,
+          transferEnabled: allValues.transferEnabled as boolean,
+        });
+        msgApi.success("已自动保存", 1.5);
+      } catch (e: unknown) {
+        msgApi.error(`保存失败: ${(e as Error).message}`);
+      }
+    }, 500);
   };
 
   const handleDetect = async () => {
@@ -105,6 +108,7 @@ const SettingsPage = () => {
         form={form}
         layout="vertical"
         style={{ maxWidth: 1024, marginTop: 16 }}
+        onValuesChange={handleValuesChange}
       >
         {/* 路径设置 */}
         <Card title="📁 路径设置" style={{ marginBottom: 16 }}>
@@ -156,27 +160,22 @@ const SettingsPage = () => {
 
         {/* 外观 */}
         <Card title="🎨 外观" style={{ marginBottom: 16 }}>
-          <Form.Item name="themeMode" label="主题模式">
+          {/* 主题模式由 next-themes 管理，存储在 localStorage，不经过 Python 后端 */}
+          <Form.Item label="主题模式">
             <Select
               style={{ width: 140 }}
+              value={currentTheme ?? "system"}
               options={[
                 { value: "system", label: "跟随系统" },
                 { value: "light", label: "浅色" },
                 { value: "dark", label: "深色" },
               ]}
+              onChange={(v) => setTheme(v)}
             />
           </Form.Item>
         </Card>
 
         <Space>
-          <Button
-            type="primary"
-            icon={<SaveOutlined />}
-            loading={isSaving}
-            onClick={handleSave}
-          >
-            保存设置
-          </Button>
           <Button icon={<ReloadOutlined />} onClick={() => void loadSettings()}>
             重置
           </Button>

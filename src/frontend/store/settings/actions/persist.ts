@@ -39,42 +39,36 @@ export const createSettingsPersistSlice: StateCreator<
         | PrimaryColors
         | undefined,
       relayWorkerUrl: data.relay_worker_url ?? "",
-      themeMode: (data.theme_mode ?? "system").toLowerCase(),
       transferEnabled: data.transfer_enabled ?? false,
     });
   },
 
   saveSettings: async (patch) => {
-    set({ isSaving: true, ...patch });
-    try {
-      const current = get();
-      const saves: Promise<unknown>[] = [
-        guiSettingsAPI.put({
-          animation_mode: current.animationMode,
-          api_port: current.apiPort,
-          custom_font_family: current.customFontFamily,
-          custom_font_url: current.customFontURL,
-          draft_folder: current.draftFolder,
-          neutral_color: current.neutralColor,
-          primary_color: current.primaryColor,
-          relay_worker_url: current.relayWorkerUrl,
-          theme_mode: current.themeMode,
-          transfer_enabled: current.transferEnabled,
+    set({ ...patch });
+    const current = get();
+    const saves: Promise<unknown>[] = [
+      guiSettingsAPI.put({
+        animation_mode: current.animationMode,
+        api_port: current.apiPort,
+        custom_font_family: current.customFontFamily,
+        custom_font_url: current.customFontURL,
+        draft_folder: current.draftFolder,
+        neutral_color: current.neutralColor,
+        primary_color: current.primaryColor,
+        relay_worker_url: current.relayWorkerUrl,
+        transfer_enabled: current.transferEnabled,
+      }),
+    ];
+    // ngrok settings are persisted in electron-store via IPC
+    if (window.electronAPI) {
+      saves.push(
+        ngrokTunnelService.saveSettings({
+          authToken: current.ngrokAuthToken,
+          region: current.ngrokRegion as string,
         }),
-      ];
-      // ngrok settings are persisted in electron-store via IPC
-      if (window.electronAPI) {
-        saves.push(
-          ngrokTunnelService.saveSettings({
-            authToken: current.ngrokAuthToken,
-            region: current.ngrokRegion as string,
-          }),
-        );
-      }
-      await Promise.all(saves);
-    } finally {
-      set({ isSaving: false });
+      );
     }
+    await Promise.all(saves);
   },
 
   detectDraftPath: async () => {

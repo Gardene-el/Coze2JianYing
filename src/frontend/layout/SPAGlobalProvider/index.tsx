@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import AppTheme from "@/layout/GlobalProvider/AppTheme";
+import NextThemeProvider from "@/layout/GlobalProvider/NextThemeProvider";
 
 // Lazy-loaded global UI hosts — aligns with lobehub SPAGlobalProvider
 const ModalHost = lazy(() =>
@@ -58,20 +59,22 @@ const SPAGlobalProvider = memo<PropsWithChildren>(({ children }) => {
   }, []);
 
   return (
-    <AppTheme>
-      <LazyMotion features={domMax}>
-        <TooltipGroup layoutAnimation={false}>
-          <StyleProvider speedy={import.meta.env.PROD}>
-            {children}
-          </StyleProvider>
-        </TooltipGroup>
-        <Suspense>
-          <ModalHost />
-          <ToastHost />
-          <ContextMenuHost />
-        </Suspense>
-      </LazyMotion>
-    </AppTheme>
+    <NextThemeProvider>
+      <AppTheme>
+        <LazyMotion features={domMax}>
+          <TooltipGroup layoutAnimation={false}>
+            <StyleProvider speedy={import.meta.env.PROD}>
+              {children}
+            </StyleProvider>
+          </TooltipGroup>
+          <Suspense>
+            <ModalHost />
+            <ToastHost />
+            <ContextMenuHost />
+          </Suspense>
+        </LazyMotion>
+      </AppTheme>
+    </NextThemeProvider>
   );
 });
 

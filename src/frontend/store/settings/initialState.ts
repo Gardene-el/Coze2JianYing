@@ -9,11 +9,7 @@ export interface SettingsState {
   ngrokAuthToken: string;
   ngrokRegion: string;
   relayWorkerUrl: string;
-  /** 'system' | 'light' | 'dark' */
-  themeMode: string;
   transferEnabled: boolean;
-  /** 是否正在保存 */
-  isSaving: boolean;
   /** 是否已从后端加载 */
   loaded: boolean;
 
@@ -36,9 +32,7 @@ export const initialSettingsState: SettingsState = {
   ngrokAuthToken: "",
   ngrokRegion: "us",
   relayWorkerUrl: "https://api.garden-eel.com/coze2jianying",
-  themeMode: "system",
   transferEnabled: false,
-  isSaving: false,
   loaded: false,
 
   primaryColor: undefined,

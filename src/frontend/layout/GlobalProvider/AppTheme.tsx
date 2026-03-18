@@ -12,6 +12,7 @@ import * as motion from "motion/react-m";
 import { type ReactNode, memo, useEffect, useMemo } from "react";
 
 import AntdStaticMethods from "@/components/AntdStaticMethods";
+import { useIsDark } from "@/hooks/useIsDark";
 import { useSettingsStore } from "@/store/settings/store";
 import { GlobalStyle } from "@/styles";
 
@@ -89,35 +90,18 @@ const AppTheme = memo<AppThemeProps>(
   }) => {
     const antdTheme = useTheme();
 
-    const [
-      themeMode,
-      primaryColor,
-      neutralColor,
-      animationMode,
-      fontFamily,
-      fontURL,
-    ] = useSettingsStore((s) => [
-      s.themeMode,
-      s.primaryColor,
-      s.neutralColor,
-      s.animationMode,
-      s.customFontFamily,
-      s.customFontURL,
-    ]);
-
-    const isDark =
-      themeMode === "dark"
-        ? true
-        : themeMode === "light"
-          ? false
-          : window.matchMedia("(prefers-color-scheme: dark)").matches;
-
+    // next-themes 负责 data-theme 属性同步和 localStorage 持久化，此处直接读取
+    const isDark = useIsDark();
     const currentAppearance = isDark ? "dark" : "light";
 
-    // 同步 html data-theme 属性，方便 CSS 选择器
-    useEffect(() => {
-      document.documentElement.setAttribute("data-theme", currentAppearance);
-    }, [currentAppearance]);
+    const [primaryColor, neutralColor, animationMode, fontFamily, fontURL] =
+      useSettingsStore((s) => [
+        s.primaryColor,
+        s.neutralColor,
+        s.animationMode,
+        s.customFontFamily,
+        s.customFontURL,
+      ]);
 
     // Electron 桌面：将消息通知顶部偏移 titlebar（仅桌面端）
     const messageTop = isDesktop ? TITLE_BAR_HEIGHT + 8 : undefined;

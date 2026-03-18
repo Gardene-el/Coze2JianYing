@@ -1,26 +1,28 @@
-import { useTheme } from "antd-style";
+import { useTheme } from "next-themes";
 import { useEffect } from "react";
 
 const isDesktop = typeof window !== "undefined" && !!window.electron;
 
 /**
- * Watches antd-style's dark-mode token and forwards theme changes to the
- * Electron main process via the IPC bridge so that the native titlebar
- * overlay controls (Windows) and the window shadow (macOS) stay in sync.
+ * 监听 next-themes 的主题值变化，将 theme 变更通过 IPC 转发给 Electron 主进程，
+ * 使 Windows 原生标题栏控件和 macOS 窗口阴影保持同步。
  *
- * Mirrors lobehub/src/features/Electron/system/useWatchThemeUpdate.ts
- * without next-themes / electron-client-ipc dependencies.
+ * 对齐 lobehub/src/features/Electron/system/useWatchThemeUpdate.ts
  */
 export const useWatchThemeUpdate = () => {
-  const { isDarkMode } = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!isDesktop) return;
-    const themeMode = isDarkMode ? "dark" : "light";
+    if (!theme) return;
+
     window.electronAPI
-      ?.invoke("system.updateThemeModeHandler", themeMode)
+      ?.invoke(
+        "system.updateThemeModeHandler",
+        theme as "dark" | "light" | "system",
+      )
       .catch(() => {
         // Ignore — running in non-electron or IPC not yet ready.
       });
-  }, [isDarkMode]);
+  }, [theme]);
 };

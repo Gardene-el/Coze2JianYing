@@ -45,7 +45,6 @@ class SettingsPayload(BaseModel):
     draft_folder: str = ""
     api_port: str = "20211"
     relay_worker_url: str = ""
-    theme_mode: str = "System"
     transfer_enabled: bool = False
 
 

@@ -57,7 +57,6 @@ class SettingsManager:
             "draft_folder": "",
             "api_port": "20211",
             "relay_worker_url": "https://api.garden-eel.com/coze2jianying",
-            "theme_mode": "System",  # System, Dark, Light
             "color_theme": "blue",   # blue, green, dark-blue
             "transfer_enabled": False
         }
