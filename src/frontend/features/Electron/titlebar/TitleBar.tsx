@@ -2,6 +2,7 @@ import { TITLE_BAR_HEIGHT } from "@lobechat/desktop-bridge";
 import { Flexbox } from "@lobehub/ui";
 import { memo, useMemo } from "react";
 
+import ThemeButton from "@/components/ThemeButton";
 import { electronStylish } from "@/styles/electron";
 
 import { useWatchThemeUpdate } from "../system/useWatchThemeUpdate";
@@ -48,7 +49,10 @@ const TitleBar = memo(() => {
       style={{ minHeight: TITLE_BAR_HEIGHT, padding }}
       width="100%"
     >
-      <NavigationBar />
+      <Flexbox horizontal align="center" className={electronStylish.nodrag} gap={2}>
+        <NavigationBar />
+        <ThemeButton placement="bottomLeft" size={16} />
+      </Flexbox>
       <Flexbox flex={1} />
       {showWinControl && <WinControl />}
     </Flexbox>

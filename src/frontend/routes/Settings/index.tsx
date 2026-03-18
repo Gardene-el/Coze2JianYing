@@ -11,7 +11,6 @@ import {
   Switch,
   Typography,
 } from "antd";
-import { useTheme as useNextThemesTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
 import { useSettingsStore } from "@/store/settings/store";
@@ -21,8 +20,6 @@ const { Title, Text } = Typography;
 const SettingsPage = () => {
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
-
-  const { theme: currentTheme, setTheme } = useNextThemesTheme();
 
   const {
     draftFolder,
@@ -155,23 +152,6 @@ const SettingsPage = () => {
         <Card title="☁️ 云服务" style={{ marginBottom: 16 }}>
           <Form.Item name="relayWorkerUrl" label="Relay Worker URL">
             <Input placeholder="https://api.example.com/coze2jianying" />
-          </Form.Item>
-        </Card>
-
-        {/* 外观 */}
-        <Card title="🎨 外观" style={{ marginBottom: 16 }}>
-          {/* 主题模式由 next-themes 管理，存储在 localStorage，不经过 Python 后端 */}
-          <Form.Item label="主题模式">
-            <Select
-              style={{ width: 140 }}
-              value={currentTheme ?? "system"}
-              options={[
-                { value: "system", label: "跟随系统" },
-                { value: "light", label: "浅色" },
-                { value: "dark", label: "深色" },
-              ]}
-              onChange={(v) => setTheme(v)}
-            />
           </Form.Item>
         </Card>
 
