@@ -35,8 +35,8 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
     /* 在 DesktopLayoutContainer Flexbox 列中自动伸长；min-height: 0 允许垂直滚动 */
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
-    padding: 24px;
+    /* padding 和 overflow-y 由各页面的 PageContainer 接管，此处仅需隐藏溢出 */
+    overflow: hidden;
   `,
   footer: css`
     flex: none;

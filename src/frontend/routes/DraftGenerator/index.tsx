@@ -3,9 +3,11 @@ import { Button, Card, message, Space, Spin, Typography } from "antd";
 import { createStaticStyles } from "antd-style";
 import { useRef, useState } from "react";
 
+import PageContainer from "@/components/PageContainer";
+import PageHeader from "@/components/PageHeader";
 import { guiDraftAPI } from "@/services/gui/draft";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   textarea: css`
@@ -60,12 +62,10 @@ const DraftGeneratorPage = () => {
   };
 
   return (
-    <>
+    <PageContainer>
       {ctx}
-      <Title level={3}>手动草稿生成（旧版）</Title>
-      <Text type="secondary">在此处粘贴 Coze 插件生成的 JSON 数据</Text>
-
-      <Card style={{ marginTop: 16 }}>
+      <PageHeader title="手动草稿生成" />
+      <Card>
         <textarea
           ref={textRef}
           className={styles.textarea}
@@ -104,7 +104,7 @@ const DraftGeneratorPage = () => {
           </Space>
         </Space>
       </Card>
-    </>
+    </PageContainer>
   );
 };
 

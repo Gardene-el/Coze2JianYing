@@ -9,13 +9,12 @@ import {
   Select,
   Space,
   Switch,
-  Typography,
 } from "antd";
 import { useEffect, useRef } from "react";
 
+import PageContainer from "@/components/PageContainer";
+import PageHeader from "@/components/PageHeader";
 import { useSettingsStore } from "@/store/settings/store";
-
-const { Title, Text } = Typography;
 
 const SettingsPage = () => {
   const [form] = Form.useForm();
@@ -97,10 +96,9 @@ const SettingsPage = () => {
   };
 
   return (
-    <>
+    <PageContainer>
       {ctx}
-      <Title level={3}>系统设置</Title>
-
+      <PageHeader title="系统设置" />
       <Form
         form={form}
         layout="vertical"
@@ -161,7 +159,7 @@ const SettingsPage = () => {
           </Button>
         </Space>
       </Form>
-    </>
+    </PageContainer>
   );
 };
 

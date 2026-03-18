@@ -23,11 +23,13 @@ import {
 import { createStaticStyles } from "antd-style";
 import { useEffect } from "react";
 
+import PageContainer from "@/components/PageContainer";
+import PageHeader from "@/components/PageHeader";
 import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { useServiceStore } from "@/store/service/store";
 import { useSettingsStore } from "@/store/settings/store";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const styles = createStaticStyles(({ css }) => ({
   row: css`
@@ -110,10 +112,9 @@ const CloudServicePage = () => {
   };
 
   return (
-    <>
+    <PageContainer>
       {ctx}
-      <Title level={3}>云端服务</Title>
-
+      <PageHeader title="云端服务" />
       {/* Coze API 服务 */}
       <Card
         title={
@@ -227,7 +228,7 @@ const CloudServicePage = () => {
           </>
         )}
       </Card>
-    </>
+    </PageContainer>
   );
 };
 

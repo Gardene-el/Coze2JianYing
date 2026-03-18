@@ -4,22 +4,13 @@ import {
   FormatPainterOutlined,
   PlayCircleOutlined,
 } from "@ant-design/icons";
-import {
-  Alert,
-  Button,
-  Card,
-  message,
-  Space,
-  Spin,
-  Tag,
-  Typography,
-} from "antd";
+import { Alert, Button, Card, message, Space, Spin, Tag } from "antd";
 import { createStaticStyles } from "antd-style";
 import { useRef, useState } from "react";
 
+import PageContainer from "@/components/PageContainer";
+import PageHeader from "@/components/PageHeader";
 import { guiScriptAPI } from "@/services/gui/script";
-
-const { Title, Text } = Typography;
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   textarea: css`
@@ -118,14 +109,10 @@ const ScriptExecutorPage = () => {
   };
 
   return (
-    <>
+    <PageContainer>
       {ctx}
-      <Title level={3}>脚本执行（新版）</Title>
-      <Text type="secondary">
-        在此处粘贴 Coze 导出的 Python 脚本以自动化执行
-      </Text>
-
-      <Card style={{ marginTop: 16 }}>
+      <PageHeader title="脚本执行" />
+      <Card>
         <textarea
           ref={textRef}
           className={styles.textarea}
@@ -189,7 +176,7 @@ const ScriptExecutorPage = () => {
           </Space>
         </Space>
       </Card>
-    </>
+    </PageContainer>
   );
 };
 

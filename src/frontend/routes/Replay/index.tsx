@@ -1,11 +1,11 @@
 import { SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Input, message, Spin, Typography } from "antd";
+import { Button, Card, Input, message, Spin } from "antd";
 import { createStaticStyles } from "antd-style";
 import { useState } from "react";
 
+import PageContainer from "@/components/PageContainer";
+import PageHeader from "@/components/PageHeader";
 import { guiReplayAPI } from "@/services/gui/replay";
-
-const { Title, Text } = Typography;
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   json: css`
@@ -44,14 +44,10 @@ const ReplayPage = () => {
   };
 
   return (
-    <>
+    <PageContainer>
       {ctx}
-      <Title level={3}>回放查看</Title>
-      <Text type="secondary">
-        通过 Draft ID 查询 Cloudflare Worker 上记录的调用回放
-      </Text>
-
-      <Card style={{ marginTop: 16 }}>
+      <PageHeader title="回放查看" />
+      <Card>
         <Input.Search
           value={draftId}
           onChange={(e) => setDraftId(e.target.value)}
@@ -72,7 +68,7 @@ const ReplayPage = () => {
           <div className={styles.json}>{JSON.stringify(result, null, 2)}</div>
         )}
       </Card>
-    </>
+    </PageContainer>
   );
 };
 
