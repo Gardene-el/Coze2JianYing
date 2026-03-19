@@ -64,7 +64,7 @@ const DraftGeneratorPage = () => {
   return (
     <PageContainer>
       {ctx}
-      <PageHeader title="手动草稿生成" />
+      <PageHeader title="粘贴草稿（弃置）" />
       <Card>
         <textarea
           ref={textRef}

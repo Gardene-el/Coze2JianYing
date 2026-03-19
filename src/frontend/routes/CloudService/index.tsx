@@ -114,7 +114,7 @@ const CloudServicePage = () => {
   return (
     <PageContainer>
       {ctx}
-      <PageHeader title="云端服务" />
+      <PageHeader title="直连模式" />
       {/* Coze API 服务 */}
       <Card
         title={

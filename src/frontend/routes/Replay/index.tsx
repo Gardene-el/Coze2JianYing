@@ -46,7 +46,7 @@ const ReplayPage = () => {
   return (
     <PageContainer>
       {ctx}
-      <PageHeader title="回放查看" />
+      <PageHeader title="拉取模式" />
       <Card>
         <Input.Search
           value={draftId}

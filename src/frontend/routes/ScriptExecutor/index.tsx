@@ -111,7 +111,7 @@ const ScriptExecutorPage = () => {
   return (
     <PageContainer>
       {ctx}
-      <PageHeader title="脚本执行" />
+      <PageHeader title="粘贴脚本" />
       <Card>
         <textarea
           ref={textRef}

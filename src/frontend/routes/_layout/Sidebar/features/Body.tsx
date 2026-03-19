@@ -1,7 +1,6 @@
 import type { Key } from "react";
 import {
   ApiOutlined,
-  ClockCircleOutlined,
   CloudServerOutlined,
   CodeOutlined,
   EditOutlined,
@@ -34,38 +33,31 @@ const SidebarBody = () => {
       >
         <CollapsibleNavGroup
           groupKey="auto"
-          title="自动方案"
+          title="云端"
           icon={<ApiOutlined />}
         >
           <NavItem
             to="/cloud-service"
             icon={<CloudServerOutlined />}
-            label="云端服务"
+            label="直连模式"
           />
-          <NavItem to="/replay" icon={<HistoryOutlined />} label="回放查看" />
+          <NavItem to="/replay" icon={<HistoryOutlined />} label="拉取模式" />
         </CollapsibleNavGroup>
 
         <CollapsibleNavGroup
           groupKey="manual"
-          title="手动方案"
+          title="手动"
           icon={<ThunderboltOutlined />}
         >
           <NavItem
             to="/script-executor"
             icon={<CodeOutlined />}
-            label="脚本执行"
+            label="粘贴脚本"
           />
-        </CollapsibleNavGroup>
-
-        <CollapsibleNavGroup
-          groupKey="legacy"
-          title="过时方案"
-          icon={<ClockCircleOutlined />}
-        >
           <NavItem
             to="/draft-generator"
             icon={<EditOutlined />}
-            label="草稿生成"
+            label="粘贴草稿（弃置）"
           />
         </CollapsibleNavGroup>
       </Accordion>
