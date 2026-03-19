@@ -18,6 +18,6 @@ export const guiScriptAPI = {
 
   execute: (script: string) =>
     apiClient
-      .post<ScriptExecuteResponse>("/gui/script/execute", { script })
+      .post<ScriptExecuteResponse>("/gui/script/execute", { script }, { timeout: 0 })
       .then((r) => r.data),
 };
