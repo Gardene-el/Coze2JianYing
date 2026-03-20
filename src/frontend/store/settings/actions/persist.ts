@@ -3,6 +3,7 @@ import type { StateCreator } from "zustand";
 
 import { guiSettingsAPI } from "@/services/gui/settings";
 import { ngrokTunnelService } from "@/services/tunnels/ngrok";
+import { TUNNEL_CHANNELS } from "@c2jy/tunnel-core";
 import type { AnimationMode, SettingsState } from "../initialState";
 
 export interface SettingsPersistAction {
@@ -23,6 +24,12 @@ export const createSettingsPersistSlice: StateCreator<
     const ngrokStored = window.electronAPI
       ? await ngrokTunnelService.getSettings().catch(() => null)
       : null;
+    // relay worker URL comes from electron-store via IPC (Electron only)
+    const workerUrl = window.electronAPI
+      ? await window.electronAPI
+          .invoke(TUNNEL_CHANNELS.getWorkerUrl)
+          .catch(() => "")
+      : "";
     set({
       animationMode: (data.animation_mode ?? "agile") as AnimationMode,
       apiPort: data.api_port ?? "20211",
@@ -38,7 +45,7 @@ export const createSettingsPersistSlice: StateCreator<
       primaryColor: (data.primary_color ?? undefined) as
         | PrimaryColors
         | undefined,
-      relayWorkerUrl: data.relay_worker_url ?? "",
+      relayWorkerUrl: (workerUrl as string) || get().relayWorkerUrl,
       transferEnabled: data.transfer_enabled ?? false,
     });
   },
@@ -55,17 +62,22 @@ export const createSettingsPersistSlice: StateCreator<
         draft_folder: current.draftFolder,
         neutral_color: current.neutralColor,
         primary_color: current.primaryColor,
-        relay_worker_url: current.relayWorkerUrl,
         transfer_enabled: current.transferEnabled,
       }),
     ];
-    // ngrok settings are persisted in electron-store via IPC
+    // ngrok + worker URL + worker URL settings are persisted in electron-store via IPC
     if (window.electronAPI) {
       saves.push(
         ngrokTunnelService.saveSettings({
           authToken: current.ngrokAuthToken,
           region: current.ngrokRegion as string,
         }),
+      );
+      saves.push(
+        window.electronAPI.invoke(
+          TUNNEL_CHANNELS.setWorkerUrl,
+          current.relayWorkerUrl,
+        ),
       );
     }
     await Promise.all(saves);

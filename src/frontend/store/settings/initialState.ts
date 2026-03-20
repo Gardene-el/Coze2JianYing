@@ -31,7 +31,7 @@ export const initialSettingsState: SettingsState = {
   apiPort: "20211",
   ngrokAuthToken: "",
   ngrokRegion: "us",
-  relayWorkerUrl: "https://api.garden-eel.com/coze2jianying",
+  relayWorkerUrl: "https://coze2jianying-relay.garden-eel.workers.dev",
   transferEnabled: false,
   loaded: false,
 

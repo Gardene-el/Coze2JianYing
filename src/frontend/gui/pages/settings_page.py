@@ -99,7 +99,7 @@ class SettingsPage(BasePage):
         self.relay_worker_url_entry = ctk.CTkEntry(
             scrollable_frame,
             textvariable=self.relay_worker_url_var,
-            placeholder_text="https://api.garden-eel.com/coze2jianying",
+            placeholder_text="https://coze2jianying-relay.garden-eel.workers.dev",
             width=400,
             corner_radius=8,
             fg_color=("white", "#3B3B3B"),

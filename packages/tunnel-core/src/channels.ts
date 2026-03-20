@@ -11,6 +11,8 @@ export const TUNNEL_CHANNELS = {
   saveSettings: "tunnel.saveSettings",
   startTunnel: "tunnel.startTunnel",
   stopTunnel: "tunnel.stopTunnel",
+  getWorkerUrl: "tunnel.getWorkerUrl",
+  setWorkerUrl: "tunnel.setWorkerUrl",
 } as const;
 
 export type TunnelChannel =

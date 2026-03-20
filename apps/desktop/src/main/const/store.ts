@@ -34,4 +34,5 @@ export const STORE_DEFAULTS: ElectronMainStore = {
   storagePath: appStorageDir,
   themeMode: 'system',
   updateChannel: UPDATE_CHANNEL,
+  workerUrl: 'https://coze2jianying-relay.garden-eel.workers.dev',
 };

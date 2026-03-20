@@ -24,8 +24,6 @@ import { withAuth } from "./middleware/auth";
 import { errorResponse, successResponse } from "./middleware/response";
 import type { Env } from "./types";
 
-const BASE_PATH = "/coze2jianying";
-
 // ── 定期清理 ─────────────────────────────────────────────────
 /**
  * 删除 created_at 早于 (now - RECORD_TTL_SECONDS) 的所有调用记录，
@@ -115,20 +113,7 @@ export default {
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
-    const url = new URL(request.url);
-    const hasPrefix =
-      url.pathname === BASE_PATH || url.pathname.startsWith(`${BASE_PATH}/`);
-
-    // 路径未携带前缀时直接拒绝，避免根路径被误调用。
-    if (!hasPrefix) {
-      return errorResponse("Not Found", 404, 404, request, env);
-    }
-
-    const rewrittenPath = url.pathname.slice(BASE_PATH.length) || "/";
-    url.pathname = rewrittenPath;
-
-    const rewrittenRequest = new Request(url.toString(), request);
-    return router.fetch(rewrittenRequest, env, ctx);
+    return router.fetch(request, env, ctx);
   },
 
   // Cron Trigger 回调（wrangler.toml [triggers].crons 配置触发频率）

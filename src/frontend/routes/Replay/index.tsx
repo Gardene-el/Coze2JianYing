@@ -1,11 +1,12 @@
 import { SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Input, message, Spin } from "antd";
+import { Button, Card, Input, message, Spin, Typography } from "antd";
 import { createStaticStyles } from "antd-style";
 import { useState } from "react";
 
 import PageContainer from "@/components/PageContainer";
 import PageHeader from "@/components/PageHeader";
-import { guiReplayAPI } from "@/services/gui/replay";
+import { workerReplayAPI } from "@/services/worker/replay";
+import { useSettingsStore } from "@/store/settings/store";
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   json: css`
@@ -29,12 +30,18 @@ const ReplayPage = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<object | null>(null);
 
+  const relayWorkerUrl = useSettingsStore((s) => s.relayWorkerUrl);
+
   const handleQuery = async () => {
     if (!draftId.trim()) return msgApi.warning("请输入 Draft ID");
+    if (!relayWorkerUrl.trim()) {
+      msgApi.error("未配置 Relay Worker URL，请前往系统设置填写");
+      return;
+    }
     setLoading(true);
     setResult(null);
     try {
-      const data = await guiReplayAPI.get(draftId.trim());
+      const data = await workerReplayAPI.get(relayWorkerUrl, draftId.trim());
       setResult(data);
     } catch (e: unknown) {
       msgApi.error(`查询失败: ${(e as Error).message}`);
@@ -48,6 +55,24 @@ const ReplayPage = () => {
       {ctx}
       <PageHeader title="拉取模式" />
       <Card>
+        {relayWorkerUrl ? (
+          <Typography.Text
+            type="secondary"
+            style={{ display: "block", marginBottom: 12 }}
+          >
+            Worker:{" "}
+            <Typography.Text code copyable>
+              {relayWorkerUrl}
+            </Typography.Text>
+          </Typography.Text>
+        ) : (
+          <Typography.Text
+            type="danger"
+            style={{ display: "block", marginBottom: 12 }}
+          >
+            未配置 Relay Worker URL，请前往「系统设置 → 云服务」填写
+          </Typography.Text>
+        )}
         <Input.Search
           value={draftId}
           onChange={(e) => setDraftId(e.target.value)}

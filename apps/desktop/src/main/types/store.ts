@@ -20,6 +20,7 @@ export interface ElectronMainStore {
   themeMode: 'dark' | 'light' | 'system';
   tunnelSettings?: TunnelProviderSettings;
   updateChannel: UpdateChannel;
+  workerUrl: string;
 }
 
 export type StoreKey = keyof ElectronMainStore;

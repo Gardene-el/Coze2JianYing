@@ -44,7 +44,6 @@ _service_thread: Optional[threading.Thread] = None
 class SettingsPayload(BaseModel):
     draft_folder: str = ""
     api_port: str = "20211"
-    relay_worker_url: str = ""
     transfer_enabled: bool = False
 
 

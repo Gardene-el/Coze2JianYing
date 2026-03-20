@@ -62,4 +62,18 @@ export default class TunnelCtr extends ControllerModule {
     const current = this.app.storeManager.get('tunnelSettings') ?? {};
     this.app.storeManager.set('tunnelSettings', { ...current, [provider]: settings });
   }
+
+  /** IPC: tunnel.getWorkerUrl */
+  @IpcMethod()
+  async getWorkerUrl(): Promise<string> {
+    logger.debug('getWorkerUrl');
+    return this.app.storeManager.get('workerUrl') ?? '';
+  }
+
+  /** IPC: tunnel.setWorkerUrl */
+  @IpcMethod()
+  async setWorkerUrl(url: string): Promise<void> {
+    logger.debug(`setWorkerUrl(${url})`);
+    this.app.storeManager.set('workerUrl', url);
+  }
 }

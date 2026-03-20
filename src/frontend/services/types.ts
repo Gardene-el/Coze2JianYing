@@ -11,7 +11,6 @@ export interface SettingsPayload {
   api_port?: string;
   ngrok_auth_token?: string;
   ngrok_region?: string;
-  relay_worker_url?: string;
   transfer_enabled?: boolean;
   // ——— 主题定制（对齐 LobeChat）———
   primary_color?: string;
