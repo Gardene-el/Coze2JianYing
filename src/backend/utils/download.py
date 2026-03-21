@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse, unquote
 
-import httpx
 import requests
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
@@ -28,10 +27,9 @@ def _get_extension_from_content_type(content_type: Optional[str]) -> str:
 
 def _detect_content_type(url: str, timeout: float = 20.0) -> Optional[str]:
     try:
-        with httpx.Client(follow_redirects=True, timeout=timeout) as client:
-            response = client.head(url)
-            response.raise_for_status()
-            return response.headers.get("Content-Type")
+        response = requests.head(url, allow_redirects=True, timeout=timeout)
+        response.raise_for_status()
+        return response.headers.get("Content-Type")
     except Exception:
         return None
 
