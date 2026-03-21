@@ -6,6 +6,7 @@ import type {
 import type { TunnelProviderSettings } from '@c2jy/tunnel-core';
 
 export interface ElectronMainStore {
+  backendPort: number;
   dataSyncConfig: DataSyncConfig;
   encryptedTokens: {
     accessToken?: string;

@@ -11,9 +11,8 @@ import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('core:PythonBackendManager');
 
-const GUI_PORT = 20210;
+const DEFAULT_PORT = 20211;
 const GUI_HOST = '127.0.0.1';
-const HEALTH_ENDPOINT = `http://${GUI_HOST}:${GUI_PORT}/gui/health`;
 const HEALTH_POLL_MS = 500;
 const HEALTH_TIMEOUT_MS = 30_000;
 
@@ -33,12 +32,22 @@ const HEALTH_TIMEOUT_MS = 30_000;
 export class PythonBackendManager {
   private process: ChildProcess | null = null;
   private stopped = false;
+  private _port: number = DEFAULT_PORT;
+  /** True once the CPython embed has been verified / built for this app session. */
+  private embedReady = false;
 
   /** Monorepo root directory (Coze2JianYing/) */
   private readonly projectRoot: string;
 
-  /** Port the Python GUI backend listens on */
-  readonly port = GUI_PORT;
+  /** Port the Python backend is currently running on (or will use on next start). */
+  get port(): number {
+    return this._port;
+  }
+
+  /** True while the Python process is alive. */
+  get isRunning(): boolean {
+    return this.process !== null;
+  }
 
   constructor() {
     // apps/desktop -> apps -> monorepo root
@@ -129,16 +138,24 @@ export class PythonBackendManager {
 
   /**
    * Spawn the Python backend and wait until it reports healthy.
+   * @param port  Port to listen on; defaults to the current stored port.
    * Returns a Promise that resolves once the process is ready.
    */
-  async start(): Promise<void> {
+  async start(port?: number): Promise<void> {
     if (this.process) {
       logger.warn('Python backend already running');
       return;
     }
+    if (port !== undefined) this._port = port;
+    this.stopped = false;
 
-    // Ensure the CPython embed is present and up to date before spawning.
-    this.ensureEmbedReady();
+    // Ensure the CPython embed is present and up to date.
+    // Only runs once per app session — subsequent UI-driven restarts skip this
+    // to avoid re-running the stamp check (and a potential rebuild).
+    if (!this.embedReady) {
+      this.ensureEmbedReady();
+      this.embedReady = true;
+    }
 
     const { cmd, args, cwd } = this.resolveSpawnConfig();
     logger.info(`Starting Python backend: ${cmd} ${args.join(' ')} (cwd: ${cwd})`);
@@ -174,7 +191,7 @@ export class PythonBackendManager {
 
     // Wait for the health endpoint to become available
     await this.waitForReady();
-    logger.info(`Python backend ready on port ${GUI_PORT}`);
+    logger.info(`Python backend ready on port ${this._port}`);
   }
 
   /** Kill the Python process if running. */
@@ -206,18 +223,19 @@ export class PythonBackendManager {
     }
 
     return {
-      args: ['-m', 'src.main', '--gui-only', '--port', String(GUI_PORT), '--host', GUI_HOST],
+      args: ['-m', 'src.main', '--gui-only', '--port', String(this._port), '--host', GUI_HOST],
       cmd: pythonExe,
       cwd: this.embedDir,
     };
   }
 
   private async waitForReady(): Promise<void> {
+    const healthEndpoint = `http://${GUI_HOST}:${this._port}/gui/health`;
     const deadline = Date.now() + HEALTH_TIMEOUT_MS;
 
     while (Date.now() < deadline) {
       try {
-        const resp = await fetch(HEALTH_ENDPOINT, { signal: AbortSignal.timeout(2000) });
+        const resp = await fetch(healthEndpoint, { signal: AbortSignal.timeout(2000) });
         if (resp.ok) return;
       } catch {
         // not yet ready

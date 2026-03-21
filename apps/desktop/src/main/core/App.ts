@@ -184,7 +184,8 @@ export class App {
     await this.staticFileServerManager.initialize();
 
     // Start Python backend (must be ready before the window opens)
-    await this.pythonBackendManager.start();
+    const backendPort = this.storeManager.get('backendPort') ?? 20211;
+    await this.pythonBackendManager.start(backendPort);
 
     // Initialize global shortcuts: globalShortcut must be called after app.whenReady()
     this.shortcutManager.initialize();

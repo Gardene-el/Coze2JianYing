@@ -26,6 +26,7 @@ export const defaultProxySettings: NetworkProxySettings = {
  * Storage default values
  */
 export const STORE_DEFAULTS: ElectronMainStore = {
+  backendPort: 20211,
   dataSyncConfig: { storageMode: 'cloud' },
   encryptedTokens: {},
   locale: 'auto',
@@ -34,5 +35,5 @@ export const STORE_DEFAULTS: ElectronMainStore = {
   storagePath: appStorageDir,
   themeMode: 'system',
   updateChannel: UPDATE_CHANNEL,
-  workerUrl: 'https://coze2jianying-relay.garden-eel.workers.dev',
+  workerUrl: 'https://coze2jianying.pages.dev',
 };

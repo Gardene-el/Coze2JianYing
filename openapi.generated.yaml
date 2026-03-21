@@ -794,7 +794,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AddKeyframesResponse"
 servers:
-  - url: https://coze2jianying-relay.garden-eel.workers.dev
+  - url: https://coze2jianying.pages.dev
 components:
   schemas:
     TimeRange:

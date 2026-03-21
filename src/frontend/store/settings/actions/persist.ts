@@ -2,8 +2,9 @@ import type { NeutralColors, PrimaryColors } from "@lobehub/ui";
 import type { StateCreator } from "zustand";
 
 import { guiSettingsAPI } from "@/services/gui/settings";
+import { setApiBaseUrl } from "@/services/client";
 import { ngrokTunnelService } from "@/services/tunnels/ngrok";
-import { TUNNEL_CHANNELS } from "@c2jy/tunnel-core";
+import { BACKEND_CHANNELS, TUNNEL_CHANNELS } from "@c2jy/tunnel-core";
 import type { AnimationMode, SettingsState } from "../initialState";
 
 export interface SettingsPersistAction {
@@ -30,9 +31,17 @@ export const createSettingsPersistSlice: StateCreator<
           .invoke(TUNNEL_CHANNELS.getWorkerUrl)
           .catch(() => "")
       : "";
+    // backend port comes from electron-store via IPC (Electron only)
+    const backendPort: number = window.electronAPI
+      ? await window.electronAPI
+          .invoke<number>(BACKEND_CHANNELS.getPort)
+          .catch(() => 20211)
+      : 20211;
+    // Align axios baseURL with the stored port so all HTTP calls use the right port
+    setApiBaseUrl(backendPort);
     set({
       animationMode: (data.animation_mode ?? "agile") as AnimationMode,
-      apiPort: data.api_port ?? "20211",
+      apiPort: String(backendPort),
       customFontFamily: data.custom_font_family ?? "",
       customFontURL: data.custom_font_url ?? "",
       draftFolder: data.draft_folder ?? "",
@@ -65,7 +74,7 @@ export const createSettingsPersistSlice: StateCreator<
         transfer_enabled: current.transferEnabled,
       }),
     ];
-    // ngrok + worker URL + worker URL settings are persisted in electron-store via IPC
+    // ngrok + worker URL + backend port are persisted in electron-store via IPC
     if (window.electronAPI) {
       saves.push(
         ngrokTunnelService.saveSettings({
@@ -77,6 +86,12 @@ export const createSettingsPersistSlice: StateCreator<
         window.electronAPI.invoke(
           TUNNEL_CHANNELS.setWorkerUrl,
           current.relayWorkerUrl,
+        ),
+      );
+      saves.push(
+        window.electronAPI.invoke(
+          BACKEND_CHANNELS.setPort,
+          Number(current.apiPort),
         ),
       );
     }

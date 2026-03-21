@@ -4,7 +4,6 @@ GUI 管理 API 路由
 为 Electron 前端提供所有 /gui/* 端点：
   - 健康检查
   - 设置 CRUD
-  - Coze API 服务启停管理
   - 草稿生成
   - 脚本格式化 / 验证 / 执行
   - 草稿回放
@@ -17,12 +16,9 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import re
-import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import uvicorn
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -34,10 +30,6 @@ from src.backend.utils.sse_log import register_subscriber, unregister_subscriber
 
 gui_router = APIRouter(tags=["GUI 管理"])
 
-# ─── Coze API 服务管理状态 ────────────────────────────────────────────
-_service_server: Optional[uvicorn.Server] = None
-_service_thread: Optional[threading.Thread] = None
-
 
 # ─── Pydantic 请求/响应模型 ───────────────────────────────────────────
 
@@ -45,11 +37,6 @@ class SettingsPayload(BaseModel):
     draft_folder: str = ""
     api_port: str = "20211"
     transfer_enabled: bool = False
-
-
-class StartServicePayload(BaseModel):
-    port: Optional[int] = None
-
 
 
 class GenerateDraftPayload(BaseModel):
@@ -95,68 +82,6 @@ async def detect_path() -> Dict[str, str]:
         if os.path.exists(candidate):
             return {"path": candidate}
     return {"path": ""}
-
-
-# ─── Coze API 服务管理 ────────────────────────────────────────────────
-
-@gui_router.get("/service/status")
-async def service_status() -> Dict[str, Any]:
-    is_running = (
-        _service_server is not None and not _service_server.should_exit
-    )
-    return {
-        "running": is_running,
-        "port": get_settings_manager().get("api_port", "20211"),
-    }
-
-
-@gui_router.post("/service/start")
-async def start_service(payload: StartServicePayload) -> Dict[str, Any]:
-    global _service_server, _service_thread
-
-    if _service_server is not None and not _service_server.should_exit:
-        raise HTTPException(status_code=400, detail="服务已在运行")
-
-    try:
-        # 延迟导入避免循环依赖
-        from src.backend.api_main import app as coze_app  # noqa: PLC0415
-
-        port = payload.port or int(get_settings_manager().get("api_port", 20211))
-        config = uvicorn.Config(
-            coze_app, host="127.0.0.1", port=port, log_level="info"
-        )
-        _service_server = uvicorn.Server(config)
-
-        def _run() -> None:
-            global _service_server
-            try:
-                _service_server.run()
-            except Exception as exc:
-                logger.error("Coze API 服务运行异常: %s", exc, exc_info=True)
-            finally:
-                logger.info("Coze API 服务已停止")
-                _service_server = None  # 服务退出后清理引用
-
-        _service_thread = threading.Thread(target=_run, daemon=True, name="coze-api-server")
-        _service_thread.start()
-        logger.info("Coze API 服务已启动，端口: %d", port)
-        return {"ok": True, "port": port}
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.error("启动 Coze API 服务失败: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
-
-
-@gui_router.post("/service/stop")
-async def stop_service() -> Dict[str, bool]:
-    global _service_server
-    if _service_server is None:
-        raise HTTPException(status_code=400, detail="服务未在运行")
-    _service_server.should_exit = True
-    logger.info("Coze API 服务正在停止...")
-    return {"ok": True}
-
 
 
 # ─── 草稿生成 ──────────────────────────────────────────────────────────
@@ -214,8 +139,8 @@ project_root = Path(__file__).resolve().parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from src.backend.api.easy import *  # noqa: F401,F403
-from src.backend.api.basic import *  # noqa: F401,F403
+from src.backend.services.easy import *  # noqa: F401,F403
+from src.backend.services.basic import *  # noqa: F401,F403
 from src.backend.core.common_types import *  # noqa: F401,F403
 
 CustomNamespace = SimpleNamespace

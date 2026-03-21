@@ -20,7 +20,7 @@ from src.backend.utils.logger import setup_logger, logger
 
 def _start_gui_only(host: str, port: int) -> None:
     """启动 GUI 管理服务器（Electron 模式）。"""
-    from src.backend.gui_main import run as run_gui
+    from src.backend.main import run as run_gui
     logger.info("启动 GUI 管理服务: http://%s:%d", host, port)
     run_gui(host=host, port=port)
 

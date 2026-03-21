@@ -149,7 +149,7 @@ const SettingsPage = () => {
         {/* 云服务设置 */}
         <Card title="☁️ 云服务" style={{ marginBottom: 16 }}>
           <Form.Item name="relayWorkerUrl" label="Relay Worker URL">
-            <Input placeholder="https://coze2jianying-relay.garden-eel.workers.dev" />
+            <Input placeholder="https://coze2jianying.pages.dev" />
           </Form.Item>
         </Card>
 

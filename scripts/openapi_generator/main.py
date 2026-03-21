@@ -348,7 +348,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="生成 basic + easy 路由的 Coze 兼容 OpenAPI")
     parser.add_argument(
         "--server-url",
-        default=os.getenv("OPENAPI_SERVER_URL", "https://coze2jianying-relay.garden-eel.workers.dev"),
+        default=os.getenv("OPENAPI_SERVER_URL", "https://coze2jianying.pages.dev"),
         help="OpenAPI servers[0].url",
     )
     parser.add_argument(

@@ -4,19 +4,23 @@
 import { useEffect, useRef } from "react";
 
 import { useLogStore } from "@/store/log/store";
-
-const SSE_URL = `${import.meta.env.VITE_API_BASE ?? "http://localhost:20210"}/gui/logs/stream`;
+import { useSettingsStore } from "@/store/settings/store";
 
 export function useSSELog() {
   const appendLog = useLogStore((s) => s.appendLog);
   const setStreaming = useLogStore((s) => s.setStreaming);
+  const apiPort = useSettingsStore((s) => s.apiPort);
   const esRef = useRef<EventSource | null>(null);
+
+  const sseUrl = `${
+    import.meta.env.VITE_API_BASE ?? `http://localhost:${apiPort || 20211}`
+  }/gui/logs/stream`;
 
   useEffect(() => {
     let es: EventSource;
 
     const connect = () => {
-      es = new EventSource(SSE_URL);
+      es = new EventSource(sseUrl);
       esRef.current = es;
 
       es.onopen = () => setStreaming(true);
@@ -39,5 +43,5 @@ export function useSSELog() {
       esRef.current?.close();
       setStreaming(false);
     };
-  }, [appendLog, setStreaming]);
+  }, [appendLog, setStreaming, sseUrl]);
 }

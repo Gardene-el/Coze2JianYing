@@ -17,3 +17,18 @@ export const TUNNEL_CHANNELS = {
 
 export type TunnelChannel =
   (typeof TUNNEL_CHANNELS)[keyof typeof TUNNEL_CHANNELS];
+
+/**
+ * IPC channels for managing the Python backend process.
+ * Channel format: `backend.<methodName>` — matches BackendCtr.groupName = 'backend'.
+ */
+export const BACKEND_CHANNELS = {
+  getPort: "backend.getPort",
+  setPort: "backend.setPort",
+  getStatus: "backend.getStatus",
+  start: "backend.start",
+  stop: "backend.stop",
+} as const;
+
+export type BackendChannel =
+  (typeof BACKEND_CHANNELS)[keyof typeof BACKEND_CHANNELS];
