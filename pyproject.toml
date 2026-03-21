@@ -55,7 +55,7 @@ package-dir = {"" = "."}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*", "backend*", "coze_plugin*"]
+include = ["src*", "coze_plugin*"]
 exclude = ["tests*", "build*", "dist*", "*.egg-info", "scripts*", "data_structures*"]
 
 [tool.setuptools.package-data]
