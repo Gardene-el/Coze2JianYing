@@ -107,9 +107,11 @@ export const createSettingsPersistSlice: StateCreator<
           .catch(() => ({ assetsBasePath: "", outputPath: "" }))
       : { assetsBasePath: "", outputPath: "" };
 
-    const saves: Promise<unknown>[] = [
-      // Push all fields Python actually uses
-      guiSettingsAPI.put({
+    // Push effective paths into Python memory (best-effort, non-fatal).
+    // Python uses these values for in-progress tasks; the authoritative
+    // persistence is in the Electron store via IPC below.
+    guiSettingsAPI
+      .put({
         draft_folder: current.draftFolder,
         effective_assets_base_path: (
           effectivePaths as { assetsBasePath: string }
@@ -117,8 +119,12 @@ export const createSettingsPersistSlice: StateCreator<
         effective_output_path: (effectivePaths as { outputPath: string })
           .outputPath,
         transfer_enabled: current.transferEnabled,
-      }),
-    ];
+      })
+      .catch(() => {
+        /* non-fatal */
+      });
+
+    const saves: Promise<unknown>[] = [];
 
     if (window.electronAPI) {
       // Persist GUI settings into Electron store
