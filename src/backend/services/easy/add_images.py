@@ -9,6 +9,7 @@ import pyJianYingDraft as draft
 from pyJianYingDraft.metadata import GroupAnimationType, IntroType, OutroType, TransitionType
 
 from src.backend.core.settings_manager import get_settings_manager
+from src.backend.config import get_config
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import DRAFT_CACHE
 from src.backend.utils.download import download
@@ -29,8 +30,7 @@ def add_images(
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 	settings = get_settings_manager()
-	settings.reload()
-	draft_dir = os.path.join(settings.get_effective_output_path(), draft_id)
+	draft_dir = os.path.join(settings.get("effective_output_path") or get_config().drafts_dir, draft_id)
 	draft_image_dir = os.path.join(draft_dir, "assets", "images")
 	os.makedirs(name=draft_image_dir, exist_ok=True)
 

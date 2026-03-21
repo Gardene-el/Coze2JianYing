@@ -401,9 +401,9 @@ export class UpdaterManager {
       );
 
       autoUpdater.setFeedURL({
-        owner: 'lobehub',
+        owner: 'Gardene-el',
         provider: 'github',
-        repo: 'lobehub',
+        repo: 'Coze2JianYing',
       });
 
       autoUpdater.allowPrerelease = this.currentChannel !== 'stable';

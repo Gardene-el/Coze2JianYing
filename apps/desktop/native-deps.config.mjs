@@ -31,7 +31,10 @@ export const nativeModules = [
   // macOS-only native modules
   ...(isDarwin ? ['node-mac-permissions', 'electron-liquid-glass'] : []),
   // Native module with binary bindings — cannot be bundled by Rollup
+  // Explicitly list only the Windows x64 platform binary; other platforms
+  // are not needed for this Windows-only desktop app.
   '@ngrok/ngrok',
+  '@ngrok/ngrok-win32-x64-msvc',
   // `ajv` and `ajv-formats` are kept as external because electron-updater and
   // electron-store compile JSON-schema validators at runtime via `new Function()`,
   // whose generated code contains `require('ajv/dist/runtime/...')` calls that
@@ -77,11 +80,11 @@ function resolveDependencies(
       resolveDependencies(dep, visited, nodeModulesPath);
     }
 
-    // Also resolve optional dependencies (important for native modules like @napi-rs/canvas
-    // which have platform-specific binaries in optional deps)
-    for (const dep of Object.keys(optionalDependencies)) {
-      resolveDependencies(dep, visited, nodeModulesPath);
-    }
+    // NOTE: optionalDependencies are intentionally NOT resolved here.
+    // Packages like @ngrok/ngrok declare all platform-specific binaries as
+    // optionalDependencies, which would pull in darwin/linux/android/freebsd
+    // variants that are never installed on Windows. Platform-specific binaries
+    // must be declared explicitly in nativeModules above instead.
   } catch {
     // Ignore errors reading package.json
   }

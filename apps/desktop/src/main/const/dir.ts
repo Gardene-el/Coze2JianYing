@@ -20,7 +20,7 @@ export const rendererDir = join(appPath, 'dist', 'renderer');
 
 export const userDataDir = app.getPath('userData');
 
-export const appStorageDir = join(userDataDir, 'lobehub-storage');
+export const appStorageDir = join(userDataDir, 'coze2jianying-storage');
 
 // Legacy local database directory used in older desktop versions
 export const legacyLocalDbDir = join(appStorageDir, 'lobehub-local-db');

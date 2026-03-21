@@ -13,7 +13,6 @@ import { type ReactNode, memo, useEffect, useMemo } from "react";
 
 import AntdStaticMethods from "@/components/AntdStaticMethods";
 import { useIsDark } from "@/hooks/useIsDark";
-import { useSettingsStore } from "@/store/settings/store";
 import { GlobalStyle } from "@/styles";
 
 /** isDesktop — 与 antdOverride.ts 保持一致，对齐 @lobechat/const isDesktop */
@@ -94,15 +93,6 @@ const AppTheme = memo<AppThemeProps>(
     const isDark = useIsDark();
     const currentAppearance = isDark ? "dark" : "light";
 
-    const [primaryColor, neutralColor, animationMode, fontFamily, fontURL] =
-      useSettingsStore((s) => [
-        s.primaryColor,
-        s.neutralColor,
-        s.animationMode,
-        s.customFontFamily,
-        s.customFontURL,
-      ]);
-
     // Electron 桌面：将消息通知顶部偏移 titlebar（仅桌面端）
     const messageTop = isDesktop ? TITLE_BAR_HEIGHT + 8 : undefined;
     const appConfig = useMemo(
@@ -115,8 +105,8 @@ const AppTheme = memo<AppThemeProps>(
       antdMessage.config({ top: messageTop });
     }, [messageTop]);
 
-    const resolvedFontFamily = customFontFamily || fontFamily || undefined;
-    const resolvedFontURL = customFontURL || fontURL || undefined;
+    const resolvedFontFamily = customFontFamily || undefined;
+    const resolvedFontURL = customFontURL || undefined;
 
     // D-15: 直接三元计算，对齐 lobehub 模式（去除 useMemo）
     const fontFamilyToken = resolvedFontFamily
@@ -135,15 +125,15 @@ const AppTheme = memo<AppThemeProps>(
           defaultAppearance={currentAppearance}
           defaultThemeMode={currentAppearance}
           customTheme={{
-            neutralColor: neutralColor ?? defaultNeutralColor,
-            primaryColor: primaryColor ?? defaultPrimaryColor,
+            neutralColor: defaultNeutralColor,
+            primaryColor: defaultPrimaryColor,
           }}
           theme={{
             cssVar: { key: "lobe-vars" },
             token: {
               fontFamily: fontFamilyToken,
-              motion: animationMode !== "disabled",
-              motionUnit: animationMode === "agile" ? 0.05 : 0.1,
+              motion: true,
+              motionUnit: 0.05,
             },
           }}
         >

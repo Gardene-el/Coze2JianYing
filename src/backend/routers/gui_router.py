@@ -35,8 +35,9 @@ gui_router = APIRouter(tags=["GUI 管理"])
 
 class SettingsPayload(BaseModel):
     draft_folder: str = ""
-    api_port: str = "20211"
     transfer_enabled: bool = False
+    effective_output_path: Optional[str] = None
+    effective_assets_base_path: Optional[str] = None
 
 
 class GenerateDraftPayload(BaseModel):
@@ -68,16 +69,18 @@ async def get_settings() -> Dict[str, Any]:
 @gui_router.put("/settings")
 async def update_settings(payload: SettingsPayload) -> Dict[str, bool]:
     sm = get_settings_manager()
-    for key, value in payload.model_dump().items():
-        sm.set(key, value)
+    sm.update(payload.model_dump())
     return {"ok": True}
 
 
 @gui_router.post("/settings/detect-path")
 async def detect_path() -> Dict[str, str]:
-    sm = get_settings_manager()
+    _DEFAULT_DRAFT_PATHS = [
+        r"C:\Users\{username}\AppData\Local\JianyingPro\User Data\Projects\com.lveditor.draft",
+        r"C:\Users\{username}\AppData\Roaming\JianyingPro\User Data\Projects\com.lveditor.draft",
+    ]
     username = os.environ.get("USERNAME") or os.environ.get("USER") or "User"
-    for template in sm.DEFAULT_DRAFT_PATHS:
+    for template in _DEFAULT_DRAFT_PATHS:
         candidate = template.format(username=username)
         if os.path.exists(candidate):
             return {"path": candidate}
@@ -229,7 +232,8 @@ async def execute_script(payload: ExecutePayload, request: Request) -> Dict[str,
 @gui_router.get("/replay/{draft_id}")
 async def replay_draft(draft_id: str) -> Dict[str, Any]:
     sm = get_settings_manager()
-    output_path = sm.get_effective_output_path()
+    from src.backend.config import get_config
+    output_path = sm.get("effective_output_path") or get_config().drafts_dir
     draft_dir = Path(output_path) / draft_id
 
     if not draft_dir.exists():

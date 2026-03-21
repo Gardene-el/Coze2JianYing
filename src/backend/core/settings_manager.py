@@ -1,26 +1,21 @@
 """
 全局设置管理器
 
-归属：core/ — 应用级用户配置持久化，属于核心基础设施，
-负责读写用户偏好设置（草稿路径、端口、ngrok Token 等）。
+归属：core/ — 纯内存状态，持久化完全由 Electron store 负责。
+Python 进程只需在内存中维护由前端通过 PUT /gui/settings 推送过来的值：
+  draft_folder, transfer_enabled, effective_output_path, effective_assets_base_path
+
+路径决策逻辑已迁移到 Electron 主进程的 PathResolverService（TypeScript）。
+Python 服务直接读取预计算好的 effective_* 路径，不再执行任何 fs 判断。
 """
-import json
-import os
 from typing import Any, Dict, Optional
-from src.backend.config import get_config
 from src.backend.utils.logger import logger
 
 
 class SettingsManager:
-    """全局设置管理器"""
+    """全局设置管理器（纯内存 KV 容器，无文件 I/O，无路径决策逻辑）"""
 
     _instance = None
-
-    # 默认剪映草稿路径
-    DEFAULT_DRAFT_PATHS = [
-        r"C:\Users\{username}\AppData\Local\JianyingPro\User Data\Projects\com.lveditor.draft",
-        r"C:\Users\{username}\AppData\Roaming\JianyingPro\User Data\Projects\com.lveditor.draft",
-    ]
 
     def __new__(cls):
         if cls._instance is None:
@@ -33,142 +28,35 @@ class SettingsManager:
             return
 
         self.logger = logger
-        self.config = get_config()
-        self.settings_file = os.path.join(self.config.data_root, "settings.json")
-        self._settings = self._load_settings()
-        self._initialized = True
-
-    def _load_settings(self) -> Dict[str, Any]:
-        """加载设置，并用默认值补全缺失的键"""
-        defaults = self._get_default_settings()
-        if not os.path.exists(self.settings_file):
-            return defaults
-
-        try:
-            with open(self.settings_file, 'r', encoding='utf-8') as f:
-                loaded = json.load(f)
-            return {**defaults, **loaded}
-        except Exception:
-            return defaults
-
-    def _get_default_settings(self) -> Dict[str, Any]:
-        """获取默认设置"""
-        return {
+        self._settings: Dict[str, Any] = {
             "draft_folder": "",
-            "api_port": "20211",
-            "transfer_enabled": False
+            "transfer_enabled": False,
+            # Pre-computed by Electron main process PathResolverService.
+            # Empty string means Python should fall back to config.drafts_dir / config.assets_dir.
+            "effective_output_path": "",
+            "effective_assets_base_path": "",
         }
-
-    def save_settings(self):
-        """保存设置"""
-        try:
-            os.makedirs(os.path.dirname(self.settings_file), exist_ok=True)
-            with open(self.settings_file, 'w', encoding='utf-8') as f:
-                json.dump(self._settings, f, indent=4, ensure_ascii=False)
-        except Exception as e:
-            self.logger.error(f"Error saving settings: {e}")
-
-    def reload(self):
-        """重新加载设置"""
-        self._settings = self._load_settings()
-        self.logger.info("设置已重新加载")
+        self._initialized = True
 
     def get(self, key: str, default: Any = None) -> Any:
         """获取设置值"""
         return self._settings.get(key, default)
 
-    def set(self, key: str, value: Any):
-        """设置值"""
-        self._settings[key] = value
-        self.save_settings()
-
     def get_all(self) -> Dict[str, Any]:
         """获取所有设置"""
         return self._settings.copy()
 
-    def get_effective_output_path(self) -> str:
-        """
-        获取实际的输出路径
-
-        根据当前设置返回实际应该使用的输出路径：
-        - 如果启用传输且设置了草稿文件夹，返回草稿文件夹路径
-        - 否则返回本地数据目录（config.drafts_dir）
-
-        Returns:
-            实际的输出路径
-        """
-        transfer_enabled = self.get("transfer_enabled", False)
-        draft_folder = self.get("draft_folder", "")
-
-        if transfer_enabled and draft_folder:
-            # 验证路径有效性
-            if os.path.exists(draft_folder) and os.path.isdir(draft_folder):
-                self.logger.info(f"使用指定的草稿文件夹: {draft_folder}")
-                return draft_folder
-            else:
-                self.logger.warning(f"指定的草稿文件夹无效: {draft_folder}，使用本地数据目录")
-
-        # 使用本地数据目录
-        local_path = self.config.drafts_dir
-        self.logger.info(f"使用本地数据目录: {local_path}")
-        return local_path
-
-    def get_effective_assets_path(self, draft_id: Optional[str] = None) -> str:
-        """
-        获取实际的素材存储路径
-
-        根据当前设置返回实际应该使用的素材存储路径：
-        - 如果启用传输且设置了草稿文件夹，返回草稿文件夹下的CozeJianYingAssistantAssets目录
-        - 否则返回本地数据目录下的assets/{draft_id}目录
-
-        Args:
-            draft_id: 草稿ID，用于本地存储时创建子目录
-
-        Returns:
-            实际的素材存储路径
-        """
-        transfer_enabled = self.get("transfer_enabled", False)
-        draft_folder = self.get("draft_folder", "")
-
-        if transfer_enabled and draft_folder:
-            # 验证路径有效性
-            if os.path.exists(draft_folder) and os.path.isdir(draft_folder):
-                # 使用草稿文件夹下的CozeJianYingAssistantAssets目录
-                assets_path = os.path.join(
-                    os.path.dirname(draft_folder),
-                    "CozeJianYingAssistantAssets"
-                )
-                os.makedirs(assets_path, exist_ok=True)
-                self.logger.info(f"使用草稿文件夹的素材目录: {assets_path}")
-                return assets_path
-
-        # 使用本地数据目录
-        if draft_id:
-            assets_path = os.path.join(self.config.assets_dir, draft_id)
-        else:
-            assets_path = self.config.assets_dir
-
-        os.makedirs(assets_path, exist_ok=True)
-        self.logger.info(f"使用本地素材目录: {assets_path}")
-        return assets_path
-
-    def detect_default_draft_folder(self) -> Optional[str]:
-        """
-        自动检测剪映草稿文件夹
-
-        Returns:
-            检测到的文件夹路径，如果未检测到则返回None
-        """
-        username = os.getenv('USERNAME') or os.getenv('USER')
-
-        for path_template in self.DEFAULT_DRAFT_PATHS:
-            path = path_template.format(username=username)
-            if os.path.exists(path) and os.path.isdir(path):
-                self.logger.info(f"检测到剪映草稿文件夹: {path}")
-                return path
-
-        self.logger.warning("未能检测到剪映草稿文件夹")
-        return None
+    def update(self, data: Dict[str, Any]) -> None:
+        """批量更新内存设置（仅保留已知键，忽略其他字段）"""
+        allowed = {
+            "draft_folder",
+            "effective_assets_base_path",
+            "effective_output_path",
+            "transfer_enabled",
+        }
+        for key, value in data.items():
+            if key in allowed:
+                self._settings[key] = value
 
 
 def get_settings_manager() -> SettingsManager:

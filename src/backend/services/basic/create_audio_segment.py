@@ -7,6 +7,7 @@ import pyJianYingDraft as draft
 
 from src.backend.core.common_types import TimeRange, to_draft_timerange
 from src.backend.core.settings_manager import get_settings_manager
+from src.backend.config import get_config
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import update_segment_cache
 from src.backend.utils.download import download
@@ -28,8 +29,7 @@ def create_audio_segment(
 
 	try:
 		settings = get_settings_manager()
-		settings.reload()
-		output_dir = settings.get_effective_output_path()
+		output_dir = settings.get("effective_output_path") or get_config().drafts_dir
 		draft_audio_dir = create_audio_directory(output_dir, segment_id)
 		audio_path = download_audio_file(material_url, draft_audio_dir)
 

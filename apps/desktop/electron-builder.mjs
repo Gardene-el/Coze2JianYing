@@ -60,18 +60,18 @@ const getPublishConfig = () => {
   console.info(`📦 ${channelPath} channel: No UPDATE_SERVER_URL, falling back to GitHub provider`);
   return [
     {
-      owner: 'lobehub',
+      owner: 'Gardene-el',
       provider: 'github',
-      repo: 'lobehub',
+      repo: 'Coze2JianYing',
     },
   ];
 };
 
 // 根据版本类型确定协议 scheme
 const getProtocolScheme = () => {
-  if (isCanary) return 'lobehub-canary';
-  if (isNightly) return 'lobehub-nightly';
-  return 'lobehub';
+  if (isCanary) return 'coze2jianying-canary';
+  if (isNightly) return 'coze2jianying-nightly';
+  return 'coze2jianying';
 };
 
 const protocolScheme = getProtocolScheme();
@@ -104,7 +104,7 @@ const config = {
     const unpackedNodeModules = path.join(resourcesPath, 'app.asar.unpacked', 'node_modules');
     await copyNativeModules(unpackedNodeModules);
   },
-  appId: 'com.lobehub.lobehub-desktop',
+  appId: 'com.coze2jianying.desktop',
 
   // Native modules must be unpacked from asar to work correctly
   asarUnpack: getAsarUnpackPatterns(),
@@ -145,7 +145,7 @@ const config = {
   },
   protocols: [
     {
-      name: 'LobeHub Protocol',
+      name: 'Coze2JianYing Protocol',
       schemes: [protocolScheme],
     },
   ],
@@ -166,7 +166,7 @@ const config = {
   ],
 
   win: {
-    executableName: 'LobeHub',
+    executableName: 'Coze2JianYing',
   },
 };
 

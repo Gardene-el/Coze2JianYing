@@ -1,19 +1,24 @@
 import type {
-  DataSyncConfig,
   NetworkProxySettings,
   UpdateChannel,
 } from '@lobechat/electron-client-ipc';
 import type { TunnelProviderSettings } from '@c2jy/tunnel-core';
 
+export interface GuiSettings {
+  draftFolder: string;
+  transferEnabled: boolean;
+}
+
+export interface EffectivePaths {
+  /** Resolved draft output path.  Empty string = use Python's config.drafts_dir fallback. */
+  outputPath: string;
+  /** Resolved assets base path.  Empty string = use Python's config.assets_dir fallback. */
+  assetsBasePath: string;
+}
+
 export interface ElectronMainStore {
   backendPort: number;
-  dataSyncConfig: DataSyncConfig;
-  encryptedTokens: {
-    accessToken?: string;
-    expiresAt?: number;
-    lastRefreshAt?: number;
-    refreshToken?: string;
-  };
+  guiSettings: GuiSettings;
   locale: string;
   networkProxy: NetworkProxySettings;
   shortcuts: Record<string, string>;

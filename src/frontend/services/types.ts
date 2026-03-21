@@ -6,18 +6,12 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
+/** 仅包含 Python backend 实际使用的字段（草稿路径 + 传输开关 + 预计算的有效路径） */
 export interface SettingsPayload {
   draft_folder?: string;
-  api_port?: string;
-  ngrok_auth_token?: string;
-  ngrok_region?: string;
+  effective_assets_base_path?: string;
+  effective_output_path?: string;
   transfer_enabled?: boolean;
-  // ——— 主题定制（对齐 LobeChat）———
-  primary_color?: string;
-  neutral_color?: string;
-  animation_mode?: string;
-  custom_font_family?: string;
-  custom_font_url?: string;
 }
 
 export interface ServiceStatusResponse {

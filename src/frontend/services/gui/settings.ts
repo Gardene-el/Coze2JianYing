@@ -2,9 +2,7 @@ import apiClient from "../client";
 import type { DetectPathResponse, SettingsPayload } from "../types";
 
 export const guiSettingsAPI = {
-  get: () =>
-    apiClient.get<SettingsPayload>("/gui/settings").then((r) => r.data),
-
+  /** 向 Python backend 推送内存对齐数据（仅 draft_folder + transfer_enabled）。 */
   put: (payload: SettingsPayload) =>
     apiClient.put("/gui/settings", payload).then((r) => r.data),
 

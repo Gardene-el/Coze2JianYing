@@ -22,6 +22,20 @@ export type TunnelChannel =
  * IPC channels for managing the Python backend process.
  * Channel format: `backend.<methodName>` — matches BackendCtr.groupName = 'backend'.
  */
+/**
+ * IPC channels for managing GUI persistent settings (stored in electron-store).
+ * Channel format: `guiSettings.<methodName>`
+ */
+export const GUI_SETTINGS_CHANNELS = {
+  detectDefaultDraftFolder: "guiSettings.detectDefaultDraftFolder",
+  get: "guiSettings.getGuiSettings",
+  resolveEffectivePaths: "guiSettings.resolveEffectivePaths",
+  set: "guiSettings.setGuiSettings",
+} as const;
+
+export type GuiSettingsChannel =
+  (typeof GUI_SETTINGS_CHANNELS)[keyof typeof GUI_SETTINGS_CHANNELS];
+
 export const BACKEND_CHANNELS = {
   getPort: "backend.getPort",
   setPort: "backend.setPort",

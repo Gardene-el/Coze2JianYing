@@ -71,7 +71,7 @@ export class App {
     logger.info(` lng: ${app.getLocale()}`);
     logger.info(` bin: ${binDir}`);
     logger.info('----------------------------------------------');
-    logger.info('Starting LobeHub...');
+    logger.info('Starting Coze2JianYing...');
 
     // Append bundled binaries directory to PATH for fallback tool resolution
     process.env.PATH = `${process.env.PATH};${binDir}`;

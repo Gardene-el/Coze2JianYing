@@ -31,8 +31,9 @@ class DraftGenerator:
         
         # 如果未指定输出目录，使用全局设置管理器的配置
         if output_base_dir is None:
+            from src.backend.config import get_config
             settings = get_settings_manager()
-            self.output_base_dir = settings.get_effective_output_path()
+            self.output_base_dir = settings.get("effective_output_path") or get_config().drafts_dir
             self.logger.info(f"使用全局路径管理器的输出目录: {self.output_base_dir}")
         else:
             self.output_base_dir = output_base_dir

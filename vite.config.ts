@@ -9,7 +9,7 @@ const isDev = mode !== "production";
 
 export default defineConfig(({ mode: envMode }) => {
   const env = loadEnv(envMode, process.cwd(), "");
-  const apiBase = env.VITE_API_BASE || "http://localhost:20210";
+  const apiBase = env.VITE_API_BASE || "http://localhost:20211";
 
   return {
     // 开发时用 '/'，Electron 生产打包需要相对路径
