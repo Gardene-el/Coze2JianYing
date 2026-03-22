@@ -155,6 +155,13 @@ JianyingProjects/
 JianyingProjects_test/
 resources/
 
+# Keep Electron assets tracked under assets/electron/
+!assets/electron/
+!assets/electron/build/
+!assets/electron/build/**
+!assets/electron/resources/
+!assets/electron/resources/**
+
 # Build artifacts
 *.spec
 
