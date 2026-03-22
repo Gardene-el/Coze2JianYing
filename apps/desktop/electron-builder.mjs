@@ -112,7 +112,7 @@ const config = {
   detectUpdateChannel: true,
 
   directories: {
-    buildResources: 'build',
+    buildResources: '../../assets/electron/build',
     output: 'release',
   },
 
@@ -122,9 +122,9 @@ const config = {
 
   files: [
     'dist',
-    'resources',
+    // Map assets/electron/resources/ into the asar at resources/ (icon, tray, html pages)
+    { from: '../../assets/electron/resources', to: 'resources' },
     'dist/renderer/**/*',
-    '!resources/locales',
     // Exclude all node_modules first
     '!node_modules',
     // Then explicitly include native modules using object form (handles pnpm symlinks)
@@ -136,12 +136,12 @@ const config = {
     allowToChangeInstallationDirectory: true,
     artifactName: '${productName}-${version}-setup.${ext}',
     createDesktopShortcut: 'always',
-    installerHeader: './build/nsis-header.bmp',
-    installerSidebar: './build/nsis-sidebar.bmp',
+    installerHeader: '../../assets/electron/build/nsis-header.bmp',
+    installerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
     oneClick: false,
     shortcutName: '${productName}',
     uninstallDisplayName: '${productName}',
-    uninstallerSidebar: './build/nsis-sidebar.bmp',
+    uninstallerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
   },
   protocols: [
     {

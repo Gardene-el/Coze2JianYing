@@ -6,13 +6,21 @@ export const mainDir = join(__dirname);
 
 export const preloadDir = join(mainDir, '../preload');
 
-export const resourcesDir = join(mainDir, '../../resources');
+// In packaged mode: reads from inside the asar (files config maps assets/electron/resources → resources/)
+// In dev mode: reads directly from the workspace assets directory
+export const resourcesDir = app.isPackaged
+  ? join(mainDir, '../../resources')
+  : join(mainDir, '../../../../assets/electron/resources');
 
-export const buildDir = join(mainDir, '../../build');
+// In packaged mode: build/ assets are only used during build, not at runtime
+// In dev mode: reads from workspace assets directory (e.g. icon-dev.ico for window icon)
+export const buildDir = app.isPackaged
+  ? join(mainDir, '../../build')
+  : join(mainDir, '../../../../assets/electron/build');
 
 export const binDir = app.isPackaged
   ? join(process.resourcesPath, 'bin')
-  : join(resourcesDir, 'bin');
+  : join(mainDir, '../../resources/bin');
 
 const appPath = app.getAppPath();
 
