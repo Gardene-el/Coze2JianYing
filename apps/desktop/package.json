@@ -31,6 +31,7 @@
     "build:backend:quick": "node -e \"const f='resources/python/python.exe';if(require('fs').existsSync(f)){console.log('[skip] Python already built, skipping rebuild')}else{const {execSync}=require('child_process');execSync('python ../../scripts/build_workflow/build_python.py',{stdio:'inherit'})}\"",
     "package:win": "npm run build:backend && npm run build:main && electron-builder --win --config electron-builder.mjs  --publish never",
     "package:quick:win": "npm run build:backend:quick && npm run build:main && electron-builder --win --config electron-builder.mjs --publish never",
+    "dev:quick": "npm run build:backend:quick && electron-vite dev",
     "start": "electron-vite preview",
     "stylelint": "stylelint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "test": "vitest --run",
