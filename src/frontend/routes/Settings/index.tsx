@@ -24,7 +24,6 @@ const SettingsPage = () => {
     apiPort,
     ngrokAuthToken,
     ngrokRegion,
-    relayWorkerUrl,
     transferEnabled,
     loadSettings,
     saveSettings,
@@ -44,7 +43,6 @@ const SettingsPage = () => {
       apiPort,
       ngrokAuthToken,
       ngrokRegion,
-      relayWorkerUrl,
       transferEnabled,
     });
   }, [
@@ -52,7 +50,6 @@ const SettingsPage = () => {
     apiPort,
     ngrokAuthToken,
     ngrokRegion,
-    relayWorkerUrl,
     transferEnabled,
     form,
   ]);
@@ -70,7 +67,6 @@ const SettingsPage = () => {
           apiPort: allValues.apiPort as string,
           ngrokAuthToken: allValues.ngrokAuthToken as string,
           ngrokRegion: allValues.ngrokRegion as string,
-          relayWorkerUrl: allValues.relayWorkerUrl as string,
           transferEnabled: allValues.transferEnabled as boolean,
         });
         msgApi.success("已自动保存", 1.5);
@@ -145,13 +141,6 @@ const SettingsPage = () => {
                 label: v,
               }))}
             />
-          </Form.Item>
-        </Card>
-
-        {/* 云服务设置 */}
-        <Card title="☁️ 云服务" style={{ marginBottom: 16 }}>
-          <Form.Item name="relayWorkerUrl" label="Relay Worker URL">
-            <Input placeholder="https://coze2jianying.pages.dev" />
           </Form.Item>
         </Card>
 
