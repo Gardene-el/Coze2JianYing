@@ -2,7 +2,6 @@ import { FolderOpenOutlined, ReloadOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
-  Divider,
   Form,
   Input,
   message,
@@ -131,7 +130,10 @@ const SettingsPage = () => {
           <Form.Item name="apiPort" label="Coze API 端口">
             <Input style={{ width: 120 }} placeholder="20211" />
           </Form.Item>
-          <Divider />
+        </Card>
+
+        {/* 隧道设置 */}
+        <Card title="🚇 隧道设置" style={{ marginBottom: 16 }}>
           <Form.Item name="ngrokAuthToken" label="ngrok Authtoken">
             <Input.Password placeholder="从 ngrok 控制台获取" />
           </Form.Item>
