@@ -43,13 +43,7 @@ const SettingsPage = () => {
       ngrokRegion,
       transferEnabled,
     });
-  }, [
-    draftFolder,
-    ngrokAuthToken,
-    ngrokRegion,
-    transferEnabled,
-    form,
-  ]);
+  }, [draftFolder, ngrokAuthToken, ngrokRegion, transferEnabled, form]);
 
   /** 表单任意字段变化时 debounce 500ms 自动保存到 Python 后端 */
   const handleValuesChange = (
