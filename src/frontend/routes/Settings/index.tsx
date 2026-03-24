@@ -21,7 +21,6 @@ const SettingsPage = () => {
 
   const {
     draftFolder,
-    apiPort,
     ngrokAuthToken,
     ngrokRegion,
     transferEnabled,
@@ -40,14 +39,12 @@ const SettingsPage = () => {
   useEffect(() => {
     form.setFieldsValue({
       draftFolder,
-      apiPort,
       ngrokAuthToken,
       ngrokRegion,
       transferEnabled,
     });
   }, [
     draftFolder,
-    apiPort,
     ngrokAuthToken,
     ngrokRegion,
     transferEnabled,
@@ -64,7 +61,6 @@ const SettingsPage = () => {
       try {
         await saveSettings({
           draftFolder: allValues.draftFolder as string,
-          apiPort: allValues.apiPort as string,
           ngrokAuthToken: allValues.ngrokAuthToken as string,
           ngrokRegion: allValues.ngrokRegion as string,
           transferEnabled: allValues.transferEnabled as boolean,
@@ -118,13 +114,6 @@ const SettingsPage = () => {
             valuePropName="checked"
           >
             <Switch />
-          </Form.Item>
-        </Card>
-
-        {/* API 设置 */}
-        <Card title="🔗 API 设置" style={{ marginBottom: 16 }}>
-          <Form.Item name="apiPort" label="Coze API 端口">
-            <Input style={{ width: 120 }} placeholder="20211" />
           </Form.Item>
         </Card>
 

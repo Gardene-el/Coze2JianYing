@@ -4,6 +4,7 @@ import {
   CopyOutlined,
   GlobalOutlined,
   PlayCircleOutlined,
+  ReloadOutlined,
   StopOutlined,
 } from "@ant-design/icons";
 import {
@@ -21,13 +22,16 @@ import {
   Typography,
 } from "antd";
 import { createStaticStyles } from "antd-style";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import PageContainer from "@/components/PageContainer";
 import PageHeader from "@/components/PageHeader";
 import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { useServiceStore } from "@/store/service/store";
+import { initialSettingsState } from "@/store/settings/initialState";
 import { useSettingsStore } from "@/store/settings/store";
+
+const DEFAULT_API_PORT = initialSettingsState.apiPort;
 
 const { Text } = Typography;
 
@@ -52,6 +56,36 @@ const CloudServicePage = () => {
   const { apiPort, ngrokAuthToken, ngrokRegion, loadSettings } =
     useSettingsStore();
   const { saveSettings } = useSettingsStore();
+
+  const [portInput, setPortInput] = useState(apiPort);
+  const portSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setPortInput(apiPort);
+  }, [apiPort]);
+
+  const handlePortChange = (value: string) => {
+    setPortInput(value);
+    if (portSaveTimerRef.current) clearTimeout(portSaveTimerRef.current);
+    portSaveTimerRef.current = setTimeout(async () => {
+      try {
+        await saveSettings({ apiPort: value });
+        msgApi.success("已保存", 1);
+      } catch (e: unknown) {
+        msgApi.error(`保存失败: ${(e as Error).message}`);
+      }
+    }, 500);
+  };
+
+  const handlePortReset = async () => {
+    setPortInput(DEFAULT_API_PORT);
+    try {
+      await saveSettings({ apiPort: DEFAULT_API_PORT });
+      msgApi.success("已重置为默认端口", 1.5);
+    } catch (e: unknown) {
+      msgApi.error(`重置失败: ${(e as Error).message}`);
+    }
+  };
 
   // 轮询服务状态
   useServiceStatus();
@@ -94,7 +128,7 @@ const CloudServicePage = () => {
       const url = await startNgrok(
         values.ngrokToken,
         values.ngrokRegion,
-        Number(apiPort),
+        Number(portInput),
       );
       msgApi.success(`ngrok 已启动: ${url}`);
     } catch (e: unknown) {
@@ -129,7 +163,17 @@ const CloudServicePage = () => {
         style={{ marginBottom: 16 }}
       >
         <Space wrap>
-          <Text type="secondary">端口：{apiPort}</Text>
+          <Space.Compact size="small">
+            <Input
+              value={portInput}
+              onChange={(e) => handlePortChange(e.target.value)}
+              style={{ width: 80 }}
+              placeholder={DEFAULT_API_PORT}
+            />
+            <Tooltip title="重置端口">
+              <Button icon={<ReloadOutlined />} onClick={handlePortReset} />
+            </Tooltip>
+          </Space.Compact>
           <Button
             type="primary"
             icon={<PlayCircleOutlined />}
