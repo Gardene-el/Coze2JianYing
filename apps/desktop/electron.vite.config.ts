@@ -115,5 +115,14 @@ export default defineConfig({
     resolve: {
       dedupe: ['react', 'react-dom'],
     },
+    server: {
+      watch: {
+        // Exclude the root landing page from Vite's HMR watcher.
+        // It is a static website (not the SPA entry) but lives under renderer.root,
+        // so without this exclusion any git-staging or file-save on index.html
+        // triggers a full-reload that briefly shows the landing page instead of the app.
+        ignored: [resolve(ROOT_DIR, 'index.html')],
+      },
+    },
   },
 });

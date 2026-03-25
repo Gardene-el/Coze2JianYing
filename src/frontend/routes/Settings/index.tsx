@@ -92,16 +92,18 @@ const SettingsPage = () => {
       >
         {/* 路径设置 */}
         <Card title="📁 路径设置" style={{ marginBottom: 16 }}>
-          <Form.Item name="draftFolder" label="剪映草稿文件夹">
-            <Space.Compact style={{ width: "100%" }}>
-              <Form.Item name="draftFolder" noStyle>
-                <Input placeholder="留空则使用应用内部目录" />
-              </Form.Item>
-              <Button icon={<FolderOpenOutlined />} onClick={handleDetect}>
-                自动检测
-              </Button>
-            </Space.Compact>
-          </Form.Item>
+          <div data-tour="draft-path">
+            <Form.Item name="draftFolder" label="剪映草稿文件夹">
+              <Space.Compact style={{ width: "100%" }}>
+                <Form.Item name="draftFolder" noStyle>
+                  <Input placeholder="留空则使用应用内部目录" />
+                </Form.Item>
+                <Button icon={<FolderOpenOutlined />} onClick={handleDetect}>
+                  自动检测
+                </Button>
+              </Space.Compact>
+            </Form.Item>
+          </div>
           <Form.Item
             name="transferEnabled"
             label="启用传输到草稿目录"

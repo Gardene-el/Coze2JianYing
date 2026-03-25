@@ -32,6 +32,8 @@
     "package:win": "npm run build:backend && npm run build:main && electron-builder --win --config electron-builder.mjs  --publish never",
     "package:quick:win": "npm run build:backend:quick && npm run build:main && electron-builder --win --config electron-builder.mjs --publish never",
     "dev:quick": "npm run build:backend:quick && electron-vite dev",
+    "dev:init": "cross-env VITE_FORCE_ONBOARDING=1 electron-vite dev",
+    "dev:quick:init": "npm run build:backend:quick && cross-env VITE_FORCE_ONBOARDING=1 electron-vite dev",
     "start": "electron-vite preview",
     "stylelint": "stylelint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "test": "vitest --run",

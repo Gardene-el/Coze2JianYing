@@ -2,6 +2,7 @@ import { lazy, type ReactNode, Suspense } from "react";
 import { Navigate, type RouteObject } from "react-router-dom";
 import { Spin } from "antd";
 
+import AppShell from "@/routes/AppShell";
 import MainLayout from "@/routes/_layout";
 
 const CloudServicePage = lazy(() => import("@/routes/CloudService"));
@@ -23,48 +24,53 @@ const LazyWrapper = ({ children }: { children: ReactNode }) => (
 export const appRoutes: RouteObject[] = [
   {
     path: "/",
-    element: <MainLayout />,
+    element: <AppShell />,
     children: [
-      { index: true, element: <Navigate replace to="/cloud-service" /> },
       {
-        path: "cloud-service",
-        element: (
-          <LazyWrapper>
-            <CloudServicePage />
-          </LazyWrapper>
-        ),
-      },
-      {
-        path: "draft-generator",
-        element: (
-          <LazyWrapper>
-            <DraftGeneratorPage />
-          </LazyWrapper>
-        ),
-      },
-      {
-        path: "script-executor",
-        element: (
-          <LazyWrapper>
-            <ScriptExecutorPage />
-          </LazyWrapper>
-        ),
-      },
-      {
-        path: "replay",
-        element: (
-          <LazyWrapper>
-            <ReplayPage />
-          </LazyWrapper>
-        ),
-      },
-      {
-        path: "settings",
-        element: (
-          <LazyWrapper>
-            <SettingsPage />
-          </LazyWrapper>
-        ),
+        element: <MainLayout />,
+        children: [
+          { index: true, element: <Navigate replace to="/cloud-service" /> },
+          {
+            path: "cloud-service",
+            element: (
+              <LazyWrapper>
+                <CloudServicePage />
+              </LazyWrapper>
+            ),
+          },
+          {
+            path: "draft-generator",
+            element: (
+              <LazyWrapper>
+                <DraftGeneratorPage />
+              </LazyWrapper>
+            ),
+          },
+          {
+            path: "script-executor",
+            element: (
+              <LazyWrapper>
+                <ScriptExecutorPage />
+              </LazyWrapper>
+            ),
+          },
+          {
+            path: "replay",
+            element: (
+              <LazyWrapper>
+                <ReplayPage />
+              </LazyWrapper>
+            ),
+          },
+          {
+            path: "settings",
+            element: (
+              <LazyWrapper>
+                <SettingsPage />
+              </LazyWrapper>
+            ),
+          },
+        ],
       },
     ],
   },

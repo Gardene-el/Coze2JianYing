@@ -14,7 +14,6 @@ import { useGlobalStore } from "@/store/global/store";
 import { systemStatusSelectors } from "@/store/global/selectors/systemStatus";
 import CollapsibleNavGroup from "@/components/CollapsibleNavGroup";
 import NavItem from "@/components/NavItem";
-
 const SidebarBody = () => {
   const expandedGroups = useGlobalStore(
     systemStatusSelectors.expandedSidebarGroups,
@@ -62,7 +61,9 @@ const SidebarBody = () => {
         </CollapsibleNavGroup>
       </Accordion>
 
-      <NavItem to="/settings" icon={<SettingOutlined />} label="系统设置" />
+      <div data-tour="settings-nav">
+        <NavItem to="/settings" icon={<SettingOutlined />} label="系统设置" />
+      </div>
     </Flexbox>
   );
 };

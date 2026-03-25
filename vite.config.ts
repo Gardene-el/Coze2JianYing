@@ -62,6 +62,12 @@ export default defineConfig(({ mode: envMode }) => {
           changeOrigin: true,
         },
       },
+      watch: {
+        // Exclude the root landing page (static website) from HMR.
+        // It lives at the Vite root but is not part of the SPA;
+        // watching it causes a full-reload that shows the wrong page.
+        ignored: [resolve(__dirname, "index.html")],
+      },
     },
 
     optimizeDeps: {
