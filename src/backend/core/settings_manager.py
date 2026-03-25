@@ -30,7 +30,6 @@ class SettingsManager:
         self.logger = logger
         self._settings: Dict[str, Any] = {
             "draft_folder": "",
-            "transfer_enabled": False,
             # Pre-computed by Electron main process PathResolverService.
             # Empty string means Python should fall back to config.drafts_dir / config.assets_dir.
             "effective_output_path": "",
@@ -52,7 +51,6 @@ class SettingsManager:
             "draft_folder",
             "effective_assets_base_path",
             "effective_output_path",
-            "transfer_enabled",
         }
         for key, value in data.items():
             if key in allowed:

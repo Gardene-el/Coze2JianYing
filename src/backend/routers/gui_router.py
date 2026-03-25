@@ -35,7 +35,6 @@ gui_router = APIRouter(tags=["GUI 管理"])
 
 class SettingsPayload(BaseModel):
     draft_folder: str = ""
-    transfer_enabled: bool = False
     effective_output_path: Optional[str] = None
     effective_assets_base_path: Optional[str] = None
 

@@ -2,10 +2,13 @@ import { ClearOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Button, Card, message, Space, Spin, Typography } from "antd";
 import { createStaticStyles } from "antd-style";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+import { modal } from "@/components/AntdStaticMethods";
 import PageContainer from "@/components/PageContainer";
 import PageHeader from "@/components/PageHeader";
 import { guiDraftAPI } from "@/services/gui/draft";
+import { useSettingsStore } from "@/store/settings/store";
 
 const { Text } = Typography;
 
@@ -35,11 +38,22 @@ const DraftGeneratorPage = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("就绪");
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
+  const draftFolder = useSettingsStore((s) => s.draftFolder);
 
   const handleGenerate = async () => {
     const content = textRef.current?.value.trim();
     if (!content) {
       msgApi.warning("请先粘贴 Coze 插件 JSON 数据");
+      return;
+    }
+    if (!draftFolder.trim()) {
+      modal.error({
+        title: "请先配置草稿目录",
+        content: "生成草稿需要先在「设置」页面指定列映草稿文件夹。",
+        okText: "去设置",
+        onOk: () => navigate("/settings"),
+      });
       return;
     }
     setLoading(true);

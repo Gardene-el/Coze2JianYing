@@ -52,7 +52,6 @@ export const createSettingsPersistSlice: StateCreator<
 
     const gui = stored as {
       draftFolder?: string;
-      transferEnabled?: boolean;
     } | null;
 
     set({
@@ -62,7 +61,6 @@ export const createSettingsPersistSlice: StateCreator<
       ngrokAuthToken: ngrokStored?.authToken ?? "",
       ngrokRegion: ngrokStored?.region ?? "us",
       relayWorkerUrl: (workerUrl as string) || get().relayWorkerUrl,
-      transferEnabled: gui?.transferEnabled ?? false,
     });
 
     // ── Step 4: resolve effective paths in main process (fs check), then push
@@ -70,7 +68,6 @@ export const createSettingsPersistSlice: StateCreator<
     const current = get();
     const guiSettings = {
       draftFolder: current.draftFolder,
-      transferEnabled: current.transferEnabled,
     };
     const effectivePaths = window.electronAPI
       ? await window.electronAPI
@@ -85,7 +82,6 @@ export const createSettingsPersistSlice: StateCreator<
         ).assetsBasePath,
         effective_output_path: (effectivePaths as { outputPath: string })
           .outputPath,
-        transfer_enabled: current.transferEnabled,
       })
       .catch(() => {
         /* non-fatal */
@@ -99,7 +95,6 @@ export const createSettingsPersistSlice: StateCreator<
     // Resolve effective paths before building the PUT payload.
     const guiSettings = {
       draftFolder: current.draftFolder,
-      transferEnabled: current.transferEnabled,
     };
     const effectivePaths = window.electronAPI
       ? await window.electronAPI
@@ -118,7 +113,6 @@ export const createSettingsPersistSlice: StateCreator<
         ).assetsBasePath,
         effective_output_path: (effectivePaths as { outputPath: string })
           .outputPath,
-        transfer_enabled: current.transferEnabled,
       })
       .catch(() => {
         /* non-fatal */
@@ -131,7 +125,6 @@ export const createSettingsPersistSlice: StateCreator<
       saves.push(
         window.electronAPI.invoke(GUI_SETTINGS_CHANNELS.set, {
           draftFolder: current.draftFolder,
-          transferEnabled: current.transferEnabled,
         }),
       );
       saves.push(

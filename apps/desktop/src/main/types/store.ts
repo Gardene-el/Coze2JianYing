@@ -6,7 +6,6 @@ import type { TunnelProviderSettings } from '@c2jy/tunnel-core';
 
 export interface GuiSettings {
   draftFolder: string;
-  transferEnabled: boolean;
 }
 
 export interface EffectivePaths {

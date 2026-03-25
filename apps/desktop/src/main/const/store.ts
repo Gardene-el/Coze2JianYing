@@ -27,7 +27,6 @@ export const defaultProxySettings: NetworkProxySettings = {
  */
 export const DEFAULT_GUI_SETTINGS: GuiSettings = {
   draftFolder: '',
-  transferEnabled: false,
 };
 
 export const STORE_DEFAULTS: ElectronMainStore = {

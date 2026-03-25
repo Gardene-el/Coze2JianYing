@@ -4,7 +4,6 @@ export interface SettingsState {
   ngrokAuthToken: string;
   ngrokRegion: string;
   relayWorkerUrl: string;
-  transferEnabled: boolean;
   /** 是否已从后端加载 */
   loaded: boolean;
 }
@@ -15,6 +14,5 @@ export const initialSettingsState: SettingsState = {
   ngrokAuthToken: "",
   ngrokRegion: "us",
   relayWorkerUrl: "https://coze2jianying.pages.dev",
-  transferEnabled: false,
   loaded: false,
 };

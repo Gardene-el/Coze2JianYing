@@ -53,10 +53,8 @@ export class PathResolverService {
    * should fall back to its own `config.drafts_dir`.
    */
   resolveOutputPath(settings: GuiSettings): string {
-    if (settings.transferEnabled && settings.draftFolder) {
-      if (this.isValidDir(settings.draftFolder)) {
-        return settings.draftFolder;
-      }
+    if (settings.draftFolder && this.isValidDir(settings.draftFolder)) {
+      return settings.draftFolder;
     }
     return '';
   }
@@ -69,10 +67,8 @@ export class PathResolverService {
    * Otherwise returns `""` so Python uses `config.assets_dir`.
    */
   resolveAssetsBasePath(settings: GuiSettings): string {
-    if (settings.transferEnabled && settings.draftFolder) {
-      if (this.isValidDir(settings.draftFolder)) {
-        return join(dirname(settings.draftFolder), 'CozeJianYingAssistantAssets');
-      }
+    if (settings.draftFolder && this.isValidDir(settings.draftFolder)) {
+      return join(dirname(settings.draftFolder), 'CozeJianYingAssistantAssets');
     }
     return '';
   }

@@ -1,14 +1,5 @@
 import { FolderOpenOutlined, ReloadOutlined } from "@ant-design/icons";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  message,
-  Select,
-  Space,
-  Switch,
-} from "antd";
+import { Button, Card, Form, Input, message, Select, Space } from "antd";
 import { useEffect, useRef } from "react";
 
 import PageContainer from "@/components/PageContainer";
@@ -23,7 +14,6 @@ const SettingsPage = () => {
     draftFolder,
     ngrokAuthToken,
     ngrokRegion,
-    transferEnabled,
     loadSettings,
     saveSettings,
     detectDraftPath,
@@ -41,9 +31,8 @@ const SettingsPage = () => {
       draftFolder,
       ngrokAuthToken,
       ngrokRegion,
-      transferEnabled,
     });
-  }, [draftFolder, ngrokAuthToken, ngrokRegion, transferEnabled, form]);
+  }, [draftFolder, ngrokAuthToken, ngrokRegion, form]);
 
   /** 表单任意字段变化时 debounce 500ms 自动保存到 Python 后端 */
   const handleValuesChange = (
@@ -57,7 +46,6 @@ const SettingsPage = () => {
           draftFolder: allValues.draftFolder as string,
           ngrokAuthToken: allValues.ngrokAuthToken as string,
           ngrokRegion: allValues.ngrokRegion as string,
-          transferEnabled: allValues.transferEnabled as boolean,
         });
         msgApi.success("已自动保存", 1.5);
       } catch (e: unknown) {
@@ -96,7 +84,7 @@ const SettingsPage = () => {
             <Form.Item name="draftFolder" label="剪映草稿文件夹">
               <Space.Compact style={{ width: "100%" }}>
                 <Form.Item name="draftFolder" noStyle>
-                  <Input placeholder="留空则使用应用内部目录" />
+                  <Input placeholder="请配置列映草稿文件夹路径" />
                 </Form.Item>
                 <Button icon={<FolderOpenOutlined />} onClick={handleDetect}>
                   自动检测
@@ -104,13 +92,6 @@ const SettingsPage = () => {
               </Space.Compact>
             </Form.Item>
           </div>
-          <Form.Item
-            name="transferEnabled"
-            label="启用传输到草稿目录"
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
         </Card>
 
         {/* 隧道设置 */}
