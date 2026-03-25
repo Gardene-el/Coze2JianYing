@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
@@ -22,12 +22,14 @@ const HEALTH_TIMEOUT_MS = 30_000;
  * Both development and production use the CPython Embeddable Package located at
  * apps/desktop/resources/python/ (dev) or resources/python/ (prod).
  *
- * In development, PythonBackendManager automatically rebuilds the embed when the
- * pyproject.toml hash changes (stamp check).  The rebuild is synchronous so the
- * window only opens after the backend is ready.
+ * In development, PythonBackendManager checks that the CPython embed exists and
+ * logs a warning when the pyproject.toml stamp is stale, but does NOT trigger a
+ * rebuild at runtime.  Rebuilding is the responsibility of the build scripts:
+ *   npm run build:backend        — full rebuild
+ *   npm run build:backend:quick  — skip if python.exe already exists (used by dev:quick)
  *
  * In production the embed is pre-built by `npm run build:backend` and bundled by
- * electron-builder; no automatic rebuild is attempted.
+ * electron-builder; no rebuild is attempted.
  */
 export class PythonBackendManager {
   private process: ChildProcess | null = null;
@@ -97,43 +99,34 @@ export class PythonBackendManager {
   }
 
   /**
-   * Ensure the CPython embed is built and up to date.
-   * Only runs in development; production embeds are pre-built.
-   * Uses spawnSync so the caller blocks until the build finishes.
+   * Verify the CPython embed exists before starting the backend process.
+   * Only runs in development (production embeds are pre-bundled by electron-builder).
+   *
+   * Rebuild is intentionally NOT triggered here — that is the job of the build
+   * scripts (build:backend / build:backend:quick / dev:quick).  Doing a rebuild
+   * inside start() would silently block the app for up to 10 minutes whenever
+   * the Electron main process hot-reloads and pyproject.toml has changed.
    */
   private ensureEmbedReady(): void {
     if (!isDev) return;
 
-    const [needs, reason] = this.needsRebuild();
-    if (!needs) {
-      logger.info(`Embed is ${reason}, skipping build`);
-      return;
-    }
-
-    logger.info(`Embed needs rebuild: ${reason}`);
-    logger.info('Running build_python.py — this may take a few minutes on first run...');
-
-    const buildScript = join(this.projectRoot, 'scripts', 'build_workflow', 'build_python.py');
-    const result = spawnSync('python', [buildScript], {
-      cwd: this.projectRoot,
-      stdio: 'inherit',
-      timeout: 600_000, // 10 min upper bound
-    });
-
-    if (result.error) {
+    if (!existsSync(this.embedPythonExe)) {
       throw new Error(
-        `Failed to start build_python.py: ${result.error.message}\n` +
-          `Make sure 'python' (3.8+) is available on PATH.`,
-      );
-    }
-    if (result.status !== 0) {
-      throw new Error(
-        `build_python.py exited with code ${result.status}. ` +
-          `Check the output above for details.`,
+        `Embedded python.exe not found at: ${this.embedPythonExe}\n` +
+          `Run 'npm run build:backend' (or use 'bun run dev:quick') to build the CPython embed first.`,
       );
     }
 
-    logger.info('Embed build completed successfully');
+    // Stamp check: only warn when dependencies appear stale, never auto-rebuild.
+    const [stale, reason] = this.needsRebuild();
+    if (stale) {
+      logger.warn(
+        `Python embed may be outdated (${reason}). ` +
+          `Run 'npm run build:backend' to rebuild. Continuing with the existing embed.`,
+      );
+    } else {
+      logger.info(`Python embed stamp is up to date`);
+    }
   }
 
   /**
