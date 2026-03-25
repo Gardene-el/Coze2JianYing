@@ -9,7 +9,7 @@ import { useTourStore } from "@/store/tour";
  * 全局 overlay Tour 组件，挂载在 AppShell 中（路由树根部），
  * 通过 data-tour 属性选择器定位真实页面元素，无需持有任何 ref。
  *
- * Step 0: 高亮侧边栏「系统设置」导航项 [data-tour="settings-nav"]
+ * Step 0: 高亮侧边栏「设置」导航项 [data-tour="settings-nav"]
  * Step 1: 自动导航至 /settings，高亮草稿路径输入区 [data-tour="draft-path"]
  */
 const TourLayer = () => {
@@ -40,7 +40,7 @@ const TourLayer = () => {
       {
         title: "指引",
         description:
-          "Coze2JianYing依赖于电脑本机的「剪映」软件，\n请确保您已经安装，并根据当前指引完成配置，\n点击「>」将自动跳转至系统设置页面，引导您完成剪映草稿路径的配置。",
+          "Coze2JianYing依赖于电脑本机的「剪映」软件，\n请确保您已经安装，并根据当前指引完成配置，\n点击「>」将自动跳转至设置页面，引导您完成剪映草稿路径的配置。",
         target: () =>
           document.querySelector(
             '[data-tour="settings-nav"]',

@@ -83,15 +83,15 @@ const SettingsPage = () => {
   return (
     <PageContainer>
       {ctx}
-      <PageHeader title="系统设置" />
+      <PageHeader title="设置" />
       <Form
         form={form}
         layout="vertical"
         style={{ maxWidth: 1024, marginTop: 16 }}
         onValuesChange={handleValuesChange}
       >
-        {/* 路径设置 */}
-        <Card title="📁 路径设置" style={{ marginBottom: 16 }}>
+        {/* 剪映路径 */}
+        <Card title="📁 剪映路径" style={{ marginBottom: 16 }}>
           <div data-tour="draft-path">
             <Form.Item name="draftFolder" label="剪映草稿文件夹">
               <Space.Compact style={{ width: "100%" }}>

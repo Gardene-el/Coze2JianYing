@@ -62,7 +62,7 @@ const SidebarBody = () => {
       </Accordion>
 
       <div data-tour="settings-nav">
-        <NavItem to="/settings" icon={<SettingOutlined />} label="系统设置" />
+        <NavItem to="/settings" icon={<SettingOutlined />} label="设置" />
       </div>
     </Flexbox>
   );
