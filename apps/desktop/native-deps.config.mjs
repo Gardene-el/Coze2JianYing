@@ -35,6 +35,9 @@ export const nativeModules = [
   // are not needed for this Windows-only desktop app.
   '@ngrok/ngrok',
   '@ngrok/ngrok-win32-x64-msvc',
+  // Cloudflare Tunnel — downloads cloudflared binary at install time; must be
+  // externalized so Rollup does not attempt to inline the binary wrapper.
+  'cloudflared',
   // `ajv` and `ajv-formats` are kept as external because electron-updater and
   // electron-store compile JSON-schema validators at runtime via `new Function()`,
   // whose generated code contains `require('ajv/dist/runtime/...')` calls that

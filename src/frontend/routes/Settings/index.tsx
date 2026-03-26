@@ -1,5 +1,5 @@
 import { FolderOpenOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, message, Select, Space } from "antd";
+import { Button, Card, Form, Input, message, Space } from "antd";
 import { useEffect, useRef } from "react";
 
 import PageContainer from "@/components/PageContainer";
@@ -10,14 +10,8 @@ const SettingsPage = () => {
   const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
 
-  const {
-    draftFolder,
-    ngrokAuthToken,
-    ngrokRegion,
-    loadSettings,
-    saveSettings,
-    detectDraftPath,
-  } = useSettingsStore();
+  const { draftFolder, loadSettings, saveSettings, detectDraftPath } =
+    useSettingsStore();
 
   // debounce 计时器，500ms 内无操作才真正保存
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,10 +23,8 @@ const SettingsPage = () => {
   useEffect(() => {
     form.setFieldsValue({
       draftFolder,
-      ngrokAuthToken,
-      ngrokRegion,
     });
-  }, [draftFolder, ngrokAuthToken, ngrokRegion, form]);
+  }, [draftFolder, form]);
 
   /** 表单任意字段变化时 debounce 500ms 自动保存到 Python 后端 */
   const handleValuesChange = (
@@ -44,8 +36,6 @@ const SettingsPage = () => {
       try {
         await saveSettings({
           draftFolder: allValues.draftFolder as string,
-          ngrokAuthToken: allValues.ngrokAuthToken as string,
-          ngrokRegion: allValues.ngrokRegion as string,
         });
         msgApi.success("已自动保存", 1.5);
       } catch (e: unknown) {
@@ -92,22 +82,6 @@ const SettingsPage = () => {
               </Space.Compact>
             </Form.Item>
           </div>
-        </Card>
-
-        {/* 隧道设置 */}
-        <Card title="🚇 隧道设置" style={{ marginBottom: 16 }}>
-          <Form.Item name="ngrokAuthToken" label="ngrok Authtoken">
-            <Input.Password placeholder="从 ngrok 控制台获取" />
-          </Form.Item>
-          <Form.Item name="ngrokRegion" label="ngrok 区域">
-            <Select
-              style={{ width: 120 }}
-              options={["us", "eu", "ap", "au", "sa", "jp", "in"].map((v) => ({
-                value: v,
-                label: v,
-              }))}
-            />
-          </Form.Item>
         </Card>
 
         <Space>

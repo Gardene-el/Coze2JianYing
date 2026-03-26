@@ -1,9 +1,42 @@
 /**
  * Shared types for tunnel providers.
  * Zero runtime — pure TypeScript interfaces and type aliases.
+ *
+ * Adding a new provider:
+ *   1. Add provider id to `TunnelProvider` union.
+ *   2. Add a `TunnelProviderMeta` entry to `TUNNEL_PROVIDER_LIST`.
+ *   3. Implement `ITunnelProvider` in the desktop main-process.
+ *   4. Register it in `TunnelRegistry`.
+ *   5. Add a settings interface (e.g. `FrpSettings`) and union it into
+ *      `TunnelProviderSettings`.
+ *   Candidates: "frp" | "localtunnel" | "bore"
  */
 
 export type TunnelProvider = "ngrok" | "cloudflare";
+
+/** Static metadata for a tunnel provider — drives the provider list UI. */
+export interface TunnelProviderMeta {
+  /** Unique provider id, matches `TunnelProvider`. */
+  id: TunnelProvider;
+  /** Display name shown in the provider list. */
+  name: string;
+  /** One-line description shown below the name. */
+  description: string;
+}
+
+/** All supported tunnel providers in display order. */
+export const TUNNEL_PROVIDER_LIST: TunnelProviderMeta[] = [
+  {
+    id: "ngrok",
+    name: "ngrok",
+    description: "稳定的商业内网穿透服务，免费层有流量限制",
+  },
+  {
+    id: "cloudflare",
+    name: "Cloudflare Tunnel",
+    description: "基于 Cloudflare 全球网络，免登录快速隧道或命名隧道",
+  },
+];
 
 export interface TunnelStatus {
   isRunning: boolean;
@@ -25,10 +58,13 @@ export interface NgrokSettings {
   region: string;
 }
 
-/** Reserved for future Cloudflare Tunnel support — not yet implemented. */
+/** Cloudflare Tunnel settings.
+ *  - `token` empty  → quick tunnel (trycloudflare.com), no account needed.
+ *  - `token` filled → named tunnel via `cloudflared tunnel run --token`.
+ */
 export interface CloudflareTunnelSettings {
-  token: string;
-  tunnelId?: string;
+  /** Service token from the Cloudflare dashboard, or empty for quick tunnel. */
+  token?: string;
 }
 
 export type TunnelProviderSettings = {

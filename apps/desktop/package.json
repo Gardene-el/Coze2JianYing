@@ -42,7 +42,8 @@
     "update-server": "sh scripts/update-test/run-test.sh"
   },
   "dependencies": {
-    "@ngrok/ngrok": "^1.4.1"
+    "@ngrok/ngrok": "^1.4.1",
+    "cloudflared": "^0.7.1"
   },
   "devDependencies": {
     "@c2jy/tunnel-core": "workspace:*",
@@ -109,6 +110,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@napi-rs/canvas",
+      "cloudflared",
       "electron",
       "electron-builder",
       "node-mac-permissions"

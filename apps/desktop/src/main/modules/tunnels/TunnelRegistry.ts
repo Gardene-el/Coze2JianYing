@@ -1,6 +1,7 @@
 import { createLogger } from '@/utils/logger';
 
 import type { ITunnelProvider, TunnelProvider } from './base';
+import { CloudflareProvider } from './CloudflareProvider';
 import { NgrokProvider } from './NgrokProvider';
 
 const logger = createLogger('modules:tunnels:TunnelRegistry');
@@ -10,7 +11,8 @@ export class TunnelRegistry {
 
   constructor() {
     this.providers.set('ngrok', new NgrokProvider());
-    logger.debug('TunnelRegistry initialized with providers: ngrok');
+    this.providers.set('cloudflare', new CloudflareProvider());
+    logger.debug('TunnelRegistry initialized with providers: ngrok, cloudflare');
   }
 
   get(provider: TunnelProvider): ITunnelProvider {

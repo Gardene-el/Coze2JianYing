@@ -3,6 +3,7 @@ import type { StateCreator } from "zustand";
 import { guiSettingsAPI } from "@/services/gui/settings";
 import { setApiBaseUrl } from "@/services/client";
 import { ngrokTunnelService } from "@/services/tunnels/ngrok";
+import { cloudflareTunnelService } from "@/services/tunnels/cloudflare";
 import {
   BACKEND_CHANNELS,
   GUI_SETTINGS_CHANNELS,
@@ -40,9 +41,12 @@ export const createSettingsPersistSlice: StateCreator<
           .catch(() => null)
       : null;
 
-    // ── Step 3: read ngrok / workerUrl from Electron store
+    // ── Step 3: read ngrok / cloudflare / workerUrl from Electron store
     const ngrokStored = window.electronAPI
       ? await ngrokTunnelService.getSettings().catch(() => null)
+      : null;
+    const cloudflareStored = window.electronAPI
+      ? await cloudflareTunnelService.getSettings().catch(() => null)
       : null;
     const workerUrl = window.electronAPI
       ? await window.electronAPI
@@ -60,6 +64,7 @@ export const createSettingsPersistSlice: StateCreator<
       loaded: true,
       ngrokAuthToken: ngrokStored?.authToken ?? "",
       ngrokRegion: ngrokStored?.region ?? "us",
+      cloudflareTunnelToken: cloudflareStored?.token ?? "",
       relayWorkerUrl: (workerUrl as string) || get().relayWorkerUrl,
     });
 
@@ -131,6 +136,11 @@ export const createSettingsPersistSlice: StateCreator<
         ngrokTunnelService.saveSettings({
           authToken: current.ngrokAuthToken,
           region: current.ngrokRegion as string,
+        }),
+      );
+      saves.push(
+        cloudflareTunnelService.saveSettings({
+          token: current.cloudflareTunnelToken,
         }),
       );
       saves.push(

@@ -1,8 +1,4 @@
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  CopyOutlined,
-  GlobalOutlined,
   PlayCircleOutlined,
   ReloadOutlined,
   StopOutlined,
@@ -12,16 +8,14 @@ import {
   Button,
   Card,
   Divider,
-  Form,
+  Empty,
   Input,
-  message,
-  Select,
   Space,
   Tag,
   Tooltip,
   Typography,
+  message,
 } from "antd";
-import { createStaticStyles } from "antd-style";
 import { useEffect, useRef, useState } from "react";
 
 import PageContainer from "@/components/PageContainer";
@@ -30,31 +24,28 @@ import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { useServiceStore } from "@/store/service/store";
 import { initialSettingsState } from "@/store/settings/initialState";
 import { useSettingsStore } from "@/store/settings/store";
+import type { TunnelProvider } from "@c2jy/tunnel-core";
+
+import CloudflareCard from "./CloudflareCard";
+import NgrokCard from "./NgrokCard";
+import TunnelProviderList from "./TunnelProviderList";
 
 const DEFAULT_API_PORT = initialSettingsState.apiPort;
 
 const { Text } = Typography;
 
-const styles = createStaticStyles(({ css }) => ({
-  row: css`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  `,
-}));
-
 const CloudServicePage = () => {
-  const [form] = Form.useForm();
   const [msgApi, ctx] = message.useMessage();
 
-  // 状态
-  const { isRunning, isLoading, ngrokRunning, ngrokLoading, ngrokUrl } =
+  // ── Service state ────────────────────────────────────────────
+  const { isRunning, isLoading, ngrokRunning, cloudflareRunning } =
     useServiceStore();
-  const { startService, stopService, startNgrok, stopNgrok } =
-    useServiceStore();
-  const { apiPort, ngrokAuthToken, ngrokRegion, loadSettings } =
-    useSettingsStore();
+  const { startService, stopService } = useServiceStore();
+  const selectedTunnelProvider = useServiceStore(
+    (s) => s.selectedTunnelProvider,
+  );
+
+  const { apiPort, loadSettings } = useSettingsStore();
   const { saveSettings } = useSettingsStore();
 
   const [portInput, setPortInput] = useState(apiPort);
@@ -87,18 +78,13 @@ const CloudServicePage = () => {
     }
   };
 
-  // 轮询服务状态
   useServiceStatus();
 
   useEffect(() => {
     void loadSettings();
   }, [loadSettings]);
 
-  useEffect(() => {
-    form.setFieldsValue({ ngrokToken: ngrokAuthToken, ngrokRegion });
-  }, [ngrokAuthToken, ngrokRegion, form]);
-
-  // ---- 服务启停 ----
+  // ── Service start / stop ─────────────────────────────────────
   const handleStartService = async () => {
     try {
       await startService();
@@ -117,39 +103,27 @@ const CloudServicePage = () => {
     }
   };
 
-  // ---- ngrok ----
-  const handleStartNgrok = async () => {
-    const values = await form.validateFields();
-    try {
-      await saveSettings({
-        ngrokAuthToken: values.ngrokToken,
-        ngrokRegion: values.ngrokRegion,
-      });
-      const url = await startNgrok(
-        values.ngrokToken,
-        values.ngrokRegion,
-        Number(portInput),
-      );
-      msgApi.success(`ngrok 已启动: ${url}`);
-    } catch (e: unknown) {
-      msgApi.error(`ngrok 启动失败: ${(e as Error).message}`);
-    }
+  // ── Tunnel provider selection ─────────────────────────────────
+  const handleProviderSelect = (provider: TunnelProvider) => {
+    useServiceStore.setState({ selectedTunnelProvider: provider });
   };
 
-  const handleStopNgrok = async () => {
-    try {
-      await stopNgrok();
-      msgApi.success("ngrok 已停止");
-    } catch (e: unknown) {
-      msgApi.error(`停止失败: ${(e as Error).message}`);
-    }
-  };
+  // Tunnel title tag
+  const tunnelRunning = ngrokRunning || cloudflareRunning;
+  const tunnelTag = tunnelRunning ? (
+    <Tag color="success">运行中</Tag>
+  ) : (
+    <Tag color="default">未启动</Tag>
+  );
+
+  const port = Number(portInput) || 20211;
 
   return (
     <PageContainer>
       {ctx}
       <PageHeader title="直连模式" />
-      {/* Coze API 服务 */}
+
+      {/* ── Coze API 服务 ───────────────────────────────────── */}
       <Card
         title={
           <Space>
@@ -195,82 +169,68 @@ const CloudServicePage = () => {
         </Space>
       </Card>
 
-      {/* ngrok 内网穿透 */}
+      {/* ── 内网穿透（可选） ────────────────────────────────── */}
       <Card
         title={
           <Space>
-            <GlobalOutlined />
-            <span>ngrok 内网穿透</span>
-            <Tag color={ngrokRunning ? "success" : "default"}>
-              {ngrokRunning ? "运行中" : "未启动"}
-            </Tag>
+            <span>内网穿透（可选）</span>
+            {tunnelTag}
           </Space>
         }
       >
-        <Form form={form} layout="inline" style={{ marginBottom: 12 }}>
-          <Form.Item
-            name="ngrokToken"
-            label="Authtoken"
-            rules={[{ required: true, message: "请填写 ngrok Authtoken" }]}
+        <div style={{ display: "flex", gap: 0, minHeight: 160 }}>
+          {/* Left: provider list */}
+          <div
+            style={{
+              borderRight: "1px solid var(--ant-color-border-secondary)",
+              paddingRight: 0,
+              marginRight: 24,
+            }}
           >
-            <Input.Password
-              style={{ width: 280 }}
-              placeholder="ngrok Authtoken"
-            />
-          </Form.Item>
-          <Form.Item name="ngrokRegion" label="区域" initialValue="us">
-            <Select
-              style={{ width: 90 }}
-              options={["us", "eu", "ap", "au", "sa", "jp", "in"].map((v) => ({
-                value: v,
-                label: v,
-              }))}
-            />
-          </Form.Item>
-        </Form>
+            <TunnelProviderList onSelect={handleProviderSelect} />
+          </div>
 
-        <div className={styles.row}>
-          <Button
-            type="primary"
-            icon={<CheckCircleOutlined />}
-            loading={ngrokLoading}
-            disabled={ngrokRunning || !isRunning}
-            onClick={handleStartNgrok}
-          >
-            启动 ngrok
-          </Button>
-          <Button
-            danger
-            icon={<CloseCircleOutlined />}
-            loading={ngrokLoading}
-            disabled={!ngrokRunning}
-            onClick={handleStopNgrok}
-          >
-            停止 ngrok
-          </Button>
+          {/* Right: provider card */}
+          <div style={{ flex: 1 }}>
+            {!selectedTunnelProvider ? (
+              <Empty
+                description={
+                  <Text type="secondary">
+                    从左侧选择一个内网穿透服务商以展开配置
+                  </Text>
+                }
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                style={{ margin: "32px 0" }}
+              />
+            ) : (
+              <>
+                <Text strong style={{ display: "block", marginBottom: 16 }}>
+                  {selectedTunnelProvider === "ngrok"
+                    ? "ngrok"
+                    : "Cloudflare Tunnel"}
+                </Text>
+                <Divider style={{ marginTop: 0 }} />
+                {selectedTunnelProvider === "ngrok" ? (
+                  <NgrokCard
+                    port={port}
+                    serviceRunning={isRunning}
+                    otherTunnelRunning={cloudflareRunning}
+                    onSuccess={(m) => msgApi.success(m)}
+                    onError={(m) => msgApi.error(m)}
+                  />
+                ) : (
+                  <CloudflareCard
+                    port={port}
+                    serviceRunning={isRunning}
+                    otherTunnelRunning={ngrokRunning}
+                    onSuccess={(m) => msgApi.success(m)}
+                    onError={(m) => msgApi.error(m)}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
-
-        {ngrokUrl && (
-          <>
-            <Divider />
-            <div className={styles.row}>
-              <Text strong>公网地址：</Text>
-              <Text code copyable>
-                {ngrokUrl}
-              </Text>
-              <Tooltip title="复制">
-                <Button
-                  size="small"
-                  icon={<CopyOutlined />}
-                  onClick={() => {
-                    void navigator.clipboard.writeText(ngrokUrl);
-                    msgApi.success("已复制");
-                  }}
-                />
-              </Tooltip>
-            </div>
-          </>
-        )}
       </Card>
     </PageContainer>
   );
