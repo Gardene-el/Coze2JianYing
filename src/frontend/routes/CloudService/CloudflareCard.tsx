@@ -48,18 +48,28 @@ const CloudflareCard = ({
   const { cloudflareRunning, cloudflareLoading, cloudflareUrl } =
     useServiceStore();
   const { startCloudflare, stopCloudflare } = useServiceStore();
-  const { cloudflareTunnelToken, saveSettings } = useSettingsStore();
+  const { cloudflareTunnelToken, cloudflareTunnelPublicUrl, saveSettings } =
+    useSettingsStore();
+
+  const cfToken = Form.useWatch("cfToken", form);
 
   useEffect(() => {
-    form.setFieldsValue({ cfToken: cloudflareTunnelToken });
-  }, [cloudflareTunnelToken, form]);
+    form.setFieldsValue({
+      cfToken: cloudflareTunnelToken,
+      cfPublicUrl: cloudflareTunnelPublicUrl,
+    });
+  }, [cloudflareTunnelToken, cloudflareTunnelPublicUrl, form]);
 
   const handleStart = async () => {
     const values = await form.validateFields();
     const token = (values.cfToken as string | undefined) ?? "";
+    const publicUrl = (values.cfPublicUrl as string | undefined) ?? "";
     try {
-      await saveSettings({ cloudflareTunnelToken: token });
-      const url = await startCloudflare(token, port);
+      await saveSettings({
+        cloudflareTunnelToken: token,
+        cloudflareTunnelPublicUrl: publicUrl,
+      });
+      const url = await startCloudflare(token, publicUrl, port);
       onSuccess(`Cloudflare 隧道已启动: ${url}`);
     } catch (e: unknown) {
       onError(`Cloudflare 启动失败: ${(e as Error).message}`);
@@ -89,6 +99,19 @@ const CloudflareCard = ({
             allowClear
           />
         </Form.Item>
+        {cfToken && (
+          <Form.Item
+            name="cfPublicUrl"
+            label="公网域名"
+            rules={[{ required: true, message: "命名隧道需要填写公网域名" }]}
+            extra="从 Cloudflare Zero Trust 控制台获取，例如 https://my-app.example.com"
+          >
+            <Input
+              style={{ maxWidth: 400 }}
+              placeholder="https://my-app.example.com"
+            />
+          </Form.Item>
+        )}
       </Form>
 
       <Space>

@@ -65,6 +65,7 @@ export const createSettingsPersistSlice: StateCreator<
       ngrokAuthToken: ngrokStored?.authToken ?? "",
       ngrokRegion: ngrokStored?.region ?? "us",
       cloudflareTunnelToken: cloudflareStored?.token ?? "",
+      cloudflareTunnelPublicUrl: cloudflareStored?.publicUrl ?? "",
       relayWorkerUrl: (workerUrl as string) || get().relayWorkerUrl,
     });
 
@@ -141,6 +142,7 @@ export const createSettingsPersistSlice: StateCreator<
       saves.push(
         cloudflareTunnelService.saveSettings({
           token: current.cloudflareTunnelToken,
+          publicUrl: current.cloudflareTunnelPublicUrl,
         }),
       );
       saves.push(

@@ -4,7 +4,11 @@ import { cloudflareTunnelService } from "@/services/tunnels/cloudflare";
 import type { ServiceState } from "../initialState";
 
 export interface CloudflareAction {
-  startCloudflare: (token: string, port: number) => Promise<string>;
+  startCloudflare: (
+    token: string,
+    publicUrl: string,
+    port: number,
+  ) => Promise<string>;
   stopCloudflare: () => Promise<void>;
   fetchCloudflareStatus: () => Promise<void>;
 }
@@ -15,10 +19,13 @@ export const createCloudflareSlice: StateCreator<
   [],
   CloudflareAction
 > = (set) => ({
-  startCloudflare: async (token, port) => {
+  startCloudflare: async (token, publicUrl, port) => {
     set({ cloudflareLoading: true });
     try {
-      const data = await cloudflareTunnelService.startTunnel(port, { token });
+      const data = await cloudflareTunnelService.startTunnel(port, {
+        token,
+        publicUrl,
+      });
       const url = data.publicUrl ?? "";
       set({ cloudflareRunning: true, cloudflareUrl: url });
       return url;

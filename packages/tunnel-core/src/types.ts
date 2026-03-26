@@ -61,10 +61,27 @@ export interface NgrokSettings {
 /** Cloudflare Tunnel settings.
  *  - `token` empty  → quick tunnel (trycloudflare.com), no account needed.
  *  - `token` filled → named tunnel via `cloudflared tunnel run --token`.
+ *    In this case `publicUrl` MUST also be set to the hostname configured in
+ *    the Cloudflare Zero Trust dashboard (cloudflared does not broadcast it).
  */
 export interface CloudflareTunnelSettings {
   /** Service token from the Cloudflare dashboard, or empty for quick tunnel. */
   token?: string;
+  /** For named tunnels: the public hostname from the Cloudflare Zero Trust
+   *  dashboard, e.g. https://my-app.example.com.  Unused for quick tunnels. */
+  publicUrl?: string;
+  /**
+   * Transport protocol passed to cloudflared via `--protocol`.
+   * Defaults to `"http2"` for quick tunnels.
+   *
+   * cloudflared 2024+ defaults to QUIC (UDP 7844), which is silently dropped
+   * on many networks/firewalls and does NOT automatically fall back to HTTP/2.
+   * Use `"http2"` (TLS/TCP 443) for maximum compatibility, or `"quic"` on
+   * networks where UDP is allowed.
+   *
+   * Valid values: `"http2"` | `"quic"` | `"auto"`
+   */
+  protocol?: "http2" | "quic" | "auto";
 }
 
 export type TunnelProviderSettings = {
