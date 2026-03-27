@@ -68,7 +68,7 @@ async def get_settings() -> Dict[str, Any]:
 @gui_router.put("/settings")
 async def update_settings(payload: SettingsPayload) -> Dict[str, bool]:
     sm = get_settings_manager()
-    sm.update(payload.model_dump())
+    sm.update(payload.model_dump(exclude_none=True))
     return {"ok": True}
 
 
@@ -91,8 +91,9 @@ async def detect_path() -> Dict[str, str]:
 @gui_router.post("/draft/generate")
 async def generate_draft(payload: GenerateDraftPayload) -> Dict[str, Any]:
     logger.info("开始生成草稿...")
+    effective_output_path = get_settings_manager().require("effective_output_path")
     try:
-        gen = DraftGenerator()
+        gen = DraftGenerator(output_base_dir=effective_output_path)
         paths: List[str] = await asyncio.to_thread(gen.generate, payload.content)
         logger.info("草稿生成成功，共 %d 个文件: %s", len(paths), paths)
         return {"paths": paths}
@@ -230,9 +231,7 @@ async def execute_script(payload: ExecutePayload, request: Request) -> Dict[str,
 
 @gui_router.get("/replay/{draft_id}")
 async def replay_draft(draft_id: str) -> Dict[str, Any]:
-    sm = get_settings_manager()
-    from src.backend.config import get_config
-    output_path = sm.get("effective_output_path") or get_config().drafts_dir
+    output_path = get_settings_manager().require("effective_output_path")
     draft_dir = Path(output_path) / draft_id
 
     if not draft_dir.exists():

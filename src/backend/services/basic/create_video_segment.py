@@ -14,7 +14,6 @@ from src.backend.core.common_types import (
 	to_draft_timerange,
 )
 from src.backend.core.settings_manager import get_settings_manager
-from src.backend.config import get_config
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import update_segment_cache
 from src.backend.utils.download import download
@@ -38,7 +37,7 @@ def create_video_segment(
 
 	try:
 		settings = get_settings_manager()
-		output_dir = settings.get("effective_output_path") or get_config().drafts_dir
+		output_dir = settings.require("effective_output_path")
 		draft_video_dir = create_video_directory(output_dir, segment_id)
 		video_path = download_video_file(material_url, draft_video_dir)
 		video_material = create_video_material(video_path, crop_settings)

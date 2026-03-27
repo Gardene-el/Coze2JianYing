@@ -31,7 +31,7 @@ class SettingsManager:
         self._settings: Dict[str, Any] = {
             "draft_folder": "",
             # Pre-computed by Electron main process PathResolverService.
-            # Empty string means Python should fall back to config.drafts_dir / config.assets_dir.
+            # Must be non-empty before any draft/segment operation; use require() to enforce.
             "effective_output_path": "",
             "effective_assets_base_path": "",
         }
@@ -40,6 +40,16 @@ class SettingsManager:
     def get(self, key: str, default: Any = None) -> Any:
         """获取设置值"""
         return self._settings.get(key, default)
+
+    def require(self, key: str) -> str:
+        """获取必须存在的设置值；若为空则抛出 ValueError。"""
+        value = self._settings.get(key)
+        if not value:
+            raise ValueError(
+                f"设置项 '{key}' 未配置：请先在前端设置中选择剪映草稿文件夹，"
+                "或通过 PUT /gui/settings 传入对应的路径。"
+            )
+        return value  # type: ignore[return-value]
 
     def get_all(self) -> Dict[str, Any]:
         """获取所有设置"""

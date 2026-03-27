@@ -4,7 +4,6 @@ from pyJianYingDraft.local_materials import AudioMaterial
 from src.backend.utils.cache import DRAFT_CACHE
 from src.backend.exceptions import CustomException, CustomError
 import os
-from src.backend.config import get_config
 from src.backend.utils.download import download
 from src.backend.core.settings_manager import get_settings_manager
 import json
@@ -65,7 +64,7 @@ def validate_draft_id(draft_id: str) -> None:
 def create_audio_directory(draft_id: str) -> str:
     """创建音频资源存储目录"""
     settings = get_settings_manager()
-    draft_dir = os.path.join(settings.get("effective_output_path") or get_config().drafts_dir, draft_id)
+    draft_dir = os.path.join(settings.require("effective_output_path"), draft_id)
     draft_audio_dir = os.path.join(draft_dir, "assets", "audios")
     os.makedirs(name=draft_audio_dir, exist_ok=True)
     logger.info(f"Created audio directory: {draft_audio_dir}")

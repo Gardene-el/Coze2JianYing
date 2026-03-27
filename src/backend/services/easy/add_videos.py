@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional
 import pyJianYingDraft as draft
 
 from src.backend.core.settings_manager import get_settings_manager
-from src.backend.config import get_config
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import DRAFT_CACHE
 from src.backend.utils.download import download
@@ -29,7 +28,7 @@ def add_videos(
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 	settings = get_settings_manager()
-	draft_dir = os.path.join(settings.get("effective_output_path") or get_config().drafts_dir, draft_id)
+	draft_dir = os.path.join(settings.require("effective_output_path"), draft_id)
 	draft_video_dir = os.path.join(draft_dir, "assets", "videos")
 	os.makedirs(name=draft_video_dir, exist_ok=True)
 

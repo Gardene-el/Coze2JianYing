@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 
-from src.backend.config import get_config
+from src.backend.core.settings_manager import get_settings_manager
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import DRAFT_CACHE
 from src.backend.utils.logger import logger
@@ -25,7 +25,6 @@ def save_draft(draft_id: str) -> str:
 	script = DRAFT_CACHE[draft_id]
 	script.save()
 
-	config = get_config()
-	logger.info("save draft success: %s", os.path.join(config.drafts_dir, draft_id))
+	logger.info("save draft success: %s", os.path.join(get_settings_manager().require("effective_output_path"), draft_id))
 	return draft_id
 

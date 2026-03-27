@@ -5,7 +5,6 @@ import os
 import pyJianYingDraft as draft
 
 from src.backend.core.settings_manager import get_settings_manager
-from src.backend.config import get_config
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import update_draft_cache
 from src.backend.utils.helper import gen_unique_id
@@ -31,7 +30,7 @@ def create_draft(width: int, height: int) -> str:
 
 	try:
 		settings = get_settings_manager()
-		output_dir = settings.get("effective_output_path") or get_config().drafts_dir
+		output_dir = settings.require("effective_output_path")
 
 		draft_folder = draft.DraftFolder(output_dir)
 		script = draft_folder.create_draft(

@@ -10,7 +10,6 @@ from src.backend.utils.logger import logger
 from .coze_parser import CozeOutputParser
 from .converter import DraftInterfaceConverter
 from .material_manager import MaterialManager, create_material_manager
-from src.backend.core.settings_manager import get_settings_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
 
@@ -18,26 +17,17 @@ from pyJianYingDraft import ScriptFile
 class DraftGenerator:
     """剪映草稿生成器 - 从Coze输出到剪映草稿的完整转换"""
     
-    def __init__(self, output_base_dir: Optional[str] = None):
+    def __init__(self, output_base_dir: str):
         """
         初始化草稿生成器
         
         Args:
-            output_base_dir: 输出根目录(存放所有草稿项目)。
-                           如果为None，则使用全局设置管理器的配置
+            output_base_dir: 输出根目录(存放所有草稿项目)。必须由调用方显式传入。
         """
         self.logger = logger
         self.logger.info("初始化草稿生成器")
-        
-        # 如果未指定输出目录，使用全局设置管理器的配置
-        if output_base_dir is None:
-            from src.backend.config import get_config
-            settings = get_settings_manager()
-            self.output_base_dir = settings.get("effective_output_path") or get_config().drafts_dir
-            self.logger.info(f"使用全局路径管理器的输出目录: {self.output_base_dir}")
-        else:
-            self.output_base_dir = output_base_dir
-            self.logger.info(f"使用指定输出目录: {output_base_dir}")
+        self.output_base_dir = output_base_dir
+        self.logger.info("输出目录: %s", self.output_base_dir)
         
         self.parser = CozeOutputParser()
         self.material_managers: Dict[str, MaterialManager] = {}
