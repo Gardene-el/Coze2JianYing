@@ -10,6 +10,7 @@ const DraftGeneratorPage = lazy(() => import("@/routes/DraftGenerator"));
 const ScriptExecutorPage = lazy(() => import("@/routes/ScriptExecutor"));
 const ReplayPage = lazy(() => import("@/routes/Replay"));
 const SettingsPage = lazy(() => import("@/routes/Settings"));
+const ToolGeneratorPage = lazy(() => import("@/routes/ToolGenerator"));
 
 const LazyWrapper = ({ children }: { children: ReactNode }) => (
   <Suspense
@@ -67,6 +68,14 @@ export const appRoutes: RouteObject[] = [
             element: (
               <LazyWrapper>
                 <SettingsPage />
+              </LazyWrapper>
+            ),
+          },
+          {
+            path: "tool-generator",
+            element: (
+              <LazyWrapper>
+                <ToolGeneratorPage />
               </LazyWrapper>
             ),
           },

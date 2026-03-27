@@ -7,6 +7,7 @@ import {
   HistoryOutlined,
   SettingOutlined,
   ThunderboltOutlined,
+  ToolOutlined,
 } from "@ant-design/icons";
 import { Accordion, Flexbox } from "@lobehub/ui";
 
@@ -57,6 +58,18 @@ const SidebarBody = () => {
             to="/draft-generator"
             icon={<EditOutlined />}
             label="粘贴草稿（弃置）"
+          />
+        </CollapsibleNavGroup>
+
+        <CollapsibleNavGroup
+          groupKey="tools"
+          title="工具"
+          icon={<ToolOutlined />}
+        >
+          <NavItem
+            to="/tool-generator"
+            icon={<ToolOutlined />}
+            label="插件生成器"
           />
         </CollapsibleNavGroup>
       </Accordion>
