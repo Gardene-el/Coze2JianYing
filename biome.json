@@ -1,0 +1,139 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/out",
+      "!**/resources/python",
+      "!**/*.snap",
+      "!**/coze_2_jianying.egg-info"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "lineWidth": 100,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf"
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "warn",
+        "useImportExtensions": "off"
+      },
+      "style": {
+        "useImportType": "error",
+        "noDefaultExport": "warn",
+        "useNodejsImportProtocol": "warn",
+        "useConsistentArrayType": "error",
+        "useShorthandFunctionType": "error",
+        "noParameterAssign": "warn"
+      },
+      "suspicious": {
+        "noConsole": {
+          "level": "warn",
+          "options": {
+            "allow": [
+              "warn",
+              "error",
+              "info",
+              "table",
+              "group",
+              "groupCollapsed",
+              "groupEnd",
+              "assert",
+              "clear"
+            ]
+          }
+        },
+        "noExplicitAny": "warn",
+        "noDoubleEquals": "error"
+      },
+      "complexity": {
+        "noBannedTypes": "error",
+        "noUselessConstructor": "error"
+      },
+      "performance": {
+        "noBarrelFile": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "semicolons": "asNeeded"
+    },
+    "globals": ["React"]
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/desktop/src/main/**",
+        "apps/desktop/src/preload/**",
+        "apps/desktop/scripts/**",
+        "apps/desktop/electron-builder.mjs",
+        "apps/desktop/electron.vite.config.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.config.*",
+        "apps/desktop/src/renderer/pages/**",
+        "apps/desktop/src/renderer/src/App.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off",
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
+}

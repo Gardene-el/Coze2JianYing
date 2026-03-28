@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# No-op: reserve hook so husky runner doesn't get SIGKILL in some environments (e.g. IDE git).
+exit 0

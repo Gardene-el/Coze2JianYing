@@ -2,16 +2,22 @@
   "name": "coze2jianying",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@10.28.2",
   "scripts": {
     "dev": "cd apps/desktop && bun run dev",
     "dev:quick": "cd apps/desktop && bun run dev:quick",
     "dev:init": "cd apps/desktop && bun run dev:init",
     "dev:quick:init": "cd apps/desktop && bun run dev:quick:init",
-    "build": "cd apps/desktop && bun run package:win"
+    "build": "cd apps/desktop && bun run package:win",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.md": [
+      "remark --quiet --output --"
+    ],
+    "*.{js,jsx,ts,tsx,json,jsonc}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -33,13 +39,31 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.9",
+    "@commitlint/cli": "^19.6.1",
+    "@lobehub/lint": "^2.1.5",
     "@types/node": "^22.13.10",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.3",
     "vite-plugin-node-polyfills": "^0.25.0",
     "vite-tsconfig-paths": "^6.1.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@napi-rs/canvas",
+      "cloudflared",
+      "electron",
+      "electron-builder",
+      "node-mac-permissions"
+    ],
+    "overrides": {
+      "react": "19.2.4",
+      "react-dom": "19.2.4"
+    }
   }
 }
