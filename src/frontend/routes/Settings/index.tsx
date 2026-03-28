@@ -1,62 +1,58 @@
-import { FolderOpenOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, message, Space } from "antd";
-import { useEffect, useRef } from "react";
+import { FolderOpenOutlined, ReloadOutlined } from '@ant-design/icons'
+import { Button, Card, Form, Input, message, Space } from 'antd'
+import { useEffect, useRef } from 'react'
 
-import PageContainer from "@/components/PageContainer";
-import PageHeader from "@/components/PageHeader";
-import { useSettingsStore } from "@/store/settings/store";
+import PageContainer from '@/components/PageContainer'
+import PageHeader from '@/components/PageHeader'
+import { useSettingsStore } from '@/store/settings/store'
 
 const SettingsPage = () => {
-  const [form] = Form.useForm();
-  const [msgApi, ctx] = message.useMessage();
+  const [form] = Form.useForm()
+  const [msgApi, ctx] = message.useMessage()
 
-  const { draftFolder, loadSettings, saveSettings, detectDraftPath } =
-    useSettingsStore();
+  const { draftFolder, loadSettings, saveSettings, detectDraftPath } = useSettingsStore()
 
   // debounce 计时器，500ms 内无操作才真正保存
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    void loadSettings();
-  }, [loadSettings]);
+    void loadSettings()
+  }, [loadSettings])
 
   useEffect(() => {
     form.setFieldsValue({
       draftFolder,
-    });
-  }, [draftFolder, form]);
+    })
+  }, [draftFolder, form])
 
   /** 表单任意字段变化时 debounce 500ms 自动保存到 Python 后端 */
-  const handleValuesChange = (
-    _: unknown,
-    allValues: Record<string, unknown>,
-  ) => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+  const handleValuesChange = (_: unknown, allValues: Record<string, unknown>) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(async () => {
       try {
         await saveSettings({
           draftFolder: allValues.draftFolder as string,
-        });
-        msgApi.success("已自动保存", 1.5);
+        })
+        msgApi.success('已自动保存', 1.5)
       } catch (e: unknown) {
-        msgApi.error(`保存失败: ${(e as Error).message}`);
+        msgApi.error(`保存失败: ${(e as Error).message}`)
       }
-    }, 500);
-  };
+    }, 500)
+  }
 
   const handleDetect = async () => {
     try {
-      const path = await detectDraftPath();
+      const path = await detectDraftPath()
       if (path) {
-        form.setFieldValue("draftFolder", path);
-        msgApi.success(`已检测到路径: ${path}`);
+        form.setFieldValue('draftFolder', path)
+        msgApi.success(`已检测到路径: ${path}`)
       } else {
-        msgApi.warning("未检测到剪映草稿路径");
+        msgApi.warning('未检测到剪映草稿路径')
       }
     } catch (e: unknown) {
-      msgApi.error(`检测失败: ${(e as Error).message}`);
+      msgApi.error(`检测失败: ${(e as Error).message}`)
     }
-  };
+  }
 
   return (
     <PageContainer>
@@ -72,7 +68,7 @@ const SettingsPage = () => {
         <Card title="📁 剪映路径" style={{ marginBottom: 16 }}>
           <div data-tour="draft-path">
             <Form.Item name="draftFolder" label="剪映草稿文件夹">
-              <Space.Compact style={{ width: "100%" }}>
+              <Space.Compact style={{ width: '100%' }}>
                 <Form.Item name="draftFolder" noStyle>
                   <Input placeholder="请配置列映草稿文件夹路径" />
                 </Form.Item>
@@ -91,7 +87,7 @@ const SettingsPage = () => {
         </Space>
       </Form>
     </PageContainer>
-  );
-};
+  )
+}
 
-export default SettingsPage;
+export default SettingsPage

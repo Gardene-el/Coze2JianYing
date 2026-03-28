@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,13 +47,13 @@
   </head>
   <body style="height: 100%">
     <script>
-      (function () {
+      (() => {
         var theme = 'system';
         try {
           theme = localStorage.getItem('theme') || 'system';
         } catch (_) {}
         var systemTheme =
-          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          window.matchMedia?.('(prefers-color-scheme: dark)').matches
             ? 'dark'
             : 'light';
         var resolvedTheme = theme === 'system' ? systemTheme : theme;

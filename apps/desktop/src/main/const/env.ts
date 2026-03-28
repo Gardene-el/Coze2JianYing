@@ -1,30 +1,30 @@
-import os from 'node:os';
+import os from 'node:os'
 
-import { dev, windows } from 'electron-is';
+import { dev, windows } from 'electron-is'
 
-import { getDesktopEnv } from '@/env';
+import { getDesktopEnv } from '@/env'
 
-export const isDev = dev();
+export const isDev = dev()
 
-export const OFFICIAL_CLOUD_SERVER = getDesktopEnv().OFFICIAL_CLOUD_SERVER;
+export const OFFICIAL_CLOUD_SERVER = getDesktopEnv().OFFICIAL_CLOUD_SERVER
 
-export const isWindows = windows();
+export const isWindows = windows()
 
 function getIsWindows11() {
-  if (!isWindows) return false;
+  if (!isWindows) return false
   // Get OS version (e.g., "10.0.22621")
-  const release = os.release();
-  const parts = release.split('.');
+  const release = os.release()
+  const parts = release.split('.')
 
   // Major and minor version
-  const majorVersion = parseInt(parts[0], 10);
-  const minorVersion = parseInt(parts[1], 10);
+  const majorVersion = parseInt(parts[0], 10)
+  const minorVersion = parseInt(parts[1], 10)
 
   // Build number is the third part
-  const buildNumber = parseInt(parts[2], 10);
+  const buildNumber = parseInt(parts[2], 10)
 
   // Windows 11 build numbers start from 22000
-  return majorVersion === 10 && minorVersion === 0 && buildNumber >= 22_000;
+  return majorVersion === 10 && minorVersion === 0 && buildNumber >= 22_000
 }
 
-export const isWindows11 = getIsWindows11();
+export const isWindows11 = getIsWindows11()

@@ -1,30 +1,25 @@
-import { lazy, type ReactNode, Suspense } from "react";
-import { Navigate, type RouteObject } from "react-router-dom";
-import { Spin } from "antd";
+import { Spin } from 'antd'
+import { lazy, type ReactNode, Suspense } from 'react'
+import { Navigate, type RouteObject } from 'react-router-dom'
+import MainLayout from '@/routes/_layout'
+import AppShell from '@/routes/AppShell'
 
-import AppShell from "@/routes/AppShell";
-import MainLayout from "@/routes/_layout";
-
-const CloudServicePage = lazy(() => import("@/routes/CloudService"));
-const DraftGeneratorPage = lazy(() => import("@/routes/DraftGenerator"));
-const ScriptExecutorPage = lazy(() => import("@/routes/ScriptExecutor"));
-const ReplayPage = lazy(() => import("@/routes/Replay"));
-const SettingsPage = lazy(() => import("@/routes/Settings"));
-const ToolGeneratorPage = lazy(() => import("@/routes/ToolGenerator"));
+const CloudServicePage = lazy(() => import('@/routes/CloudService'))
+const DraftGeneratorPage = lazy(() => import('@/routes/DraftGenerator'))
+const ScriptExecutorPage = lazy(() => import('@/routes/ScriptExecutor'))
+const ReplayPage = lazy(() => import('@/routes/Replay'))
+const SettingsPage = lazy(() => import('@/routes/Settings'))
+const ToolGeneratorPage = lazy(() => import('@/routes/ToolGenerator'))
 
 const LazyWrapper = ({ children }: { children: ReactNode }) => (
-  <Suspense
-    fallback={
-      <Spin size="large" style={{ margin: "40px auto", display: "block" }} />
-    }
-  >
+  <Suspense fallback={<Spin size="large" style={{ margin: '40px auto', display: 'block' }} />}>
     {children}
   </Suspense>
-);
+)
 
 export const appRoutes: RouteObject[] = [
   {
-    path: "/",
+    path: '/',
     element: <AppShell />,
     children: [
       {
@@ -32,7 +27,7 @@ export const appRoutes: RouteObject[] = [
         children: [
           { index: true, element: <Navigate replace to="/cloud-service" /> },
           {
-            path: "cloud-service",
+            path: 'cloud-service',
             element: (
               <LazyWrapper>
                 <CloudServicePage />
@@ -40,7 +35,7 @@ export const appRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "draft-generator",
+            path: 'draft-generator',
             element: (
               <LazyWrapper>
                 <DraftGeneratorPage />
@@ -48,7 +43,7 @@ export const appRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "script-executor",
+            path: 'script-executor',
             element: (
               <LazyWrapper>
                 <ScriptExecutorPage />
@@ -56,7 +51,7 @@ export const appRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "replay",
+            path: 'replay',
             element: (
               <LazyWrapper>
                 <ReplayPage />
@@ -64,7 +59,7 @@ export const appRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "settings",
+            path: 'settings',
             element: (
               <LazyWrapper>
                 <SettingsPage />
@@ -72,7 +67,7 @@ export const appRoutes: RouteObject[] = [
             ),
           },
           {
-            path: "tool-generator",
+            path: 'tool-generator',
             element: (
               <LazyWrapper>
                 <ToolGeneratorPage />
@@ -83,4 +78,4 @@ export const appRoutes: RouteObject[] = [
       },
     ],
   },
-];
+]

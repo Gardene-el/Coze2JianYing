@@ -1,8 +1,8 @@
-import fixPath from 'fix-path';
+import fixPath from 'fix-path'
 
-import { App } from './core/App';
+import { App } from './core/App'
 
-const app = new App();
+const app = new App()
 
-fixPath();
-app.bootstrap();
+fixPath()
+app.bootstrap()

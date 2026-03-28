@@ -87,6 +87,6 @@ const menu = {
   'window.title': 'Window',
   'window.toggleFullscreen': 'Toggle Fullscreen',
   'window.zoom': 'Zoom',
-};
+}
 
-export default menu;
+export default menu

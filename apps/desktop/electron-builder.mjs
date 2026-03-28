@@ -1,80 +1,80 @@
-import { execSync } from 'node:child_process';
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
 
 import {
   copyNativeModules,
   copyNativeModulesToSource,
   getAsarUnpackPatterns,
   getNativeModulesFilesConfig,
-} from './native-deps.config.mjs';
+} from './native-deps.config.mjs'
 
-dotenv.config();
+dotenv.config()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const packageJSON = JSON.parse(await fs.readFile(path.join(__dirname, 'package.json'), 'utf8'));
+const packageJSON = JSON.parse(await fs.readFile(path.join(__dirname, 'package.json'), 'utf8'))
 
-const channel = process.env.UPDATE_CHANNEL;
-const arch = os.arch();
+const channel = process.env.UPDATE_CHANNEL
+const arch = os.arch()
 
 // 自定义更新服务器 URL (用于 stable 频道)
-const updateServerUrl = process.env.UPDATE_SERVER_URL;
+const updateServerUrl = process.env.UPDATE_SERVER_URL
 
-console.info(`🚄 Build Version ${packageJSON.version}, Channel: ${channel}`);
-console.info(`🏗️ Building for architecture: ${arch}`);
+console.info(`🚄 Build Version ${packageJSON.version}, Channel: ${channel}`)
+console.info(`🏗️ Building for architecture: ${arch}`)
 
 // Channel identity derived solely from UPDATE_CHANNEL env var.
 // Supported channels: stable, nightly, canary
-const isStable = !channel || channel === 'stable';
-const isNightly = channel === 'nightly';
-const isCanary = channel === 'canary';
+const isStable = !channel || channel === 'stable'
+const isNightly = channel === 'nightly'
+const isCanary = channel === 'canary'
 
 // Strip trailing channel path from URL for re-appending the correct channel
 // Handles both base URL (https://cdn.example.com) and legacy URL with channel (https://cdn.example.com/stable)
-const stripChannelSuffix = (url) => url.replace(/\/(stable|nightly|canary|beta)\/?$/, '');
+const stripChannelSuffix = (url) => url.replace(/\/(stable|nightly|canary|beta)\/?$/, '')
 
 // 根据 channel 配置 publish provider
 // - 所有渠道 + UPDATE_SERVER_URL: 使用 generic (S3)
 // - 无 UPDATE_SERVER_URL: 回退到 GitHub (本地开发)
 const getPublishConfig = () => {
-  const channelPath = isStable ? 'stable' : isNightly ? 'nightly' : channel || 'stable';
+  const channelPath = isStable ? 'stable' : isNightly ? 'nightly' : channel || 'stable'
 
   if (updateServerUrl) {
-    const baseUrl = stripChannelSuffix(updateServerUrl);
-    const fullUrl = `${baseUrl}/${channelPath}`;
-    console.info(`📦 ${channelPath} channel: Using generic provider (${fullUrl})`);
+    const baseUrl = stripChannelSuffix(updateServerUrl)
+    const fullUrl = `${baseUrl}/${channelPath}`
+    console.info(`📦 ${channelPath} channel: Using generic provider (${fullUrl})`)
     return [
       {
         provider: 'generic',
         url: fullUrl,
       },
-    ];
+    ]
   }
 
   // 本地开发无 S3 时回退到 GitHub
-  console.info(`📦 ${channelPath} channel: No UPDATE_SERVER_URL, falling back to GitHub provider`);
+  console.info(`📦 ${channelPath} channel: No UPDATE_SERVER_URL, falling back to GitHub provider`)
   return [
     {
       owner: 'Gardene-el',
       provider: 'github',
       repo: 'Coze2JianYing',
     },
-  ];
-};
+  ]
+}
 
 // 根据版本类型确定协议 scheme
 const getProtocolScheme = () => {
-  if (isCanary) return 'coze2jianying-canary';
-  if (isNightly) return 'coze2jianying-nightly';
-  return 'coze2jianying';
-};
+  if (isCanary) return 'coze2jianying-canary'
+  if (isNightly) return 'coze2jianying-nightly'
+  return 'coze2jianying'
+}
 
-const protocolScheme = getProtocolScheme();
+const protocolScheme = getProtocolScheme()
 
 /**
  * @type {import('electron-builder').Configuration}
@@ -86,10 +86,10 @@ const config = {
    * This ensures native modules are properly included in the asar archive.
    */
   beforePack: async () => {
-    await copyNativeModulesToSource();
+    await copyNativeModulesToSource()
 
-    console.info('📦 Downloading agent-browser binary...');
-    execSync('node scripts/download-agent-browser.mjs', { stdio: 'inherit', cwd: __dirname });
+    console.info('📦 Downloading agent-browser binary...')
+    execSync('node scripts/download-agent-browser.mjs', { stdio: 'inherit', cwd: __dirname })
   },
   /**
    * AfterPack hook: copy native modules to asar.unpacked (resolving pnpm symlinks)
@@ -98,11 +98,11 @@ const config = {
    */
   afterPack: async (context) => {
     // Windows: resources is directly in appOutDir
-    const resourcesPath = path.join(context.appOutDir, 'resources');
+    const resourcesPath = path.join(context.appOutDir, 'resources')
 
     // Copy native modules to asar.unpacked, resolving pnpm symlinks
-    const unpackedNodeModules = path.join(resourcesPath, 'app.asar.unpacked', 'node_modules');
-    await copyNativeModules(unpackedNodeModules);
+    const unpackedNodeModules = path.join(resourcesPath, 'app.asar.unpacked', 'node_modules')
+    await copyNativeModules(unpackedNodeModules)
   },
   appId: 'com.coze2jianying.desktop',
 
@@ -168,6 +168,6 @@ const config = {
   win: {
     executableName: 'Coze2JianYing',
   },
-};
+}
 
-export default config;
+export default config

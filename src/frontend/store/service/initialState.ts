@@ -1,26 +1,26 @@
-import type { TunnelProvider } from "@c2jy/tunnel-core";
+import type { TunnelProvider } from '@c2jy/tunnel-core'
 
 export interface ServiceState {
   /** Coze API 服务是否在运行 */
-  isRunning: boolean;
+  isRunning: boolean
   /** 服务监听端口 */
-  port: number;
+  port: number
   /** 服务启/停操作是否进行中 */
-  isLoading: boolean;
+  isLoading: boolean
   /** ngrok 是否在运行 */
-  ngrokRunning: boolean;
+  ngrokRunning: boolean
   /** ngrok 公网 URL */
-  ngrokUrl: string;
+  ngrokUrl: string
   /** ngrok 操作是否进行中 */
-  ngrokLoading: boolean;
+  ngrokLoading: boolean
   /** Cloudflare Tunnel 是否在运行 */
-  cloudflareRunning: boolean;
+  cloudflareRunning: boolean
   /** Cloudflare 公网 URL */
-  cloudflareUrl: string;
+  cloudflareUrl: string
   /** Cloudflare 操作是否进行中 */
-  cloudflareLoading: boolean;
+  cloudflareLoading: boolean
   /** 当前展开的隧道提供商（null = 未选择） */
-  selectedTunnelProvider: TunnelProvider | null;
+  selectedTunnelProvider: TunnelProvider | null
 }
 
 export const initialServiceState: ServiceState = {
@@ -28,10 +28,10 @@ export const initialServiceState: ServiceState = {
   port: 20211,
   isLoading: false,
   ngrokRunning: false,
-  ngrokUrl: "",
+  ngrokUrl: '',
   ngrokLoading: false,
   cloudflareRunning: false,
-  cloudflareUrl: "",
+  cloudflareUrl: '',
   cloudflareLoading: false,
   selectedTunnelProvider: null,
-};
+}

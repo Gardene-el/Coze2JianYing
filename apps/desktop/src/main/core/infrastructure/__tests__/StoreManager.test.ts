@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { App as AppCore } from '../../App';
-import { StoreManager } from '../StoreManager';
+import type { App as AppCore } from '../../App'
+import { StoreManager } from '../StoreManager'
 
 // Use vi.hoisted to define mocks before hoisting
 const { mockStoreInstance, mockMakeSureDirExist, MockStore } = vi.hoisted(() => {
@@ -9,27 +9,27 @@ const { mockStoreInstance, mockMakeSureDirExist, MockStore } = vi.hoisted(() => 
     clear: vi.fn(),
     delete: vi.fn(),
     get: vi.fn().mockImplementation((key: string, defaultValue?: any) => {
-      if (key === 'storagePath') return '/mock/storage/path';
-      return defaultValue;
+      if (key === 'storagePath') return '/mock/storage/path'
+      return defaultValue
     }),
     has: vi.fn().mockReturnValue(false),
     openInEditor: vi.fn().mockResolvedValue(undefined),
     set: vi.fn(),
-  };
+  }
 
-  const MockStore = vi.fn().mockImplementation(() => mockStoreInstance);
+  const MockStore = vi.fn().mockImplementation(() => mockStoreInstance)
 
   return {
     MockStore,
     mockMakeSureDirExist: vi.fn(),
     mockStoreInstance,
-  };
-});
+  }
+})
 
 // Mock electron-store
 vi.mock('electron-store', () => ({
   default: MockStore,
-}));
+}))
 
 // Mock logger
 vi.mock('@/utils/logger', () => ({
@@ -39,12 +39,12 @@ vi.mock('@/utils/logger', () => ({
     info: vi.fn(),
     warn: vi.fn(),
   }),
-}));
+}))
 
 // Mock file-system utils
 vi.mock('@/utils/file-system', () => ({
   makeSureDirExist: mockMakeSureDirExist,
-}));
+}))
 
 // Mock store constants
 vi.mock('@/const/store', () => ({
@@ -53,27 +53,27 @@ vi.mock('@/const/store', () => ({
     storagePath: '/default/storage/path',
   },
   STORE_NAME: 'test-config',
-}));
+}))
 
 describe('StoreManager', () => {
-  let manager: StoreManager;
-  let mockAppCore: AppCore;
+  let manager: StoreManager
+  let mockAppCore: AppCore
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks()
 
     // Reset store mock behaviors
     mockStoreInstance.get.mockImplementation((key: string, defaultValue?: any) => {
-      if (key === 'storagePath') return '/mock/storage/path';
-      return defaultValue;
-    });
-    mockStoreInstance.has.mockReturnValue(false);
+      if (key === 'storagePath') return '/mock/storage/path'
+      return defaultValue
+    })
+    mockStoreInstance.has.mockReturnValue(false)
 
     // Create mock App core
-    mockAppCore = {} as unknown as AppCore;
+    mockAppCore = {} as unknown as AppCore
 
-    manager = new StoreManager(mockAppCore);
-  });
+    manager = new StoreManager(mockAppCore)
+  })
 
   describe('constructor', () => {
     it('should create electron-store with correct options', () => {
@@ -83,82 +83,82 @@ describe('StoreManager', () => {
           storagePath: '/default/storage/path',
         },
         name: 'test-config',
-      });
-    });
+      })
+    })
 
     it('should ensure storage directory exists', () => {
-      expect(mockMakeSureDirExist).toHaveBeenCalledWith('/mock/storage/path');
-    });
-  });
+      expect(mockMakeSureDirExist).toHaveBeenCalledWith('/mock/storage/path')
+    })
+  })
 
   describe('get', () => {
     it('should call store.get with key', () => {
-      mockStoreInstance.get.mockReturnValue('test-value');
+      mockStoreInstance.get.mockReturnValue('test-value')
 
-      const result = manager.get('locale' as any);
+      const result = manager.get('locale' as any)
 
-      expect(mockStoreInstance.get).toHaveBeenCalledWith('locale', undefined);
-      expect(result).toBe('test-value');
-    });
+      expect(mockStoreInstance.get).toHaveBeenCalledWith('locale', undefined)
+      expect(result).toBe('test-value')
+    })
 
     it('should call store.get with key and default value', () => {
-      mockStoreInstance.get.mockImplementation((_key: string, defaultValue?: any) => defaultValue);
+      mockStoreInstance.get.mockImplementation((_key: string, defaultValue?: any) => defaultValue)
 
-      const result = manager.get('locale' as any, 'en-US' as any);
+      const result = manager.get('locale' as any, 'en-US' as any)
 
-      expect(mockStoreInstance.get).toHaveBeenCalledWith('locale', 'en-US');
-      expect(result).toBe('en-US');
-    });
-  });
+      expect(mockStoreInstance.get).toHaveBeenCalledWith('locale', 'en-US')
+      expect(result).toBe('en-US')
+    })
+  })
 
   describe('set', () => {
     it('should call store.set with key and value', () => {
-      manager.set('locale' as any, 'zh-CN' as any);
+      manager.set('locale' as any, 'zh-CN' as any)
 
-      expect(mockStoreInstance.set).toHaveBeenCalledWith('locale', 'zh-CN');
-    });
-  });
+      expect(mockStoreInstance.set).toHaveBeenCalledWith('locale', 'zh-CN')
+    })
+  })
 
   describe('delete', () => {
     it('should call store.delete with key', () => {
-      manager.delete('locale' as any);
+      manager.delete('locale' as any)
 
-      expect(mockStoreInstance.delete).toHaveBeenCalledWith('locale');
-    });
-  });
+      expect(mockStoreInstance.delete).toHaveBeenCalledWith('locale')
+    })
+  })
 
   describe('clear', () => {
     it('should call store.clear', () => {
-      manager.clear();
+      manager.clear()
 
-      expect(mockStoreInstance.clear).toHaveBeenCalled();
-    });
-  });
+      expect(mockStoreInstance.clear).toHaveBeenCalled()
+    })
+  })
 
   describe('has', () => {
     it('should return true when key exists', () => {
-      mockStoreInstance.has.mockReturnValue(true);
+      mockStoreInstance.has.mockReturnValue(true)
 
-      const result = manager.has('locale' as any);
+      const result = manager.has('locale' as any)
 
-      expect(mockStoreInstance.has).toHaveBeenCalledWith('locale');
-      expect(result).toBe(true);
-    });
+      expect(mockStoreInstance.has).toHaveBeenCalledWith('locale')
+      expect(result).toBe(true)
+    })
 
     it('should return false when key does not exist', () => {
-      mockStoreInstance.has.mockReturnValue(false);
+      mockStoreInstance.has.mockReturnValue(false)
 
-      const result = manager.has('nonExistent' as any);
+      const result = manager.has('nonExistent' as any)
 
-      expect(result).toBe(false);
-    });
-  });
+      expect(result).toBe(false)
+    })
+  })
 
   describe('openInEditor', () => {
     it('should call store.openInEditor', async () => {
-      await manager.openInEditor();
+      await manager.openInEditor()
 
-      expect(mockStoreInstance.openInEditor).toHaveBeenCalled();
-    });
-  });
-});
+      expect(mockStoreInstance.openInEditor).toHaveBeenCalled()
+    })
+  })
+})

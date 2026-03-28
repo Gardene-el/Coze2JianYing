@@ -1,6 +1,6 @@
-import type { Key, ReactNode } from "react";
-import { AccordionItem, Flexbox } from "@lobehub/ui";
-import { createStaticStyles } from "antd-style";
+import { AccordionItem, Flexbox } from '@lobehub/ui'
+import { createStaticStyles } from 'antd-style'
+import type { Key, ReactNode } from 'react'
 
 const styles = createStaticStyles(({ css }) => ({
   icon: css`
@@ -14,21 +14,16 @@ const styles = createStaticStyles(({ css }) => ({
     letter-spacing: 0.04em;
     text-transform: uppercase;
   `,
-}));
+}))
 
 interface CollapsibleNavGroupProps {
-  groupKey: Key;
-  title: string;
-  icon?: ReactNode;
-  children: ReactNode;
+  groupKey: Key
+  title: string
+  icon?: ReactNode
+  children: ReactNode
 }
 
-const CollapsibleNavGroup = ({
-  groupKey,
-  title,
-  icon,
-  children,
-}: CollapsibleNavGroupProps) => {
+const CollapsibleNavGroup = ({ groupKey, title, icon, children }: CollapsibleNavGroupProps) => {
   return (
     <AccordionItem
       itemKey={groupKey}
@@ -43,7 +38,7 @@ const CollapsibleNavGroup = ({
     >
       {children}
     </AccordionItem>
-  );
-};
+  )
+}
 
-export default CollapsibleNavGroup;
+export default CollapsibleNavGroup

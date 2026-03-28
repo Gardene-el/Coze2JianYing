@@ -1,64 +1,64 @@
-import type { MainBroadcastEventKey, MainBroadcastParams } from '@lobechat/electron-client-ipc';
+import type { MainBroadcastEventKey, MainBroadcastParams } from '@lobechat/electron-client-ipc'
 
-import { name } from '@/../../package.json';
-import { createLogger } from '@/utils/logger';
+import { name } from '@/../../package.json'
+import { createLogger } from '@/utils/logger'
 
-import type { App } from '../App';
-import type { TrayOptions } from './Tray';
-import { Tray } from './Tray';
+import type { App } from '../App'
+import type { TrayOptions } from './Tray'
+import { Tray } from './Tray'
 
 // Create logger
-const logger = createLogger('core:TrayManager');
+const logger = createLogger('core:TrayManager')
 
 /**
  * Tray identifier type
  */
-export type TrayIdentifiers = 'main';
+export type TrayIdentifiers = 'main'
 
 export class TrayManager {
-  app: App;
+  app: App
 
   /**
    * Store all tray instances
    */
-  trays: Map<TrayIdentifiers, Tray> = new Map();
+  trays: Map<TrayIdentifiers, Tray> = new Map()
 
   /**
    * Constructor
    * @param app Application instance
    */
   constructor(app: App) {
-    logger.debug('Initialize TrayManager');
-    this.app = app;
+    logger.debug('Initialize TrayManager')
+    this.app = app
   }
 
   /**
    * Initialize all trays
    */
   initializeTrays() {
-    logger.debug('Initialize application tray');
+    logger.debug('Initialize application tray')
 
     // Initialize main tray
-    this.initializeMainTray();
+    this.initializeMainTray()
   }
 
   /**
    * Get main tray
    */
   getMainTray() {
-    return this.retrieveByIdentifier('main');
+    return this.retrieveByIdentifier('main')
   }
 
   /**
    * Initialize main tray
    */
   initializeMainTray() {
-    logger.debug('Initialize main tray');
+    logger.debug('Initialize main tray')
     return this.retrieveOrInitialize({
       iconPath: 'tray.png',
       identifier: 'main',
       tooltip: name,
-    });
+    })
   }
 
   /**
@@ -66,8 +66,8 @@ export class TrayManager {
    * @param identifier Tray identifier
    */
   retrieveByIdentifier(identifier: TrayIdentifiers) {
-    logger.debug(`Retrieving tray by identifier: ${identifier}`);
-    return this.trays.get(identifier);
+    logger.debug(`Retrieving tray by identifier: ${identifier}`)
+    return this.trays.get(identifier)
   }
 
   /**
@@ -79,11 +79,11 @@ export class TrayManager {
     event: T,
     data: MainBroadcastParams<T>,
   ) => {
-    logger.debug(`Broadcasting event ${event} to all trays`);
+    logger.debug(`Broadcasting event ${event} to all trays`)
     this.trays.forEach((tray) => {
-      tray.broadcast(event, data);
-    });
-  };
+      tray.broadcast(event, data)
+    })
+  }
 
   /**
    * Broadcast a message to a specific tray
@@ -96,37 +96,37 @@ export class TrayManager {
     event: T,
     data: MainBroadcastParams<T>,
   ) => {
-    logger.debug(`Broadcasting event ${event} to tray ${identifier}`);
-    this.trays.get(identifier)?.broadcast(event, data);
-  };
+    logger.debug(`Broadcasting event ${event} to tray ${identifier}`)
+    this.trays.get(identifier)?.broadcast(event, data)
+  }
 
   /**
    * Retrieve or create a tray instance
    * @param options Tray options
    */
   private retrieveOrInitialize(options: TrayOptions) {
-    let tray = this.trays.get(options.identifier as TrayIdentifiers);
+    let tray = this.trays.get(options.identifier as TrayIdentifiers)
     if (tray) {
-      logger.debug(`Retrieved existing tray: ${options.identifier}`);
-      return tray;
+      logger.debug(`Retrieved existing tray: ${options.identifier}`)
+      return tray
     }
 
-    logger.debug(`Creating new tray: ${options.identifier}`);
-    tray = new Tray(options, this.app);
+    logger.debug(`Creating new tray: ${options.identifier}`)
+    tray = new Tray(options, this.app)
 
-    this.trays.set(options.identifier as TrayIdentifiers, tray);
+    this.trays.set(options.identifier as TrayIdentifiers, tray)
 
-    return tray;
+    return tray
   }
 
   /**
    * Destroy all trays
    */
   destroyAll() {
-    logger.debug('Destroying all trays');
+    logger.debug('Destroying all trays')
     this.trays.forEach((tray) => {
-      tray.destroy();
-    });
-    this.trays.clear();
+      tray.destroy()
+    })
+    this.trays.clear()
   }
 }

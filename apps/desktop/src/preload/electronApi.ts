@@ -1,8 +1,8 @@
-import { electronAPI } from '@electron-toolkit/preload';
-import { contextBridge } from 'electron';
+import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge } from 'electron'
 
-import { invoke } from './invoke';
-import { onStreamInvoke } from './streamer';
+import { invoke } from './invoke'
+import { onStreamInvoke } from './streamer'
 
 export const setupElectronApi = () => {
   // Use `contextBridge` APIs to expose Electron APIs to
@@ -10,17 +10,17 @@ export const setupElectronApi = () => {
   // just add to the DOM global.
 
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI);
+    contextBridge.exposeInMainWorld('electron', electronAPI)
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 
   contextBridge.exposeInMainWorld('electronAPI', {
     invoke,
     onStreamInvoke,
-  });
+  })
 
   contextBridge.exposeInMainWorld('lobeEnv', {
     platform: process.platform,
-  });
-};
+  })
+}

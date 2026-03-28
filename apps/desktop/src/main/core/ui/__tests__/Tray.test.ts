@@ -1,8 +1,8 @@
-import { app, Menu, nativeImage,Tray as ElectronTray } from 'electron';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { app, Tray as ElectronTray, Menu, nativeImage } from 'electron'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { App } from '../../App';
-import { Tray } from '../Tray';
+import type { App } from '../../App'
+import { Tray } from '../Tray'
 
 // Mock electron modules
 vi.mock('electron', () => ({
@@ -16,7 +16,7 @@ vi.mock('electron', () => ({
   app: {
     quit: vi.fn(),
   },
-}));
+}))
 
 // Mock logger
 vi.mock('@/utils/logger', () => ({
@@ -26,22 +26,22 @@ vi.mock('@/utils/logger', () => ({
     warn: vi.fn(),
     error: vi.fn(),
   }),
-}));
+}))
 
 // Mock dir constants
 vi.mock('@/const/dir', () => ({
   resourcesDir: '/mock/resources',
-}));
+}))
 
 describe('Tray', () => {
-  let tray: Tray;
-  let mockApp: App;
-  let mockElectronTray: any;
-  let mockBrowserWindow: any;
-  let mockMainWindow: any;
+  let tray: Tray
+  let mockApp: App
+  let mockElectronTray: any
+  let mockBrowserWindow: any
+  let mockMainWindow: any
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks()
 
     // Mock Electron Tray instance
     mockElectronTray = {
@@ -51,14 +51,14 @@ describe('Tray', () => {
       on: vi.fn(),
       destroy: vi.fn(),
       displayBalloon: vi.fn(),
-    };
+    }
 
     // Mock BrowserWindow
     mockBrowserWindow = {
       isVisible: vi.fn(),
       isFocused: vi.fn(),
       focus: vi.fn(),
-    };
+    }
 
     // Mock MainWindow
     mockMainWindow = {
@@ -66,7 +66,7 @@ describe('Tray', () => {
       hide: vi.fn(),
       show: vi.fn(),
       broadcast: vi.fn(),
-    };
+    }
 
     // Mock App
     mockApp = {
@@ -74,13 +74,13 @@ describe('Tray', () => {
         showMainWindow: vi.fn(),
         getMainWindow: vi.fn(() => mockMainWindow),
       },
-    } as unknown as App;
+    } as unknown as App
 
     // Mock electron constructors
-    vi.mocked(ElectronTray).mockImplementation(() => mockElectronTray);
-    vi.mocked(nativeImage.createFromPath).mockReturnValue({} as any);
-    vi.mocked(Menu.buildFromTemplate).mockReturnValue({} as any);
-  });
+    vi.mocked(ElectronTray).mockImplementation(() => mockElectronTray)
+    vi.mocked(nativeImage.createFromPath).mockReturnValue({} as any)
+    vi.mocked(Menu.buildFromTemplate).mockReturnValue({} as any)
+  })
 
   describe('constructor', () => {
     it('should initialize tray with provided options', () => {
@@ -91,12 +91,12 @@ describe('Tray', () => {
           tooltip: 'Test Tray',
         },
         mockApp,
-      );
+      )
 
-      expect(tray.identifier).toBe('test-tray');
-      expect(tray.options.iconPath).toBe('tray.png');
-      expect(tray.options.tooltip).toBe('Test Tray');
-    });
+      expect(tray.identifier).toBe('test-tray')
+      expect(tray.options.iconPath).toBe('tray.png')
+      expect(tray.options.tooltip).toBe('Test Tray')
+    })
 
     it('should call retrieveOrInitialize during construction', () => {
       tray = new Tray(
@@ -105,12 +105,12 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
+      )
 
-      expect(nativeImage.createFromPath).toHaveBeenCalledWith('/mock/resources/tray.png');
-      expect(ElectronTray).toHaveBeenCalled();
-    });
-  });
+      expect(nativeImage.createFromPath).toHaveBeenCalledWith('/mock/resources/tray.png')
+      expect(ElectronTray).toHaveBeenCalled()
+    })
+  })
 
   describe('retrieveOrInitialize', () => {
     it('should create new tray instance with icon and tooltip', () => {
@@ -121,12 +121,12 @@ describe('Tray', () => {
           tooltip: 'Test Tray',
         },
         mockApp,
-      );
+      )
 
-      expect(nativeImage.createFromPath).toHaveBeenCalledWith('/mock/resources/tray.png');
-      expect(ElectronTray).toHaveBeenCalled();
-      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('Test Tray');
-    });
+      expect(nativeImage.createFromPath).toHaveBeenCalledWith('/mock/resources/tray.png')
+      expect(ElectronTray).toHaveBeenCalled()
+      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('Test Tray')
+    })
 
     it('should not set tooltip if not provided', () => {
       tray = new Tray(
@@ -135,10 +135,10 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
+      )
 
-      expect(mockElectronTray.setToolTip).not.toHaveBeenCalled();
-    });
+      expect(mockElectronTray.setToolTip).not.toHaveBeenCalled()
+    })
 
     it('should return existing tray instance if already created', () => {
       tray = new Tray(
@@ -147,14 +147,14 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
+      )
 
-      const firstTray = tray.tray;
-      const secondTray = tray.tray;
+      const firstTray = tray.tray
+      const secondTray = tray.tray
 
-      expect(firstTray).toBe(secondTray);
-      expect(ElectronTray).toHaveBeenCalledTimes(1);
-    });
+      expect(firstTray).toBe(secondTray)
+      expect(ElectronTray).toHaveBeenCalledTimes(1)
+    })
 
     it('should register click event handler', () => {
       tray = new Tray(
@@ -163,10 +163,10 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
+      )
 
-      expect(mockElectronTray.on).toHaveBeenCalledWith('click', expect.any(Function));
-    });
+      expect(mockElectronTray.on).toHaveBeenCalledWith('click', expect.any(Function))
+    })
 
     it('should set default context menu', () => {
       tray = new Tray(
@@ -175,17 +175,17 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
+      )
 
-      expect(Menu.buildFromTemplate).toHaveBeenCalled();
-      expect(mockElectronTray.setContextMenu).toHaveBeenCalled();
-    });
+      expect(Menu.buildFromTemplate).toHaveBeenCalled()
+      expect(mockElectronTray.setContextMenu).toHaveBeenCalled()
+    })
 
     it('should handle errors when creating tray', () => {
-      const error = new Error('Failed to create tray');
+      const error = new Error('Failed to create tray')
       vi.mocked(ElectronTray).mockImplementation(() => {
-        throw error;
-      });
+        throw error
+      })
 
       expect(() => {
         tray = new Tray(
@@ -194,10 +194,10 @@ describe('Tray', () => {
             identifier: 'test-tray',
           },
           mockApp,
-        );
-      }).toThrow(error);
-    });
-  });
+        )
+      }).toThrow(error)
+    })
+  })
 
   describe('setContextMenu', () => {
     beforeEach(() => {
@@ -207,12 +207,12 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-      vi.clearAllMocks();
-    });
+      )
+      vi.clearAllMocks()
+    })
 
     it('should set default context menu when no template provided', () => {
-      tray.setContextMenu();
+      tray.setContextMenu()
 
       expect(Menu.buildFromTemplate).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -220,44 +220,44 @@ describe('Tray', () => {
           expect.objectContaining({ type: 'separator' }),
           expect.objectContaining({ label: 'Quit' }),
         ]),
-      );
-      expect(mockElectronTray.setContextMenu).toHaveBeenCalled();
-    });
+      )
+      expect(mockElectronTray.setContextMenu).toHaveBeenCalled()
+    })
 
     it('should set custom context menu when template provided', () => {
       const customTemplate = [
         { label: 'Custom Item 1', click: vi.fn() },
         { label: 'Custom Item 2', click: vi.fn() },
-      ];
+      ]
 
-      tray.setContextMenu(customTemplate);
+      tray.setContextMenu(customTemplate)
 
-      expect(Menu.buildFromTemplate).toHaveBeenCalledWith(customTemplate);
-      expect(mockElectronTray.setContextMenu).toHaveBeenCalled();
-    });
+      expect(Menu.buildFromTemplate).toHaveBeenCalledWith(customTemplate)
+      expect(mockElectronTray.setContextMenu).toHaveBeenCalled()
+    })
 
     it('should call showMainWindow when Show Main Window is clicked', () => {
-      tray.setContextMenu();
+      tray.setContextMenu()
 
-      const templateArg = vi.mocked(Menu.buildFromTemplate).mock.calls[0][0];
-      const showMainWindowItem = templateArg.find((item: any) => item.label === 'Show Main Window');
+      const templateArg = vi.mocked(Menu.buildFromTemplate).mock.calls[0][0]
+      const showMainWindowItem = templateArg.find((item: any) => item.label === 'Show Main Window')
 
-      showMainWindowItem?.click?.(null as any, null as any, null as any);
+      showMainWindowItem?.click?.(null as any, null as any, null as any)
 
-      expect(mockApp.browserManager.showMainWindow).toHaveBeenCalled();
-    });
+      expect(mockApp.browserManager.showMainWindow).toHaveBeenCalled()
+    })
 
     it('should call app.quit when Quit is clicked', () => {
-      tray.setContextMenu();
+      tray.setContextMenu()
 
-      const templateArg = vi.mocked(Menu.buildFromTemplate).mock.calls[0][0];
-      const quitItem = templateArg.find((item: any) => item.label === 'Quit');
+      const templateArg = vi.mocked(Menu.buildFromTemplate).mock.calls[0][0]
+      const quitItem = templateArg.find((item: any) => item.label === 'Quit')
 
-      quitItem?.click?.(null as any, null as any, null as any);
+      quitItem?.click?.(null as any, null as any, null as any)
 
-      expect(app.quit).toHaveBeenCalled();
-    });
-  });
+      expect(app.quit).toHaveBeenCalled()
+    })
+  })
 
   describe('onClick', () => {
     beforeEach(() => {
@@ -267,47 +267,47 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-    });
+      )
+    })
 
     it('should hide window when it is visible and focused', () => {
-      mockBrowserWindow.isVisible.mockReturnValue(true);
-      mockBrowserWindow.isFocused.mockReturnValue(true);
+      mockBrowserWindow.isVisible.mockReturnValue(true)
+      mockBrowserWindow.isFocused.mockReturnValue(true)
 
-      tray.onClick();
+      tray.onClick()
 
-      expect(mockMainWindow.hide).toHaveBeenCalled();
-      expect(mockMainWindow.show).not.toHaveBeenCalled();
-    });
+      expect(mockMainWindow.hide).toHaveBeenCalled()
+      expect(mockMainWindow.show).not.toHaveBeenCalled()
+    })
 
     it('should show and focus window when it is not visible', () => {
-      mockBrowserWindow.isVisible.mockReturnValue(false);
-      mockBrowserWindow.isFocused.mockReturnValue(false);
+      mockBrowserWindow.isVisible.mockReturnValue(false)
+      mockBrowserWindow.isFocused.mockReturnValue(false)
 
-      tray.onClick();
+      tray.onClick()
 
-      expect(mockMainWindow.show).toHaveBeenCalled();
-      expect(mockBrowserWindow.focus).toHaveBeenCalled();
-      expect(mockMainWindow.hide).not.toHaveBeenCalled();
-    });
+      expect(mockMainWindow.show).toHaveBeenCalled()
+      expect(mockBrowserWindow.focus).toHaveBeenCalled()
+      expect(mockMainWindow.hide).not.toHaveBeenCalled()
+    })
 
     it('should show and focus window when it is visible but not focused', () => {
-      mockBrowserWindow.isVisible.mockReturnValue(true);
-      mockBrowserWindow.isFocused.mockReturnValue(false);
+      mockBrowserWindow.isVisible.mockReturnValue(true)
+      mockBrowserWindow.isFocused.mockReturnValue(false)
 
-      tray.onClick();
+      tray.onClick()
 
-      expect(mockMainWindow.show).toHaveBeenCalled();
-      expect(mockBrowserWindow.focus).toHaveBeenCalled();
-      expect(mockMainWindow.hide).not.toHaveBeenCalled();
-    });
+      expect(mockMainWindow.show).toHaveBeenCalled()
+      expect(mockBrowserWindow.focus).toHaveBeenCalled()
+      expect(mockMainWindow.hide).not.toHaveBeenCalled()
+    })
 
     it('should handle case when main window is null', () => {
-      vi.mocked(mockApp.browserManager.getMainWindow).mockReturnValue(null);
+      vi.mocked(mockApp.browserManager.getMainWindow).mockReturnValue(null)
 
-      expect(() => tray.onClick()).not.toThrow();
-    });
-  });
+      expect(() => tray.onClick()).not.toThrow()
+    })
+  })
 
   describe('updateIcon', () => {
     beforeEach(() => {
@@ -317,30 +317,30 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-      vi.clearAllMocks();
-    });
+      )
+      vi.clearAllMocks()
+    })
 
     it('should update tray icon successfully', () => {
-      const newIcon = {};
-      vi.mocked(nativeImage.createFromPath).mockReturnValue(newIcon as any);
+      const newIcon = {}
+      vi.mocked(nativeImage.createFromPath).mockReturnValue(newIcon as any)
 
-      tray.updateIcon('new-icon.png');
+      tray.updateIcon('new-icon.png')
 
-      expect(nativeImage.createFromPath).toHaveBeenCalledWith('/mock/resources/new-icon.png');
-      expect(mockElectronTray.setImage).toHaveBeenCalledWith(newIcon);
-      expect(tray.options.iconPath).toBe('new-icon.png');
-    });
+      expect(nativeImage.createFromPath).toHaveBeenCalledWith('/mock/resources/new-icon.png')
+      expect(mockElectronTray.setImage).toHaveBeenCalledWith(newIcon)
+      expect(tray.options.iconPath).toBe('new-icon.png')
+    })
 
     it('should handle errors when updating icon', () => {
-      const error = new Error('Failed to load icon');
+      const error = new Error('Failed to load icon')
       vi.mocked(nativeImage.createFromPath).mockImplementation(() => {
-        throw error;
-      });
+        throw error
+      })
 
-      expect(() => tray.updateIcon('bad-icon.png')).not.toThrow();
-    });
-  });
+      expect(() => tray.updateIcon('bad-icon.png')).not.toThrow()
+    })
+  })
 
   describe('updateTooltip', () => {
     beforeEach(() => {
@@ -350,23 +350,23 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-    });
+      )
+    })
 
     it('should update tray tooltip successfully', () => {
-      tray.updateTooltip('New Tooltip');
+      tray.updateTooltip('New Tooltip')
 
-      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('New Tooltip');
-      expect(tray.options.tooltip).toBe('New Tooltip');
-    });
-  });
+      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('New Tooltip')
+      expect(tray.options.tooltip).toBe('New Tooltip')
+    })
+  })
 
   describe('displayBalloon', () => {
-    const originalPlatform = process.platform;
+    const originalPlatform = process.platform
 
     afterEach(() => {
-      Object.defineProperty(process, 'platform', { value: originalPlatform });
-    });
+      Object.defineProperty(process, 'platform', { value: originalPlatform })
+    })
 
     beforeEach(() => {
       tray = new Tray(
@@ -375,48 +375,48 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-    });
+      )
+    })
 
     it('should display balloon notification on Windows', () => {
-      Object.defineProperty(process, 'platform', { value: 'win32' });
+      Object.defineProperty(process, 'platform', { value: 'win32' })
 
       const options = {
         title: 'Test',
         content: 'Test content',
-      };
+      }
 
-      tray.displayBalloon(options);
+      tray.displayBalloon(options)
 
-      expect(mockElectronTray.displayBalloon).toHaveBeenCalledWith(options);
-    });
+      expect(mockElectronTray.displayBalloon).toHaveBeenCalledWith(options)
+    })
 
     it('should not display balloon notification on macOS', () => {
-      Object.defineProperty(process, 'platform', { value: 'darwin' });
+      Object.defineProperty(process, 'platform', { value: 'darwin' })
 
       const options = {
         title: 'Test',
         content: 'Test content',
-      };
+      }
 
-      tray.displayBalloon(options);
+      tray.displayBalloon(options)
 
-      expect(mockElectronTray.displayBalloon).not.toHaveBeenCalled();
-    });
+      expect(mockElectronTray.displayBalloon).not.toHaveBeenCalled()
+    })
 
     it('should not display balloon notification on Linux', () => {
-      Object.defineProperty(process, 'platform', { value: 'linux' });
+      Object.defineProperty(process, 'platform', { value: 'linux' })
 
       const options = {
         title: 'Test',
         content: 'Test content',
-      };
+      }
 
-      tray.displayBalloon(options);
+      tray.displayBalloon(options)
 
-      expect(mockElectronTray.displayBalloon).not.toHaveBeenCalled();
-    });
-  });
+      expect(mockElectronTray.displayBalloon).not.toHaveBeenCalled()
+    })
+  })
 
   describe('broadcast', () => {
     beforeEach(() => {
@@ -426,25 +426,25 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-    });
+      )
+    })
 
     it('should broadcast message to main window', () => {
-      const channel = 'test-channel' as any;
-      const data = { test: 'data' };
+      const channel = 'test-channel' as any
+      const data = { test: 'data' }
 
-      tray.broadcast(channel, data);
+      tray.broadcast(channel, data)
 
-      expect(mockApp.browserManager.getMainWindow).toHaveBeenCalled();
-      expect(mockMainWindow.broadcast).toHaveBeenCalledWith(channel, data);
-    });
+      expect(mockApp.browserManager.getMainWindow).toHaveBeenCalled()
+      expect(mockMainWindow.broadcast).toHaveBeenCalledWith(channel, data)
+    })
 
     it('should handle case when main window is null', () => {
-      vi.mocked(mockApp.browserManager.getMainWindow).mockReturnValue(null);
+      vi.mocked(mockApp.browserManager.getMainWindow).mockReturnValue(null)
 
-      expect(() => tray.broadcast('test-channel' as any)).not.toThrow();
-    });
-  });
+      expect(() => tray.broadcast('test-channel' as any)).not.toThrow()
+    })
+  })
 
   describe('destroy', () => {
     beforeEach(() => {
@@ -454,32 +454,32 @@ describe('Tray', () => {
           identifier: 'test-tray',
         },
         mockApp,
-      );
-    });
+      )
+    })
 
     it('should destroy tray instance', () => {
-      tray.destroy();
+      tray.destroy()
 
-      expect(mockElectronTray.destroy).toHaveBeenCalled();
-    });
+      expect(mockElectronTray.destroy).toHaveBeenCalled()
+    })
 
     it('should handle multiple destroy calls', () => {
-      tray.destroy();
-      tray.destroy();
+      tray.destroy()
+      tray.destroy()
 
-      expect(mockElectronTray.destroy).toHaveBeenCalledTimes(1);
-    });
+      expect(mockElectronTray.destroy).toHaveBeenCalledTimes(1)
+    })
 
     it('should allow creating new tray after destroy', () => {
-      tray.destroy();
-      vi.clearAllMocks();
+      tray.destroy()
+      vi.clearAllMocks()
 
-      const newTray = tray.tray;
+      const newTray = tray.tray
 
-      expect(newTray).toBeDefined();
-      expect(ElectronTray).toHaveBeenCalled();
-    });
-  });
+      expect(newTray).toBeDefined()
+      expect(ElectronTray).toHaveBeenCalled()
+    })
+  })
 
   describe('integration tests', () => {
     it('should handle complete tray lifecycle', () => {
@@ -490,29 +490,29 @@ describe('Tray', () => {
           tooltip: 'Test Tray',
         },
         mockApp,
-      );
+      )
 
       // Verify creation
-      expect(tray.tray).toBeDefined();
-      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('Test Tray');
+      expect(tray.tray).toBeDefined()
+      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('Test Tray')
 
       // Update icon
-      tray.updateIcon('new-icon.png');
-      expect(mockElectronTray.setImage).toHaveBeenCalled();
+      tray.updateIcon('new-icon.png')
+      expect(mockElectronTray.setImage).toHaveBeenCalled()
 
       // Update tooltip
-      tray.updateTooltip('New Tooltip');
-      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('New Tooltip');
+      tray.updateTooltip('New Tooltip')
+      expect(mockElectronTray.setToolTip).toHaveBeenCalledWith('New Tooltip')
 
       // Test click behavior
-      mockBrowserWindow.isVisible.mockReturnValue(true);
-      mockBrowserWindow.isFocused.mockReturnValue(true);
-      tray.onClick();
-      expect(mockMainWindow.hide).toHaveBeenCalled();
+      mockBrowserWindow.isVisible.mockReturnValue(true)
+      mockBrowserWindow.isFocused.mockReturnValue(true)
+      tray.onClick()
+      expect(mockMainWindow.hide).toHaveBeenCalled()
 
       // Destroy
-      tray.destroy();
-      expect(mockElectronTray.destroy).toHaveBeenCalled();
-    });
-  });
-});
+      tray.destroy()
+      expect(mockElectronTray.destroy).toHaveBeenCalled()
+    })
+  })
+})

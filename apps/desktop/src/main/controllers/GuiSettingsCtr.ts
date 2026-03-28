@@ -1,11 +1,11 @@
-import type { EffectivePaths, GuiSettings } from '@/types/store';
-import { DEFAULT_GUI_SETTINGS } from '@/const/store';
-import { pathResolverService } from '@/utils/pathResolver';
-import { createLogger } from '@/utils/logger';
+import { DEFAULT_GUI_SETTINGS } from '@/const/store'
+import type { EffectivePaths, GuiSettings } from '@/types/store'
+import { createLogger } from '@/utils/logger'
+import { pathResolverService } from '@/utils/pathResolver'
 
-import { ControllerModule, IpcMethod } from './index';
+import { ControllerModule, IpcMethod } from './index'
 
-const logger = createLogger('controllers:GuiSettingsCtr');
+const logger = createLogger('controllers:GuiSettingsCtr')
 
 /**
  * IPC controller for persisting GUI settings in electron-store.
@@ -19,21 +19,21 @@ const logger = createLogger('controllers:GuiSettingsCtr');
  *   guiSettings.detectDefaultDraftFolder — auto-detect JianyingPro draft folder
  */
 export default class GuiSettingsCtr extends ControllerModule {
-  static override readonly groupName = 'guiSettings';
+  static override readonly groupName = 'guiSettings'
 
   /** IPC: guiSettings.getGuiSettings */
   @IpcMethod()
   getGuiSettings(): GuiSettings {
-    return this.app.storeManager.get('guiSettings') ?? DEFAULT_GUI_SETTINGS;
+    return this.app.storeManager.get('guiSettings') ?? DEFAULT_GUI_SETTINGS
   }
 
   /** IPC: guiSettings.setGuiSettings — merges patch into existing value */
   @IpcMethod()
   setGuiSettings(patch: Partial<GuiSettings>): void {
-    const current = this.app.storeManager.get('guiSettings') ?? DEFAULT_GUI_SETTINGS;
-    const merged: GuiSettings = { ...current, ...patch };
-    this.app.storeManager.set('guiSettings', merged);
-    logger.debug('GuiSettings updated:', Object.keys(patch));
+    const current = this.app.storeManager.get('guiSettings') ?? DEFAULT_GUI_SETTINGS
+    const merged: GuiSettings = { ...current, ...patch }
+    this.app.storeManager.set('guiSettings', merged)
+    logger.debug('GuiSettings updated:', Object.keys(patch))
   }
 
   /**
@@ -45,7 +45,7 @@ export default class GuiSettingsCtr extends ControllerModule {
    */
   @IpcMethod()
   resolveEffectivePaths(settings: GuiSettings): EffectivePaths {
-    return pathResolverService.resolveEffectivePaths(settings);
+    return pathResolverService.resolveEffectivePaths(settings)
   }
 
   /**
@@ -56,6 +56,6 @@ export default class GuiSettingsCtr extends ControllerModule {
    */
   @IpcMethod()
   detectDefaultDraftFolder(): string | null {
-    return pathResolverService.detectDefaultDraftFolder();
+    return pathResolverService.detectDefaultDraftFolder()
   }
 }

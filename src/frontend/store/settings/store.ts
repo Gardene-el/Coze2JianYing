@@ -1,14 +1,11 @@
-import { createWithEqualityFn } from "zustand/traditional";
-import { subscribeWithSelector } from "zustand/middleware";
+import { subscribeWithSelector } from 'zustand/middleware'
+import { createWithEqualityFn } from 'zustand/traditional'
 
-import { devtools } from "@/store/middleware/devtools";
-import { initialSettingsState, type SettingsState } from "./initialState";
-import {
-  createSettingsPersistSlice,
-  type SettingsPersistAction,
-} from "./actions/persist";
+import { devtools } from '@/store/middleware/devtools'
+import { createSettingsPersistSlice, type SettingsPersistAction } from './actions/persist'
+import { initialSettingsState, type SettingsState } from './initialState'
 
-export type SettingsStore = SettingsState & SettingsPersistAction;
+export type SettingsStore = SettingsState & SettingsPersistAction
 
 export const useSettingsStore = createWithEqualityFn<SettingsStore>()(
   subscribeWithSelector(
@@ -17,7 +14,7 @@ export const useSettingsStore = createWithEqualityFn<SettingsStore>()(
         ...initialSettingsState,
         ...createSettingsPersistSlice(...args),
       }),
-      { name: "coze2jianying/settings" },
+      { name: 'coze2jianying/settings' },
     ),
   ),
-);
+)

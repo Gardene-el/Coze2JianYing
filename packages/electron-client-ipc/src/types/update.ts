@@ -1,34 +1,34 @@
-export type UpdateChannel = 'stable' | 'nightly' | 'canary';
+export type UpdateChannel = 'stable' | 'nightly' | 'canary'
 
 export interface ReleaseNoteInfo {
   /**
    * The note.
    */
-  note: string | null;
+  note: string | null
   /**
    * The version.
    */
-  version: string;
+  version: string
 }
 
 export interface ProgressInfo {
-  bytesPerSecond: number;
-  percent: number;
-  total: number;
-  transferred: number;
+  bytesPerSecond: number
+  percent: number
+  total: number
+  transferred: number
 }
 
 export interface UpdateInfo {
-  releaseDate: string;
-  releaseNotes?: string | ReleaseNoteInfo[];
-  version: string;
+  releaseDate: string
+  releaseNotes?: string | ReleaseNoteInfo[]
+  version: string
 }
 
-export type UpdaterStage = 'idle' | 'checking' | 'downloading' | 'downloaded' | 'latest' | 'error';
+export type UpdaterStage = 'idle' | 'checking' | 'downloading' | 'downloaded' | 'latest' | 'error'
 
 export interface UpdaterState {
-  errorMessage?: string;
-  progress?: ProgressInfo;
-  stage: UpdaterStage;
-  updateInfo?: UpdateInfo;
+  errorMessage?: string
+  progress?: ProgressInfo
+  stage: UpdaterStage
+  updateInfo?: UpdateInfo
 }

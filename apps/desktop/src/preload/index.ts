@@ -1,14 +1,14 @@
-import { setupElectronApi } from './electronApi';
-import { setupRouteInterceptors } from './routeInterceptor';
+import { setupElectronApi } from './electronApi'
+import { setupRouteInterceptors } from './routeInterceptor'
 
 const setupPreload = () => {
-  setupElectronApi();
+  setupElectronApi()
 
   // Setup route interception logic
   window.addEventListener('DOMContentLoaded', () => {
     // Setup client-side route interceptor
-    setupRouteInterceptors();
-  });
-};
+    setupRouteInterceptors()
+  })
+}
 
-setupPreload();
+setupPreload()

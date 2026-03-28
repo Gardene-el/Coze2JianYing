@@ -1,10 +1,10 @@
 // apps/desktop/src/main/menus/impl/BaseMenuPlatform.ts
-import type { App } from '@/core/App';
+import type { App } from '@/core/App'
 
 export abstract class BaseMenuPlatform {
-  protected app: App;
+  protected app: App
 
   constructor(app: App) {
-    this.app = app;
+    this.app = app
   }
 }

@@ -1,67 +1,67 @@
-import { extname, join } from 'node:path';
+import { extname, join } from 'node:path'
 
-import { pathExistsSync } from 'fs-extra';
+import { pathExistsSync } from 'fs-extra'
 
-import { rendererDir } from '@/const/dir';
-import { isDev } from '@/const/env';
-import { getDesktopEnv } from '@/env';
-import { createLogger } from '@/utils/logger';
+import { rendererDir } from '@/const/dir'
+import { isDev } from '@/const/env'
+import { getDesktopEnv } from '@/env'
+import { createLogger } from '@/utils/logger'
 
-import { RendererProtocolManager } from './RendererProtocolManager';
+import { RendererProtocolManager } from './RendererProtocolManager'
 
-const logger = createLogger('core:RendererUrlManager');
+const logger = createLogger('core:RendererUrlManager')
 
 // Vite build with root=monorepo preserves input path structure,
 // so index.html ends up at apps/desktop/index.html in outDir.
-const SPA_ENTRY_HTML = join(rendererDir, 'apps', 'desktop', 'index.html');
+const SPA_ENTRY_HTML = join(rendererDir, 'apps', 'desktop', 'index.html')
 
 export class RendererUrlManager {
-  private readonly rendererProtocolManager: RendererProtocolManager;
-  private readonly rendererStaticOverride = getDesktopEnv().DESKTOP_RENDERER_STATIC;
-  private rendererLoadedUrl: string;
+  private readonly rendererProtocolManager: RendererProtocolManager
+  private readonly rendererStaticOverride = getDesktopEnv().DESKTOP_RENDERER_STATIC
+  private rendererLoadedUrl: string
 
   constructor() {
     this.rendererProtocolManager = new RendererProtocolManager({
       rendererDir,
       resolveRendererFilePath: this.resolveRendererFilePath,
-    });
+    })
 
-    this.rendererLoadedUrl = this.rendererProtocolManager.getRendererUrl();
+    this.rendererLoadedUrl = this.rendererProtocolManager.getRendererUrl()
   }
 
   get protocolScheme() {
-    return this.rendererProtocolManager.protocolScheme;
+    return this.rendererProtocolManager.protocolScheme
   }
 
   /**
    * Configure renderer loading strategy for dev/prod
    */
   configureRendererLoader() {
-    const electronRendererUrl = process.env['ELECTRON_RENDERER_URL'];
+    const electronRendererUrl = process.env.ELECTRON_RENDERER_URL
 
     if (isDev && !this.rendererStaticOverride && electronRendererUrl) {
-      this.rendererLoadedUrl = electronRendererUrl;
-      this.setupDevRenderer();
-      return;
+      this.rendererLoadedUrl = electronRendererUrl
+      this.setupDevRenderer()
+      return
     }
 
     if (isDev && !this.rendererStaticOverride && !electronRendererUrl) {
-      logger.warn('Dev mode: ELECTRON_RENDERER_URL not set, falling back to protocol handler');
+      logger.warn('Dev mode: ELECTRON_RENDERER_URL not set, falling back to protocol handler')
     }
 
     if (isDev && this.rendererStaticOverride) {
-      logger.warn('Dev mode: DESKTOP_RENDERER_STATIC enabled, using static renderer handler');
+      logger.warn('Dev mode: DESKTOP_RENDERER_STATIC enabled, using static renderer handler')
     }
 
-    this.setupProdRenderer();
+    this.setupProdRenderer()
   }
 
   /**
    * Build renderer URL for dev/prod.
    */
   buildRendererUrl(path: string): string {
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${this.rendererLoadedUrl}${cleanPath}`;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`
+    return `${this.rendererLoadedUrl}${cleanPath}`
   }
 
   /**
@@ -69,17 +69,17 @@ export class RendererUrlManager {
    * Static assets map directly; all routes fall back to index.html (SPA).
    */
   resolveRendererFilePath = async (url: URL): Promise<string | null> => {
-    const pathname = url.pathname;
+    const pathname = url.pathname
 
     // Static assets: direct file mapping
     if (pathname.startsWith('/assets/') || extname(pathname)) {
-      const filePath = join(rendererDir, pathname);
-      return pathExistsSync(filePath) ? filePath : null;
+      const filePath = join(rendererDir, pathname)
+      return pathExistsSync(filePath) ? filePath : null
     }
 
     // All routes fallback to index.html (SPA)
-    return SPA_ENTRY_HTML;
-  };
+    return SPA_ENTRY_HTML
+  }
 
   /**
    * Development: use electron-vite renderer dev server
@@ -87,14 +87,14 @@ export class RendererUrlManager {
   private setupDevRenderer() {
     logger.info(
       `Development mode: renderer served from electron-vite dev server at ${this.rendererLoadedUrl}`,
-    );
+    )
   }
 
   /**
    * Production: serve static renderer assets via protocol handler
    */
   private setupProdRenderer() {
-    this.rendererLoadedUrl = this.rendererProtocolManager.getRendererUrl();
-    this.rendererProtocolManager.registerHandler();
+    this.rendererLoadedUrl = this.rendererProtocolManager.getRendererUrl()
+    this.rendererProtocolManager.registerHandler()
   }
 }

@@ -1,4 +1,4 @@
-import 'vite/client';
+import 'vite/client'
 
 /**
  * `node-mac-permissions` is a macOS-only native module.
@@ -7,7 +7,7 @@ import 'vite/client';
  * but we still need a module declaration so TypeScript can compile.
  */
 declare module 'node-mac-permissions' {
-  export type AuthStatus = 'authorized' | 'denied' | 'not determined' | 'restricted';
+  export type AuthStatus = 'authorized' | 'denied' | 'not determined' | 'restricted'
 
   export type AuthType =
     | 'accessibility'
@@ -20,15 +20,15 @@ declare module 'node-mac-permissions' {
     | 'microphone'
     | 'reminders'
     | 'screen'
-    | 'speech-recognition';
+    | 'speech-recognition'
 
-  export function getAuthStatus(type: AuthType): AuthStatus;
+  export function getAuthStatus(type: AuthType): AuthStatus
 
-  export function askForAccessibilityAccess(): void;
-  export function askForMicrophoneAccess(): Promise<AuthStatus>;
-  export function askForCameraAccess(): Promise<AuthStatus>;
-  export function askForScreenCaptureAccess(openPreferences?: boolean): void;
-  export function askForFullDiskAccess(): void;
+  export function askForAccessibilityAccess(): void
+  export function askForMicrophoneAccess(): Promise<AuthStatus>
+  export function askForCameraAccess(): Promise<AuthStatus>
+  export function askForScreenCaptureAccess(openPreferences?: boolean): void
+  export function askForFullDiskAccess(): void
 }
 
 /**
@@ -38,14 +38,12 @@ declare module 'node-mac-permissions' {
  */
 declare module 'electron-liquid-glass' {
   interface LiquidGlassOptions {
-    tintOpacity?: number;
-    blurRadius?: number;
+    blurRadius?: number
+    tintOpacity?: number
   }
   const liquidGlass: {
-    applyEffect(browserWindow: any, options?: LiquidGlassOptions): void;
-    removeEffect(browserWindow: any): void;
-  };
-  export default liquidGlass;
+    applyEffect(browserWindow: any, options?: LiquidGlassOptions): void
+    removeEffect(browserWindow: any): void
+  }
+  export default liquidGlass
 }
-
-export {};

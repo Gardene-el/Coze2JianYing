@@ -1,9 +1,9 @@
-import type { App } from '../core/App';
+import type { App } from '../core/App'
 
 export class ServiceModule {
   constructor(public app: App) {
-    this.app = app;
+    this.app = app
   }
 }
 
-export type IServiceModule = typeof ServiceModule;
+export type IServiceModule = typeof ServiceModule

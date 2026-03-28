@@ -1,17 +1,17 @@
-import { resolve } from 'node:path';
+import { resolve } from 'node:path'
 
-import dotenv from 'dotenv';
-import { defineConfig } from 'electron-vite';
-import type { PluginOption, ViteDevServer } from 'vite';
-import { loadEnv } from 'vite';
+import dotenv from 'dotenv'
+import { defineConfig } from 'electron-vite'
+import type { PluginOption, ViteDevServer } from 'vite'
+import { loadEnv } from 'vite'
 
 import {
   sharedOptimizeDeps,
   sharedRendererDefine,
   sharedRendererPlugins,
   sharedRollupOutput,
-} from '../../plugins/vite/sharedRendererConfig';
-import { getExternalDependencies } from './native-deps.config.mjs';
+} from '../../plugins/vite/sharedRendererConfig'
+import { getExternalDependencies } from './native-deps.config.mjs'
 
 /**
  * Rewrite `/` to `/apps/desktop/index.html` so the electron-vite dev server
@@ -22,25 +22,25 @@ function electronDesktopHtmlPlugin(): PluginOption {
     configureServer(server: ViteDevServer) {
       server.middlewares.use((req, _res, next) => {
         if (req.url === '/' || req.url === '/index.html') {
-          req.url = '/apps/desktop/index.html';
+          req.url = '/apps/desktop/index.html'
         }
-        next();
-      });
+        next()
+      })
     },
     name: 'electron-desktop-html',
-  };
+  }
 }
 
-dotenv.config();
+dotenv.config()
 
-const isDev = process.env.NODE_ENV === 'development';
-const ROOT_DIR = resolve(__dirname, '../..');
-const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const isDev = process.env.NODE_ENV === 'development'
+const ROOT_DIR = resolve(__dirname, '../..')
+const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 
-Object.assign(process.env, loadEnv(mode, ROOT_DIR, ''));
-const updateChannel = process.env.UPDATE_CHANNEL;
+Object.assign(process.env, loadEnv(mode, ROOT_DIR, ''))
+const updateChannel = process.env.UPDATE_CHANNEL
 
-console.info(`[electron-vite.config.ts] Detected UPDATE_CHANNEL: ${updateChannel}`);
+console.info(`[electron-vite.config.ts] Detected UPDATE_CHANNEL: ${updateChannel}`)
 
 export default defineConfig({
   main: {
@@ -58,15 +58,15 @@ export default defineConfig({
           // Prevent debug package from being bundled into index.js to avoid side-effect pollution
           manualChunks(id) {
             if (id.includes('node_modules/debug')) {
-              return 'vendor-debug';
+              return 'vendor-debug'
             }
 
             // Split i18n json resources by namespace (ns), not by locale.
             // Example: ".../resources/locales/zh-CN/common.json?import" -> "locales-common"
-            const normalizedId = id.replaceAll('\\', '/').split('?')[0];
-            const match = normalizedId.match(/\/locales\/[^/]+\/([^/]+)\.json$/);
+            const normalizedId = id.replaceAll('\\', '/').split('?')[0]
+            const match = normalizedId.match(/\/locales\/[^/]+\/([^/]+)\.json$/)
 
-            if (match?.[1]) return `locales-${match[1]}`;
+            if (match?.[1]) return `locales-${match[1]}`
           },
         },
       },
@@ -125,4 +125,4 @@ export default defineConfig({
       },
     },
   },
-});
+})

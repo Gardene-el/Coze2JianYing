@@ -1,21 +1,21 @@
-import type { NetworkProxySettings } from '@lobechat/electron-client-ipc';
-import type {SocksProxies } from 'fetch-socks';
-import { socksDispatcher } from 'fetch-socks';
-import { Agent, getGlobalDispatcher, ProxyAgent, setGlobalDispatcher } from 'undici';
+import type { NetworkProxySettings } from '@lobechat/electron-client-ipc'
+import type { SocksProxies } from 'fetch-socks'
+import { socksDispatcher } from 'fetch-socks'
+import { Agent, getGlobalDispatcher, ProxyAgent, setGlobalDispatcher } from 'undici'
 
-import { createLogger } from '@/utils/logger';
+import { createLogger } from '@/utils/logger'
 
-import { ProxyUrlBuilder } from './urlBuilder';
+import { ProxyUrlBuilder } from './urlBuilder'
 
 // Create logger
-const logger = createLogger('modules:networkProxy:dispatcher');
+const logger = createLogger('modules:networkProxy:dispatcher')
 
 /**
  * Proxy dispatcher manager
  */
 export class ProxyDispatcherManager {
-  private static isChanging = false;
-  private static changeQueue: Array<() => Promise<void>> = [];
+  private static isChanging = false
+  private static changeQueue: Array<() => Promise<void>> = []
 
   /**
    * Apply proxy settings (with concurrency control)
@@ -24,65 +24,65 @@ export class ProxyDispatcherManager {
     return new Promise((resolve, reject) => {
       const operation = async () => {
         try {
-          await this.doApplyProxySettings(config);
-          resolve();
+          await ProxyDispatcherManager.doApplyProxySettings(config)
+          resolve()
         } catch (error) {
-          reject(error);
+          reject(error)
         }
-      };
+      }
 
-      if (this.isChanging) {
+      if (ProxyDispatcherManager.isChanging) {
         // If currently switching, add to queue
-        this.changeQueue.push(operation);
+        ProxyDispatcherManager.changeQueue.push(operation)
       } else {
         // Execute immediately
-        operation();
+        operation()
       }
-    });
+    })
   }
 
   /**
    * Execute proxy settings application
    */
   private static async doApplyProxySettings(config: NetworkProxySettings): Promise<void> {
-    this.isChanging = true;
+    ProxyDispatcherManager.isChanging = true
 
     try {
-      const currentDispatcher = getGlobalDispatcher();
+      const currentDispatcher = getGlobalDispatcher()
 
       // Disable proxy, restore default connection
       if (!config.enableProxy) {
-        await this.safeDestroyDispatcher(currentDispatcher);
+        await ProxyDispatcherManager.safeDestroyDispatcher(currentDispatcher)
         // Create a new default Agent to replace the proxy
-        setGlobalDispatcher(new Agent());
-        logger.debug('Proxy disabled, reset to direct connection mode');
-        return;
+        setGlobalDispatcher(new Agent())
+        logger.debug('Proxy disabled, reset to direct connection mode')
+        return
       }
 
       // Build proxy URL
-      const proxyUrl = ProxyUrlBuilder.build(config);
+      const proxyUrl = ProxyUrlBuilder.build(config)
 
       // Create proxy agent
-      const agent = this.createProxyAgent(config.proxyType, proxyUrl);
+      const agent = ProxyDispatcherManager.createProxyAgent(config.proxyType, proxyUrl)
 
       // Destroy old dispatcher before switching proxy
-      await this.safeDestroyDispatcher(currentDispatcher);
-      setGlobalDispatcher(agent);
+      await ProxyDispatcherManager.safeDestroyDispatcher(currentDispatcher)
+      setGlobalDispatcher(agent)
 
       logger.info(
         `Proxy settings applied: ${config.proxyType}://${config.proxyServer}:${config.proxyPort}`,
-      );
+      )
       logger.debug(
         'Global request proxy set, all Node.js network requests will go through this proxy',
-      );
+      )
     } finally {
-      this.isChanging = false;
+      ProxyDispatcherManager.isChanging = false
 
       // Process next operation in queue
-      if (this.changeQueue.length > 0) {
-        const nextOperation = this.changeQueue.shift();
+      if (ProxyDispatcherManager.changeQueue.length > 0) {
+        const nextOperation = ProxyDispatcherManager.changeQueue.shift()
         if (nextOperation) {
-          setTimeout(() => nextOperation(), 0);
+          setTimeout(() => nextOperation(), 0)
         }
       }
     }
@@ -95,7 +95,7 @@ export class ProxyDispatcherManager {
     try {
       if (proxyType === 'socks5') {
         // Parse SOCKS5 proxy URL
-        const url = new URL(proxyUrl);
+        const url = new URL(proxyUrl)
         const socksProxies: SocksProxies = [
           {
             host: url.hostname,
@@ -108,19 +108,19 @@ export class ProxyDispatcherManager {
                 }
               : {}),
           },
-        ];
+        ]
 
         // Use fetch-socks to handle SOCKS5 proxy
-        return socksDispatcher(socksProxies);
+        return socksDispatcher(socksProxies)
       } else {
         // undici's ProxyAgent supports http, https
-        return new ProxyAgent({ uri: proxyUrl });
+        return new ProxyAgent({ uri: proxyUrl })
       }
     } catch (error) {
-      logger.error(`Failed to create proxy agent for ${proxyType}:`, error);
+      logger.error(`Failed to create proxy agent for ${proxyType}:`, error)
       throw new Error(
         `Failed to create proxy agent: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      )
     }
   }
 
@@ -130,10 +130,10 @@ export class ProxyDispatcherManager {
   private static async safeDestroyDispatcher(dispatcher: any): Promise<void> {
     try {
       if (dispatcher && typeof dispatcher.destroy === 'function') {
-        await dispatcher.destroy();
+        await dispatcher.destroy()
       }
     } catch (error) {
-      logger.warn('Failed to destroy dispatcher:', error);
+      logger.warn('Failed to destroy dispatcher:', error)
     }
   }
 }

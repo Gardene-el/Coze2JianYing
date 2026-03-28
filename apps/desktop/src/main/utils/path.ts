@@ -1,5 +1,5 @@
-import { pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url'
 
 export const filePathToAppUrl = (filePath: string) => {
-  return `app://coze2jianying.com${pathToFileURL(filePath).pathname}`;
-};
+  return `app://coze2jianying.com${pathToFileURL(filePath).pathname}`
+}

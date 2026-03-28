@@ -1,53 +1,52 @@
-import { resolve } from "node:path";
-import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
-import type { ViteDevServer } from "vite";
+import { resolve } from 'node:path'
+import react from '@vitejs/plugin-react'
+import type { ViteDevServer } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
-const mode =
-  process.env.NODE_ENV === "production" ? "production" : "development";
-const isDev = mode !== "production";
+const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+const isDev = mode !== 'production'
 
 export default defineConfig(({ mode: envMode }) => {
-  const env = loadEnv(envMode, process.cwd(), "");
-  const apiBase = env.VITE_API_BASE || "http://localhost:20211";
+  const env = loadEnv(envMode, process.cwd(), '')
+  const apiBase = env.VITE_API_BASE || 'http://localhost:20211'
 
   return {
     // 开发时用 '/'，Electron 生产打包需要相对路径
-    base: isDev ? "/" : "./",
+    base: isDev ? '/' : './',
 
     plugins: [
       react(),
       // 将根路径 / 重写到 apps/desktop/index.html，使独立 SPA 开发模式（bun run dev）
       // 和 Electron 开发模式（electron-vite renderer）一致
       isDev && {
-        name: "desktop-html-rewrite",
+        name: 'desktop-html-rewrite',
         configureServer(server: ViteDevServer) {
           server.middlewares.use((req, _res, next) => {
-            if (req.url === "/" || req.url === "/index.html") {
-              req.url = "/apps/desktop/index.html";
+            if (req.url === '/' || req.url === '/index.html') {
+              req.url = '/apps/desktop/index.html'
             }
-            next();
-          });
+            next()
+          })
         },
       },
     ],
 
     resolve: {
       alias: {
-        "@": resolve(__dirname, "src/frontend"),
+        '@': resolve(__dirname, 'src/frontend'),
       },
     },
 
     build: {
-      outDir: "dist",
+      outDir: 'dist',
       emptyOutDir: true,
       rollupOptions: {
-        input: resolve(__dirname, "apps/desktop/index.html"),
+        input: resolve(__dirname, 'apps/desktop/index.html'),
         output: {
           manualChunks: {
-            antd: ["antd", "antd-style"],
-            react: ["react", "react-dom", "react-router-dom"],
-            zustand: ["zustand"],
+            antd: ['antd', 'antd-style'],
+            react: ['react', 'react-dom', 'react-router-dom'],
+            zustand: ['zustand'],
           },
         },
       },
@@ -57,7 +56,7 @@ export default defineConfig(({ mode: envMode }) => {
       port: 5173,
       host: true,
       proxy: {
-        "/gui": {
+        '/gui': {
           target: apiBase,
           changeOrigin: true,
         },
@@ -66,12 +65,12 @@ export default defineConfig(({ mode: envMode }) => {
         // Exclude the root landing page (static website) from HMR.
         // It lives at the Vite root but is not part of the SPA;
         // watching it causes a full-reload that shows the wrong page.
-        ignored: [resolve(__dirname, "index.html")],
+        ignored: [resolve(__dirname, 'index.html')],
       },
     },
 
     optimizeDeps: {
-      include: ["antd", "antd-style", "zustand", "axios", "react-router-dom"],
+      include: ['antd', 'antd-style', 'zustand', 'axios', 'react-router-dom'],
     },
-  };
-});
+  }
+})

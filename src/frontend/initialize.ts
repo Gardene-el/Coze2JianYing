@@ -6,5 +6,5 @@
 // 确保 Zustand devtools 在开发环境生效
 if (import.meta.env.DEV) {
   // @ts-expect-error — 在 window 上挂载供 devtools 识别
-  window.__ZUSTAND_DEVTOOLS__ = true;
+  window.__ZUSTAND_DEVTOOLS__ = true
 }

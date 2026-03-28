@@ -105,7 +105,7 @@
         development server is running.
       </p>
 
-      <button id="retry-button" class="retry-button">Retry</button>
+      <button type="button" id="retry-button" class="retry-button">Retry</button>
     </div>
 
     <script>
@@ -121,9 +121,9 @@
           errorMessage.textContent = 'Attempting to reconnect to the next server, please wait...';
 
           // 调用主进程的重试逻辑
-          if (window.electron && window.electron.ipcRenderer) {
+          if (window.electron?.ipcRenderer) {
             window.electron.ipcRenderer.invoke('retry-connection').then((result) => {
-              if (result && result.success) {
+              if (result?.success) {
                 // 连接成功，无需额外操作，页面会自动导航
               } else {
                 // 连接失败，重置按钮状态

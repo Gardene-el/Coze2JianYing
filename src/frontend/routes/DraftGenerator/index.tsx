@@ -1,17 +1,17 @@
-import { ClearOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { Button, Card, message, Space, Spin, Typography } from "antd";
-import { createStaticStyles } from "antd-style";
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { ClearOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { Button, Card, message, Space, Spin, Typography } from 'antd'
+import { createStaticStyles } from 'antd-style'
+import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { modal } from "@/components/AntdStaticMethods";
-import PageContainer from "@/components/PageContainer";
-import PageHeader from "@/components/PageHeader";
-import { guiDraftAPI } from "@/services/gui/draft";
-import { useEnsureBackend } from "@/hooks/useEnsureBackend";
-import { useSettingsStore } from "@/store/settings/store";
+import { modal } from '@/components/AntdStaticMethods'
+import PageContainer from '@/components/PageContainer'
+import PageHeader from '@/components/PageHeader'
+import { useEnsureBackend } from '@/hooks/useEnsureBackend'
+import { guiDraftAPI } from '@/services/gui/draft'
+import { useSettingsStore } from '@/store/settings/store'
 
-const { Text } = Typography;
+const { Text } = Typography
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   textarea: css`
@@ -32,68 +32,64 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
       border-color: ${cssVar.colorPrimary};
     }
   `,
-}));
+}))
 
 const DraftGeneratorPage = () => {
-  const [msgApi, ctx] = message.useMessage();
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("就绪");
-  const textRef = useRef<HTMLTextAreaElement>(null);
-  const navigate = useNavigate();
-  const draftFolder = useSettingsStore((s) => s.draftFolder);
-  const { ensureReady, isReady } = useEnsureBackend();
+  const [msgApi, ctx] = message.useMessage()
+  const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState('就绪')
+  const textRef = useRef<HTMLTextAreaElement>(null)
+  const navigate = useNavigate()
+  const draftFolder = useSettingsStore((s) => s.draftFolder)
+  const { ensureReady, isReady } = useEnsureBackend()
 
   const handleGenerate = async () => {
-    const content = textRef.current?.value.trim();
+    const content = textRef.current?.value.trim()
     if (!content) {
-      msgApi.warning("请先粘贴 Coze 插件 JSON 数据");
-      return;
+      msgApi.warning('请先粘贴 Coze 插件 JSON 数据')
+      return
     }
     if (!draftFolder.trim()) {
       modal.error({
-        title: "请先配置草稿目录",
-        content: "生成草稿需要先在「设置」页面指定列映草稿文件夹。",
-        okText: "去设置",
-        onOk: () => navigate("/settings"),
-      });
-      return;
+        title: '请先配置草稿目录',
+        content: '生成草稿需要先在「设置」页面指定列映草稿文件夹。',
+        okText: '去设置',
+        onOk: () => navigate('/settings'),
+      })
+      return
     }
-    setLoading(true);
-    setStatus(isReady ? "正在生成…" : "准备后端中…");
+    setLoading(true)
+    setStatus(isReady ? '正在生成…' : '准备后端中…')
     try {
-      await ensureReady();
-      setStatus("正在生成…");
-      await guiDraftAPI.generate(content);
-      setStatus("生成成功 ✓");
-      msgApi.success("草稿已生成");
+      await ensureReady()
+      setStatus('正在生成…')
+      await guiDraftAPI.generate(content)
+      setStatus('生成成功 ✓')
+      msgApi.success('草稿已生成')
     } catch (e: unknown) {
-      setStatus("生成失败");
-      msgApi.error(`生成失败: ${(e as Error).message}`);
+      setStatus('生成失败')
+      msgApi.error(`生成失败: ${(e as Error).message}`)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleClear = () => {
-    if (textRef.current) textRef.current.value = "";
-    setStatus("就绪");
-  };
+    if (textRef.current) textRef.current.value = ''
+    setStatus('就绪')
+  }
 
   return (
     <PageContainer>
       {ctx}
       <PageHeader title="粘贴草稿（弃置）" />
       <Card>
-        <textarea
-          ref={textRef}
-          className={styles.textarea}
-          placeholder="粘贴 JSON 数据…"
-        />
+        <textarea ref={textRef} className={styles.textarea} placeholder="粘贴 JSON 数据…" />
         <Space
           style={{
             marginTop: 12,
-            width: "100%",
-            justifyContent: "space-between",
+            width: '100%',
+            justifyContent: 'space-between',
           }}
           wrap
         >
@@ -123,7 +119,7 @@ const DraftGeneratorPage = () => {
         </Space>
       </Card>
     </PageContainer>
-  );
-};
+  )
+}
 
-export default DraftGeneratorPage;
+export default DraftGeneratorPage

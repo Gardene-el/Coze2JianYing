@@ -1,5 +1,5 @@
-import { resolve } from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -17,4 +17,4 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./src/main/__mocks__/setup.ts'],
   },
-});
+})

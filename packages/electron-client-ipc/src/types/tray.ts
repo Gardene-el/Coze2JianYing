@@ -5,17 +5,17 @@ export interface ShowTrayNotificationParams {
   /**
    * Notification content
    */
-  content: string;
+  content: string
 
   /**
    * Icon type
    */
-  iconType?: 'info' | 'warning' | 'error' | 'none';
+  iconType?: 'info' | 'warning' | 'error' | 'none'
 
   /**
    * Notification title
    */
-  title: string;
+  title: string
 }
 
 /**
@@ -25,7 +25,7 @@ export interface UpdateTrayIconParams {
   /**
    * Icon path (relative to resources directory)
    */
-  iconPath: string;
+  iconPath: string
 }
 
 /**
@@ -35,5 +35,5 @@ export interface UpdateTrayTooltipParams {
   /**
    * Tooltip text
    */
-  tooltip: string;
+  tooltip: string
 }

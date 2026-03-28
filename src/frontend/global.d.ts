@@ -6,17 +6,14 @@
  */
 
 interface LobeEnv {
-  darwinMajorVersion: number;
-  isMacTahoe: boolean;
-  platform: string;
+  darwinMajorVersion: number
+  isMacTahoe: boolean
+  platform: string
 }
 
 interface ElectronStreamAPI {
-  invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
-  onStreamInvoke: (
-    channel: string,
-    handler: (...args: unknown[]) => void,
-  ) => () => void;
+  invoke: (channel: string, ...args: unknown[]) => Promise<unknown>
+  onStreamInvoke: (channel: string, handler: (...args: unknown[]) => void) => () => void
 }
 
 declare interface Window {
@@ -24,11 +21,11 @@ declare interface Window {
    * `@electron-toolkit/preload` 的 electronAPI 对象。
    * 存在时说明当前运行于 Electron 环境。
    */
-  electron?: Record<string, unknown>;
+  electron?: Record<string, unknown>
 
   /** 自定义 IPC invoke / stream API */
-  electronAPI?: ElectronStreamAPI;
+  electronAPI?: ElectronStreamAPI
 
   /** 运行平台信息 */
-  lobeEnv?: LobeEnv;
+  lobeEnv?: LobeEnv
 }

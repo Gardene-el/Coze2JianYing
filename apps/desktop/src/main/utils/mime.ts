@@ -1,7 +1,7 @@
-import { extname } from 'node:path';
+import { extname } from 'node:path'
 
 export const getExportMimeType = (filePath: string) => {
-  const ext = extname(filePath).toLowerCase();
+  const ext = extname(filePath).toLowerCase()
 
   const map: Record<string, string> = {
     '.css': 'text/css; charset=utf-8',
@@ -20,7 +20,7 @@ export const getExportMimeType = (filePath: string) => {
     '.webp': 'image/webp',
     '.woff': 'font/woff',
     '.woff2': 'font/woff2',
-  };
+  }
 
-  return map[ext];
-};
+  return map[ext]
+}

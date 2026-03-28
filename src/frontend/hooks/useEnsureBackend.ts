@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { guiServiceAPI } from '@/services/gui/service';
+import { guiServiceAPI } from '@/services/gui/service'
 
 /**
  * Ensures the Python backend is running before a tool operation begins,
@@ -18,46 +18,46 @@ import { guiServiceAPI } from '@/services/gui/service';
  *   await ensureReady();
  */
 export function useEnsureBackend() {
-  const [isReady, setIsReady] = useState(false);
-  const [isPreparing, setIsPreparing] = useState(false);
+  const [isReady, setIsReady] = useState(false)
+  const [isPreparing, setIsPreparing] = useState(false)
 
   // Ref-based guards — safe to read in async callbacks without stale-closure issues.
-  const isReadyRef = useRef(false);
-  const preparingRef = useRef(false);
+  const isReadyRef = useRef(false)
+  const preparingRef = useRef(false)
   // True only if THIS hook instance called start() — determines unmount cleanup.
-  const weStartedBackend = useRef(false);
+  const weStartedBackend = useRef(false)
 
   const ensureReady = useCallback(async () => {
     // Idempotent: skip if already ready or a concurrent prepare is in flight.
-    if (isReadyRef.current || preparingRef.current) return;
+    if (isReadyRef.current || preparingRef.current) return
 
-    preparingRef.current = true;
-    setIsPreparing(true);
+    preparingRef.current = true
+    setIsPreparing(true)
 
     try {
-      const { running } = await guiServiceAPI.getStatus();
+      const { running } = await guiServiceAPI.getStatus()
       if (!running) {
-        await guiServiceAPI.start();
-        weStartedBackend.current = true;
+        await guiServiceAPI.start()
+        weStartedBackend.current = true
       }
-      isReadyRef.current = true;
-      setIsReady(true);
+      isReadyRef.current = true
+      setIsReady(true)
     } finally {
-      preparingRef.current = false;
-      setIsPreparing(false);
+      preparingRef.current = false
+      setIsPreparing(false)
     }
     // Errors are intentionally not caught here — callers display the error message.
-  }, []);
+  }, [])
 
   useEffect(() => {
     return () => {
       // On unmount: only stop the backend if we started it.
       // This prevents tool pages from killing the CloudService (直连模式) backend.
       if (weStartedBackend.current) {
-        void guiServiceAPI.stop();
+        void guiServiceAPI.stop()
       }
-    };
-  }, []);
+    }
+  }, [])
 
-  return { ensureReady, isPreparing, isReady };
+  return { ensureReady, isPreparing, isReady }
 }

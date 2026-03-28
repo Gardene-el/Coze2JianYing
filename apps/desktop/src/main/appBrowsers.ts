@@ -1,11 +1,11 @@
-import { APP_WINDOW_MIN_SIZE } from '@lobechat/desktop-bridge';
+import { APP_WINDOW_MIN_SIZE } from '@lobechat/desktop-bridge'
 
-import type { BrowserWindowOpts } from './core/browser/Browser';
+import type { BrowserWindowOpts } from './core/browser/Browser'
 
 export const BrowsersIdentifiers = {
   app: 'app',
   devtools: 'devtools',
-};
+}
 
 export const appBrowsers = {
   app: {
@@ -32,25 +32,25 @@ export const appBrowsers = {
     titleBarStyle: 'hiddenInset',
     width: 1000,
   },
-} satisfies Record<string, BrowserWindowOpts>;
+} satisfies Record<string, BrowserWindowOpts>
 
 // Window templates for multi-instance windows
 export interface WindowTemplate {
-  allowMultipleInstances: boolean;
-  autoHideMenuBar?: boolean;
-  baseIdentifier: string;
-  basePath: string;
-  devTools?: boolean;
-  height?: number;
-  keepAlive?: boolean;
-  minWidth?: number;
-  parentIdentifier?: string;
-  showOnInit?: boolean;
-  title?: string;
-  titleBarStyle?: 'hidden' | 'default' | 'hiddenInset' | 'customButtonsOnHover';
+  allowMultipleInstances: boolean
+  autoHideMenuBar?: boolean
+  baseIdentifier: string
+  basePath: string
+  devTools?: boolean
+  height?: number
+  keepAlive?: boolean
+  minWidth?: number
+  parentIdentifier?: string
+  showOnInit?: boolean
+  title?: string
+  titleBarStyle?: 'hidden' | 'default' | 'hiddenInset' | 'customButtonsOnHover'
   // Note: vibrancy / visualEffectState / transparent are intentionally omitted.
   // Platform visual effects are managed exclusively by WindowThemeManager.
-  width?: number;
+  width?: number
 }
 
 export const windowTemplates = {
@@ -66,7 +66,7 @@ export const windowTemplates = {
     titleBarStyle: 'hidden',
     width: 900,
   },
-} satisfies Record<string, WindowTemplate>;
+} satisfies Record<string, WindowTemplate>
 
-export type AppBrowsersIdentifiers = keyof typeof appBrowsers;
-export type WindowTemplateIdentifiers = keyof typeof windowTemplates;
+export type AppBrowsersIdentifiers = keyof typeof appBrowsers
+export type WindowTemplateIdentifiers = keyof typeof windowTemplates

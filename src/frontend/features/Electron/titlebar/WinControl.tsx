@@ -1,4 +1,4 @@
-import { createStaticStyles } from "antd-style";
+import { createStaticStyles } from 'antd-style'
 
 /**
  * Windows native window-control button placeholder.
@@ -13,8 +13,8 @@ const styles = createStaticStyles(({ css }) => ({
   root: css`
     width: 132px;
   `,
-}));
+}))
 
-const WinControl = () => <div className={styles.root} />;
+const WinControl = () => <div className={styles.root} />
 
-export default WinControl;
+export default WinControl

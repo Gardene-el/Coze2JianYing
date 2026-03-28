@@ -1,19 +1,19 @@
-import { createEnv } from '@t3-oss/env-core';
-import { memoize } from 'es-toolkit';
-import { z } from 'zod';
+import { createEnv } from '@t3-oss/env-core'
+import { memoize } from 'es-toolkit'
+import { z } from 'zod'
 
 const normalizeEnvString = (input: unknown) => {
-  if (typeof input !== 'string') return undefined;
-  const trimmed = input.trim();
-  if (!trimmed) return undefined;
-  return trimmed;
-};
+  if (typeof input !== 'string') return undefined
+  const trimmed = input.trim()
+  if (!trimmed) return undefined
+  return trimmed
+}
 
 const envBoolean = (defaultValue: boolean) =>
   z
     .preprocess((input) => {
-      const str = normalizeEnvString(input);
-      if (!str) return undefined;
+      const str = normalizeEnvString(input)
+      if (!str) return undefined
 
       switch (str.toLowerCase()) {
         case '1':
@@ -21,7 +21,7 @@ const envBoolean = (defaultValue: boolean) =>
         case 'yes':
         case 'y':
         case 'on': {
-          return true;
+          return true
         }
 
         case '0':
@@ -29,26 +29,26 @@ const envBoolean = (defaultValue: boolean) =>
         case 'no':
         case 'n':
         case 'off': {
-          return false;
+          return false
         }
 
         default: {
-          return undefined;
+          return undefined
         }
       }
     }, z.boolean().optional())
-    .default(defaultValue);
+    .default(defaultValue)
 
 const envNumber = (defaultValue: number) =>
   z
     .preprocess((input) => {
-      const str = normalizeEnvString(input);
-      if (!str) return undefined;
-      const num = Number(str);
-      if (!Number.isFinite(num)) return undefined;
-      return num;
+      const str = normalizeEnvString(input)
+      if (!str) return undefined
+      const num = Number(str)
+      if (!Number.isFinite(num)) return undefined
+      return num
     }, z.number().optional())
-    .default(defaultValue);
+    .default(defaultValue)
 
 /**
  * Desktop (Electron main process) runtime env access.
@@ -95,4 +95,4 @@ export const getDesktopEnv = memoize(() =>
       VERCEL_JWT: z.string().optional(),
     },
   }),
-);
+)

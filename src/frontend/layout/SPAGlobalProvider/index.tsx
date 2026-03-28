@@ -1,27 +1,17 @@
-import { TooltipGroup } from "@lobehub/ui";
-import { StyleProvider } from "antd-style";
-import { domMax, LazyMotion } from "motion/react";
-import {
-  lazy,
-  memo,
-  type PropsWithChildren,
-  Suspense,
-  useLayoutEffect,
-} from "react";
+import { TooltipGroup } from '@lobehub/ui'
+import { StyleProvider } from 'antd-style'
+import { domMax, LazyMotion } from 'motion/react'
+import { lazy, memo, type PropsWithChildren, Suspense, useLayoutEffect } from 'react'
 
-import AppTheme from "@/layout/GlobalProvider/AppTheme";
-import NextThemeProvider from "@/layout/GlobalProvider/NextThemeProvider";
+import AppTheme from '@/layout/GlobalProvider/AppTheme'
+import NextThemeProvider from '@/layout/GlobalProvider/NextThemeProvider'
 
 // Lazy-loaded global UI hosts — aligns with lobehub SPAGlobalProvider
-const ModalHost = lazy(() =>
-  import("@lobehub/ui").then((m) => ({ default: m.ModalHost })),
-);
-const ToastHost = lazy(() =>
-  import("@lobehub/ui").then((m) => ({ default: m.ToastHost })),
-);
+const ModalHost = lazy(() => import('@lobehub/ui').then((m) => ({ default: m.ModalHost })))
+const ToastHost = lazy(() => import('@lobehub/ui').then((m) => ({ default: m.ToastHost })))
 const ContextMenuHost = lazy(() =>
-  import("@lobehub/ui").then((m) => ({ default: m.ContextMenuHost })),
-);
+  import('@lobehub/ui').then((m) => ({ default: m.ContextMenuHost })),
+)
 
 /**
  * 注入初始 body 背景色，防止深色/浅色模式切换时的闪屏。
@@ -29,19 +19,19 @@ const ContextMenuHost = lazy(() =>
  */
 function injectBodyBackground() {
   const isDark =
-    document.documentElement.getAttribute("data-theme") === "dark" ||
-    (document.documentElement.getAttribute("data-theme") == null &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (document.documentElement.getAttribute('data-theme') == null &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
 
   // Electron 窗口背景透明；Web fallback 用纯色
-  const isElectron = typeof window !== "undefined" && !!window.electron;
+  const isElectron = typeof window !== 'undefined' && !!window.electron
 
   if (isElectron) {
     document.body.style.background = isDark
-      ? "color-mix(in srgb, #000 90%, transparent)"
-      : "color-mix(in srgb, #f8f8f8 70%, transparent)";
+      ? 'color-mix(in srgb, #000 90%, transparent)'
+      : 'color-mix(in srgb, #f8f8f8 70%, transparent)'
   } else {
-    document.body.style.backgroundColor = isDark ? "#000" : "#f8f8f8";
+    document.body.style.backgroundColor = isDark ? '#000' : '#f8f8f8'
   }
 }
 
@@ -54,18 +44,16 @@ function injectBodyBackground() {
 const SPAGlobalProvider = memo<PropsWithChildren>(({ children }) => {
   // 移除加载屏 + 注入初始背景色，防止白屏/黑屏闪烁
   useLayoutEffect(() => {
-    document.getElementById("loading-screen")?.remove();
-    injectBodyBackground();
-  }, []);
+    document.getElementById('loading-screen')?.remove()
+    injectBodyBackground()
+  }, [])
 
   return (
     <NextThemeProvider>
       <AppTheme>
         <LazyMotion features={domMax}>
           <TooltipGroup layoutAnimation={false}>
-            <StyleProvider speedy={import.meta.env.PROD}>
-              {children}
-            </StyleProvider>
+            <StyleProvider speedy={import.meta.env.PROD}>{children}</StyleProvider>
           </TooltipGroup>
           <Suspense>
             <ModalHost />
@@ -75,9 +63,9 @@ const SPAGlobalProvider = memo<PropsWithChildren>(({ children }) => {
         </LazyMotion>
       </AppTheme>
     </NextThemeProvider>
-  );
-});
+  )
+})
 
-SPAGlobalProvider.displayName = "SPAGlobalProvider";
+SPAGlobalProvider.displayName = 'SPAGlobalProvider'
 
-export default SPAGlobalProvider;
+export default SPAGlobalProvider

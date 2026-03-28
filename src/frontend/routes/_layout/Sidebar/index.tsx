@@ -1,7 +1,7 @@
-import SidebarContent from "./SidebarContent";
+import SidebarContent from './SidebarContent'
 
 const Sidebar = () => {
-  return <SidebarContent />;
-};
+  return <SidebarContent />
+}
 
-export default Sidebar;
+export default Sidebar

@@ -11,32 +11,32 @@
  * Results are pushed to Python via `PUT /gui/settings` so the Python layer
  * only needs `sm.get("effective_output_path")` — zero decision logic.
  */
-import { statSync } from 'node:fs';
+import { statSync } from 'node:fs'
 
-import { app } from 'electron';
+import { app } from 'electron'
 
-import type { GuiSettings } from '@/types/store';
+import type { GuiSettings } from '@/types/store'
 
 export interface EffectivePaths {
   /** Resolved draft folder path.  Empty string = Python should use its own fallback. */
-  draftFolder: string;
+  draftFolder: string
 }
 
 /** Candidate JianyingPro draft folder templates (Windows only). */
 const JIANYING_DRAFT_TEMPLATES = [
   String.raw`C:\Users\{username}\AppData\Local\JianyingPro\User Data\Projects\com.lveditor.draft`,
   String.raw`C:\Users\{username}\AppData\Roaming\JianyingPro\User Data\Projects\com.lveditor.draft`,
-];
+]
 
 export class PathResolverService {
   // ─── private helpers ──────────────────────────────────────────────────────
 
   private isValidDir(p: string): boolean {
-    if (!p) return false;
+    if (!p) return false
     try {
-      return statSync(p).isDirectory();
+      return statSync(p).isDirectory()
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -50,16 +50,16 @@ export class PathResolverService {
    */
   resolveDraftFolder(settings: GuiSettings): string {
     if (settings.draftFolder && this.isValidDir(settings.draftFolder)) {
-      return settings.draftFolder;
+      return settings.draftFolder
     }
-    return '';
+    return ''
   }
 
   /** Validate effective paths in one call (for IPC handler). */
   resolveEffectivePaths(settings: GuiSettings): EffectivePaths {
     return {
       draftFolder: this.resolveDraftFolder(settings),
-    };
+    }
   }
 
   /**
@@ -68,19 +68,19 @@ export class PathResolverService {
    * `app.getPath('home')` which is more reliable than `os.getenv('USERNAME')`.
    */
   detectDefaultDraftFolder(): string | null {
-    const homeDir = app.getPath('home');
+    const homeDir = app.getPath('home')
     // Extract the username from the home directory path (last path segment).
-    const username = homeDir.split(/[\\/]/).at(-1) ?? '';
+    const username = homeDir.split(/[/\\]/).at(-1) ?? ''
 
     for (const template of JIANYING_DRAFT_TEMPLATES) {
-      const candidate = template.replace('{username}', username);
+      const candidate = template.replace('{username}', username)
       if (this.isValidDir(candidate)) {
-        return candidate;
+        return candidate
       }
     }
-    return null;
+    return null
   }
 }
 
 /** Singleton instance — safe to import anywhere in the main process. */
-export const pathResolverService = new PathResolverService();
+export const pathResolverService = new PathResolverService()

@@ -2,13 +2,13 @@ export interface ShortcutConfig {
   /**
    * Shortcut accelerator (e.g. CommandOrControl+E)
    */
-  accelerator: string;
+  accelerator: string
   /**
    * Shortcut ID
    */
-  id: string;
+  id: string
 }
-export type ShortcutActionType = Record<string, any>;
+export type ShortcutActionType = Record<string, any>
 
 export interface ShortcutUpdateResult {
   errorType?:
@@ -17,6 +17,6 @@ export interface ShortcutUpdateResult {
     | 'NO_MODIFIER'
     | 'CONFLICT'
     | 'SYSTEM_OCCUPIED'
-    | 'UNKNOWN';
-  success: boolean;
+    | 'UNKNOWN'
+  success: boolean
 }

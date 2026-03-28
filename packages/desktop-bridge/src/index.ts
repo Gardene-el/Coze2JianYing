@@ -6,15 +6,15 @@ export {
   type Locales,
   locales,
   RouteVariants,
-} from './routeVariants';
+} from './routeVariants'
 
 // Desktop window constants
-export const TITLE_BAR_HEIGHT = 38;
+export const TITLE_BAR_HEIGHT = 38
 
 export const APP_WINDOW_MIN_SIZE = {
   height: 600,
   width: 1000,
-} as const;
+} as const
 
 // HTTP Headers for desktop-server communication
 /**
@@ -24,11 +24,11 @@ export const APP_WINDOW_MIN_SIZE = {
  * When the server sets this header to 'true', the desktop app should trigger
  * re-authentication flow.
  */
-export const AUTH_REQUIRED_HEADER = 'X-Auth-Required';
+export const AUTH_REQUIRED_HEADER = 'X-Auth-Required'
 
 // TRPC error codes (mirrors @trpc/server internal codes)
 /**
  * TRPC error code for unauthorized requests.
  * Used to identify authentication failures in TRPC responses.
  */
-export const TRPC_ERROR_CODE_UNAUTHORIZED = 'UNAUTHORIZED' as const;
+export const TRPC_ERROR_CODE_UNAUTHORIZED = 'UNAUTHORIZED' as const

@@ -1,12 +1,12 @@
-import { globalShortcut } from 'electron';
+import { globalShortcut } from 'electron'
 
-import { DEFAULT_SHORTCUTS_CONFIG } from '@/shortcuts';
-import { createLogger } from '@/utils/logger';
+import { DEFAULT_SHORTCUTS_CONFIG } from '@/shortcuts'
+import { createLogger } from '@/utils/logger'
 
-import type { App } from '../App';
+import type { App } from '../App'
 
 // Create logger
-const logger = createLogger('core:ShortcutManager');
+const logger = createLogger('core:ShortcutManager')
 
 export interface ShortcutUpdateResult {
   errorType?:
@@ -15,22 +15,22 @@ export interface ShortcutUpdateResult {
     | 'NO_MODIFIER'
     | 'CONFLICT'
     | 'SYSTEM_OCCUPIED'
-    | 'UNKNOWN';
-  success: boolean;
+    | 'UNKNOWN'
+  success: boolean
 }
 
 export class ShortcutManager {
-  private app: App;
-  private shortcuts: Map<string, () => void> = new Map();
-  private shortcutsConfig: Record<string, string> = {};
+  private app: App
+  private shortcuts: Map<string, () => void> = new Map()
+  private shortcutsConfig: Record<string, string> = {}
 
   constructor(app: App) {
-    logger.debug('Initializing ShortcutManager');
-    this.app = app;
+    logger.debug('Initializing ShortcutManager')
+    this.app = app
 
     app.shortcutMethodMap.forEach((method, key) => {
-      this.shortcuts.set(key, method);
-    });
+      this.shortcuts.set(key, method)
+    })
   }
 
   /**
@@ -42,32 +42,32 @@ export class ShortcutManager {
     return accelerator
       .split('+')
       .map((key) => {
-        const trimmedKey = key.trim().toLowerCase();
+        const trimmedKey = key.trim().toLowerCase()
 
         // Convert react-hotkey 'mod' to Electron 'CommandOrControl'
         if (trimmedKey === 'mod') {
-          return 'CommandOrControl';
+          return 'CommandOrControl'
         }
 
         // Keep other keys as is, but preserve proper casing
-        return key.trim().length === 1 ? key.trim().toUpperCase() : key.trim();
+        return key.trim().length === 1 ? key.trim().toUpperCase() : key.trim()
       })
-      .join('+');
+      .join('+')
   }
 
   initialize() {
-    logger.info('Initializing global shortcuts');
+    logger.info('Initializing global shortcuts')
     // Load shortcuts configuration from storage
-    this.loadShortcutsConfig();
+    this.loadShortcutsConfig()
     // Register configured shortcuts
-    this.registerConfiguredShortcuts();
+    this.registerConfiguredShortcuts()
   }
 
   /**
    * Get shortcuts configuration
    */
   getShortcutsConfig(): Record<string, string> {
-    return this.shortcutsConfig;
+    return this.shortcutsConfig
   }
 
   /**
@@ -75,52 +75,52 @@ export class ShortcutManager {
    */
   updateShortcutConfig(id: string, accelerator: string): ShortcutUpdateResult {
     try {
-      logger.debug(`Updating shortcut ${id} to ${accelerator}`);
+      logger.debug(`Updating shortcut ${id} to ${accelerator}`)
 
       // 1. Check if ID is valid
       if (!DEFAULT_SHORTCUTS_CONFIG[id]) {
-        logger.error(`Invalid shortcut ID: ${id}`);
-        return { errorType: 'INVALID_ID', success: false };
+        logger.error(`Invalid shortcut ID: ${id}`)
+        return { errorType: 'INVALID_ID', success: false }
       }
 
       // 2. Basic format validation
       if (typeof accelerator !== 'string') {
-        logger.error(`Invalid accelerator format: ${accelerator}`);
-        return { errorType: 'INVALID_FORMAT', success: false };
+        logger.error(`Invalid accelerator format: ${accelerator}`)
+        return { errorType: 'INVALID_FORMAT', success: false }
       }
 
-      const trimmedAccelerator = accelerator.trim();
+      const trimmedAccelerator = accelerator.trim()
 
       // Empty value means disable this shortcut binding
       if (trimmedAccelerator === '') {
-        this.shortcutsConfig[id] = '';
-        this.saveShortcutsConfig();
-        this.registerConfiguredShortcuts();
-        return { success: true };
+        this.shortcutsConfig[id] = ''
+        this.saveShortcutsConfig()
+        this.registerConfiguredShortcuts()
+        return { success: true }
       }
 
       // Convert frontend format to Electron format
-      const convertedAccelerator = this.convertAcceleratorFormat(trimmedAccelerator);
-      const cleanAccelerator = convertedAccelerator.toLowerCase();
+      const convertedAccelerator = this.convertAcceleratorFormat(trimmedAccelerator)
+      const cleanAccelerator = convertedAccelerator.toLowerCase()
 
-      logger.debug(`Converted accelerator from ${accelerator} to ${convertedAccelerator}`);
+      logger.debug(`Converted accelerator from ${accelerator} to ${convertedAccelerator}`)
 
       // 3. Check if contains + sign (modifier key format)
       if (!cleanAccelerator.includes('+')) {
         logger.error(
           `Invalid accelerator format: ${cleanAccelerator}. Must contain modifier keys like 'CommandOrControl+E'`,
-        );
-        return { errorType: 'INVALID_FORMAT', success: false };
+        )
+        return { errorType: 'INVALID_FORMAT', success: false }
       }
 
       // 4. Check if has basic modifier keys
       const hasModifier = ['CommandOrControl', 'Command', 'Ctrl', 'Alt', 'Shift'].some((modifier) =>
         cleanAccelerator.includes(modifier.toLowerCase()),
-      );
+      )
 
       if (!hasModifier) {
-        logger.error(`Invalid accelerator format: ${cleanAccelerator}. Must contain modifier keys`);
-        return { errorType: 'NO_MODIFIER', success: false };
+        logger.error(`Invalid accelerator format: ${cleanAccelerator}. Must contain modifier keys`)
+        return { errorType: 'NO_MODIFIER', success: false }
       }
 
       // 5. Check for conflicts
@@ -130,32 +130,32 @@ export class ShortcutManager {
           typeof existingAccelerator === 'string' &&
           existingAccelerator.toLowerCase() === cleanAccelerator
         ) {
-          logger.error(`Shortcut conflict: ${cleanAccelerator} already used by ${existingId}`);
-          return { errorType: 'CONFLICT', success: false };
+          logger.error(`Shortcut conflict: ${cleanAccelerator} already used by ${existingId}`)
+          return { errorType: 'CONFLICT', success: false }
         }
       }
 
       // 6. Try test registration (check if occupied by system)
-      const testSuccess = globalShortcut.register(convertedAccelerator, () => {});
+      const testSuccess = globalShortcut.register(convertedAccelerator, () => {})
       if (!testSuccess) {
         logger.error(
           `Shortcut ${convertedAccelerator} is already registered by system or other app`,
-        );
-        return { errorType: 'SYSTEM_OCCUPIED', success: false };
+        )
+        return { errorType: 'SYSTEM_OCCUPIED', success: false }
       } else {
         // Test successful, immediately unregister
-        globalShortcut.unregister(convertedAccelerator);
+        globalShortcut.unregister(convertedAccelerator)
       }
 
       // 7. Update configuration
-      this.shortcutsConfig[id] = convertedAccelerator;
+      this.shortcutsConfig[id] = convertedAccelerator
 
-      this.saveShortcutsConfig();
-      this.registerConfiguredShortcuts();
-      return { success: true };
+      this.saveShortcutsConfig()
+      this.registerConfiguredShortcuts()
+      return { success: true }
     } catch (error) {
-      logger.error(`Error updating shortcut ${id}:`, error);
-      return { errorType: 'UNKNOWN', success: false };
+      logger.error(`Error updating shortcut ${id}:`, error)
+      return { errorType: 'UNKNOWN', success: false }
     }
   }
 
@@ -169,23 +169,23 @@ export class ShortcutManager {
     try {
       // If already registered, unregister first
       if (this.shortcuts.has(accelerator)) {
-        this.unregisterShortcut(accelerator);
+        this.unregisterShortcut(accelerator)
       }
 
       // Register new shortcut
-      const success = globalShortcut.register(accelerator, callback);
+      const success = globalShortcut.register(accelerator, callback)
 
       if (success) {
-        this.shortcuts.set(accelerator, callback);
-        logger.debug(`Registered shortcut: ${accelerator}`);
+        this.shortcuts.set(accelerator, callback)
+        logger.debug(`Registered shortcut: ${accelerator}`)
       } else {
-        logger.error(`Failed to register shortcut: ${accelerator}`);
+        logger.error(`Failed to register shortcut: ${accelerator}`)
       }
 
-      return success;
+      return success
     } catch (error) {
-      logger.error(`Error registering shortcut: ${accelerator}`, error);
-      return false;
+      logger.error(`Error registering shortcut: ${accelerator}`, error)
+      return false
     }
   }
 
@@ -195,11 +195,11 @@ export class ShortcutManager {
    */
   unregisterShortcut(accelerator: string): void {
     try {
-      globalShortcut.unregister(accelerator);
-      this.shortcuts.delete(accelerator);
-      logger.debug(`Unregistered shortcut: ${accelerator}`);
+      globalShortcut.unregister(accelerator)
+      this.shortcuts.delete(accelerator)
+      logger.debug(`Unregistered shortcut: ${accelerator}`)
     } catch (error) {
-      logger.error(`Error unregistering shortcut: ${accelerator}`, error);
+      logger.error(`Error unregistering shortcut: ${accelerator}`, error)
     }
   }
 
@@ -209,15 +209,15 @@ export class ShortcutManager {
    * @returns Whether it is registered
    */
   isRegistered(accelerator: string): boolean {
-    return globalShortcut.isRegistered(accelerator);
+    return globalShortcut.isRegistered(accelerator)
   }
 
   /**
    * Unregister all shortcuts
    */
   unregisterAll(): void {
-    globalShortcut.unregisterAll();
-    logger.info('Unregistered all shortcuts');
+    globalShortcut.unregisterAll()
+    logger.info('Unregistered all shortcuts')
   }
 
   /**
@@ -226,49 +226,49 @@ export class ShortcutManager {
   private loadShortcutsConfig() {
     try {
       // Try to get configuration from storage
-      const config = this.app.storeManager.get('shortcuts');
+      const config = this.app.storeManager.get('shortcuts')
 
       // If no configuration, use default configuration
       if (!config || Object.keys(config).length === 0) {
-        logger.debug('No shortcuts config found, using defaults');
-        this.shortcutsConfig = { ...DEFAULT_SHORTCUTS_CONFIG };
-        this.saveShortcutsConfig();
+        logger.debug('No shortcuts config found, using defaults')
+        this.shortcutsConfig = { ...DEFAULT_SHORTCUTS_CONFIG }
+        this.saveShortcutsConfig()
       } else {
         // Filter out invalid shortcuts that are not in DEFAULT_SHORTCUTS_CONFIG
-        const filteredConfig: Record<string, string> = {};
-        let hasInvalidKeys = false;
+        const filteredConfig: Record<string, string> = {}
+        let hasInvalidKeys = false
 
         Object.entries(config).forEach(([id, accelerator]) => {
           if (DEFAULT_SHORTCUTS_CONFIG[id]) {
-            filteredConfig[id] = accelerator;
+            filteredConfig[id] = accelerator
           } else {
-            hasInvalidKeys = true;
-            logger.debug(`Filtering out invalid shortcut ID: ${id}`);
+            hasInvalidKeys = true
+            logger.debug(`Filtering out invalid shortcut ID: ${id}`)
           }
-        });
+        })
 
         // Ensure all default shortcuts are present
         Object.entries(DEFAULT_SHORTCUTS_CONFIG).forEach(([id, defaultAccelerator]) => {
           if (!(id in filteredConfig)) {
-            filteredConfig[id] = defaultAccelerator;
-            logger.debug(`Adding missing default shortcut: ${id} = ${defaultAccelerator}`);
+            filteredConfig[id] = defaultAccelerator
+            logger.debug(`Adding missing default shortcut: ${id} = ${defaultAccelerator}`)
           }
-        });
+        })
 
-        this.shortcutsConfig = filteredConfig;
+        this.shortcutsConfig = filteredConfig
 
         // Save the filtered configuration back to storage if we removed invalid keys
         if (hasInvalidKeys) {
-          logger.debug('Saving filtered shortcuts config to remove invalid keys');
-          this.saveShortcutsConfig();
+          logger.debug('Saving filtered shortcuts config to remove invalid keys')
+          this.saveShortcutsConfig()
         }
       }
 
-      logger.debug('Loaded shortcuts config:', this.shortcutsConfig);
+      logger.debug('Loaded shortcuts config:', this.shortcutsConfig)
     } catch (error) {
-      logger.error('Error loading shortcuts config:', error);
-      this.shortcutsConfig = { ...DEFAULT_SHORTCUTS_CONFIG };
-      this.saveShortcutsConfig();
+      logger.error('Error loading shortcuts config:', error)
+      this.shortcutsConfig = { ...DEFAULT_SHORTCUTS_CONFIG }
+      this.saveShortcutsConfig()
     }
   }
 
@@ -277,10 +277,10 @@ export class ShortcutManager {
    */
   private saveShortcutsConfig() {
     try {
-      this.app.storeManager.set('shortcuts', this.shortcutsConfig);
-      logger.debug('Saved shortcuts config');
+      this.app.storeManager.set('shortcuts', this.shortcutsConfig)
+      logger.debug('Saved shortcuts config')
     } catch (error) {
-      logger.error('Error saving shortcuts config:', error);
+      logger.error('Error saving shortcuts config:', error)
     }
   }
 
@@ -289,22 +289,22 @@ export class ShortcutManager {
    */
   private registerConfiguredShortcuts() {
     // Unregister all shortcuts first
-    this.unregisterAll();
+    this.unregisterAll()
 
     // Register each enabled shortcut
     Object.entries(this.shortcutsConfig).forEach(([id, accelerator]) => {
-      logger.debug(`Registering shortcut '${id}' with ${accelerator}`);
+      logger.debug(`Registering shortcut '${id}' with ${accelerator}`)
 
       // Only register shortcuts that exist in DEFAULT_SHORTCUTS_CONFIG
       if (!DEFAULT_SHORTCUTS_CONFIG[id]) {
-        logger.debug(`Skipping shortcut '${id}' - not found in DEFAULT_SHORTCUTS_CONFIG`);
-        return;
+        logger.debug(`Skipping shortcut '${id}' - not found in DEFAULT_SHORTCUTS_CONFIG`)
+        return
       }
 
-      const method = this.shortcuts.get(id);
+      const method = this.shortcuts.get(id)
       if (accelerator && method) {
-        this.registerShortcut(accelerator, method);
+        this.registerShortcut(accelerator, method)
       }
-    });
+    })
   }
 }

@@ -1,0 +1,301 @@
+$ biome check --write .
+apps\desktop\.remarkrc.mjs:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { remarklint } from '@lobehub/lint'
+    2 鈹?
+  > 3 鈹?export default remarklint
+      鈹?       ^^^^^^^
+    4 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\electron-builder.mjs:137:20 lint/suspicious/noTemplateCurlyInString 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected template string placeholder.
+  
+    135 鈹?  nsis: {
+    136 鈹?    allowToChangeInstallationDirectory: true,
+  > 137 鈹?    artifactName: '${productName}-${version}-setup.${ext}',
+        鈹?                   ^^^^^^^^^^^^^^
+    138 鈹?    createDesktopShortcut: 'always',
+    139 鈹?    installerHeader: '../../assets/electron/build/nsis-header.bmp',
+  
+  i Turn the string into a template string.
+  
+
+apps\desktop\electron-builder.mjs:142:20 lint/suspicious/noTemplateCurlyInString 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected template string placeholder.
+  
+    140 鈹?    installerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
+    141 鈹?    oneClick: false,
+  > 142 鈹?    shortcutName: '${productName}',
+        鈹?                   ^^^^^^^^^^^^^^
+    143 鈹?    uninstallDisplayName: '${productName}',
+    144 鈹?    uninstallerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
+  
+  i Turn the string into a template string.
+  
+
+apps\desktop\electron-builder.mjs:143:28 lint/suspicious/noTemplateCurlyInString 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected template string placeholder.
+  
+    141 鈹?    oneClick: false,
+    142 鈹?    shortcutName: '${productName}',
+  > 143 鈹?    uninstallDisplayName: '${productName}',
+        鈹?                           ^^^^^^^^^^^^^^
+    144 鈹?    uninstallerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
+    145 鈹?  },
+  
+  i Turn the string into a template string.
+  
+
+apps\desktop\electron-builder.mjs:173:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    171 鈹?}
+    172 鈹?
+  > 173 鈹?export default config
+        鈹?       ^^^^^^^
+    174 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\index.html:56:11 lint/complexity/useOptionalChain  FIXABLE  鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Change to an optional chain.
+  
+    54 鈹?        } catch (_) {}
+    55 鈹?        var systemTheme =
+  > 56 鈹?          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+       鈹?          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 鈹?            ? 'dark'
+    58 鈹?            : 'light';
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     6  6 鈹?          } catch (_) {}鈵?     7  7 鈹?          var systemTheme =鈵?     8    鈹?- 路路路路路路路路路路window.matchMedia路&&路window.matchMedia('(prefers-color-scheme:路dark)').matches鈵?        8 鈹?+ 路路路路路路路路路路window.matchMedia?.('(prefers-color-scheme:路dark)').matches鈵?     9  9 鈹?              ? 'dark'鈵?    10 10 鈹?              : 'light';鈵?  
+
+apps\desktop\scripts\i18nWorkflow\genDiff.ts:30:50 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    28 鈹?    const prodJSON = readJSON(filepath)
+    29 鈹?
+  > 30 鈹?    const diffResult = diff(prodJSON, devJSON as any)
+       鈹?                                                 ^^^
+    31 鈹?    const remove = diffResult.filter((item) => item.op === 'remove')
+    32 鈹?    if (remove.length === 0) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\scripts\i18nWorkflow\utils.ts:13:51 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    11 鈹?}
+    12 鈹?
+  > 13 鈹?export const writeJSON = (filePath: string, data: any) => {
+       鈹?                                                  ^^^
+    14 鈹?  const jsonStr = JSON.stringify(data, null, 2)
+    15 鈹?  writeFileSync(filePath, jsonStr, 'utf8')
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\BackendCtr.ts:28:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    26 鈹? *   backend.stop       鈥?kill the Python process
+    27 鈹? */
+  > 28 鈹?export default class BackendCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    29 鈹?  static override readonly groupName = 'backend'
+    30 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\DevtoolsCtr.ts:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { ControllerModule, IpcMethod } from './index'
+    2 鈹?
+  > 3 鈹?export default class DevtoolsCtr extends ControllerModule {
+      鈹?       ^^^^^^^
+    4 鈹?  static override readonly groupName = 'devtools'
+    5 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\MenuCtr.ts:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { ControllerModule, IpcMethod } from './index'
+    2 鈹?
+  > 3 鈹?export default class MenuController extends ControllerModule {
+      鈹?       ^^^^^^^
+    4 鈹?  static override readonly groupName = 'menu'
+    5 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\MenuCtr.ts:18:36 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    16 鈹?   */
+    17 鈹?  @IpcMethod()
+  > 18 鈹?  showContextMenu(params: { data?: any; type: string }) {
+       鈹?                                   ^^^
+    19 鈹?    return this.app.menuManager.showContextMenu(params.type, params.data)
+    20 鈹?  }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\NetworkProxyCtr.ts:22:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    20 鈹? * Handle desktop application network proxy related functions
+    21 鈹? */
+  > 22 鈹?export default class NetworkProxyCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    23 鈹?  static override readonly groupName = 'networkProxy'
+    24 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\NotificationCtr.ts:13:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    11 鈹?const logger = createLogger('controllers:NotificationCtr')
+    12 鈹?
+  > 13 鈹?export default class NotificationCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    14 鈹?  static override readonly groupName = 'notification'
+    15 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\ShortcutCtr.ts:5:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    3 鈹?import { ControllerModule, IpcMethod } from '.'
+    4 鈹?
+  > 5 鈹?export default class ShortcutController extends ControllerModule {
+      鈹?       ^^^^^^^
+    6 鈹?  static override readonly groupName = 'shortcut'
+    7 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\TrayMenuCtr.ts:14:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    12 鈹?const logger = createLogger('controllers:TrayMenuCtr')
+    13 鈹?
+  > 14 鈹?export default class TrayMenuCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    15 鈹?  static override readonly groupName = 'tray'
+    16 鈹?  async toggleMainWindow() {
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\TunnelCtr.ts:16:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    14 鈹?const logger = createLogger('controllers:TunnelCtr')
+    15 鈹?
+  > 16 鈹?export default class TunnelCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    17 鈹?  static override readonly groupName = 'tunnel'
+    18 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\UpdaterCtr.ts:9:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+     7 鈹?const logger = createLogger('controllers:UpdaterCtr')
+     8 鈹?
+   > 9 鈹?export default class UpdaterCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    10 鈹?  static override readonly groupName = 'autoUpdate'
+    11 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\UploadFileCtr.ts:7:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    5 鈹?import { ControllerModule, IpcMethod } from './index'
+    6 鈹?
+  > 7 鈹?export default class UploadFileCtr extends ControllerModule {
+      鈹?       ^^^^^^^
+    8 鈹?  static override readonly groupName = 'upload'
+    9 鈹?  private get fileService() {
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\_template.ts:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { ControllerModule, IpcMethod } from './index'
+    2 鈹?
+  > 3 鈹?export default class DevtoolsCtr extends ControllerModule {
+      鈹?       ^^^^^^^
+    4 鈹?  @IpcMethod()
+    5 鈹?  async openDevtools() {
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+Skipped 143 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 273.
+Checked 282 files in 202ms. No fixes applied.
+Found 224 warnings.
+Found 69 infos.

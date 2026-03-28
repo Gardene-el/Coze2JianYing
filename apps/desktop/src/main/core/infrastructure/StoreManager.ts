@@ -1,14 +1,14 @@
-import Store from 'electron-store';
+import Store from 'electron-store'
 
-import { STORE_DEFAULTS, STORE_NAME } from '@/const/store';
-import type { ElectronMainStore, StoreKey } from '@/types/store';
-import { makeSureDirExist } from '@/utils/file-system';
-import { createLogger } from '@/utils/logger';
+import { STORE_DEFAULTS, STORE_NAME } from '@/const/store'
+import type { ElectronMainStore, StoreKey } from '@/types/store'
+import { makeSureDirExist } from '@/utils/file-system'
+import { createLogger } from '@/utils/logger'
 
-import type { App } from '../App';
+import type { App } from '../App'
 
 // Create logger
-const logger = createLogger('core:StoreManager');
+const logger = createLogger('core:StoreManager')
 
 /**
  * Application configuration storage manager
@@ -17,22 +17,21 @@ export class StoreManager {
   /**
    * Global configuration store instance
    */
-  private store: Store<ElectronMainStore>;
-  private app: App;
+  private store: Store<ElectronMainStore>
 
   constructor(app: App) {
-    logger.debug('Initializing StoreManager');
-    this.app = app;
+    logger.debug('Initializing StoreManager')
+    this.app = app
     this.store = new Store<ElectronMainStore>({
       defaults: STORE_DEFAULTS,
       name: STORE_NAME,
-    });
-    logger.info('StoreManager initialized with store name:', STORE_NAME);
+    })
+    logger.info('StoreManager initialized with store name:', STORE_NAME)
 
-    const storagePath = this.store.get('storagePath');
-    logger.info('app storage path:', storagePath);
+    const storagePath = this.store.get('storagePath')
+    logger.info('app storage path:', storagePath)
 
-    makeSureDirExist(storagePath);
+    makeSureDirExist(storagePath)
   }
 
   /**
@@ -41,8 +40,8 @@ export class StoreManager {
    * @param defaultValue Default value
    */
   get<K extends StoreKey>(key: K, defaultValue?: ElectronMainStore[K]): ElectronMainStore[K] {
-    logger.debug('Getting configuration value for key:', key);
-    return this.store.get(key, defaultValue as any);
+    logger.debug('Getting configuration value for key:', key)
+    return this.store.get(key, defaultValue as any)
   }
 
   /**
@@ -51,8 +50,8 @@ export class StoreManager {
    * @param value Configuration value
    */
   set<K extends StoreKey>(key: K, value: ElectronMainStore[K]): void {
-    logger.debug('Setting configuration value for key:', key);
-    this.store.set(key, value);
+    logger.debug('Setting configuration value for key:', key)
+    this.store.set(key, value)
   }
 
   /**
@@ -60,16 +59,16 @@ export class StoreManager {
    * @param key Configuration key
    */
   delete(key: StoreKey): void {
-    logger.debug('Deleting configuration key:', key);
-    this.store.delete(key);
+    logger.debug('Deleting configuration key:', key)
+    this.store.delete(key)
   }
 
   /**
    * Clear all storage
    */
   clear(): void {
-    logger.warn('Clearing all store data');
-    this.store.clear();
+    logger.warn('Clearing all store data')
+    this.store.clear()
   }
 
   /**
@@ -77,13 +76,13 @@ export class StoreManager {
    * @param key Configuration key
    */
   has(key: StoreKey): boolean {
-    const exists = this.store.has(key);
-    logger.debug('Checking if key exists:', key, exists);
-    return exists;
+    const exists = this.store.has(key)
+    logger.debug('Checking if key exists:', key, exists)
+    return exists
   }
 
   async openInEditor() {
-    logger.info('Opening store in editor');
-    await this.store.openInEditor();
+    logger.info('Opening store in editor')
+    await this.store.openInEditor()
   }
 }

@@ -1,5 +1,5 @@
-import type { GlobalStore } from "../store";
-import { INITIAL_STATUS } from "../initialState";
+import { INITIAL_STATUS } from '../initialState'
+import type { GlobalStore } from '../store'
 
 export const systemStatusSelectors = {
   /** 返回当前所有展开的分组 key 数组（带默认值，对齐 lobehub sessionGroupKeys 模式） */
@@ -10,7 +10,5 @@ export const systemStatusSelectors = {
   isGroupExpanded:
     (key: string) =>
     (s: GlobalStore): boolean =>
-      (
-        s.status.expandedSidebarGroups ?? INITIAL_STATUS.expandedSidebarGroups
-      ).includes(key),
-};
+      (s.status.expandedSidebarGroups ?? INITIAL_STATUS.expandedSidebarGroups).includes(key),
+}

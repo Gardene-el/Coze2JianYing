@@ -1,9 +1,9 @@
-import { ControllerModule, IpcMethod } from './index';
+import { ControllerModule, IpcMethod } from './index'
 
 export default class DevtoolsCtr extends ControllerModule {
   @IpcMethod()
   async openDevtools() {
-    const devtoolsBrowser = this.app.browserManager.retrieveByIdentifier('devtools');
-    devtoolsBrowser.show();
+    const devtoolsBrowser = this.app.browserManager.retrieveByIdentifier('devtools')
+    devtoolsBrowser.show()
   }
 }

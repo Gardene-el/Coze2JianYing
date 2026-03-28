@@ -1,4 +1,4 @@
-import type { McpInstallSchema } from '../types';
+import type { McpInstallSchema } from '../types'
 
 /**
  * Protocol installation related Broadcast events (main process -> renderer process)
@@ -10,10 +10,10 @@ export interface ProtocolBroadcastEvents {
    */
   mcpInstallRequest: (data: {
     /** Market source ID */
-    marketId?: string;
+    marketId?: string
     /** Plugin ID */
-    pluginId: string;
+    pluginId: string
     /** MCP Schema 对象 */
-    schema: McpInstallSchema;
-  }) => void;
+    schema: McpInstallSchema
+  }) => void
 }

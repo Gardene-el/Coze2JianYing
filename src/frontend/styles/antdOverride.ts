@@ -1,9 +1,8 @@
-import { type Theme } from "antd-style";
-import { css } from "antd-style";
-import { rgba } from "polished";
+import { css, type Theme } from 'antd-style'
+import { rgba } from 'polished'
 
 /** 动态检测是否运行于 Electron 桌面环境（对齐 LobeChat @lobechat/const isDesktop） */
-const isDesktop = typeof window !== "undefined" && !!window.electron;
+const isDesktop = typeof window !== 'undefined' && !!window.electron
 
 const antdOverride = ({ token }: { prefixCls: string; token: Theme }) => css`
   .${token.prefixCls}-popover {
@@ -21,13 +20,15 @@ const antdOverride = ({ token }: { prefixCls: string; token: Theme }) => css`
     backdrop-filter: blur(2px);
   }
 
-  ${isDesktop &&
-  css`
+  ${
+    isDesktop &&
+    css`
     .${token.prefixCls}-modal-mask.${token.prefixCls}-modal-mask-blur {
       background: ${rgba(token.colorBgLayout, 0.8)} !important;
       backdrop-filter: none !important;
     }
-  `}
-`;
+  `
+  }
+`
 
-export default antdOverride;
+export default antdOverride

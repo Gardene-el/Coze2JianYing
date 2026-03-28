@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite';
+import type { Plugin } from 'vite'
 
 /**
  * Prevents Node.js-only modules from being bundled into the SPA browser build.
@@ -9,21 +9,21 @@ import type { Plugin } from 'vite';
  *   Node.js version check — dead code in browser since native fetch is available.
  */
 export function viteNodeModuleStub(): Plugin {
-  const stubbedModules = new Set(['node:stream', 'node-fetch']);
-  const VIRTUAL_PREFIX = '\0node-stub:';
+  const stubbedModules = new Set(['node:stream', 'node-fetch'])
+  const VIRTUAL_PREFIX = '\0node-stub:'
 
   return {
     enforce: 'pre',
     load(id) {
-      if (id.startsWith(VIRTUAL_PREFIX)) return 'export default {};';
-      return null;
+      if (id.startsWith(VIRTUAL_PREFIX)) return 'export default {};'
+      return null
     },
     name: 'vite-node-module-stub',
     resolveId(source) {
       if (stubbedModules.has(source)) {
-        return { id: `${VIRTUAL_PREFIX}${source}`, moduleSideEffects: false };
+        return { id: `${VIRTUAL_PREFIX}${source}`, moduleSideEffects: false }
       }
-      return null;
+      return null
     },
-  };
+  }
 }

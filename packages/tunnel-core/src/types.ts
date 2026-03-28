@@ -12,50 +12,47 @@
  *   Candidates: "frp" | "localtunnel" | "bore"
  */
 
-export type TunnelProvider = "ngrok" | "cloudflare";
+export type TunnelProvider = 'ngrok' | 'cloudflare'
 
 /** Static metadata for a tunnel provider — drives the provider list UI. */
 export interface TunnelProviderMeta {
   /** Unique provider id, matches `TunnelProvider`. */
-  id: TunnelProvider;
+  id: TunnelProvider
   /** Display name shown in the provider list. */
-  name: string;
+  name: string
   /** One-line description shown below the name. */
-  description: string;
+  description: string
 }
 
 /** All supported tunnel providers in display order. */
 export const TUNNEL_PROVIDER_LIST: TunnelProviderMeta[] = [
   {
-    id: "ngrok",
-    name: "ngrok",
-    description: "稳定的商业内网穿透服务，免费层有流量限制",
+    id: 'ngrok',
+    name: 'ngrok',
+    description: '稳定的商业内网穿透服务，免费层有流量限制',
   },
   {
-    id: "cloudflare",
-    name: "Cloudflare Tunnel",
-    description: "基于 Cloudflare 全球网络，免登录快速隧道或命名隧道",
+    id: 'cloudflare',
+    name: 'Cloudflare Tunnel',
+    description: '基于 Cloudflare 全球网络，免登录快速隧道或命名隧道',
   },
-];
+]
 
 export interface TunnelStatus {
-  isRunning: boolean;
-  publicUrl?: string;
+  isRunning: boolean
+  publicUrl?: string
 }
 
 /** Contract every provider implementation must satisfy (used in the main process). */
 export interface ITunnelProvider {
-  getStatus(): TunnelStatus;
-  startTunnel(
-    port: number,
-    settings: NgrokSettings | CloudflareTunnelSettings,
-  ): Promise<string>;
-  stopTunnel(): Promise<void>;
+  getStatus(): TunnelStatus
+  startTunnel(port: number, settings: NgrokSettings | CloudflareTunnelSettings): Promise<string>
+  stopTunnel(): Promise<void>
 }
 
 export interface NgrokSettings {
-  authToken: string;
-  region: string;
+  authToken: string
+  region: string
 }
 
 /** Cloudflare Tunnel settings.
@@ -66,10 +63,10 @@ export interface NgrokSettings {
  */
 export interface CloudflareTunnelSettings {
   /** Service token from the Cloudflare dashboard, or empty for quick tunnel. */
-  token?: string;
+  token?: string
   /** For named tunnels: the public hostname from the Cloudflare Zero Trust
    *  dashboard, e.g. https://my-app.example.com.  Unused for quick tunnels. */
-  publicUrl?: string;
+  publicUrl?: string
   /**
    * Transport protocol passed to cloudflared via `--protocol`.
    * Defaults to `"http2"` for quick tunnels.
@@ -81,26 +78,26 @@ export interface CloudflareTunnelSettings {
    *
    * Valid values: `"http2"` | `"quic"` | `"auto"`
    */
-  protocol?: "http2" | "quic" | "auto";
+  protocol?: 'http2' | 'quic' | 'auto'
 }
 
 export type TunnelProviderSettings = {
-  ngrok?: NgrokSettings;
-  cloudflare?: CloudflareTunnelSettings;
-};
+  ngrok?: NgrokSettings
+  cloudflare?: CloudflareTunnelSettings
+}
 
 export interface StartTunnelPayload {
-  provider: TunnelProvider;
-  port: number;
+  provider: TunnelProvider
+  port: number
   /** Override stored settings for this invocation. */
-  settings?: Partial<NgrokSettings | CloudflareTunnelSettings>;
+  settings?: Partial<NgrokSettings | CloudflareTunnelSettings>
 }
 
 export interface TunnelSettingsPayload {
-  provider: TunnelProvider;
-  settings: NgrokSettings | CloudflareTunnelSettings;
+  provider: TunnelProvider
+  settings: NgrokSettings | CloudflareTunnelSettings
 }
 
 export interface TunnelProviderPayload {
-  provider: TunnelProvider;
+  provider: TunnelProvider
 }

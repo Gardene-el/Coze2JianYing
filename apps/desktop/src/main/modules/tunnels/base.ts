@@ -13,4 +13,4 @@ export type {
   TunnelProvider,
   TunnelProviderSettings,
   TunnelStatus,
-} from '@c2jy/tunnel-core';
+} from '@c2jy/tunnel-core'

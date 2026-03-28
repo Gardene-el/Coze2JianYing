@@ -1,4 +1,4 @@
-const { defineConfig } = require('@lobehub/i18n-cli');
+const { defineConfig } = require('@lobehub/i18n-cli')
 
 module.exports = defineConfig({
   entry: 'resources/locales/en',
@@ -29,4 +29,4 @@ module.exports = defineConfig({
   experimental: {
     jsonMode: true,
   },
-});
+})

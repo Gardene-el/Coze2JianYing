@@ -4,9 +4,9 @@
  * Electron's webRequest responseHeaders is a plain JS object where keys are case-sensitive,
  * but HTTP headers are case-insensitive per spec. These utilities handle this mismatch.
  */
-import { getDesktopEnv } from '@/env';
+import { getDesktopEnv } from '@/env'
 
-type ElectronResponseHeaders = Record<string, string[]>;
+type ElectronResponseHeaders = Record<string, string[]>
 
 /**
  * Append Vercel JWT cookie to headers if VERCEL_JWT env is set.
@@ -15,20 +15,18 @@ type ElectronResponseHeaders = Record<string, string[]>;
 export function appendVercelCookie(
   headers: Headers | Record<string, string | number | string[] | undefined>,
 ): void {
-  const vercelJwt = getDesktopEnv().VERCEL_JWT;
-  if (!vercelJwt) return;
+  const vercelJwt = getDesktopEnv().VERCEL_JWT
+  if (!vercelJwt) return
 
   if (headers instanceof Headers) {
-    const existing = headers.get('Cookie') || '';
+    const existing = headers.get('Cookie') || ''
     headers.set(
       'Cookie',
       existing ? `${existing}; _vercel_jwt=${vercelJwt}` : `_vercel_jwt=${vercelJwt}`,
-    );
+    )
   } else {
-    const existing = (headers['Cookie'] as string) || '';
-    headers['Cookie'] = existing
-      ? `${existing}; _vercel_jwt=${vercelJwt}`
-      : `_vercel_jwt=${vercelJwt}`;
+    const existing = (headers.Cookie as string) || ''
+    headers.Cookie = existing ? `${existing}; _vercel_jwt=${vercelJwt}` : `_vercel_jwt=${vercelJwt}`
   }
 }
 
@@ -43,17 +41,17 @@ export function setResponseHeader(
   // Delete any existing header with same name (case-insensitive)
   for (const key of Object.keys(headers)) {
     if (key.toLowerCase() === name.toLowerCase()) {
-      delete headers[key];
+      delete headers[key]
     }
   }
-  headers[name] = Array.isArray(value) ? value : [value];
+  headers[name] = Array.isArray(value) ? value : [value]
 }
 
 /**
  * Check if a header exists (case-insensitive)
  */
 export function hasResponseHeader(headers: ElectronResponseHeaders, name: string): boolean {
-  return Object.keys(headers).some((key) => key.toLowerCase() === name.toLowerCase());
+  return Object.keys(headers).some((key) => key.toLowerCase() === name.toLowerCase())
 }
 
 /**
@@ -65,22 +63,22 @@ export function getResponseHeader(
 ): string[] | undefined {
   for (const key of Object.keys(headers)) {
     if (key.toLowerCase() === name.toLowerCase()) {
-      return headers[key];
+      return headers[key]
     }
   }
-  return undefined;
+  return undefined
 }
 
 /**
  * Delete a header (case-insensitive)
  */
 export function deleteResponseHeader(headers: ElectronResponseHeaders, name: string): boolean {
-  let deleted = false;
+  let deleted = false
   for (const key of Object.keys(headers)) {
     if (key.toLowerCase() === name.toLowerCase()) {
-      delete headers[key];
-      deleted = true;
+      delete headers[key]
+      deleted = true
     }
   }
-  return deleted;
+  return deleted
 }

@@ -1,277 +1,277 @@
 // Define types for local file operations
 export interface LocalFileItem {
-  contentType?: string;
-  createdTime: Date;
+  contentType?: string
+  createdTime: Date
   /** Search engine used to find this file (e.g., 'mdfind', 'fd', 'find', 'fast-glob') */
-  engine?: string;
-  isDirectory: boolean;
-  lastAccessTime: Date;
+  engine?: string
+  isDirectory: boolean
+  lastAccessTime: Date
   // Spotlight specific metadata
   metadata?: {
-    [key: string]: any;
-  };
-  modifiedTime: Date;
-  name: string;
-  path: string;
-  size: number;
-  type: string;
+    [key: string]: any
+  }
+  modifiedTime: Date
+  name: string
+  path: string
+  size: number
+  type: string
 }
 
-export type ListLocalFileSortBy = 'name' | 'modifiedTime' | 'createdTime' | 'size';
-export type ListLocalFileSortOrder = 'asc' | 'desc';
+export type ListLocalFileSortBy = 'name' | 'modifiedTime' | 'createdTime' | 'size'
+export type ListLocalFileSortOrder = 'asc' | 'desc'
 
 export interface ListLocalFileParams {
   /**
    * Maximum number of files to return
    * @default 100
    */
-  limit?: number;
+  limit?: number
   /**
    * Directory path to list
    */
-  path: string;
+  path: string
   /**
    * Field to sort by
    * @default 'modifiedTime'
    */
-  sortBy?: ListLocalFileSortBy;
+  sortBy?: ListLocalFileSortBy
   /**
    * Sort order
    * @default 'desc'
    */
-  sortOrder?: ListLocalFileSortOrder;
+  sortOrder?: ListLocalFileSortOrder
 }
 
 export interface ListLocalFilesResult {
   /**
    * List of files (truncated to limit)
    */
-  files: LocalFileItem[];
+  files: LocalFileItem[]
   /**
    * Total count of files before truncation
    */
-  totalCount: number;
+  totalCount: number
 }
 
 export interface MoveLocalFileParams {
-  newPath: string;
-  oldPath: string;
+  newPath: string
+  oldPath: string
 }
 
 export interface MoveLocalFilesParams {
-  items: MoveLocalFileParams[];
+  items: MoveLocalFileParams[]
 }
 
 export interface LocalMoveFilesResultItem {
-  error?: string; // Error message if this specific item failed
-  newPath?: string; // The final path after moving/renaming, if successful
-  sourcePath: string; // The original path of the item being moved/renamed
-  success: boolean; // Whether the operation for this specific item was successful
+  error?: string // Error message if this specific item failed
+  newPath?: string // The final path after moving/renaming, if successful
+  sourcePath: string // The original path of the item being moved/renamed
+  success: boolean // Whether the operation for this specific item was successful
 }
 
 export interface RenameLocalFileParams {
-  newName: string;
-  path: string;
+  newName: string
+  path: string
 }
 
 export interface RenameLocalFileResult {
-  error?: any;
-  newPath: string;
-  success: boolean;
+  error?: any
+  newPath: string
+  success: boolean
 }
 
 export interface LocalReadFileParams {
-  fullContent?: boolean;
-  loc?: [number, number];
-  path: string;
+  fullContent?: boolean
+  loc?: [number, number]
+  path: string
 }
 
 export interface LocalReadFilesParams {
-  paths: string[];
+  paths: string[]
 }
 
 export interface WriteLocalFileParams {
   /**
    * Content to write
    */
-  content: string;
+  content: string
 
   /**
    * File path to write to
    */
-  path: string;
+  path: string
 }
 
 export interface LocalReadFileResult {
   /**
    * Character count of the content within the specified `loc` range.
    */
-  charCount: number;
+  charCount: number
   /**
    * Content of the file within the specified `loc` range.
    */
-  content: string;
-  createdTime: Date;
-  filename: string;
-  fileType: string;
+  content: string
+  createdTime: Date
+  filename: string
+  fileType: string
   /**
    * Line count of the content within the specified `loc` range.
    */
-  lineCount: number;
-  loc: [number, number];
-  modifiedTime: Date;
+  lineCount: number
+  loc: [number, number]
+  modifiedTime: Date
   /**
    * Total character count of the entire file.
    */
-  totalCharCount: number;
+  totalCharCount: number
   /**
    * Total line count of the entire file.
    */
-  totalLineCount: number;
+  totalLineCount: number
 }
 
 export interface LocalSearchFilesParams {
   // Content options
-  contentContains?: string; // Search for files containing specific text
+  contentContains?: string // Search for files containing specific text
 
   // Time options (ISO 8601 date strings)
-  createdAfter?: string;
-  createdBefore?: string;
+  createdAfter?: string
+  createdBefore?: string
 
   // Result options
-  detailed?: boolean;
+  detailed?: boolean
 
   // Path options
-  directory?: string; // Limit search to specific directory
+  directory?: string // Limit search to specific directory
 
-  exclude?: string[]; // Paths to exclude from search
+  exclude?: string[] // Paths to exclude from search
   // File type options
-  fileTypes?: string[]; // File extensions to filter (e.g., ['pdf', 'docx'])
+  fileTypes?: string[] // File extensions to filter (e.g., ['pdf', 'docx'])
   // Basic search
-  keywords: string;
-  limit?: number;
+  keywords: string
+  limit?: number
 
-  liveUpdate?: boolean;
-  modifiedAfter?: string;
-  modifiedBefore?: string;
+  liveUpdate?: boolean
+  modifiedAfter?: string
+  modifiedBefore?: string
 
   /** Working directory scope. When `directory` is not specified, used as the default search location. */
-  scope?: string;
-  sortBy?: 'name' | 'date' | 'size';
-  sortDirection?: 'asc' | 'desc';
+  scope?: string
+  sortBy?: 'name' | 'date' | 'size'
+  sortDirection?: 'asc' | 'desc'
 }
 
 export interface OpenLocalFileParams {
-  path: string;
+  path: string
 }
 
 export interface OpenLocalFolderParams {
-  isDirectory?: boolean;
-  path: string;
+  isDirectory?: boolean
+  path: string
 }
 
 // Shell command types
 export interface RunCommandParams {
-  command: string;
-  cwd?: string;
-  description?: string;
-  run_in_background?: boolean;
-  timeout?: number;
+  command: string
+  cwd?: string
+  description?: string
+  run_in_background?: boolean
+  timeout?: number
 }
 
 export interface RunCommandResult {
-  error?: string;
-  exit_code?: number;
-  output?: string;
-  shell_id?: string;
-  stderr?: string;
-  stdout?: string;
-  success: boolean;
+  error?: string
+  exit_code?: number
+  output?: string
+  shell_id?: string
+  stderr?: string
+  stdout?: string
+  success: boolean
 }
 
 export interface GetCommandOutputParams {
-  filter?: string;
-  shell_id: string;
+  filter?: string
+  shell_id: string
 }
 
 export interface GetCommandOutputResult {
-  error?: string;
-  output: string;
-  running: boolean;
-  stderr: string;
-  stdout: string;
-  success: boolean;
+  error?: string
+  output: string
+  running: boolean
+  stderr: string
+  stdout: string
+  success: boolean
 }
 
 export interface KillCommandParams {
-  shell_id: string;
+  shell_id: string
 }
 
 export interface KillCommandResult {
-  error?: string;
-  success: boolean;
+  error?: string
+  success: boolean
 }
 
 // Grep types
 export interface GrepContentParams {
-  '-A'?: number;
-  '-B'?: number;
-  '-C'?: number;
-  '-i'?: boolean;
-  '-n'?: boolean;
-  'glob'?: string;
-  'head_limit'?: number;
-  'multiline'?: boolean;
-  'output_mode'?: 'content' | 'files_with_matches' | 'count';
-  'path'?: string;
-  'pattern': string;
+  '-A'?: number
+  '-B'?: number
+  '-C'?: number
+  '-i'?: boolean
+  '-n'?: boolean
+  glob?: string
+  head_limit?: number
+  multiline?: boolean
+  output_mode?: 'content' | 'files_with_matches' | 'count'
+  path?: string
+  pattern: string
   /** Working directory scope. When `path` is not specified, used as the default search location. */
-  'scope'?: string;
+  scope?: string
   /** Preferred search tool: 'rg' | 'ag' | 'grep' */
-  'tool'?: 'rg' | 'ag' | 'grep';
-  'type'?: string;
+  tool?: 'rg' | 'ag' | 'grep'
+  type?: string
 }
 
 export interface GrepContentResult {
   /** Search engine used: 'rg' | 'ag' | 'grep' | 'nodejs' */
-  engine?: string;
-  error?: string;
-  matches: string[];
-  success: boolean;
-  total_matches: number;
+  engine?: string
+  error?: string
+  matches: string[]
+  success: boolean
+  total_matches: number
 }
 
 // Glob types
 export interface GlobFilesParams {
-  pattern: string;
+  pattern: string
   /** Working directory scope. When `pattern` is relative, it is joined with this scope. Defaults to the current working directory. */
-  scope?: string;
+  scope?: string
 }
 
 export interface GlobFilesResult {
   /** Search engine used: 'fd' | 'find' | 'fast-glob' */
-  engine?: string;
-  error?: string;
-  files: string[];
-  success: boolean;
-  total_files: number;
+  engine?: string
+  error?: string
+  files: string[]
+  success: boolean
+  total_files: number
 }
 
 // Edit types
 export interface EditLocalFileParams {
-  file_path: string;
-  new_string: string;
-  old_string: string;
-  replace_all?: boolean;
+  file_path: string
+  new_string: string
+  old_string: string
+  replace_all?: boolean
 }
 
 export interface EditLocalFileResult {
-  diffText?: string;
-  error?: string;
-  linesAdded?: number;
-  linesDeleted?: number;
-  replacements: number;
-  success: boolean;
+  diffText?: string
+  error?: string
+  linesAdded?: number
+  linesDeleted?: number
+  replacements: number
+  success: boolean
 }
 
 // Open Dialog types
@@ -279,41 +279,41 @@ export interface ShowOpenDialogParams {
   /**
    * File type filters
    */
-  filters?: { extensions: string[]; name: string }[];
+  filters?: { extensions: string[]; name: string }[]
   /**
    * Allow selecting multiple files
    */
-  multiple?: boolean;
+  multiple?: boolean
   /**
    * Dialog title
    */
-  title?: string;
+  title?: string
 }
 
 export interface ShowOpenDialogResult {
   /**
    * Whether the dialog was cancelled
    */
-  canceled: boolean;
+  canceled: boolean
   /**
    * The selected file paths (empty if cancelled)
    */
-  filePaths: string[];
+  filePaths: string[]
 }
 
 // Pick File (dialog + read in one IPC call)
 export interface PickFileParams {
-  filters?: { extensions: string[]; name: string }[];
-  title?: string;
+  filters?: { extensions: string[]; name: string }[]
+  title?: string
 }
 
 export interface PickFileResult {
-  canceled: boolean;
+  canceled: boolean
   file?: {
-    data: Uint8Array;
-    mimeType: string;
-    name: string;
-  };
+    data: Uint8Array
+    mimeType: string
+    name: string
+  }
 }
 
 // Save Dialog types
@@ -321,49 +321,49 @@ export interface ShowSaveDialogParams {
   /**
    * Default file name
    */
-  defaultPath?: string;
+  defaultPath?: string
   /**
    * File type filters
    */
-  filters?: { extensions: string[]; name: string }[];
+  filters?: { extensions: string[]; name: string }[]
   /**
    * Dialog title
    */
-  title?: string;
+  title?: string
 }
 
 export interface ShowSaveDialogResult {
   /**
    * Whether the dialog was cancelled
    */
-  canceled: boolean;
+  canceled: boolean
   /**
    * The selected file path (undefined if cancelled)
    */
-  filePath?: string;
+  filePath?: string
 }
 
 export interface PrepareSkillDirectoryParams {
-  forceRefresh?: boolean;
-  url: string;
-  zipHash: string;
+  forceRefresh?: boolean
+  url: string
+  zipHash: string
 }
 
 export interface PrepareSkillDirectoryResult {
-  error?: string;
-  extractedDir: string;
-  success: boolean;
-  zipPath: string;
+  error?: string
+  extractedDir: string
+  success: boolean
+  zipPath: string
 }
 
 export interface ResolveSkillResourcePathParams {
-  path: string;
-  url: string;
-  zipHash: string;
+  path: string
+  url: string
+  zipHash: string
 }
 
 export interface ResolveSkillResourcePathResult {
-  error?: string;
-  fullPath?: string;
-  success: boolean;
+  error?: string
+  fullPath?: string
+  success: boolean
 }

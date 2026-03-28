@@ -23,6 +23,6 @@ const common = {
   'status.loading': 'Loading',
   'status.success': 'Success',
   'status.warning': 'Warning',
-};
+}
 
-export default common;
+export default common

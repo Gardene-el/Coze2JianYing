@@ -5,23 +5,23 @@
  */
 
 export const headersToRecord = (headersInit?: HeadersInit): Record<string, string> => {
-  const record: Record<string, string> = {};
+  const record: Record<string, string> = {}
   if (!headersInit) {
-    return record;
+    return record
   }
   if (headersInit instanceof Headers) {
     headersInit.forEach((value, key) => {
-      record[key] = value;
-    });
+      record[key] = value
+    })
   } else if (Array.isArray(headersInit)) {
     headersInit.forEach(([key, value]) => {
-      record[key] = value;
-    });
+      record[key] = value
+    })
   } else {
-    Object.assign(record, headersInit);
+    Object.assign(record, headersInit)
   }
-  delete record['host'];
-  delete record['connection'];
-  delete record['content-length'];
-  return record;
-};
+  delete record.host
+  delete record.connection
+  delete record['content-length']
+  return record
+}

@@ -70,7 +70,8 @@
       },
       "complexity": {
         "noBannedTypes": "error",
-        "noUselessConstructor": "error"
+        "noUselessConstructor": "error",
+        "noStaticOnlyClass": "off"
       },
       "performance": {
         "noBarrelFile": "off"
@@ -113,13 +114,28 @@
     {
       "includes": [
         "**/*.config.*",
+        "**/*.d.ts",
+        "apps/desktop/.remarkrc.mjs",
+        "apps/desktop/electron-builder.mjs",
+        "apps/desktop/src/main/**",
         "apps/desktop/src/renderer/pages/**",
-        "apps/desktop/src/renderer/src/App.tsx"
+        "apps/desktop/src/renderer/src/App.tsx",
+        "src/frontend/**"
       ],
       "linter": {
         "rules": {
           "style": {
             "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/desktop/electron-builder.mjs"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noTemplateCurlyInString": "off"
           }
         }
       }

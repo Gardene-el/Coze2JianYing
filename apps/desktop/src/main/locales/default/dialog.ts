@@ -25,6 +25,6 @@ const dialog = {
   'update.newVersion': 'New Version Found',
   'update.newVersionAvailable': 'New version: {{version}}',
   'update.skipThisVersion': 'Skip This Version',
-};
+}
 
-export default dialog;
+export default dialog

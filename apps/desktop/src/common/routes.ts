@@ -5,27 +5,27 @@ export interface RouteInterceptConfig {
   /**
    * Whether to always open in a new window, even if target window already exists
    */
-  alwaysOpenNew?: boolean;
+  alwaysOpenNew?: boolean
 
   /**
    * Description
    */
-  description: string;
+  description: string
 
   /**
    * Whether interception is enabled
    */
-  enabled: boolean;
+  enabled: boolean
 
   /**
    * Route pattern prefix, e.g., '/settings'
    */
-  pathPrefix: string;
+  pathPrefix: string
 
   /**
    * Target window identifier
    */
-  targetWindow: string;
+  targetWindow: string
 }
 
 /**
@@ -46,7 +46,7 @@ export const interceptRoutes: RouteInterceptConfig[] = [
   //   pathPrefix: '/help',
   //   targetWindow: 'help',
   // },
-];
+]
 
 /**
  * Find matching route intercept configuration by path
@@ -54,8 +54,8 @@ export const interceptRoutes: RouteInterceptConfig[] = [
  * @returns Matching intercept configuration, or undefined if no match found
  */
 export const findMatchingRoute = (path: string): RouteInterceptConfig | undefined => {
-  return interceptRoutes.find((route) => route.enabled && path.startsWith(route.pathPrefix));
-};
+  return interceptRoutes.find((route) => route.enabled && path.startsWith(route.pathPrefix))
+}
 
 /**
  * Extract sub-path from full path
@@ -64,9 +64,9 @@ export const findMatchingRoute = (path: string): RouteInterceptConfig | undefine
  * @returns Sub-path, e.g., 'agent'
  */
 export const extractSubPath = (fullPath: string, pathPrefix: string): string | undefined => {
-  if (fullPath.length <= pathPrefix.length) return undefined;
+  if (fullPath.length <= pathPrefix.length) return undefined
 
   // Remove leading slash
-  const subPath = fullPath.slice(Math.max(0, pathPrefix.length + 1));
-  return subPath || undefined;
-};
+  const subPath = fullPath.slice(Math.max(0, pathPrefix.length + 1))
+  return subPath || undefined
+}

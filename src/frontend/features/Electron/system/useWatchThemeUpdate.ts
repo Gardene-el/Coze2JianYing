@@ -1,7 +1,7 @@
-import { useTheme } from "next-themes";
-import { useEffect } from "react";
+import { useTheme } from 'next-themes'
+import { useEffect } from 'react'
 
-const isDesktop = typeof window !== "undefined" && !!window.electron;
+const isDesktop = typeof window !== 'undefined' && !!window.electron
 
 /**
  * 监听 next-themes 的主题值变化，将 theme 变更通过 IPC 转发给 Electron 主进程，
@@ -10,19 +10,16 @@ const isDesktop = typeof window !== "undefined" && !!window.electron;
  * 对齐 lobehub/src/features/Electron/system/useWatchThemeUpdate.ts
  */
 export const useWatchThemeUpdate = () => {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   useEffect(() => {
-    if (!isDesktop) return;
-    if (!theme) return;
+    if (!isDesktop) return
+    if (!theme) return
 
     window.electronAPI
-      ?.invoke(
-        "system.updateThemeModeHandler",
-        theme as "dark" | "light" | "system",
-      )
+      ?.invoke('system.updateThemeModeHandler', theme as 'dark' | 'light' | 'system')
       .catch(() => {
         // Ignore — running in non-electron or IPC not yet ready.
-      });
-  }, [theme]);
-};
+      })
+  }, [theme])
+}

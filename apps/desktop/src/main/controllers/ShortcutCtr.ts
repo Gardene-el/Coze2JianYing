@@ -1,15 +1,15 @@
-import type { ShortcutUpdateResult } from '@/core/ui/ShortcutManager';
+import type { ShortcutUpdateResult } from '@/core/ui/ShortcutManager'
 
-import { ControllerModule, IpcMethod } from '.';
+import { ControllerModule, IpcMethod } from '.'
 
 export default class ShortcutController extends ControllerModule {
-  static override readonly groupName = 'shortcut';
+  static override readonly groupName = 'shortcut'
   /**
    * Get all shortcut configurations
    */
   @IpcMethod()
   getShortcutsConfig() {
-    return this.app.shortcutManager.getShortcutsConfig();
+    return this.app.shortcutManager.getShortcutsConfig()
   }
 
   /**
@@ -20,9 +20,9 @@ export default class ShortcutController extends ControllerModule {
     id,
     accelerator,
   }: {
-    accelerator: string;
-    id: string;
+    accelerator: string
+    id: string
   }): ShortcutUpdateResult {
-    return this.app.shortcutManager.updateShortcutConfig(id, accelerator);
+    return this.app.shortcutManager.updateShortcutConfig(id, accelerator)
   }
 }

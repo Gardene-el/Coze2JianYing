@@ -1,20 +1,20 @@
-import { spawn } from 'node:child_process';
-import type { ChildProcess } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import type { ChildProcess } from 'node:child_process'
+import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
-import { app } from 'electron';
+import { app } from 'electron'
 
-import { isDev } from '@/const/env';
-import { createLogger } from '@/utils/logger';
+import { isDev } from '@/const/env'
+import { createLogger } from '@/utils/logger'
 
-const logger = createLogger('core:PythonBackendManager');
+const logger = createLogger('core:PythonBackendManager')
 
-const DEFAULT_PORT = 20211;
-const GUI_HOST = '127.0.0.1';
-const HEALTH_POLL_MS = 500;
-const HEALTH_TIMEOUT_MS = 30_000;
+const DEFAULT_PORT = 20211
+const GUI_HOST = '127.0.0.1'
+const HEALTH_POLL_MS = 500
+const HEALTH_TIMEOUT_MS = 30_000
 
 /**
  * Manages the Python FastAPI backend process lifecycle.
@@ -32,46 +32,46 @@ const HEALTH_TIMEOUT_MS = 30_000;
  * electron-builder; no rebuild is attempted.
  */
 export class PythonBackendManager {
-  private process: ChildProcess | null = null;
-  private stopped = false;
-  private _port: number = DEFAULT_PORT;
+  private process: ChildProcess | null = null
+  private stopped = false
+  private _port: number = DEFAULT_PORT
   /** True once the CPython embed has been verified / built for this app session. */
-  private embedReady = false;
+  private embedReady = false
 
   /** Monorepo root directory (Coze2JianYing/) */
-  private readonly projectRoot: string;
+  private readonly projectRoot: string
 
   /** Port the Python backend is currently running on (or will use on next start). */
   get port(): number {
-    return this._port;
+    return this._port
   }
 
   /** True while the Python process is alive. */
   get isRunning(): boolean {
-    return this.process !== null;
+    return this.process !== null
   }
 
   constructor() {
     // apps/desktop -> apps -> monorepo root
-    this.projectRoot = join(app.getAppPath(), '..', '..');
-    logger.debug(`Python project root: ${this.projectRoot}`);
+    this.projectRoot = join(app.getAppPath(), '..', '..')
+    logger.debug(`Python project root: ${this.projectRoot}`)
   }
 
   /** Directory that contains python.exe + Lib/site-packages */
   private get embedDir(): string {
-    if (isDev) return join(app.getAppPath(), 'resources', 'python');
-    return join(process.resourcesPath, 'python');
+    if (isDev) return join(app.getAppPath(), 'resources', 'python')
+    return join(process.resourcesPath, 'python')
   }
 
   /** Full path to the embedded python.exe */
   private get embedPythonExe(): string {
-    return join(this.embedDir, 'python.exe');
+    return join(this.embedDir, 'python.exe')
   }
 
   /** Compute the log directory passed to Python via COZE2JY_LOG_DIR env var */
   private get logDir(): string {
-    if (isDev) return join(this.projectRoot, 'logs');
-    return join(process.resourcesPath, 'python', 'logs');
+    if (isDev) return join(this.projectRoot, 'logs')
+    return join(process.resourcesPath, 'python', 'logs')
   }
 
   /**
@@ -79,10 +79,10 @@ export class PythonBackendManager {
    * Must match the format written by scripts/build_workflow/build_python.py.
    */
   private computeStamp(): string {
-    const pyprojectPath = join(this.projectRoot, 'pyproject.toml');
-    const hash = createHash('sha256').update(readFileSync(pyprojectPath)).digest('hex');
+    const pyprojectPath = join(this.projectRoot, 'pyproject.toml')
+    const hash = createHash('sha256').update(readFileSync(pyprojectPath)).digest('hex')
     // PYTHON_VERSION mirrors the value in build_python.py; bump both together.
-    return `python_version=3.12.9\nhash=${hash}\n`;
+    return `python_version=3.12.9\nhash=${hash}\n`
   }
 
   /**
@@ -90,12 +90,12 @@ export class PythonBackendManager {
    * Returns [needsBuild, reason].
    */
   private needsRebuild(): [boolean, string] {
-    if (!existsSync(this.embedPythonExe)) return [true, 'python.exe missing'];
-    const stampPath = join(this.embedDir, '.stamp');
-    if (!existsSync(stampPath)) return [true, '.stamp missing'];
-    const existing = readFileSync(stampPath, 'utf8');
-    if (existing !== this.computeStamp()) return [true, 'stamp mismatch (dependencies changed)'];
-    return [false, 'up to date'];
+    if (!existsSync(this.embedPythonExe)) return [true, 'python.exe missing']
+    const stampPath = join(this.embedDir, '.stamp')
+    if (!existsSync(stampPath)) return [true, '.stamp missing']
+    const existing = readFileSync(stampPath, 'utf8')
+    if (existing !== this.computeStamp()) return [true, 'stamp mismatch (dependencies changed)']
+    return [false, 'up to date']
   }
 
   /**
@@ -108,24 +108,24 @@ export class PythonBackendManager {
    * the Electron main process hot-reloads and pyproject.toml has changed.
    */
   private ensureEmbedReady(): void {
-    if (!isDev) return;
+    if (!isDev) return
 
     if (!existsSync(this.embedPythonExe)) {
       throw new Error(
         `Embedded python.exe not found at: ${this.embedPythonExe}\n` +
           `Run 'npm run build:backend' (or use 'bun run dev:quick') to build the CPython embed first.`,
-      );
+      )
     }
 
     // Stamp check: only warn when dependencies appear stale, never auto-rebuild.
-    const [stale, reason] = this.needsRebuild();
+    const [stale, reason] = this.needsRebuild()
     if (stale) {
       logger.warn(
         `Python embed may be outdated (${reason}). ` +
           `Run 'npm run build:backend' to rebuild. Continuing with the existing embed.`,
-      );
+      )
     } else {
-      logger.info(`Python embed stamp is up to date`);
+      logger.info(`Python embed stamp is up to date`)
     }
   }
 
@@ -136,75 +136,75 @@ export class PythonBackendManager {
    */
   async start(port?: number): Promise<void> {
     if (this.process) {
-      logger.warn('Python backend already running');
-      return;
+      logger.warn('Python backend already running')
+      return
     }
-    if (port !== undefined) this._port = port;
-    this.stopped = false;
+    if (port !== undefined) this._port = port
+    this.stopped = false
 
     // Ensure the CPython embed is present and up to date.
     // Only runs once per app session — subsequent UI-driven restarts skip this
     // to avoid re-running the stamp check (and a potential rebuild).
     if (!this.embedReady) {
-      this.ensureEmbedReady();
-      this.embedReady = true;
+      this.ensureEmbedReady()
+      this.embedReady = true
     }
 
-    const { cmd, args, cwd } = this.resolveSpawnConfig();
-    logger.info(`Starting Python backend: ${cmd} ${args.join(' ')} (cwd: ${cwd})`);
+    const { cmd, args, cwd } = this.resolveSpawnConfig()
+    logger.info(`Starting Python backend: ${cmd} ${args.join(' ')} (cwd: ${cwd})`)
 
     this.process = spawn(cmd, args, {
       cwd,
       env: { ...process.env, COZE2JY_LOG_DIR: this.logDir },
       stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    })
 
     this.process.stdout?.on('data', (data: Buffer) => {
       for (const line of data.toString().split('\n')) {
-        if (line.trim()) logger.debug(`[python] ${line.trim()}`);
+        if (line.trim()) logger.debug(`[python] ${line.trim()}`)
       }
-    });
+    })
 
     this.process.stderr?.on('data', (data: Buffer) => {
       for (const line of data.toString().split('\n')) {
-        if (line.trim()) logger.warn(`[python:err] ${line.trim()}`);
+        if (line.trim()) logger.warn(`[python:err] ${line.trim()}`)
       }
-    });
+    })
 
     this.process.on('error', (err) => {
-      logger.error('Python process error:', err);
-    });
+      logger.error('Python process error:', err)
+    })
 
     this.process.on('exit', (code, signal) => {
       if (!this.stopped) {
-        logger.warn(`Python process exited unexpectedly (code=${code}, signal=${signal})`);
+        logger.warn(`Python process exited unexpectedly (code=${code}, signal=${signal})`)
       }
-      this.process = null;
-    });
+      this.process = null
+    })
 
     // Wait for the health endpoint to become available
-    await this.waitForReady();
-    logger.info(`Python backend ready on port ${this._port}`);
+    await this.waitForReady()
+    logger.info(`Python backend ready on port ${this._port}`)
   }
 
   /** Kill the Python process if running. */
   stop(): void {
-    this.stopped = true;
-    if (!this.process) return;
+    this.stopped = true
+    if (!this.process) return
 
-    logger.info('Stopping Python backend');
+    logger.info('Stopping Python backend')
     try {
-      spawn('taskkill', ['/pid', String(this.process.pid), '/f', '/t']);
+      spawn('taskkill', ['/pid', String(this.process.pid), '/f', '/t'])
     } catch (err) {
-      logger.warn('Error stopping Python process:', err);
+      logger.warn('Error stopping Python process:', err)
     }
-    this.process = null;
+    this.process = null
   }
 
   // ---------------------------------------------------------------------------
 
   private resolveSpawnConfig(): { args: string[]; cmd: string; cwd: string } {
-    const pythonExe = this.embedPythonExe;
+    const pythonExe = this.embedPythonExe
 
     if (!existsSync(pythonExe)) {
       // Should never happen in production (embed is pre-bundled).
@@ -212,37 +212,35 @@ export class PythonBackendManager {
       throw new Error(
         `Embedded python.exe not found at: ${pythonExe}\n` +
           `Run 'npm run build:backend' from apps/desktop to build the CPython embed.`,
-      );
+      )
     }
 
     return {
       args: ['-m', 'src.main', '--gui-only', '--port', String(this._port), '--host', GUI_HOST],
       cmd: pythonExe,
       cwd: this.embedDir,
-    };
+    }
   }
 
   private async waitForReady(): Promise<void> {
-    const healthEndpoint = `http://${GUI_HOST}:${this._port}/gui/health`;
-    const deadline = Date.now() + HEALTH_TIMEOUT_MS;
+    const healthEndpoint = `http://${GUI_HOST}:${this._port}/gui/health`
+    const deadline = Date.now() + HEALTH_TIMEOUT_MS
 
     while (Date.now() < deadline) {
       try {
-        const resp = await fetch(healthEndpoint, { signal: AbortSignal.timeout(2000) });
-        if (resp.ok) return;
+        const resp = await fetch(healthEndpoint, { signal: AbortSignal.timeout(2000) })
+        if (resp.ok) return
       } catch {
         // not yet ready
       }
 
       if (!this.process) {
-        throw new Error('Python backend process exited before becoming healthy');
+        throw new Error('Python backend process exited before becoming healthy')
       }
 
-      await new Promise((r) => setTimeout(r, HEALTH_POLL_MS));
+      await new Promise((r) => setTimeout(r, HEALTH_POLL_MS))
     }
 
-    throw new Error(
-      `Python backend did not become healthy within ${HEALTH_TIMEOUT_MS / 1000}s`,
-    );
+    throw new Error(`Python backend did not become healthy within ${HEALTH_TIMEOUT_MS / 1000}s`)
   }
 }

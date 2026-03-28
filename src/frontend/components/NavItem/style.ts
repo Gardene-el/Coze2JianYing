@@ -1,4 +1,4 @@
-import { createStaticStyles } from "antd-style";
+import { createStaticStyles } from 'antd-style'
 
 export const navItemStyles = createStaticStyles(({ css, cssVar }) => ({
   item: css`
@@ -37,4 +37,4 @@ export const navItemStyles = createStaticStyles(({ css, cssVar }) => ({
     font-size: 16px;
     flex-shrink: 0;
   `,
-}));
+}))

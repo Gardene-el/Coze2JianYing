@@ -1,10 +1,10 @@
-import { createStaticStyles } from "antd-style";
+import { createStaticStyles } from 'antd-style'
 
 /** 与 AppTheme / antdOverride 保持一致的 isDesktop 判断 */
-const isDesktop = typeof window !== "undefined" && !!window.electron;
+const isDesktop = typeof window !== 'undefined' && !!window.electron
 
 // 顶部 padding: Electron 紧贴 TitleBar → 0；Web 保留 8px
-const paddingTop = isDesktop ? "0" : "8px";
+const paddingTop = isDesktop ? '0' : '8px'
 
 /**
  * DesktopLayoutContainer 样式 — 对齐 LobeChat
@@ -36,4 +36,4 @@ export const containerStyles = createStaticStyles(({ css, cssVar }) => ({
     padding-bottom: 8px;
     padding-left: 0;
   `,
-}));
+}))

@@ -2,45 +2,45 @@ export interface InterceptRouteParams {
   /**
    * Request path
    */
-  path: string;
+  path: string
   /**
    * Source type: 'link-click', 'push-state', 'replace-state'
    */
-  source: 'link-click' | 'push-state' | 'replace-state';
+  source: 'link-click' | 'push-state' | 'replace-state'
   /**
    * Full URL
    */
-  url: string;
+  url: string
 }
 
 export interface InterceptRouteResponse {
   /**
    * Error message (if any)
    */
-  error?: string;
+  error?: string
 
   /**
    * Whether intercepted
    */
-  intercepted: boolean;
+  intercepted: boolean
 
   /**
    * Original path
    */
-  path: string;
+  path: string
 
   /**
    * Original source
    */
-  source: string;
+  source: string
 
   /**
    * Sub path (if any)
    */
-  subPath?: string;
+  subPath?: string
 
   /**
    * Target window identifier
    */
-  targetWindow?: string;
+  targetWindow?: string
 }

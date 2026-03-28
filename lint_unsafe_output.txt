@@ -1,0 +1,2264 @@
+apps\desktop\.remarkrc.mjs:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { remarklint } from '@lobehub/lint'
+    2 鈹?
+  > 3 鈹?export default remarklint
+      鈹?       ^^^^^^^
+    4 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\electron-builder.mjs:137:20 lint/suspicious/noTemplateCurlyInString 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected template string placeholder.
+  
+    135 鈹?  nsis: {
+    136 鈹?    allowToChangeInstallationDirectory: true,
+  > 137 鈹?    artifactName: '${productName}-${version}-setup.${ext}',
+        鈹?                   ^^^^^^^^^^^^^^
+    138 鈹?    createDesktopShortcut: 'always',
+    139 鈹?    installerHeader: '../../assets/electron/build/nsis-header.bmp',
+  
+  i Turn the string into a template string.
+  
+
+apps\desktop\electron-builder.mjs:142:20 lint/suspicious/noTemplateCurlyInString 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected template string placeholder.
+  
+    140 鈹?    installerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
+    141 鈹?    oneClick: false,
+  > 142 鈹?    shortcutName: '${productName}',
+        鈹?                   ^^^^^^^^^^^^^^
+    143 鈹?    uninstallDisplayName: '${productName}',
+    144 鈹?    uninstallerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
+  
+  i Turn the string into a template string.
+  
+
+apps\desktop\electron-builder.mjs:143:28 lint/suspicious/noTemplateCurlyInString 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected template string placeholder.
+  
+    141 鈹?    oneClick: false,
+    142 鈹?    shortcutName: '${productName}',
+  > 143 鈹?    uninstallDisplayName: '${productName}',
+        鈹?                           ^^^^^^^^^^^^^^
+    144 鈹?    uninstallerSidebar: '../../assets/electron/build/nsis-sidebar.bmp',
+    145 鈹?  },
+  
+  i Turn the string into a template string.
+  
+
+apps\desktop\electron-builder.mjs:173:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    171 鈹?}
+    172 鈹?
+  > 173 鈹?export default config
+        鈹?       ^^^^^^^
+    174 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\scripts\i18nWorkflow\genDiff.ts:30:50 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    28 鈹?    const prodJSON = readJSON(filepath)
+    29 鈹?
+  > 30 鈹?    const diffResult = diff(prodJSON, devJSON as any)
+       鈹?                                                 ^^^
+    31 鈹?    const remove = diffResult.filter((item) => item.op === 'remove')
+    32 鈹?    if (remove.length === 0) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\scripts\i18nWorkflow\utils.ts:13:51 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    11 鈹?}
+    12 鈹?
+  > 13 鈹?export const writeJSON = (filePath: string, data: any) => {
+       鈹?                                                  ^^^
+    14 鈹?  const jsonStr = JSON.stringify(data, null, 2)
+    15 鈹?  writeFileSync(filePath, jsonStr, 'utf8')
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\BackendCtr.ts:28:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    26 鈹? *   backend.stop       鈥?kill the Python process
+    27 鈹? */
+  > 28 鈹?export default class BackendCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    29 鈹?  static override readonly groupName = 'backend'
+    30 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\BrowserWindowsCtr.ts:14:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    12 鈹?import { ControllerModule, IpcMethod, shortcut } from './index'
+    13 鈹?
+  > 14 鈹?export default class BrowserWindowsCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    15 鈹?  static override readonly groupName = 'windows'
+    16 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\DevtoolsCtr.ts:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { ControllerModule, IpcMethod } from './index'
+    2 鈹?
+  > 3 鈹?export default class DevtoolsCtr extends ControllerModule {
+      鈹?       ^^^^^^^
+    4 鈹?  static override readonly groupName = 'devtools'
+    5 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\GuiSettingsCtr.ts:21:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    19 鈹? *   guiSettings.detectDefaultDraftFolder 鈥?auto-detect JianyingPro draft folder
+    20 鈹? */
+  > 21 鈹?export default class GuiSettingsCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    22 鈹?  static override readonly groupName = 'guiSettings'
+    23 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\MenuCtr.ts:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { ControllerModule, IpcMethod } from './index'
+    2 鈹?
+  > 3 鈹?export default class MenuController extends ControllerModule {
+      鈹?       ^^^^^^^
+    4 鈹?  static override readonly groupName = 'menu'
+    5 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\MenuCtr.ts:18:36 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    16 鈹?   */
+    17 鈹?  @IpcMethod()
+  > 18 鈹?  showContextMenu(params: { data?: any; type: string }) {
+       鈹?                                   ^^^
+    19 鈹?    return this.app.menuManager.showContextMenu(params.type, params.data)
+    20 鈹?  }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\NetworkProxyCtr.ts:22:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    20 鈹? * Handle desktop application network proxy related functions
+    21 鈹? */
+  > 22 鈹?export default class NetworkProxyCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    23 鈹?  static override readonly groupName = 'networkProxy'
+    24 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\NotificationCtr.ts:13:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    11 鈹?const logger = createLogger('controllers:NotificationCtr')
+    12 鈹?
+  > 13 鈹?export default class NotificationCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    14 鈹?  static override readonly groupName = 'notification'
+    15 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\ShortcutCtr.ts:5:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    3 鈹?import { ControllerModule, IpcMethod } from '.'
+    4 鈹?
+  > 5 鈹?export default class ShortcutController extends ControllerModule {
+      鈹?       ^^^^^^^
+    6 鈹?  static override readonly groupName = 'shortcut'
+    7 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\SystemCtr.ts:23:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    21 鈹?const logger = createLogger('controllers:SystemCtr')
+    22 鈹?
+  > 23 鈹?export default class SystemController extends ControllerModule {
+       鈹?       ^^^^^^^
+    24 鈹?  static override readonly groupName = 'system'
+    25 鈹?  private systemThemeListenerInitialized = false
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\SystemCtr.ts:116:48 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    114 鈹?    logger.info('[FullDiskAccess] Showing native prompt dialog')
+    115 鈹?
+  > 116 鈹?    const result = await dialog.showMessageBox(mainWindow!, {
+        鈹?                                               ^^^^^^^^^^^
+    117 鈹?      buttons: [openSettingsButtonText, skipButtonText],
+    118 鈹?      cancelId: 1,
+  
+
+apps\desktop\src\main\controllers\SystemCtr.ts:169:48 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    167 鈹?    const mainWindow = this.app.browserManager.getMainWindow()?.browserWindow
+    168 鈹?
+  > 169 鈹?    const result = await dialog.showOpenDialog(mainWindow!, {
+        鈹?                                               ^^^^^^^^^^^
+    170 鈹?      defaultPath: payload?.defaultPath,
+    171 鈹?      properties: ['openDirectory', 'createDirectory'],
+  
+
+apps\desktop\src\main\controllers\TrayMenuCtr.ts:14:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    12 鈹?const logger = createLogger('controllers:TrayMenuCtr')
+    13 鈹?
+  > 14 鈹?export default class TrayMenuCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    15 鈹?  static override readonly groupName = 'tray'
+    16 鈹?  async toggleMainWindow() {
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\TunnelCtr.ts:16:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    14 鈹?const logger = createLogger('controllers:TunnelCtr')
+    15 鈹?
+  > 16 鈹?export default class TunnelCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    17 鈹?  static override readonly groupName = 'tunnel'
+    18 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\UpdaterCtr.ts:9:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+     7 鈹?const logger = createLogger('controllers:UpdaterCtr')
+     8 鈹?
+   > 9 鈹?export default class UpdaterCtr extends ControllerModule {
+       鈹?       ^^^^^^^
+    10 鈹?  static override readonly groupName = 'autoUpdate'
+    11 鈹?  /**
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\UploadFileCtr.ts:7:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    5 鈹?import { ControllerModule, IpcMethod } from './index'
+    6 鈹?
+  > 7 鈹?export default class UploadFileCtr extends ControllerModule {
+      鈹?       ^^^^^^^
+    8 鈹?  static override readonly groupName = 'upload'
+    9 鈹?  private get fileService() {
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\_template.ts:3:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    1 鈹?import { ControllerModule, IpcMethod } from './index'
+    2 鈹?
+  > 3 鈹?export default class DevtoolsCtr extends ControllerModule {
+      鈹?       ^^^^^^^
+    4 鈹?  @IpcMethod()
+    5 鈹?  async openDevtools() {
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\controllers\index.ts:21:49 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    20 鈹?const protocolDecorator =
+  > 21 鈹?  (urlType: string, action: string) => (target: any, methodName: string, descriptor?: any) => {
+       鈹?                                                ^^^
+    22 鈹?    const handlers = IoCContainer.protocolHandlers.get(target.constructor) || []
+    23 鈹?    handlers.push({ action, methodName, urlType })
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\index.ts:6:54 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    4 鈹?import { IpcService } from '@/utils/ipc'
+    5 鈹?
+  > 6 鈹?const shortcutDecorator = (name: string) => (target: any, methodName: string, descriptor?: any) => {
+      鈹?                                                     ^^^
+    7 鈹?  const actions = IoCContainer.shortcuts.get(target.constructor) || []
+    8 鈹?  actions.push({ methodName, name })
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\index.ts:21:87 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    20 鈹?const protocolDecorator =
+  > 21 鈹?  (urlType: string, action: string) => (target: any, methodName: string, descriptor?: any) => {
+       鈹?                                                                                      ^^^
+    22 鈹?    const handlers = IoCContainer.protocolHandlers.get(target.constructor) || []
+    23 鈹?    handlers.push({ action, methodName, urlType })
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\controllers\index.ts:6:92 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    4 鈹?import { IpcService } from '@/utils/ipc'
+    5 鈹?
+  > 6 鈹?const shortcutDecorator = (name: string) => (target: any, methodName: string, descriptor?: any) => {
+      鈹?                                                                                           ^^^
+    7 鈹?  const actions = IoCContainer.shortcuts.get(target.constructor) || []
+    8 鈹?  actions.push({ methodName, name })
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:28:60 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    27 鈹?export type ShortcutMethodMap = Map<string, () => Promise<void>>
+  > 28 鈹?export type ProtocolHandlerMap = Map<string, { controller: any; methodName: string }>
+       鈹?                                                           ^^^
+    29 鈹?
+    30 鈹?type Class<T> = new (...args: any[]) => T
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:30:31 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    28 鈹?export type ProtocolHandlerMap = Map<string, { controller: any; methodName: string }>
+    29 鈹?
+  > 30 鈹?type Class<T> = new (...args: any[]) => T
+       鈹?                              ^^^
+    31 鈹?
+    32 鈹?const importAll = (r: any) => Object.values(r).map((v: any) => v.default)
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:32:23 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    30 鈹?type Class<T> = new (...args: any[]) => T
+    31 鈹?
+  > 32 鈹?const importAll = (r: any) => Object.values(r).map((v: any) => v.default)
+       鈹?                      ^^^
+    33 鈹?
+    34 鈹?export class App {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:32:56 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    30 鈹?type Class<T> = new (...args: any[]) => T
+    31 鈹?
+  > 32 鈹?const importAll = (r: any) => Object.values(r).map((v: any) => v.default)
+       鈹?                                                       ^^^
+    33 鈹?
+    34 鈹?export class App {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:231:70 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    229 鈹?   * @returns Whether successfully handled
+    230 鈹?   */
+  > 231 鈹?  async handleProtocolRequest(urlType: string, action: string, data: any): Promise<boolean> {
+        鈹?                                                                     ^^^
+    232 鈹?    const key = `${urlType}:${action}`
+    233 鈹?    const handler = this.protocolHandlerMap.get(key)
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:321:39 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    319 鈹?   * all controllers in app
+    320 鈹?   */
+  > 321 鈹?  private controllers = new Map<Class<any>, any>()
+        鈹?                                      ^^^
+    322 鈹?  /**
+    323 鈹?   * all services in app
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:321:45 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    319 鈹?   * all controllers in app
+    320 鈹?   */
+  > 321 鈹?  private controllers = new Map<Class<any>, any>()
+        鈹?                                            ^^^
+    322 鈹?  /**
+    323 鈹?   * all services in app
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:325:36 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    323 鈹?   * all services in app
+    324 鈹?   */
+  > 325 鈹?  private services = new Map<Class<any>, any>()
+        鈹?                                   ^^^
+    326 鈹?
+    327 鈹?  shortcutMethodMap: ShortcutMethodMap = new Map()
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\App.ts:325:42 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    323 鈹?   * all services in app
+    324 鈹?   */
+  > 325 鈹?  private services = new Map<Class<any>, any>()
+        鈹?                                         ^^^
+    326 鈹?
+    327 鈹?  shortcutMethodMap: ShortcutMethodMap = new Map()
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\browser\Browser.ts:35:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    33 鈹?// ==================== Browser Class ====================
+    34 鈹?
+  > 35 鈹?export default class Browser {
+       鈹?       ^^^^^^^
+    36 鈹?  private readonly app: App
+    37 鈹?  private readonly stateManager: WindowStateManager
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\core\browser\Browser.ts:274:33 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    272 鈹?        isEditable,
+    273 鈹?        linkURL: linkURL || undefined,
+  > 274 鈹?        mediaType: mediaType as any,
+        鈹?                                ^^^
+    275 鈹?        selectionText: selectionText || undefined,
+    276 鈹?        srcURL: srcURL || undefined,
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\browser\Browser.ts:349:88 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    348 鈹?    // todo: fix ts type
+  > 349 鈹?    const parentWin = this.app.browserManager.retrieveByIdentifier(parentIdentifier as any)
+        鈹?                                                                                       ^^^
+    350 鈹?    if (!parentWin) return
+    351 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\browser\Browser.ts:422:21 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    420 鈹?        logger.info(`[${this.identifier}] Reconnection successful to ${urlWithLocale}`)
+    421 鈹?        return { success: true }
+  > 422 鈹?      } catch (err: any) {
+        鈹?                    ^^^
+    423 鈹?        logger.error(`[${this.identifier}] Retry connection failed:`, err)
+    424 鈹?        try {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\browser\WindowStateManager.ts:45:55 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    43 鈹?   */
+    44 鈹?  loadState(): WindowState | undefined {
+  > 45 鈹?    return this.app.storeManager.get(this.stateKey as any) as WindowState | undefined
+       鈹?                                                      ^^^
+    46 鈹?  }
+    47 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\browser\WindowStateManager.ts:63:50 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    61 鈹?        `[${this.identifier}] Saving window state on ${context}: ${JSON.stringify(state)}`,
+    62 鈹?      )
+  > 63 鈹?      this.app.storeManager.set(this.stateKey as any, state)
+       鈹?                                                 ^^^
+    64 鈹?    } catch (error) {
+    65 鈹?      logger.error(`[${this.identifier}] Failed to save window state on ${context}:`, error)
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\I18nManager.ts:71:31 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    69 鈹?   * Basic translation function
+    70 鈹?   */
+  > 71 鈹?  t = (key: string, options?: any) => {
+       鈹?                              ^^^
+    72 鈹?    const result = this.i18n.t(key, options) as string
+    73 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\I18nManager.ts:88:35 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    86 鈹?   */
+    87 鈹?  createNamespacedT(namespace: string) {
+  > 88 鈹?    return (key: string, options: any = {}) => {
+       鈹?                                  ^^^
+    89 鈹?      // Copy options to avoid modifying the original object
+    90 鈹?      const mergedOptions = { ...options, ns: namespace }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\IoCContainer.ts:5:29 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    3 鈹? */
+    4 鈹?export class IoCContainer {
+  > 5 鈹?  static shortcuts: WeakMap<any, { methodName: string; name: string }[]> = new WeakMap()
+      鈹?                            ^^^
+    6 鈹?
+    7 鈹?  static protocolHandlers: WeakMap<any, { action: string; methodName: string; urlType: string }[]> =
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\IoCContainer.ts:7:36 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    5 鈹?  static shortcuts: WeakMap<any, { methodName: string; name: string }[]> = new WeakMap()
+    6 鈹?
+  > 7 鈹?  static protocolHandlers: WeakMap<any, { action: string; methodName: string; urlType: string }[]> =
+      鈹?                                   ^^^
+    8 鈹?    new WeakMap()
+    9 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\RendererProtocolManager.ts:196:34 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    194 鈹?          return await buildFileResponse(filePath)
+    195 鈹?        } catch (error) {
+  > 196 鈹?          const code = (error as any).code
+        鈹?                                 ^^^
+    197 鈹?
+    198 鈹?          if (code === 'ENOENT') {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\StaticFileServerManager.ts:30:23 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    28 鈹?export class StaticFileServerManager {
+    29 鈹?  private fileService: FileService
+  > 30 鈹?  private httpServer: any = null
+       鈹?                      ^^^
+    31 鈹?  private serverPort: number = 0
+    32 鈹?  private isInitialized = false
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\StaticFileServerManager.ts:135:40 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    133 鈹?   * Handle HTTP requests
+    134 鈹?   */
+  > 135 鈹?  private async handleHttpRequest(req: any, res: any): Promise<void> {
+        鈹?                                       ^^^
+    136 鈹?    try {
+    137 鈹?      // Check if the response has already ended
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\StaticFileServerManager.ts:135:50 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    133 鈹?   * Handle HTTP requests
+    134 鈹?   */
+  > 135 鈹?  private async handleHttpRequest(req: any, res: any): Promise<void> {
+        鈹?                                                 ^^^
+    136 鈹?    try {
+    137 鈹?      // Check if the response has already ended
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\StoreManager.ts:44:48 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    42 鈹?  get<K extends StoreKey>(key: K, defaultValue?: ElectronMainStore[K]): ElectronMainStore[K] {
+    43 鈹?    logger.debug('Getting configuration value for key:', key)
+  > 44 鈹?    return this.store.get(key, defaultValue as any)
+       鈹?                                               ^^^
+    45 鈹?  }
+    46 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\UpdaterManager.ts:255:35 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    253 鈹?    if (!isWindows) {
+    254 鈹?      const allWindows = BrowserWindow.getAllWindows()
+  > 255 鈹?      allWindows.forEach((window: any) => {
+        鈹?                                  ^^^
+    256 鈹?        if (!window.isDestroyed()) {
+    257 鈹?          window.close()
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\core\infrastructure\__tests__\BackendProxyProtocolManager.test.ts:116:22 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    114 鈹?    } as any)
+    115 鈹?
+  > 116 鈹?    const [, init] = fetchMock.mock.calls[0]!
+        鈹?                     ^^^^^^^^^^^^^^^^^^^^^^^^
+    117 鈹?    expect(init).toBeDefined()
+    118 鈹?    if (!init) throw new Error('Expected fetch init to be defined')
+  
+
+apps\desktop\src\main\core\infrastructure\__tests__\BackendProxyProtocolManager.test.ts:76:31 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    75 鈹?    expect(fetchMock).toHaveBeenCalledTimes(1)
+  > 76 鈹?    const [calledUrl, init] = fetchMock.mock.calls[0]!
+       鈹?                              ^^^^^^^^^^^^^^^^^^^^^^^^
+    77 鈹?    expect(calledUrl).toBe('https://remote.example.com/trpc/hello?batch=1')
+    78 鈹?    expect(init).toBeDefined()
+  
+
+apps\desktop\src\main\core\ui\MenuManager.ts:33:40 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    31 鈹?   * Build and show context menu
+    32 鈹?   */
+  > 33 鈹?  showContextMenu(type: string, data?: any) {
+       鈹?                                       ^^^
+    34 鈹?    logger.debug(`Showing context menu of type: ${type}`)
+    35 鈹?    const menu = this.platformImpl.buildContextMenu(type, data)
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\global.d.ts:45:32 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    43 鈹?  }
+    44 鈹?  const liquidGlass: {
+  > 45 鈹?    applyEffect(browserWindow: any, options?: LiquidGlassOptions): void
+       鈹?                               ^^^
+    46 鈹?    removeEffect(browserWindow: any): void
+    47 鈹?  }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\global.d.ts:46:33 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    44 鈹?  const liquidGlass: {
+    45 鈹?    applyEffect(browserWindow: any, options?: LiquidGlassOptions): void
+  > 46 鈹?    removeEffect(browserWindow: any): void
+       鈹?                                ^^^
+    47 鈹?  }
+    48 鈹?  export default liquidGlass
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\global.d.ts:48:10 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    46 鈹?    removeEffect(browserWindow: any): void
+    47 鈹?  }
+  > 48 鈹?  export default liquidGlass
+       鈹?         ^^^^^^^
+    49 鈹?}
+    50 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\locales\default\common.ts:28:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    26 鈹?}
+    27 鈹?
+  > 28 鈹?export default common
+       鈹?       ^^^^^^^
+    29 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\locales\default\dialog.ts:30:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    28 鈹?}
+    29 鈹?
+  > 30 鈹?export default dialog
+       鈹?       ^^^^^^^
+    31 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\locales\default\index.ts:11:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+     9 鈹?} as const
+    10 鈹?
+  > 11 鈹?export default resources
+       鈹?       ^^^^^^^
+    12 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\locales\default\menu.ts:92:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    90 鈹?}
+    91 鈹?
+  > 92 鈹?export default menu
+       鈹?       ^^^^^^^
+    93 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:307:49 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    305 鈹?        click: () => {
+    306 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 307 鈹?          mainWindow.webContents.inspectElement(data.x!, data.y!)
+        鈹?                                                ^^^^^^^
+    308 鈹?        },
+    309 鈹?        label: t('context.inspectElement'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:213:53 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    211 鈹?  }
+    212 鈹?
+  > 213 鈹?  private getUpdateMenuItem(t: (key: string, opts?: any) => string): MenuItemConstructorOptions {
+        鈹?                                                    ^^^
+    214 鈹?    const { stage } = this.app.updaterManager.getUpdaterState()
+    215 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:264:41 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    262 鈹?    if (hasLink) {
+    263 鈹?      template.push({
+  > 264 鈹?        click: () => shell.openExternal(data?.linkURL!),
+        鈹?                                        ^^^^^^^^^^^^^^
+    265 鈹?        label: t('context.openLink'),
+    266 鈹?      })
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:268:42 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    266 鈹?      })
+    267 鈹?      template.push({
+  > 268 鈹?        click: () => clipboard.writeText(data?.linkURL!),
+        鈹?                                         ^^^^^^^^^^^^^^
+    269 鈹?        label: t('context.copyLink'),
+    270 鈹?      })
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:279:46 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    277 鈹?        click: () => {
+    278 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 279 鈹?          mainWindow.webContents.downloadURL(data?.srcURL!)
+        鈹?                                             ^^^^^^^^^^^^^
+    280 鈹?        },
+    281 鈹?        label: t('context.saveImage'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:285:31 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    283 鈹?      template.push({
+    284 鈹?        click: () => {
+  > 285 鈹?          clipboard.writeText(data?.srcURL!)
+        鈹?                              ^^^^^^^^^^^^^
+    286 鈹?        },
+    287 鈹?        label: t('context.copyImageAddress'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:307:58 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    305 鈹?        click: () => {
+    306 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 307 鈹?          mainWindow.webContents.inspectElement(data.x!, data.y!)
+        鈹?                                                         ^^^^^^^
+    308 鈹?        },
+    309 鈹?        label: t('context.inspectElement'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:339:41 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    337 鈹?    if (hasLink) {
+    338 鈹?      template.push({
+  > 339 鈹?        click: () => shell.openExternal(data?.linkURL!),
+        鈹?                                        ^^^^^^^^^^^^^^
+    340 鈹?        label: t('context.openLink'),
+    341 鈹?      })
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:343:42 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    341 鈹?      })
+    342 鈹?      template.push({
+  > 343 鈹?        click: () => clipboard.writeText(data?.linkURL!),
+        鈹?                                         ^^^^^^^^^^^^^^
+    344 鈹?        label: t('context.copyLink'),
+    345 鈹?      })
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:354:46 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    352 鈹?        click: () => {
+    353 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 354 鈹?          mainWindow.webContents.downloadURL(data?.srcURL!)
+        鈹?                                             ^^^^^^^^^^^^^
+    355 鈹?        },
+    356 鈹?        label: t('context.saveImage'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:360:31 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    358 鈹?      template.push({
+    359 鈹?        click: () => {
+  > 360 鈹?          clipboard.writeText(data?.srcURL!)
+        鈹?                              ^^^^^^^^^^^^^
+    361 鈹?        },
+    362 鈹?        label: t('context.copyImageAddress'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:381:49 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    379 鈹?        click: () => {
+    380 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 381 鈹?          mainWindow.webContents.inspectElement(data.x!, data.y!)
+        鈹?                                                ^^^^^^^
+    382 鈹?        },
+    383 鈹?        label: t('context.inspectElement'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:381:58 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    379 鈹?        click: () => {
+    380 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 381 鈹?          mainWindow.webContents.inspectElement(data.x!, data.y!)
+        鈹?                                                         ^^^^^^^
+    382 鈹?        },
+    383 鈹?        label: t('context.inspectElement'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:425:49 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    423 鈹?        click: () => {
+    424 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 425 鈹?          mainWindow.webContents.inspectElement(data.x!, data.y!)
+        鈹?                                                ^^^^^^^
+    426 鈹?        },
+    427 鈹?        label: t('context.inspectElement'),
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:425:58 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    423 鈹?        click: () => {
+    424 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 425 鈹?          mainWindow.webContents.inspectElement(data.x!, data.y!)
+        鈹?                                                         ^^^^^^^
+    426 鈹?        },
+    427 鈹?        label: t('context.inspectElement'),
+  
+
+apps\desktop\src\main\modules\networkProxy\dispatcher.ts:16:8 lint/complexity/noStaticOnlyClass 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid classes that contain only static members.
+  
+     14 鈹? * Proxy dispatcher manager
+     15 鈹? */
+   > 16 鈹?export class ProxyDispatcherManager {
+        鈹?       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 17 鈹?  private static isChanging = false
+         ...
+  > 137 鈹?    }
+  > 138 鈹?  }
+  > 139 鈹?}
+        鈹?^
+    140 鈹?
+  
+  i Prefer using simple functions instead of classes with only static members.
+  
+
+apps\desktop\src\main\modules\networkProxy\dispatcher.ts:130:58 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    128 鈹?   * Safely destroy dispatcher
+    129 鈹?   */
+  > 130 鈹?  private static async safeDestroyDispatcher(dispatcher: any): Promise<void> {
+        鈹?                                                         ^^^
+    131 鈹?    try {
+    132 鈹?      if (dispatcher && typeof dispatcher.destroy === 'function') {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\modules\networkProxy\tester.ts:26:8 lint/complexity/noStaticOnlyClass 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid classes that contain only static members.
+  
+     24 鈹? * Proxy connection tester
+     25 鈹? */
+   > 26 鈹?export class ProxyConnectionTester {
+        鈹?       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 27 鈹?  private static readonly DEFAULT_TIMEOUT = 10_000 // 10 seconds timeout
+         ...
+  > 159 鈹?    }
+  > 160 鈹?  }
+  > 161 鈹?}
+        鈹?^
+    162 鈹?
+  
+  i Prefer using simple functions instead of classes with only static members.
+  
+
+apps\desktop\src\main\modules\networkProxy\validator.ts:14:8 lint/complexity/noStaticOnlyClass 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid classes that contain only static members.
+  
+    12 鈹? * Proxy configuration validator
+    13 鈹? */
+  > 14 鈹?export class ProxyConfigValidator {
+       鈹?       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 鈹?  private static readonly SUPPORTED_TYPES = ['http', 'https', 'socks5'] as const
+        ...
+  > 76 鈹?    return ipRegex.test(host) || domainRegex.test(host)
+  > 77 鈹?  }
+  > 78 鈹?}
+       鈹?^
+    79 鈹?
+  
+  i Prefer using simple functions instead of classes with only static members.
+  
+
+apps\desktop\src\main\modules\networkProxy\validator.ts:29:76 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    28 鈹?    // Validate proxy type
+  > 29 鈹?    if (!ProxyConfigValidator.SUPPORTED_TYPES.includes(config.proxyType as any)) {
+       鈹?                                                                           ^^^
+    30 鈹?      errors.push(
+    31 鈹?        `Unsupported proxy type: ${config.proxyType}. Supported types: ${ProxyConfigValidator.SUPPORTED_TYPES.join(', ')}`,
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\modules\tunnels\CloudflareProvider.ts:155:21 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    153 鈹?            t.off('stdout', onOutput)
+    154 鈹?            t.off('stderr', onOutput)
+  > 155 鈹?            resolve(resolvedUrl!)
+        鈹?                    ^^^^^^^^^^^^
+    156 鈹?          }, 10_000)
+    157 鈹?        })
+  
+
+apps\desktop\src\main\services\fileSrv.ts:48:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    46 鈹?}
+    47 鈹?
+  > 48 鈹?export default class FileService extends ServiceModule {
+       鈹?       ^^^^^^^
+    49 鈹?  /**
+    50 鈹?   * Get legacy upload directory path
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\types\electron-liquid-glass.d.ts:15:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    14 鈹?declare const liquidGlass: LiquidGlass
+  > 15 鈹?export default liquidGlass
+       鈹?       ^^^^^^^
+    16 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\utils\file-system.ts:10:26 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+     8 鈹?    try {
+     9 鈹?      mkdirSync(dir, { recursive: true })
+  > 10 鈹?    } catch (mkdirError: any) {
+       鈹?                         ^^^
+    11 鈹?      // Throw error if directory creation fails (e.g., permission issues)
+    12 鈹?      throw new Error(`Could not create target directory: ${dir}. Error: ${mkdirError.message}`)
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:120:23 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    118 鈹?export function createServices<T extends readonly IpcServiceConstructor[]>(
+    119 鈹?  serviceConstructors: T,
+  > 120 鈹?  ...constructorArgs: any[]
+        鈹?                      ^^^
+    121 鈹?): CreateServicesResult<T> {
+    122 鈹?  const services = {} as any
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:13:36 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    12 鈹?// Metadata storage for decorated methods
+  > 13 鈹?const methodMetadata = new WeakMap<any, Map<string, string>>()
+       鈹?                                   ^^^
+    14 鈹?const ipcContextStorage = new AsyncLocalStorage<IpcContext>()
+    15 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:18:19 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    16 鈹?// Decorator for IPC methods
+    17 鈹?export function IpcMethod() {
+  > 18 鈹?  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+       鈹?                  ^^^
+    19 鈹?    const ctor = target.constructor
+    20 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:25:21 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Forbidden non-null assertion.
+  
+    23 鈹?    }
+    24 鈹?
+  > 25 鈹?    const methods = methodMetadata.get(ctor)!
+       鈹?                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 鈹?    methods.set(propertyKey, propertyKey)
+    27 鈹?
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:54:72 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    52 鈹?    this.registeredChannels.add(channel)
+    53 鈹?
+  > 54 鈹?    ipcMain.handle(channel, async (event: IpcMainInvokeEvent, ...args: any[]) => {
+       鈹?                                                                       ^^^
+    55 鈹?      const context: IpcContext = {
+    56 鈹?        event,
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:73:22 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    72 鈹?  // Send events to renderer
+  > 73 鈹?  sendToRenderer<T = any>(webContents: WebContents, channel: string, data: T) {
+       鈹?                     ^^^
+    74 鈹?    webContents.send(channel, data)
+    75 鈹?  }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:93:33 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    91 鈹?    if (methods) {
+    92 鈹?      methods.forEach((methodName, propertyKey) => {
+  > 93 鈹?        const method = (this as any)[propertyKey]
+       鈹?                                ^^^
+    94 鈹?        if (typeof method === 'function') {
+    95 鈹?          this.registerMethod(methodName, method.bind(this))
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:113:17 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    111 鈹?// Service constructor with groupName
+    112 鈹?export interface IpcServiceConstructor {
+  > 113 鈹?  new (...args: any[]): IpcService
+        鈹?                ^^^
+    114 鈹?  readonly groupName: string
+    115 鈹?}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\base.ts:122:26 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    120 鈹?  ...constructorArgs: any[]
+    121 鈹?): CreateServicesResult<T> {
+  > 122 鈹?  const services = {} as any
+        鈹?                         ^^^
+    123 鈹?
+    124 鈹?  for (const ServiceConstructor of serviceConstructors) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\utility.ts:7:43 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    6 鈹?export type ExtractServiceMethods<T> = {
+  > 7 鈹?  [K in keyof T as T[K] extends (...args: any[]) => any ? K : never]: ExtractMethodSignature<T[K]>
+      鈹?                                          ^^^
+    8 鈹?}
+    9 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\utility.ts:7:53 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    6 鈹?export type ExtractServiceMethods<T> = {
+  > 7 鈹?  [K in keyof T as T[K] extends (...args: any[]) => any ? K : never]: ExtractMethodSignature<T[K]>
+      鈹?                                                    ^^^
+    8 鈹?}
+    9 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\ipc\utility.ts:16:14 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    14 鈹?export type MergeIpcService<T> = {
+    15 鈹?  [K in keyof T]: T[K] extends new (
+  > 16 鈹?    ...args: any[]
+       鈹?             ^^^
+    17 鈹?  ) => infer Instance
+    18 鈹?    ? ExtractServiceMethods<Instance>
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps\desktop\src\main\utils\protocol.ts:46:36 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    44 鈹? * @returns Whether it's a valid MCP Schema
+    45 鈹? */
+  > 46 鈹?function validateMcpSchema(schema: any): schema is McpSchema {
+       鈹?                                   ^^^
+    47 鈹?  if (!schema || typeof schema !== 'object') return false
+    48 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\desktop-bridge\src\routeVariants.ts:43:8 lint/complexity/noStaticOnlyClass 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid classes that contain only static members.
+  
+    41 鈹?const SPLITTER = '__'
+    42 鈹?
+  > 43 鈹?export class RouteVariants {
+       鈹?       ^^^^^^^^^^^^^^^^^^^^^
+  > 44 鈹?  static serializeVariants = (variants: IRouteVariants): string =>
+        ...
+  > 64 鈹?
+  > 65 鈹?  private static isValidLocale = (locale: string): boolean => locales.includes(locale as any)
+  > 66 鈹?}
+       鈹?^
+    67 鈹?
+  
+  i Prefer using simple functions instead of classes with only static members.
+  
+
+packages\desktop-bridge\src\routeVariants.ts:65:90 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    63 鈹?  })
+    64 鈹?
+  > 65 鈹?  private static isValidLocale = (locale: string): boolean => locales.includes(locale as any)
+       鈹?                                                                                         ^^^
+    66 鈹?}
+    67 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\streamInvoke.ts:26:59 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+    25 鈹?  return new Promise<Response>((resolve, reject) => {
+  > 26 鈹?    let streamController: ReadableStreamDefaultController<any>
+       鈹?                                                          ^^^
+    27 鈹?    let responseResolved = false
+    28 鈹?
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\types\localSystem.ts:11:20 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+     9 鈹?  // Spotlight specific metadata
+    10 鈹?  metadata?: {
+  > 11 鈹?    [key: string]: any
+       鈹?                   ^^^
+    12 鈹?  }
+    13 鈹?  modifiedTime: Date
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\types\localSystem.ts:78:11 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    77 鈹?export interface RenameLocalFileResult {
+  > 78 鈹?  error?: any
+       鈹?          ^^^
+    79 鈹?  newPath: string
+    80 鈹?  success: boolean
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\types\shortcut.ts:11:49 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+     9 鈹?  id: string
+    10 鈹?}
+  > 11 鈹?export type ShortcutActionType = Record<string, any>
+       鈹?                                                ^^^
+    12 鈹?
+    13 鈹?export interface ShortcutUpdateResult {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\useWatchBroadcast.ts:9:54 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+     7 鈹?interface ElectronAPI {
+     8 鈹?  ipcRenderer: {
+   > 9 鈹?    on: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+       鈹?                                                     ^^^
+    10 鈹?    removeListener: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+    11 鈹?  }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\useWatchBroadcast.ts:9:65 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Unexpected any. Specify a different type.
+  
+     7 鈹?interface ElectronAPI {
+     8 鈹?  ipcRenderer: {
+   > 9 鈹?    on: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+       鈹?                                                                ^^^
+    10 鈹?    removeListener: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+    11 鈹?  }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\useWatchBroadcast.ts:10:66 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+     8 鈹?  ipcRenderer: {
+     9 鈹?    on: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+  > 10 鈹?    removeListener: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+       鈹?                                                                 ^^^
+    11 鈹?  }
+    12 鈹?}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\useWatchBroadcast.ts:10:77 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+     8 鈹?  ipcRenderer: {
+     9 鈹?    on: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+  > 10 鈹?    removeListener: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+       鈹?                                                                            ^^^
+    11 鈹?  }
+    12 鈹?}
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+packages\electron-client-ipc\src\useWatchBroadcast.ts:33:27 lint/suspicious/noExplicitAny 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Unexpected any. Specify a different type.
+  
+    31 鈹?    if (!window.electron) return
+    32 鈹?
+  > 33 鈹?    const listener = (_e: any, data: MainBroadcastParams<T>) => {
+       鈹?                          ^^^
+    34 鈹?      handlerRef.current(data)
+    35 鈹?    }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+plugins\vite\vercelSkewProtection.ts:149:7 lint/style/noParameterAssign 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Assigning a function parameter is confusing.
+  
+    147 鈹?      )
+    148 鈹?      // <link rel="stylesheet|modulepreload" href="...">
+  > 149 鈹?      html = html.replaceAll(
+        鈹?      ^^^^
+    150 鈹?        /(<link[^>]+href=["'])([^"']+)(["'][^>]*>)/g,
+    151 鈹?        (match, before, href, after) => {
+  
+  i The parameter is declared here:
+  
+    137 鈹?    // 鈹€鈹€ 3. Rewrite HTML <script src> and <link href> 鈹€鈹€
+  > 138 鈹?    transformIndexHtml(html) {
+        鈹?                       ^^^^
+    139 鈹?      if (!enabled) return
+    140 鈹?      // <script ... src="...">
+  
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
+  
+
+plugins\vite\vercelSkewProtection.ts:141:7 lint/style/noParameterAssign 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Assigning a function parameter is confusing.
+  
+    139 鈹?      if (!enabled) return
+    140 鈹?      // <script ... src="...">
+  > 141 鈹?      html = html.replaceAll(
+        鈹?      ^^^^
+    142 鈹?        /(<script[^>]+src=["'])([^"']+)(["'][^>]*>)/g,
+    143 鈹?        (match, before, src, after) => {
+  
+  i The parameter is declared here:
+  
+    137 鈹?    // 鈹€鈹€ 3. Rewrite HTML <script src> and <link href> 鈹€鈹€
+  > 138 鈹?    transformIndexHtml(html) {
+        鈹?                       ^^^^
+    139 鈹?      if (!enabled) return
+    140 鈹?      // <script ... src="...">
+  
+  i Developers usually expect function parameters to be readonly. To align with this expectation, use a local variable instead.
+  
+
+src\frontend\components\AntdStaticMethods\index.tsx:16:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    14 鈹?let modal: Omit<ModalStaticFunctions, 'warn'>
+    15 鈹?
+  > 16 鈹?export default memo(() => {
+       鈹?       ^^^^^^^
+    17 鈹?  const staticFunction = App.useApp()
+    18 鈹?  message = staticFunction.message
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\components\BootErrorBoundary.tsx:41:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    39 鈹?}
+    40 鈹?
+  > 41 鈹?export default BootErrorBoundary
+       鈹?       ^^^^^^^
+    42 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\components\CollapsibleNavGroup\index.tsx:44:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    42 鈹?}
+    43 鈹?
+  > 44 鈹?export default CollapsibleNavGroup
+       鈹?       ^^^^^^^
+    45 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\components\NavItem\index.tsx:31:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    29 鈹?}
+    30 鈹?
+  > 31 鈹?export default NavItem
+       鈹?       ^^^^^^^
+    32 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\components\PageContainer\index.tsx:47:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    45 鈹?PageContainer.displayName = 'PageContainer'
+    46 鈹?
+  > 47 鈹?export default PageContainer
+       鈹?       ^^^^^^^
+    48 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\components\PageHeader\index.tsx:32:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    30 鈹?}
+    31 鈹?
+  > 32 鈹?export default PageHeader
+       鈹?       ^^^^^^^
+    33 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\components\ThemeButton\index.tsx:52:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    50 鈹?}
+    51 鈹?
+  > 52 鈹?export default ThemeButton
+       鈹?       ^^^^^^^
+    53 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\features\Electron\titlebar\NavigationBar.tsx:21:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    19 鈹?})
+    20 鈹?
+  > 21 鈹?export default NavigationBar
+       鈹?       ^^^^^^^
+    22 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\features\Electron\titlebar\TitleBar.tsx:58:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    56 鈹?})
+    57 鈹?
+  > 58 鈹?export default TitleBar
+       鈹?       ^^^^^^^
+    59 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\features\Electron\titlebar\WinControl.tsx:20:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    18 鈹?const WinControl = () => <div className={styles.root} />
+    19 鈹?
+  > 20 鈹?export default WinControl
+       鈹?       ^^^^^^^
+    21 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\features\NavPanel\SideBarLayout.tsx:22:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    20 鈹?}
+    21 鈹?
+  > 22 鈹?export default SideBarLayout
+       鈹?       ^^^^^^^
+    23 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\features\Tour\TourLayer.tsx:71:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    69 鈹?}
+    70 鈹?
+  > 71 鈹?export default TourLayer
+       鈹?       ^^^^^^^
+    72 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\layout\GlobalProvider\AppTheme.tsx:151:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    149 鈹?AppTheme.displayName = 'AppTheme'
+    150 鈹?
+  > 151 鈹?export default AppTheme
+        鈹?       ^^^^^^^
+    152 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\layout\GlobalProvider\NextThemeProvider.tsx:14:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    12 鈹?}
+    13 鈹?
+  > 14 鈹?export default function NextThemeProvider({ children }: NextThemeProviderProps) {
+       鈹?       ^^^^^^^
+    15 鈹?  return (
+    16 鈹?    <NextThemesProvider
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\layout\SPAGlobalProvider\index.tsx:71:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    69 鈹?SPAGlobalProvider.displayName = 'SPAGlobalProvider'
+    70 鈹?
+  > 71 鈹?export default SPAGlobalProvider
+       鈹?       ^^^^^^^
+    72 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\AppShell.tsx:32:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    30 鈹?}
+    31 鈹?
+  > 32 鈹?export default AppShell
+       鈹?       ^^^^^^^
+    33 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\CloudService\CloudflareCard.tsx:154:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    152 鈹?}
+    153 鈹?
+  > 154 鈹?export default CloudflareCard
+        鈹?       ^^^^^^^
+    155 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\CloudService\NgrokCard.tsx:141:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    139 鈹?}
+    140 鈹?
+  > 141 鈹?export default NgrokCard
+        鈹?       ^^^^^^^
+    142 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\CloudService\TunnelProviderList.tsx:72:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    70 鈹?}
+    71 鈹?
+  > 72 鈹?export default TunnelProviderList
+       鈹?       ^^^^^^^
+    73 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\CloudService\index.tsx:225:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    223 鈹?}
+    224 鈹?
+  > 225 鈹?export default CloudServicePage
+        鈹?       ^^^^^^^
+    226 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\DraftGenerator\index.tsx:125:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    123 鈹?}
+    124 鈹?
+  > 125 鈹?export default DraftGeneratorPage
+        鈹?       ^^^^^^^
+    126 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\Replay\index.tsx:128:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    126 鈹?}
+    127 鈹?
+  > 128 鈹?export default ReplayPage
+        鈹?       ^^^^^^^
+    129 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\ScriptExecutor\index.tsx:180:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    178 鈹?}
+    179 鈹?
+  > 180 鈹?export default ScriptExecutorPage
+        鈹?       ^^^^^^^
+    181 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\Settings\index.tsx:93:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    91 鈹?}
+    92 鈹?
+  > 93 鈹?export default SettingsPage
+       鈹?       ^^^^^^^
+    94 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\ToolGenerator\index.tsx:80:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    78 鈹?}
+    79 鈹?
+  > 80 鈹?export default ToolGeneratorPage
+       鈹?       ^^^^^^^
+    81 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\DesktopLayoutContainer\index.tsx:46:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    44 鈹?DesktopLayoutContainer.displayName = 'DesktopLayoutContainer'
+    45 鈹?
+  > 46 鈹?export default DesktopLayoutContainer
+       鈹?       ^^^^^^^
+    47 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\LogPanel\index.tsx:324:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    322 鈹?}
+    323 鈹?
+  > 324 鈹?export default LogPanel
+        鈹?       ^^^^^^^
+    325 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\Sidebar\SidebarContent.tsx:13:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    11 鈹?}
+    12 鈹?
+  > 13 鈹?export default SidebarContent
+       鈹?       ^^^^^^^
+    14 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\Sidebar\features\Body.tsx:51:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    49 鈹?}
+    50 鈹?
+  > 51 鈹?export default SidebarBody
+       鈹?       ^^^^^^^
+    52 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\Sidebar\features\Footer.tsx:26:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    24 鈹?}
+    25 鈹?
+  > 26 鈹?export default SidebarFooter
+       鈹?       ^^^^^^^
+    27 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\Sidebar\features\Header.tsx:14:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    12 鈹?}
+    13 鈹?
+  > 14 鈹?export default SidebarHeader
+       鈹?       ^^^^^^^
+    15 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\Sidebar\index.tsx:7:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+    5 鈹?}
+    6 鈹?
+  > 7 鈹?export default Sidebar
+      鈹?       ^^^^^^^
+    8 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\routes\_layout\index.tsx:93:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    91 鈹?}
+    92 鈹?
+  > 93 鈹?export default MainLayout
+       鈹?       ^^^^^^^
+    94 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\services\client.ts:29:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    27 鈹?}
+    28 鈹?
+  > 29 鈹?export default apiClient
+       鈹?       ^^^^^^^
+    30 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\spa\entry.desktop.tsx:14:12 lint/style/noNonNullAssertion 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Forbidden non-null assertion.
+  
+    12 鈹?const router = createBrowserRouter(appRoutes, { basename: '/' })
+    13 鈹?
+  > 14 鈹?createRoot(document.getElementById('root')!).render(
+       鈹?           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 鈹?  <BootErrorBoundary>
+    16 鈹?    <SPAGlobalProvider>
+  
+
+src\frontend\styles\antdOverride.ts:34:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  ! Avoid default exports.
+  
+    32 鈹?`
+    33 鈹?
+  > 34 鈹?export default antdOverride
+       鈹?       ^^^^^^^
+    35 鈹?
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+src\frontend\styles\global.ts:8:8 lint/style/noDefaultExport 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹?
+  ! Avoid default exports.
+  
+     6 鈹?// ref: https://zhuanlan.zhihu.com/p/113855026
+     7 鈹?// eslint-disable-next-line unicorn/no-anonymous-default-export
+   > 8 鈹?export default ({ token }: { prefixCls: string; token: Theme }) => css`
+       鈹?       ^^^^^^^
+     9 鈹?  html,
+    10 鈹?  body,
+  
+  i Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.
+  
+  i Use a named export instead.
+  
+
+apps\desktop\src\main\core\browser\Browser.ts:358:50 lint/correctness/noUnsafeOptionalChaining 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Unsafe usage of optional chaining.
+  
+    357 鈹?    const { workArea } = display
+  > 358 鈹?    const { width, height } = this._browserWindow?.getContentBounds()
+        鈹?                                                 ^^
+    359 鈹?
+    360 鈹?    const newX = Math.floor(Math.max(workArea.x + (workArea.width - width) / 2, workArea.x))
+  
+  i If it short-circuits with 'undefined' the evaluation will throw TypeError here:
+  
+    357 鈹?    const { workArea } = display
+  > 358 鈹?    const { width, height } = this._browserWindow?.getContentBounds()
+        鈹?          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    359 鈹?
+    360 鈹?    const newX = Math.floor(Math.max(workArea.x + (workArea.width - width) / 2, workArea.x))
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:279:46 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    277 鈹?        click: () => {
+    278 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 279 鈹?          mainWindow.webContents.downloadURL(data?.srcURL!)
+        鈹?                                             ^^^^^^^^^^^^^
+    280 鈹?        },
+    281 鈹?        label: t('context.saveImage'),
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:339:41 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    337 鈹?    if (hasLink) {
+    338 鈹?      template.push({
+  > 339 鈹?        click: () => shell.openExternal(data?.linkURL!),
+        鈹?                                        ^^^^^^^^^^^^^^
+    340 鈹?        label: t('context.openLink'),
+    341 鈹?      })
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:268:42 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    266 鈹?      })
+    267 鈹?      template.push({
+  > 268 鈹?        click: () => clipboard.writeText(data?.linkURL!),
+        鈹?                                         ^^^^^^^^^^^^^^
+    269 鈹?        label: t('context.copyLink'),
+    270 鈹?      })
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:343:42 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    341 鈹?      })
+    342 鈹?      template.push({
+  > 343 鈹?        click: () => clipboard.writeText(data?.linkURL!),
+        鈹?                                         ^^^^^^^^^^^^^^
+    344 鈹?        label: t('context.copyLink'),
+    345 鈹?      })
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:285:31 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    283 鈹?      template.push({
+    284 鈹?        click: () => {
+  > 285 鈹?          clipboard.writeText(data?.srcURL!)
+        鈹?                              ^^^^^^^^^^^^^
+    286 鈹?        },
+    287 鈹?        label: t('context.copyImageAddress'),
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:354:46 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    352 鈹?        click: () => {
+    353 鈹?          const mainWindow = this.app.browserManager.getMainWindow()
+  > 354 鈹?          mainWindow.webContents.downloadURL(data?.srcURL!)
+        鈹?                                             ^^^^^^^^^^^^^
+    355 鈹?        },
+    356 鈹?        label: t('context.saveImage'),
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:264:41 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    262 鈹?    if (hasLink) {
+    263 鈹?      template.push({
+  > 264 鈹?        click: () => shell.openExternal(data?.linkURL!),
+        鈹?                                        ^^^^^^^^^^^^^^
+    265 鈹?        label: t('context.openLink'),
+    266 鈹?      })
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+apps\desktop\src\main\menus\impls\windows.ts:360:31 lint/suspicious/noNonNullAssertedOptionalChain 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Forbidden non-null assertion after optional chaining.
+  
+    358 鈹?      template.push({
+    359 鈹?        click: () => {
+  > 360 鈹?          clipboard.writeText(data?.srcURL!)
+        鈹?                              ^^^^^^^^^^^^^
+    361 鈹?        },
+    362 鈹?        label: t('context.copyImageAddress'),
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+Checked 282 files in 206ms. No fixes applied.
+Found 9 errors.
+Found 150 warnings.
+check 鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣
+
+  脳 Some errors were emitted while running checks.
+  
+

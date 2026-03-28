@@ -1,12 +1,12 @@
-import { shallow } from "zustand/shallow";
-import { createWithEqualityFn } from "zustand/traditional";
-import { subscribeWithSelector } from "zustand/middleware";
+import { subscribeWithSelector } from 'zustand/middleware'
+import { shallow } from 'zustand/shallow'
+import { createWithEqualityFn } from 'zustand/traditional'
 
-import { devtools } from "@/store/middleware/devtools";
-import { initialGlobalState, type GlobalState } from "./initialState";
-import { createSidebarSlice, type SidebarAction } from "./actions/sidebar";
+import { devtools } from '@/store/middleware/devtools'
+import { createSidebarSlice, type SidebarAction } from './actions/sidebar'
+import { type GlobalState, initialGlobalState } from './initialState'
 
-export type GlobalStore = GlobalState & SidebarAction;
+export type GlobalStore = GlobalState & SidebarAction
 
 export const useGlobalStore = createWithEqualityFn<GlobalStore>()(
   subscribeWithSelector(
@@ -15,8 +15,8 @@ export const useGlobalStore = createWithEqualityFn<GlobalStore>()(
         ...initialGlobalState,
         ...createSidebarSlice(...args),
       }),
-      { name: "coze2jianying/global" },
+      { name: 'coze2jianying/global' },
     ),
   ),
   shallow,
-);
+)

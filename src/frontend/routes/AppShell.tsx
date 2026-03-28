@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { useEffect } from 'react'
+import { Outlet } from 'react-router-dom'
 
-import TourLayer from "@/features/Tour/TourLayer";
-import { useTourStore } from "@/store/tour";
-import { hasCompletedOnboarding } from "@/routes/Onboarding/storage";
+import TourLayer from '@/features/Tour/TourLayer'
+import { hasCompletedOnboarding } from '@/routes/Onboarding/storage'
+import { useTourStore } from '@/store/tour'
 
 /**
  * 根路由包装壳，挂载在所有路由之上。
@@ -12,22 +12,21 @@ import { hasCompletedOnboarding } from "@/routes/Onboarding/storage";
  * - 首次进入时自动启动 Tour（无需独立 onboarding 页面）
  */
 const AppShell = () => {
-  const startTour = useTourStore((s) => s.startTour);
+  const startTour = useTourStore((s) => s.startTour)
 
   useEffect(() => {
     if (!hasCompletedOnboarding()) {
-      startTour();
+      startTour()
     }
     // 仅在组件挂载时执行一次
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startTour])
 
   return (
     <>
       <Outlet />
       <TourLayer />
     </>
-  );
-};
+  )
+}
 
-export default AppShell;
+export default AppShell

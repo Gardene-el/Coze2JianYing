@@ -1,22 +1,22 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
-import { Button, Result } from "antd";
+import { Button, Result } from 'antd'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 interface Props {
-  children?: ReactNode;
+  children?: ReactNode
 }
 interface State {
-  error: Error | null;
+  error: Error | null
 }
 
 class BootErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  state: State = { error: null }
 
   static getDerivedStateFromError(error: Error): State {
-    return { error };
+    return { error }
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[BootErrorBoundary]", error, info);
+    console.error('[BootErrorBoundary]', error, info)
   }
 
   render() {
@@ -32,10 +32,10 @@ class BootErrorBoundary extends Component<Props, State> {
             </Button>
           }
         />
-      );
+      )
     }
-    return this.props.children;
+    return this.props.children
   }
 }
 
-export default BootErrorBoundary;
+export default BootErrorBoundary

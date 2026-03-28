@@ -1,4 +1,4 @@
-export type StorageMode = 'cloud' | 'selfHost';
+export type StorageMode = 'cloud' | 'selfHost'
 export enum StorageModeEnum {
   Cloud = 'cloud',
   SelfHost = 'selfHost',
@@ -8,7 +8,7 @@ export enum StorageModeEnum {
  * Remote server configuration related events
  */
 export interface DataSyncConfig {
-  active?: boolean;
-  remoteServerUrl?: string;
-  storageMode: StorageMode;
+  active?: boolean
+  remoteServerUrl?: string
+  storageMode: StorageMode
 }

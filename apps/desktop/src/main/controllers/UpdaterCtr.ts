@@ -1,20 +1,20 @@
-import type { UpdateChannel, UpdaterState } from '@lobechat/electron-client-ipc';
+import type { UpdateChannel, UpdaterState } from '@lobechat/electron-client-ipc'
 
-import { createLogger } from '@/utils/logger';
+import { createLogger } from '@/utils/logger'
 
-import { ControllerModule, IpcMethod } from './index';
+import { ControllerModule, IpcMethod } from './index'
 
-const logger = createLogger('controllers:UpdaterCtr');
+const logger = createLogger('controllers:UpdaterCtr')
 
 export default class UpdaterCtr extends ControllerModule {
-  static override readonly groupName = 'autoUpdate';
+  static override readonly groupName = 'autoUpdate'
   /**
    * Check for updates
    */
   @IpcMethod()
   async checkForUpdates() {
-    logger.info('Check for updates requested');
-    await this.app.updaterManager.checkForUpdates({ manual: true });
+    logger.info('Check for updates requested')
+    await this.app.updaterManager.checkForUpdates({ manual: true })
   }
 
   /**
@@ -22,8 +22,8 @@ export default class UpdaterCtr extends ControllerModule {
    */
   @IpcMethod()
   async downloadUpdate() {
-    logger.info('Download update requested');
-    await this.app.updaterManager.downloadUpdate();
+    logger.info('Download update requested')
+    await this.app.updaterManager.downloadUpdate()
   }
 
   /**
@@ -31,8 +31,8 @@ export default class UpdaterCtr extends ControllerModule {
    */
   @IpcMethod()
   quitAndInstallUpdate() {
-    logger.info('Quit and install update requested');
-    this.app.updaterManager.installNow();
+    logger.info('Quit and install update requested')
+    this.app.updaterManager.installNow()
   }
 
   /**
@@ -40,13 +40,13 @@ export default class UpdaterCtr extends ControllerModule {
    */
   @IpcMethod()
   installLater() {
-    logger.info('Install later requested');
-    this.app.updaterManager.installLater();
+    logger.info('Install later requested')
+    this.app.updaterManager.installLater()
   }
 
   @IpcMethod()
   async getUpdateChannel(): Promise<UpdateChannel> {
-    return this.app.storeManager.get('updateChannel') ?? 'stable';
+    return this.app.storeManager.get('updateChannel') ?? 'stable'
   }
 
   /**
@@ -55,24 +55,24 @@ export default class UpdaterCtr extends ControllerModule {
    */
   @IpcMethod()
   async getBuildChannel(): Promise<string> {
-    const { BUILD_CHANNEL } = await import('@/modules/updater/configs');
-    return BUILD_CHANNEL;
+    const { BUILD_CHANNEL } = await import('@/modules/updater/configs')
+    return BUILD_CHANNEL
   }
 
   @IpcMethod()
   async setUpdateChannel(channel: UpdateChannel): Promise<void> {
-    const validChannels = new Set(['stable', 'nightly', 'canary']);
+    const validChannels = new Set(['stable', 'nightly', 'canary'])
     if (!validChannels.has(channel)) {
-      logger.warn(`Invalid update channel: ${channel}, ignoring`);
-      return;
+      logger.warn(`Invalid update channel: ${channel}, ignoring`)
+      return
     }
-    logger.info(`Set update channel requested: ${channel}`);
-    this.app.storeManager.set('updateChannel', channel);
-    this.app.updaterManager.switchChannel(channel);
+    logger.info(`Set update channel requested: ${channel}`)
+    this.app.storeManager.set('updateChannel', channel)
+    this.app.updaterManager.switchChannel(channel)
   }
 
   @IpcMethod()
   async getUpdaterState(): Promise<UpdaterState> {
-    return this.app.updaterManager.getUpdaterState();
+    return this.app.updaterManager.getUpdaterState()
   }
 }

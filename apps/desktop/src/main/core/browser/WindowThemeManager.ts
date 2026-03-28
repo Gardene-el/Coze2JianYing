@@ -1,11 +1,11 @@
-import { join } from 'node:path';
+import { join } from 'node:path'
 
-import { TITLE_BAR_HEIGHT } from '@lobechat/desktop-bridge';
-import { type BrowserWindow, type BrowserWindowConstructorOptions, nativeTheme } from 'electron';
+import { TITLE_BAR_HEIGHT } from '@lobechat/desktop-bridge'
+import { type BrowserWindow, type BrowserWindowConstructorOptions, nativeTheme } from 'electron'
 
-import { buildDir } from '@/const/dir';
-import { isDev, isWindows } from '@/const/env';
-import { createLogger } from '@/utils/logger';
+import { buildDir } from '@/const/dir'
+import { isDev } from '@/const/env'
+import { createLogger } from '@/utils/logger'
 
 import {
   BACKGROUND_DARK,
@@ -13,33 +13,33 @@ import {
   SYMBOL_COLOR_DARK,
   SYMBOL_COLOR_LIGHT,
   THEME_CHANGE_DELAY,
-} from '../../const/theme';
+} from '../../const/theme'
 
-const logger = createLogger('core:WindowThemeManager');
+const logger = createLogger('core:WindowThemeManager')
 
 interface WindowsThemeConfig {
-  backgroundColor: string;
-  icon?: string;
+  backgroundColor: string
+  icon?: string
   titleBarOverlay: {
-    color: string;
-    height: number;
-    symbolColor: string;
-  };
-  titleBarStyle: 'hidden';
+    color: string
+    height: number
+    symbolColor: string
+  }
+  titleBarStyle: 'hidden'
 }
 
 /**
  * Manages window theme configuration and visual effects
  */
 export class WindowThemeManager {
-  private readonly identifier: string;
-  private browserWindow?: BrowserWindow;
-  private listenerSetup = false;
-  private boundHandleThemeChange: () => void;
+  private readonly identifier: string
+  private browserWindow?: BrowserWindow
+  private listenerSetup = false
+  private boundHandleThemeChange: () => void
 
   constructor(identifier: string) {
-    this.identifier = identifier;
-    this.boundHandleThemeChange = this.handleThemeChange.bind(this);
+    this.identifier = identifier
+    this.boundHandleThemeChange = this.handleThemeChange.bind(this)
   }
 
   private getWindowsTitleBarOverlay(isDarkMode: boolean): WindowsThemeConfig['titleBarOverlay'] {
@@ -48,7 +48,7 @@ export class WindowThemeManager {
       // Reduce 2px to prevent blocking the container border edge
       height: TITLE_BAR_HEIGHT - 2,
       symbolColor: isDarkMode ? SYMBOL_COLOR_DARK : SYMBOL_COLOR_LIGHT,
-    };
+    }
   }
 
   // ==================== Lifecycle ====================
@@ -58,9 +58,9 @@ export class WindowThemeManager {
    * Owns the full visual effect lifecycle including liquid glass on macOS Tahoe.
    */
   attach(browserWindow: BrowserWindow): void {
-    this.browserWindow = browserWindow;
-    this.setupThemeListener();
-    this.applyVisualEffects();
+    this.browserWindow = browserWindow
+    this.setupThemeListener()
+    this.applyVisualEffects()
   }
 
   /**
@@ -68,11 +68,11 @@ export class WindowThemeManager {
    */
   cleanup(): void {
     if (this.listenerSetup) {
-      nativeTheme.off('updated', this.boundHandleThemeChange);
-      this.listenerSetup = false;
-      logger.debug(`[${this.identifier}] Theme listener cleaned up.`);
+      nativeTheme.off('updated', this.boundHandleThemeChange)
+      this.listenerSetup = false
+      logger.debug(`[${this.identifier}] Theme listener cleaned up.`)
     }
-    this.browserWindow = undefined;
+    this.browserWindow = undefined
   }
 
   // ==================== Theme Configuration ====================
@@ -81,7 +81,7 @@ export class WindowThemeManager {
    * Get current dark mode state
    */
   get isDarkMode(): boolean {
-    return nativeTheme.shouldUseDarkColors;
+    return nativeTheme.shouldUseDarkColors
   }
 
   /**
@@ -89,14 +89,14 @@ export class WindowThemeManager {
    * Always false on Windows
    */
   get useLiquidGlass(): boolean {
-    return false;
+    return false
   }
 
   /**
    * Get platform-specific theme configuration for window creation
    */
   getPlatformConfig(): Partial<BrowserWindowConstructorOptions> {
-    return this.getWindowsConfig(this.isDarkMode);
+    return this.getWindowsConfig(this.isDarkMode)
   }
 
   /**
@@ -108,34 +108,34 @@ export class WindowThemeManager {
       icon: isDev ? join(buildDir, 'icon-dev.ico') : undefined,
       titleBarOverlay: this.getWindowsTitleBarOverlay(isDarkMode),
       titleBarStyle: 'hidden',
-    };
+    }
   }
 
   // ==================== Theme Listener ====================
 
   private setupThemeListener(): void {
-    if (this.listenerSetup) return;
+    if (this.listenerSetup) return
 
-    nativeTheme.on('updated', this.boundHandleThemeChange);
-    this.listenerSetup = true;
-    logger.debug(`[${this.identifier}] Theme listener setup.`);
+    nativeTheme.on('updated', this.boundHandleThemeChange)
+    this.listenerSetup = true
+    logger.debug(`[${this.identifier}] Theme listener setup.`)
   }
 
   private handleThemeChange(): void {
-    logger.debug(`[${this.identifier}] System theme changed, reapplying visual effects.`);
+    logger.debug(`[${this.identifier}] System theme changed, reapplying visual effects.`)
     setTimeout(() => {
-      this.applyVisualEffects();
-    }, THEME_CHANGE_DELAY);
+      this.applyVisualEffects()
+    }, THEME_CHANGE_DELAY)
   }
 
   /**
    * Handle application theme mode change (called from BrowserManager)
    */
   handleAppThemeChange(): void {
-    logger.debug(`[${this.identifier}] App theme mode changed, reapplying visual effects.`);
+    logger.debug(`[${this.identifier}] App theme mode changed, reapplying visual effects.`)
     setTimeout(() => {
-      this.applyVisualEffects();
-    }, THEME_CHANGE_DELAY);
+      this.applyVisualEffects()
+    }, THEME_CHANGE_DELAY)
   }
 
   // ==================== Visual Effects ====================
@@ -145,9 +145,9 @@ export class WindowThemeManager {
    * Checks explicit themeSource first to handle app-level theme overrides correctly.
    */
   private resolveIsDarkMode(): boolean {
-    if (nativeTheme.themeSource === 'dark') return true;
-    if (nativeTheme.themeSource === 'light') return false;
-    return nativeTheme.shouldUseDarkColors;
+    if (nativeTheme.themeSource === 'dark') return true
+    if (nativeTheme.themeSource === 'light') return false
+    return nativeTheme.shouldUseDarkColors
   }
 
   /**
@@ -155,15 +155,15 @@ export class WindowThemeManager {
    * Single entry point for ALL platform visual effects.
    */
   applyVisualEffects(): void {
-    if (!this.browserWindow || this.browserWindow.isDestroyed()) return;
+    if (!this.browserWindow || this.browserWindow.isDestroyed()) return
 
-    const isDarkMode = this.resolveIsDarkMode();
-    logger.debug(`[${this.identifier}] Applying visual effects (dark: ${isDarkMode})`);
+    const isDarkMode = this.resolveIsDarkMode()
+    logger.debug(`[${this.identifier}] Applying visual effects (dark: ${isDarkMode})`)
 
     try {
-      this.applyWindowsVisualEffects(isDarkMode);
+      this.applyWindowsVisualEffects(isDarkMode)
     } catch (error) {
-      logger.error(`[${this.identifier}] Failed to apply visual effects:`, error);
+      logger.error(`[${this.identifier}] Failed to apply visual effects:`, error)
     }
   }
 
@@ -171,15 +171,15 @@ export class WindowThemeManager {
    * Manually reapply visual effects
    */
   reapplyVisualEffects(): void {
-    logger.debug(`[${this.identifier}] Manually reapplying visual effects.`);
-    this.applyVisualEffects();
+    logger.debug(`[${this.identifier}] Manually reapplying visual effects.`)
+    this.applyVisualEffects()
   }
 
   private applyWindowsVisualEffects(isDarkMode: boolean): void {
-    if (!this.browserWindow) return;
+    if (!this.browserWindow) return
 
-    const config = this.getWindowsConfig(isDarkMode);
-    this.browserWindow.setBackgroundColor(config.backgroundColor);
-    this.browserWindow.setTitleBarOverlay(config.titleBarOverlay);
+    const config = this.getWindowsConfig(isDarkMode)
+    this.browserWindow.setBackgroundColor(config.backgroundColor)
+    this.browserWindow.setTitleBarOverlay(config.titleBarOverlay)
   }
 }

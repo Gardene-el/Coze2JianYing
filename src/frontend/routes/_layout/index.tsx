@@ -1,21 +1,21 @@
-import { DraggablePanel } from "@lobehub/ui";
-import { Layout } from "antd";
-import { createStaticStyles } from "antd-style";
-import { useCallback, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { DraggablePanel } from '@lobehub/ui'
+import { Layout } from 'antd'
+import { createStaticStyles } from 'antd-style'
+import { useCallback, useState } from 'react'
+import { Outlet } from 'react-router-dom'
 
-import TitleBar from "@/features/Electron/titlebar/TitleBar";
+import TitleBar from '@/features/Electron/titlebar/TitleBar'
 
-import DesktopLayoutContainer from "./DesktopLayoutContainer";
-import LogPanel from "./LogPanel";
-import Sidebar from "./Sidebar/index";
+import DesktopLayoutContainer from './DesktopLayoutContainer'
+import LogPanel from './LogPanel'
+import Sidebar from './Sidebar/index'
 
-const { Content, Footer } = Layout;
+const { Content, Footer } = Layout
 
-const SIDEBAR_WIDTH_KEY = "c2j-sidebar-width";
-const DEFAULT_SIDEBAR_WIDTH = 260;
+const SIDEBAR_WIDTH_KEY = 'c2j-sidebar-width'
+const DEFAULT_SIDEBAR_WIDTH = 260
 
-const isElectron = typeof window !== "undefined" && !!window.electron;
+const isElectron = typeof window !== 'undefined' && !!window.electron
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   layout: css`
@@ -43,37 +43,31 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
     padding: 0;
     background: transparent;
   `,
-}));
+}))
 
 const MainLayout = () => {
   /** localStorage 持久化侧边栏宽度，与 LobeChat globalStore.leftPanelWidth 对齐 */
   const [sidebarWidth] = useState(() => {
-    const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return stored ? parseInt(stored, 10) : DEFAULT_SIDEBAR_WIDTH;
-  });
+    const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY)
+    return stored ? parseInt(stored, 10) : DEFAULT_SIDEBAR_WIDTH
+  })
 
-  const handleSizeChange = useCallback(
-    (_: unknown, size?: { width?: number | string }) => {
-      const w =
-        typeof size?.width === "string"
-          ? parseInt(size.width, 10)
-          : size?.width;
-      if (!w || w < 64) return;
-      localStorage.setItem(SIDEBAR_WIDTH_KEY, String(w));
-    },
-    [],
-  );
+  const handleSizeChange = useCallback((_: unknown, size?: { width?: number | string }) => {
+    const w = typeof size?.width === 'string' ? parseInt(size.width, 10) : size?.width
+    if (!w || w < 64) return
+    localStorage.setItem(SIDEBAR_WIDTH_KEY, String(w))
+  }, [])
 
   return (
-    <Layout className={styles.layout} style={{ flexDirection: "column" }}>
+    <Layout className={styles.layout} style={{ flexDirection: 'column' }}>
       {/* Electron 无边框窗口：自定义标题栏（含导航按钮 + Win 原生按钮占位） */}
       {isElectron && <TitleBar />}
       {/* 侧边栏 + 内容区水平排列 */}
-      <Layout style={{ flex: 1, overflow: "hidden", flexDirection: "row" }}>
+      <Layout style={{ flex: 1, overflow: 'hidden', flexDirection: 'row' }}>
         {/* 可拖拽调宽的导航侧边栏，对齐 LobeChat NavPanelDraggable */}
         <DraggablePanel
           className={styles.panel}
-          defaultSize={{ width: sidebarWidth, height: "100%" }}
+          defaultSize={{ width: sidebarWidth, height: '100%' }}
           expandable={false}
           maxWidth={200}
           minWidth={132}
@@ -93,7 +87,7 @@ const MainLayout = () => {
         </DesktopLayoutContainer>
       </Layout>
     </Layout>
-  );
-};
+  )
+}
 
-export default MainLayout;
+export default MainLayout

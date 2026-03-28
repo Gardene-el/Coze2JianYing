@@ -1,33 +1,31 @@
-import type { ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { cx } from "antd-style";
+import { cx } from 'antd-style'
+import type { ReactNode } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-import { navItemStyles } from "./style";
+import { navItemStyles } from './style'
 
 interface NavItemProps {
-  to: string;
-  icon: ReactNode;
-  label: string;
+  to: string
+  icon: ReactNode
+  label: string
 }
 
 const NavItem = ({ to, icon, label }: NavItemProps) => {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
 
-  const isActive = pathname === to;
+  const isActive = pathname === to
 
   return (
-    <div
+    <button
+      type="button"
       className={cx(navItemStyles.item, { [navItemStyles.active]: isActive })}
       onClick={() => navigate(to)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && navigate(to)}
     >
       <span className={navItemStyles.icon}>{icon}</span>
       <span>{label}</span>
-    </div>
-  );
-};
+    </button>
+  )
+}
 
-export default NavItem;
+export default NavItem

@@ -1,89 +1,88 @@
-import os from 'node:os';
-import { join } from 'node:path';
+import os from 'node:os'
 
-import { app, nativeTheme, protocol } from 'electron';
+import { app, nativeTheme, protocol } from 'electron'
 
-import { binDir, buildDir } from '@/const/dir';
-import { isDev } from '@/const/env';
-import { ELECTRON_BE_PROTOCOL_SCHEME } from '@/const/protocol';
-import type { IControlModule } from '@/controllers';
-import type { IServiceModule } from '@/services';
-import { createLogger } from '@/utils/logger';
+import { binDir } from '@/const/dir'
+import { isDev } from '@/const/env'
+import { ELECTRON_BE_PROTOCOL_SCHEME } from '@/const/protocol'
+import type { IControlModule } from '@/controllers'
+import type { IServiceModule } from '@/services'
+import { createLogger } from '@/utils/logger'
 
-import { BrowserManager } from './browser/BrowserManager';
-import { I18nManager } from './infrastructure/I18nManager';
-import { IoCContainer } from './infrastructure/IoCContainer';
-import { ProtocolManager } from './infrastructure/ProtocolManager';
-import { PythonBackendManager } from './infrastructure/PythonBackendManager';
-import { RendererUrlManager } from './infrastructure/RendererUrlManager';
-import { StaticFileServerManager } from './infrastructure/StaticFileServerManager';
-import { StoreManager } from './infrastructure/StoreManager';
-import { UpdaterManager } from './infrastructure/UpdaterManager';
-import { MenuManager } from './ui/MenuManager';
-import { ShortcutManager } from './ui/ShortcutManager';
-import { TrayManager } from './ui/TrayManager';
+import { BrowserManager } from './browser/BrowserManager'
+import { I18nManager } from './infrastructure/I18nManager'
+import { IoCContainer } from './infrastructure/IoCContainer'
+import { ProtocolManager } from './infrastructure/ProtocolManager'
+import { PythonBackendManager } from './infrastructure/PythonBackendManager'
+import { RendererUrlManager } from './infrastructure/RendererUrlManager'
+import { StaticFileServerManager } from './infrastructure/StaticFileServerManager'
+import { StoreManager } from './infrastructure/StoreManager'
+import { UpdaterManager } from './infrastructure/UpdaterManager'
+import { MenuManager } from './ui/MenuManager'
+import { ShortcutManager } from './ui/ShortcutManager'
+import { TrayManager } from './ui/TrayManager'
 
-const logger = createLogger('core:App');
+const logger = createLogger('core:App')
 
-export type ShortcutMethodMap = Map<string, () => Promise<void>>;
-export type ProtocolHandlerMap = Map<string, { controller: any; methodName: string }>;
+export type ShortcutMethodMap = Map<string, () => Promise<void>>
+export type ProtocolHandlerMap = Map<string, { controller: any; methodName: string }>
 
-type Class<T> = new (...args: any[]) => T;
+type Class<T> = new (...args: any[]) => T
 
-const importAll = (r: any) => Object.values(r).map((v: any) => v.default);
+const importAll = (r: any) => Object.values(r).map((v: any) => v.default)
 
 export class App {
-  browserManager: BrowserManager;
-  menuManager: MenuManager;
-  i18n: I18nManager;
-  storeManager: StoreManager;
-  updaterManager: UpdaterManager;
-  shortcutManager: ShortcutManager;
-  trayManager: TrayManager;
-  staticFileServerManager: StaticFileServerManager;
-  protocolManager: ProtocolManager;
-  rendererUrlManager: RendererUrlManager;
-  pythonBackendManager: PythonBackendManager;
-  chromeFlags: string[] = ['OverlayScrollbar', 'FluentOverlayScrollbar', 'FluentScrollbar'];
+  browserManager: BrowserManager
+  menuManager: MenuManager
+  i18n: I18nManager
+  storeManager: StoreManager
+  updaterManager: UpdaterManager
+  shortcutManager: ShortcutManager
+  trayManager: TrayManager
+  staticFileServerManager: StaticFileServerManager
+  protocolManager: ProtocolManager
+  rendererUrlManager: RendererUrlManager
+  pythonBackendManager: PythonBackendManager
+  chromeFlags: string[] = ['OverlayScrollbar', 'FluentOverlayScrollbar', 'FluentScrollbar']
 
   /**
    * whether app is in quiting
    */
-  isQuiting: boolean = false;
+  isQuiting: boolean = false
 
   get appStoragePath() {
-    const storagePath = this.storeManager.get('storagePath');
+    const storagePath = this.storeManager.get('storagePath')
 
     if (!storagePath) {
-      throw new Error('Storage path not found in store');
+      throw new Error('Storage path not found in store')
     }
 
-    return storagePath;
+    return storagePath
   }
 
   constructor() {
-    logger.info('----------------------------------------------');
+    logger.info('----------------------------------------------')
     // Log system information
-    logger.info(`  OS: ${os.platform()} (${os.arch()})`);
-    logger.info(` CPU: ${os.cpus().length} cores`);
-    logger.info(` RAM: ${Math.round(os.totalmem() / 1024 / 1024 / 1024)} GB`);
-    logger.info(`PATH: ${app.getAppPath()}`);
-    logger.info(` lng: ${app.getLocale()}`);
-    logger.info(` bin: ${binDir}`);
-    logger.info('----------------------------------------------');
-    logger.info('Starting Coze2JianYing...');
+    logger.info(`  OS: ${os.platform()} (${os.arch()})`)
+    logger.info(` CPU: ${os.cpus().length} cores`)
+    logger.info(` RAM: ${Math.round(os.totalmem() / 1024 / 1024 / 1024)} GB`)
+    logger.info(`PATH: ${app.getAppPath()}`)
+    logger.info(` lng: ${app.getLocale()}`)
+    logger.info(` bin: ${binDir}`)
+    logger.info('----------------------------------------------')
+    logger.info('Starting Coze2JianYing...')
 
     // Append bundled binaries directory to PATH for fallback tool resolution
-    process.env.PATH = `${process.env.PATH};${binDir}`;
+    process.env.PATH = `${process.env.PATH};${binDir}`
 
     // Use native mode (pure Rust/CDP) so agent-browser works without Node.js
-    process.env.AGENT_BROWSER_NATIVE = '1';
+    process.env.AGENT_BROWSER_NATIVE = '1'
 
-    logger.debug('Initializing App');
+    logger.debug('Initializing App')
     // Initialize store manager
-    this.storeManager = new StoreManager(this);
+    this.storeManager = new StoreManager(this)
 
-    this.rendererUrlManager = new RendererUrlManager();
+    this.rendererUrlManager = new RendererUrlManager()
     protocol.registerSchemesAsPrivileged([
       {
         privileges: {
@@ -96,48 +95,52 @@ export class App {
         scheme: ELECTRON_BE_PROTOCOL_SCHEME,
       },
       this.rendererUrlManager.protocolScheme,
-    ]);
+    ])
 
     // load controllers
     const controllers: IControlModule[] = importAll(
       import.meta.glob('@/controllers/*Ctr.ts', { eager: true }),
-    );
+    )
 
-    logger.debug(`Loading ${controllers.length} controllers`);
-    controllers.forEach((controller) => this.addController(controller));
+    logger.debug(`Loading ${controllers.length} controllers`)
+    controllers.forEach((controller) => {
+      this.addController(controller)
+    })
 
     // load services
     const services: IServiceModule[] = importAll(
       import.meta.glob('@/services/*Srv.ts', { eager: true }),
-    );
+    )
 
-    logger.debug(`Loading ${services.length} services`);
-    services.forEach((service) => this.addService(service));
+    logger.debug(`Loading ${services.length} services`)
+    services.forEach((service) => {
+      this.addService(service)
+    })
 
-    this.i18n = new I18nManager(this);
-    this.browserManager = new BrowserManager(this);
-    this.menuManager = new MenuManager(this);
-    this.updaterManager = new UpdaterManager(this);
-    this.shortcutManager = new ShortcutManager(this);
-    this.trayManager = new TrayManager(this);
-    this.staticFileServerManager = new StaticFileServerManager(this);
-    this.protocolManager = new ProtocolManager(this);
-    this.pythonBackendManager = new PythonBackendManager();
+    this.i18n = new I18nManager(this)
+    this.browserManager = new BrowserManager(this)
+    this.menuManager = new MenuManager(this)
+    this.updaterManager = new UpdaterManager(this)
+    this.shortcutManager = new ShortcutManager(this)
+    this.trayManager = new TrayManager(this)
+    this.staticFileServerManager = new StaticFileServerManager(this)
+    this.protocolManager = new ProtocolManager(this)
+    this.pythonBackendManager = new PythonBackendManager()
 
     // Configure renderer loading strategy (dev server vs static export)
     // should register before app ready
-    this.rendererUrlManager.configureRendererLoader();
+    this.rendererUrlManager.configureRendererLoader()
 
     // initialize protocol handlers
-    this.protocolManager.initialize();
+    this.protocolManager.initialize()
 
     // Unified handling of before-quit event
-    app.on('before-quit', this.handleBeforeQuit);
+    app.on('before-quit', this.handleBeforeQuit)
 
     // Initialize theme mode from store
-    this.initializeThemeMode();
+    this.initializeThemeMode()
 
-    logger.info('App initialization completed');
+    logger.info('App initialization completed')
   }
 
   /**
@@ -145,77 +148,77 @@ export class App {
    * This allows nativeTheme.shouldUseDarkColors to be used consistently everywhere
    */
   private initializeThemeMode() {
-    let themeMode = this.storeManager.get('themeMode');
+    let themeMode = this.storeManager.get('themeMode')
 
     // Migrate legacy 'auto' value to 'system' (nativeTheme.themeSource doesn't accept 'auto')
     if (Object.is(themeMode, 'auto')) {
-      themeMode = 'system';
-      this.storeManager.set('themeMode', themeMode);
-      logger.info(`Migrated legacy theme mode 'auto' to 'system'`);
+      themeMode = 'system'
+      this.storeManager.set('themeMode', themeMode)
+      logger.info(`Migrated legacy theme mode 'auto' to 'system'`)
     }
 
     if (themeMode) {
-      nativeTheme.themeSource = themeMode;
+      nativeTheme.themeSource = themeMode
       logger.debug(
         `Theme mode initialized to: ${themeMode} (themeSource: ${nativeTheme.themeSource})`,
-      );
+      )
     }
   }
 
   bootstrap = async () => {
-    logger.info('Bootstrapping application');
+    logger.info('Bootstrapping application')
     // make single instance
-    const isSingle = app.requestSingleInstanceLock();
+    const isSingle = app.requestSingleInstanceLock()
     if (!isSingle) {
-      logger.info('Another instance is already running, exiting');
-      app.exit(0);
+      logger.info('Another instance is already running, exiting')
+      app.exit(0)
     }
 
-    this.initDevBranding();
+    this.initDevBranding()
 
     // Initialize app
-    await this.makeAppReady();
+    await this.makeAppReady()
 
     // Initialize i18n. Note: app.getLocale() must be called after app.whenReady() to get the correct value
-    await this.i18n.init();
-    this.menuManager.initialize();
+    await this.i18n.init()
+    this.menuManager.initialize()
 
     // Initialize static file manager
-    await this.staticFileServerManager.initialize();
+    await this.staticFileServerManager.initialize()
 
     // Initialize global shortcuts: globalShortcut must be called after app.whenReady()
-    this.shortcutManager.initialize();
+    this.shortcutManager.initialize()
 
-    await this.browserManager.initializeBrowsers();
+    await this.browserManager.initializeBrowsers()
 
     // Initialize tray manager
-    this.trayManager.initializeTrays();
+    this.trayManager.initializeTrays()
 
     // Initialize updater manager
-    await this.updaterManager.initialize();
+    await this.updaterManager.initialize()
 
     // Set global application exit state
-    this.isQuiting = false;
+    this.isQuiting = false
 
     app.on('window-all-closed', () => {
-      logger.info('All windows closed, quitting application');
-      app.quit();
-    });
+      logger.info('All windows closed, quitting application')
+      app.quit()
+    })
 
-    app.on('activate', this.onActivate);
+    app.on('activate', this.onActivate)
 
     // Process any pending protocol URLs after everything is ready
-    await this.protocolManager.processPendingUrls();
+    await this.protocolManager.processPendingUrls()
 
-    logger.info('Application bootstrap completed');
-  };
+    logger.info('Application bootstrap completed')
+  }
 
   getService<T>(serviceClass: Class<T>): T {
-    return this.services.get(serviceClass);
+    return this.services.get(serviceClass)
   }
 
   getController<T>(controllerClass: Class<T>): T {
-    return this.controllers.get(controllerClass);
+    return this.controllers.get(controllerClass)
   }
 
   /**
@@ -226,69 +229,69 @@ export class App {
    * @returns Whether successfully handled
    */
   async handleProtocolRequest(urlType: string, action: string, data: any): Promise<boolean> {
-    const key = `${urlType}:${action}`;
-    const handler = this.protocolHandlerMap.get(key);
+    const key = `${urlType}:${action}`
+    const handler = this.protocolHandlerMap.get(key)
 
     if (!handler) {
-      logger.warn(`No protocol handler found for ${key}`);
-      return false;
+      logger.warn(`No protocol handler found for ${key}`)
+      return false
     }
 
     try {
-      logger.debug(`Dispatching protocol request ${key} to controller`);
-      const result = await handler.controller[handler.methodName](data);
-      return result !== false; // Assume controller returning false indicates handling failure
+      logger.debug(`Dispatching protocol request ${key} to controller`)
+      const result = await handler.controller[handler.methodName](data)
+      return result !== false // Assume controller returning false indicates handling failure
     } catch (error) {
-      logger.error(`Error handling protocol request ${key}:`, error);
-      return false;
+      logger.error(`Error handling protocol request ${key}:`, error)
+      return false
     }
   }
 
   private onActivate = () => {
-    logger.debug('Application activated');
-    this.browserManager.showMainWindow();
-  };
+    logger.debug('Application activated')
+    this.browserManager.showMainWindow()
+  }
 
   /**
    * Call beforeAppReady method on all controllers before the application is ready
    */
   private makeAppReady = async () => {
-    logger.debug('Preparing application ready state');
+    logger.debug('Preparing application ready state')
     this.controllers.forEach((controller) => {
       if (typeof controller.beforeAppReady === 'function') {
         try {
-          controller.beforeAppReady();
+          controller.beforeAppReady()
         } catch (error) {
-          logger.error(`Error in controller.beforeAppReady:`, error);
-          console.error(`[App] Error in controller.beforeAppReady:`, error);
+          logger.error(`Error in controller.beforeAppReady:`, error)
+          console.error(`[App] Error in controller.beforeAppReady:`, error)
         }
       }
-    });
+    })
 
     // refs: https://github.com/lobehub/lobe-chat/pull/7883
     // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
-    app.commandLine.appendSwitch('gtk-version', '3');
+    app.commandLine.appendSwitch('gtk-version', '3')
 
-    app.commandLine.appendSwitch('enable-features', this.chromeFlags.join(','));
+    app.commandLine.appendSwitch('enable-features', this.chromeFlags.join(','))
 
-    logger.debug('Waiting for app to be ready');
-    await app.whenReady();
-    logger.debug('Application ready');
+    logger.debug('Waiting for app to be ready')
+    await app.whenReady()
+    logger.debug('Application ready')
 
-    await this.installReactDevtools();
+    await this.installReactDevtools()
 
     this.controllers.forEach((controller) => {
       if (typeof controller.afterAppReady === 'function') {
         try {
-          controller.afterAppReady();
+          controller.afterAppReady()
         } catch (error) {
-          logger.error(`Error in controller.afterAppReady:`, error);
-          console.error(`[App] Error in controller.beforeAppReady:`, error);
+          logger.error(`Error in controller.afterAppReady:`, error)
+          console.error(`[App] Error in controller.beforeAppReady:`, error)
         }
       }
-    });
-    logger.info('Application ready state completed');
-  };
+    })
+    logger.info('Application ready state completed')
+  }
 
   /**
    * Development only: install React DevTools extension into Electron's devtools.
@@ -296,87 +299,87 @@ export class App {
    * transitive dependency `yaku`) is never loaded in production builds.
    */
   private installReactDevtools = async () => {
-    if (!isDev) return;
+    if (!isDev) return
 
     try {
       const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
         'electron-devtools-installer'
-      );
-      const name = await installExtension(REACT_DEVELOPER_TOOLS);
+      )
+      const name = await installExtension(REACT_DEVELOPER_TOOLS)
 
-      logger.info(`Installed DevTools extension: ${name}`);
+      logger.info(`Installed DevTools extension: ${name}`)
     } catch (error) {
-      logger.warn('Failed to install React DevTools extension', error);
+      logger.warn('Failed to install React DevTools extension', error)
     }
-  };
+  }
 
   // ============= helper ============= //
 
   /**
    * all controllers in app
    */
-  private controllers = new Map<Class<any>, any>();
+  private controllers = new Map<Class<any>, any>()
   /**
    * all services in app
    */
-  private services = new Map<Class<any>, any>();
+  private services = new Map<Class<any>, any>()
 
-  shortcutMethodMap: ShortcutMethodMap = new Map();
-  protocolHandlerMap: ProtocolHandlerMap = new Map();
+  shortcutMethodMap: ShortcutMethodMap = new Map()
+  protocolHandlerMap: ProtocolHandlerMap = new Map()
 
   private addController = (ControllerClass: IControlModule) => {
-    const controller = new ControllerClass(this);
-    this.controllers.set(ControllerClass, controller);
+    const controller = new ControllerClass(this)
+    this.controllers.set(ControllerClass, controller)
 
     IoCContainer.shortcuts.get(ControllerClass)?.forEach((shortcut) => {
       this.shortcutMethodMap.set(shortcut.name, async () => {
-        controller[shortcut.methodName]();
-      });
-    });
+        controller[shortcut.methodName]()
+      })
+    })
 
     IoCContainer.protocolHandlers.get(ControllerClass)?.forEach((handler) => {
-      const key = `${handler.urlType}:${handler.action}`;
+      const key = `${handler.urlType}:${handler.action}`
       this.protocolHandlerMap.set(key, {
         controller,
         methodName: handler.methodName,
-      });
-    });
-  };
+      })
+    })
+  }
 
   private addService = (ServiceClass: IServiceModule) => {
-    const service = new ServiceClass(this);
-    this.services.set(ServiceClass, service);
-  };
+    const service = new ServiceClass(this)
+    this.services.set(ServiceClass, service)
+  }
 
   private initDevBranding = () => {
-    if (!isDev) return;
+    if (!isDev) return
 
-    logger.debug('Setting up dev branding');
-    app.setName('coze2jianying-dev');
-  };
+    logger.debug('Setting up dev branding')
+    app.setName('coze2jianying-dev')
+  }
 
   /**
    * Build renderer URL for dev/prod.
    */
   async buildRendererUrl(path: string): Promise<string> {
-    return this.rendererUrlManager.buildRendererUrl(path);
+    return this.rendererUrlManager.buildRendererUrl(path)
   }
 
   // Add before-quit handler function
   private handleBeforeQuit = () => {
-    logger.info('Application is preparing to quit');
-    this.isQuiting = true;
+    logger.info('Application is preparing to quit')
+    this.isQuiting = true
 
     // Destroy tray
-    this.trayManager.destroyAll();
+    this.trayManager.destroyAll()
 
     // Execute cleanup operations
-    this.staticFileServerManager.destroy();
-    this.pythonBackendManager.stop();
+    this.staticFileServerManager.destroy()
+    this.pythonBackendManager.stop()
 
     // Stop all active tunnel providers (fire-and-forget; app is quitting)
     import('../modules/tunnels/TunnelRegistry').then(({ tunnelRegistry }) => {
-      tunnelRegistry.stopAll().catch(() => void 0);
-    });
-  };
+      tunnelRegistry.stopAll().catch(() => void 0)
+    })
+  }
 }

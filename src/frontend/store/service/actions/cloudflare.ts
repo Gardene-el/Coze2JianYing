@@ -1,16 +1,12 @@
-import type { StateCreator } from "zustand";
+import type { StateCreator } from 'zustand'
 
-import { cloudflareTunnelService } from "@/services/tunnels/cloudflare";
-import type { ServiceState } from "../initialState";
+import { cloudflareTunnelService } from '@/services/tunnels/cloudflare'
+import type { ServiceState } from '../initialState'
 
 export interface CloudflareAction {
-  startCloudflare: (
-    token: string,
-    publicUrl: string,
-    port: number,
-  ) => Promise<string>;
-  stopCloudflare: () => Promise<void>;
-  fetchCloudflareStatus: () => Promise<void>;
+  startCloudflare: (token: string, publicUrl: string, port: number) => Promise<string>
+  stopCloudflare: () => Promise<void>
+  fetchCloudflareStatus: () => Promise<void>
 }
 
 export const createCloudflareSlice: StateCreator<
@@ -20,39 +16,39 @@ export const createCloudflareSlice: StateCreator<
   CloudflareAction
 > = (set) => ({
   startCloudflare: async (token, publicUrl, port) => {
-    set({ cloudflareLoading: true });
+    set({ cloudflareLoading: true })
     try {
       const data = await cloudflareTunnelService.startTunnel(port, {
         token,
         publicUrl,
-      });
-      const url = data.publicUrl ?? "";
-      set({ cloudflareRunning: true, cloudflareUrl: url });
-      return url;
+      })
+      const url = data.publicUrl ?? ''
+      set({ cloudflareRunning: true, cloudflareUrl: url })
+      return url
     } finally {
-      set({ cloudflareLoading: false });
+      set({ cloudflareLoading: false })
     }
   },
 
   stopCloudflare: async () => {
-    set({ cloudflareLoading: true });
+    set({ cloudflareLoading: true })
     try {
-      await cloudflareTunnelService.stopTunnel();
-      set({ cloudflareRunning: false, cloudflareUrl: "" });
+      await cloudflareTunnelService.stopTunnel()
+      set({ cloudflareRunning: false, cloudflareUrl: '' })
     } finally {
-      set({ cloudflareLoading: false });
+      set({ cloudflareLoading: false })
     }
   },
 
   fetchCloudflareStatus: async () => {
     try {
-      const data = await cloudflareTunnelService.getStatus();
+      const data = await cloudflareTunnelService.getStatus()
       set({
         cloudflareRunning: data.isRunning,
-        cloudflareUrl: data.publicUrl ?? "",
-      });
+        cloudflareUrl: data.publicUrl ?? '',
+      })
     } catch {
       // 静默处理
     }
   },
-});
+})

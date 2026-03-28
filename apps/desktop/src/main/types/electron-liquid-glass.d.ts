@@ -6,10 +6,10 @@
  */
 
 interface LiquidGlass {
-  addView(windowHandle: Buffer): number;
-  removeView(viewId: number): void;
-  unstable_setVariant(viewId: number, variant: number): void;
+  addView: (windowHandle: Buffer) => number
+  removeView: (viewId: number) => void
+  unstable_setVariant: (viewId: number, variant: number) => void
 }
 
-declare const liquidGlass: LiquidGlass;
-export default liquidGlass;
+declare const liquidGlass: LiquidGlass
+export default liquidGlass

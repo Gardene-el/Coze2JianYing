@@ -1,5 +1,5 @@
-import { FluentEmoji } from "@lobehub/ui";
-import { createStaticStyles } from "antd-style";
+import { FluentEmoji } from '@lobehub/ui'
+import { createStaticStyles } from 'antd-style'
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   footer: css`
@@ -12,7 +12,7 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
     font-weight: 700;
     color: ${cssVar.colorText};
   `,
-}));
+}))
 
 const SidebarFooter = () => {
   return (
@@ -20,7 +20,7 @@ const SidebarFooter = () => {
       <FluentEmoji emoji="📸" size={48} type="anim" />
       <span>扣子2剪映</span>
     </div>
-  );
-};
+  )
+}
 
-export default SidebarFooter;
+export default SidebarFooter

@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite';
+import type { Plugin } from 'vite'
 
 /**
  * Forces emotion's speedy mode in antd-style.
@@ -18,8 +18,8 @@ export function viteEmotionSpeedy(): Plugin {
         return {
           code: code.replaceAll('speedy: false', 'speedy: true'),
           map: null,
-        };
+        }
       }
     },
-  };
+  }
 }

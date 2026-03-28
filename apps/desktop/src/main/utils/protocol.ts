@@ -1,42 +1,42 @@
-import { app } from 'electron';
+import { app } from 'electron'
 
-import type { McpSchema, ProtocolUrlParsed } from '../types/protocol';
+import type { McpSchema, ProtocolUrlParsed } from '../types/protocol'
 
-export type AppChannel = 'stable' | 'beta' | 'nightly';
+export type AppChannel = 'stable' | 'beta' | 'nightly'
 
 export const getProtocolScheme = (): string => {
   // In Electron environment, version can be determined in multiple ways
-  const bundleId = app.name;
-  const appPath = app.getPath('exe');
+  const bundleId = app.name
+  const appPath = app.getPath('exe')
 
   // Determine by bundle identifier
-  if (bundleId?.toLowerCase().includes('nightly')) return 'coze2jianying-nightly';
-  if (bundleId?.toLowerCase().includes('beta')) return 'coze2jianying-beta';
-  if (bundleId?.includes('dev')) return 'coze2jianying-dev';
+  if (bundleId?.toLowerCase().includes('nightly')) return 'coze2jianying-nightly'
+  if (bundleId?.toLowerCase().includes('beta')) return 'coze2jianying-beta'
+  if (bundleId?.includes('dev')) return 'coze2jianying-dev'
 
   // Determine by executable file path
-  if (appPath?.toLowerCase().includes('nightly')) return 'coze2jianying-nightly';
-  if (appPath?.toLowerCase().includes('beta')) return 'coze2jianying-beta';
-  if (appPath?.includes('dev')) return 'coze2jianying-dev';
+  if (appPath?.toLowerCase().includes('nightly')) return 'coze2jianying-nightly'
+  if (appPath?.toLowerCase().includes('beta')) return 'coze2jianying-beta'
+  if (appPath?.includes('dev')) return 'coze2jianying-dev'
 
-  return 'coze2jianying';
-};
+  return 'coze2jianying'
+}
 
 export const getVersionInfo = (): { channel: AppChannel; protocolScheme: string } => {
-  const protocolScheme = getProtocolScheme();
+  const protocolScheme = getProtocolScheme()
 
-  let appChannel: AppChannel = 'stable';
+  let appChannel: AppChannel = 'stable'
   if (protocolScheme.includes('nightly')) {
-    appChannel = 'nightly';
+    appChannel = 'nightly'
   } else if (protocolScheme.includes('beta')) {
-    appChannel = 'beta';
+    appChannel = 'beta'
   }
 
   return {
     channel: appChannel,
     protocolScheme,
-  };
-};
+  }
+}
 
 /**
  * Validate MCP Schema object structure
@@ -44,40 +44,40 @@ export const getVersionInfo = (): { channel: AppChannel; protocolScheme: string 
  * @returns Whether it's a valid MCP Schema
  */
 function validateMcpSchema(schema: any): schema is McpSchema {
-  if (!schema || typeof schema !== 'object') return false;
+  if (!schema || typeof schema !== 'object') return false
 
   // Required field validation
-  if (typeof schema.identifier !== 'string' || !schema.identifier) return false;
-  if (typeof schema.name !== 'string' || !schema.name) return false;
-  if (typeof schema.author !== 'string' || !schema.author) return false;
-  if (typeof schema.description !== 'string' || !schema.description) return false;
-  if (typeof schema.version !== 'string' || !schema.version) return false;
+  if (typeof schema.identifier !== 'string' || !schema.identifier) return false
+  if (typeof schema.name !== 'string' || !schema.name) return false
+  if (typeof schema.author !== 'string' || !schema.author) return false
+  if (typeof schema.description !== 'string' || !schema.description) return false
+  if (typeof schema.version !== 'string' || !schema.version) return false
 
   // Optional field validation
-  if (schema.homepage !== undefined && typeof schema.homepage !== 'string') return false;
-  if (schema.icon !== undefined && typeof schema.icon !== 'string') return false;
+  if (schema.homepage !== undefined && typeof schema.homepage !== 'string') return false
+  if (schema.icon !== undefined && typeof schema.icon !== 'string') return false
 
   // config field validation
-  if (!schema.config || typeof schema.config !== 'object') return false;
-  const config = schema.config;
+  if (!schema.config || typeof schema.config !== 'object') return false
+  const config = schema.config
 
   if (config.type === 'stdio') {
-    if (typeof config.command !== 'string' || !config.command) return false;
-    if (config.args !== undefined && !Array.isArray(config.args)) return false;
-    if (config.env !== undefined && typeof config.env !== 'object') return false;
+    if (typeof config.command !== 'string' || !config.command) return false
+    if (config.args !== undefined && !Array.isArray(config.args)) return false
+    if (config.env !== undefined && typeof config.env !== 'object') return false
   } else if (config.type === 'http') {
-    if (typeof config.url !== 'string' || !config.url) return false;
+    if (typeof config.url !== 'string' || !config.url) return false
     try {
-      new URL(config.url); // Validate URL format
+      new URL(config.url) // Validate URL format
     } catch {
-      return false;
+      return false
     }
-    if (config.headers !== undefined && typeof config.headers !== 'object') return false;
+    if (config.headers !== undefined && typeof config.headers !== 'object') return false
   } else {
-    return false; // Unknown config type
+    return false // Unknown config type
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -95,31 +95,36 @@ function validateMcpSchema(schema: any): schema is McpSchema {
  */
 export const parseProtocolUrl = (url: string): ProtocolUrlParsed | null => {
   try {
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(url)
 
     // Support multiple protocol schemes
-    const validProtocols = ['coze2jianying:', 'coze2jianying-dev:', 'coze2jianying-nightly:', 'coze2jianying-beta:'];
+    const validProtocols = [
+      'coze2jianying:',
+      'coze2jianying-dev:',
+      'coze2jianying-nightly:',
+      'coze2jianying-beta:',
+    ]
     if (!validProtocols.includes(parsedUrl.protocol)) {
-      return null;
+      return null
     }
 
     // For custom protocols, after URL parsing:
     // lobehub://plugin/install -> hostname: "plugin", pathname: "/install"
-    const urlType = parsedUrl.hostname; // "plugin"
-    const pathParts = parsedUrl.pathname.split('/').filter(Boolean); // ["install"]
+    const urlType = parsedUrl.hostname // "plugin"
+    const pathParts = parsedUrl.pathname.split('/').filter(Boolean) // ["install"]
 
     if (pathParts.length < 1) {
-      return null;
+      return null
     }
 
-    const action = pathParts[0]; // "install"
+    const action = pathParts[0] // "install"
 
     // Parse all query parameters
-    const params: Record<string, string> = {};
-    const searchParams = new URLSearchParams(parsedUrl.search);
+    const params: Record<string, string> = {}
+    const searchParams = new URLSearchParams(parsedUrl.search)
 
     for (const [key, value] of searchParams.entries()) {
-      params[key] = value;
+      params[key] = value
     }
 
     return {
@@ -127,12 +132,12 @@ export const parseProtocolUrl = (url: string): ProtocolUrlParsed | null => {
       originalUrl: url,
       params,
       urlType,
-    };
+    }
   } catch (error) {
-    console.error('Failed to parse protocol URL:', error);
-    return null;
+    console.error('Failed to parse protocol URL:', error)
+    return null
   }
-};
+}
 
 /**
  * Generate RFC 0001 compliant protocol URL
@@ -142,46 +147,46 @@ export const parseProtocolUrl = (url: string): ProtocolUrlParsed | null => {
  */
 export function generateRFCProtocolUrl(params: {
   /** Plugin unique identifier */
-  id: string;
+  id: string
   /** Marketplace ID */
-  marketId?: string;
+  marketId?: string
   /** MCP Schema object */
-  schema: McpSchema;
+  schema: McpSchema
   /** Protocol scheme (default: coze2jianying) */
-  scheme?: string;
+  scheme?: string
 }): string {
-  const { id, schema, marketId, scheme = 'coze2jianying' } = params;
+  const { id, schema, marketId, scheme = 'coze2jianying' } = params
 
   // Validate schema.identifier matches id
   if (schema.identifier !== id) {
-    throw new Error('Schema identifier must match the id parameter');
+    throw new Error('Schema identifier must match the id parameter')
   }
 
   // Validate schema structure
   if (!validateMcpSchema(schema)) {
-    throw new Error('Invalid MCP Schema structure');
+    throw new Error('Invalid MCP Schema structure')
   }
 
   // Build base URL
-  const baseUrl = `${scheme}://plugin/install`;
+  const baseUrl = `${scheme}://plugin/install`
 
   // Build query parameters
-  const searchParams = new URLSearchParams();
+  const searchParams = new URLSearchParams()
 
   // Required parameters
-  searchParams.set('type', 'mcp');
-  searchParams.set('id', id);
+  searchParams.set('type', 'mcp')
+  searchParams.set('id', id)
 
   // Encode schema - pass JSON string directly, let URLSearchParams auto-encode
-  const schemaJson = JSON.stringify(schema);
-  searchParams.set('schema', schemaJson);
+  const schemaJson = JSON.stringify(schema)
+  searchParams.set('schema', schemaJson)
 
   // Optional parameters
   if (marketId) {
-    searchParams.set('marketId', marketId);
+    searchParams.set('marketId', marketId)
   }
 
-  return `${baseUrl}?${searchParams.toString()}`;
+  return `${baseUrl}?${searchParams.toString()}`
 }
 
 /**
