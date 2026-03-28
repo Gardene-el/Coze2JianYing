@@ -1,4 +1,6 @@
 import { createLogger } from '@/utils/logger';
+import { DEFAULT_GUI_SETTINGS } from '@/const/store';
+import { pathResolverService } from '@/utils/pathResolver';
 
 import { ControllerModule, IpcMethod } from './index';
 
@@ -54,7 +56,34 @@ export default class BackendCtr extends ControllerModule {
     logger.info('start() requested via IPC');
     const port = this.app.storeManager.get('backendPort') ?? DEFAULT_PORT;
     await this.app.pythonBackendManager.start(port);
+
+    // After Python is ready, push the persisted GUI settings into Python memory.
+    // This handles the case where loadSettings() ran before Python was started
+    // (the HTTP PUT failed silently), ensuring draft_folder is always available.
+    this.pushGuiSettingsToPython(port).catch((err) => {
+      logger.warn('Failed to push GUI settings to Python after start:', err);
+    });
+
     return { port, running: true };
+  }
+
+  /**
+   * Reads GUI settings from Electron store, resolves effective paths (fs check),
+   * and pushes them to the Python backend via PUT /gui/settings.
+   */
+  private async pushGuiSettingsToPython(port: number): Promise<void> {
+    const guiSettings = this.app.storeManager.get('guiSettings') ?? DEFAULT_GUI_SETTINGS;
+    const effectivePaths = pathResolverService.resolveEffectivePaths(guiSettings);
+    const payload = { draft_folder: effectivePaths.draftFolder };
+    logger.info(`Pushing GUI settings to Python: draft_folder="${effectivePaths.draftFolder}"`);
+    const res = await fetch(`http://127.0.0.1:${port}/gui/settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      throw new Error(`PUT /gui/settings failed: ${res.status} ${res.statusText}`);
+    }
   }
 
   /** IPC: backend.stop — kills Python process */
