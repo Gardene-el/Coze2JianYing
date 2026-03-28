@@ -11,6 +11,7 @@ import { useRef, useState } from "react";
 import PageContainer from "@/components/PageContainer";
 import PageHeader from "@/components/PageHeader";
 import { guiScriptAPI } from "@/services/gui/script";
+import { useEnsureBackend } from "@/hooks/useEnsureBackend";
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   textarea: css`
@@ -40,6 +41,7 @@ const ScriptExecutorPage = () => {
   const [statusText, setStatusText] = useState("就绪");
   const [validationMsg, setValidationMsg] = useState<string | null>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const { ensureReady } = useEnsureBackend();
 
   const getContent = () => textRef.current?.value.trim() ?? "";
 
@@ -48,6 +50,7 @@ const ScriptExecutorPage = () => {
     if (!content) return msgApi.warning("请先粘贴内容");
     setStatus("loading");
     try {
+      await ensureReady();
       const data = await guiScriptAPI.format(content);
       if (textRef.current) textRef.current.value = data.formatted;
       setStatus("idle");
@@ -63,6 +66,7 @@ const ScriptExecutorPage = () => {
     if (!content) return msgApi.warning("请先粘贴内容");
     setStatus("loading");
     try {
+      await ensureReady();
       const data = await guiScriptAPI.validate(content);
       setValidationMsg(data.valid ? null : (data.error ?? "语法错误"));
       setStatus(data.valid ? "success" : "error");
@@ -80,6 +84,7 @@ const ScriptExecutorPage = () => {
     setStatusText("执行中…");
     setValidationMsg(null);
     try {
+      await ensureReady();
       await guiScriptAPI.execute(content);
       setStatus("success");
       setStatusText("执行成功 ✓");

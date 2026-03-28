@@ -8,6 +8,7 @@ import { modal } from "@/components/AntdStaticMethods";
 import PageContainer from "@/components/PageContainer";
 import PageHeader from "@/components/PageHeader";
 import { guiDraftAPI } from "@/services/gui/draft";
+import { useEnsureBackend } from "@/hooks/useEnsureBackend";
 import { useSettingsStore } from "@/store/settings/store";
 
 const { Text } = Typography;
@@ -40,6 +41,7 @@ const DraftGeneratorPage = () => {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
   const draftFolder = useSettingsStore((s) => s.draftFolder);
+  const { ensureReady, isReady } = useEnsureBackend();
 
   const handleGenerate = async () => {
     const content = textRef.current?.value.trim();
@@ -57,8 +59,10 @@ const DraftGeneratorPage = () => {
       return;
     }
     setLoading(true);
-    setStatus("正在生成…");
+    setStatus(isReady ? "正在生成…" : "准备后端中…");
     try {
+      await ensureReady();
+      setStatus("正在生成…");
       await guiDraftAPI.generate(content);
       setStatus("生成成功 ✓");
       msgApi.success("草稿已生成");
