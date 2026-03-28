@@ -128,9 +128,22 @@ def _extract_script_from_input(content: str) -> str:
     return content
 
 
-def _preprocess_script(script_content: str) -> str:
-    """在用户脚本前注入标准导入，并包装成 async main()。"""
-    preamble = """\
+_LEGACY_PREAMBLE = """\
+import sys
+import asyncio
+from pathlib import Path
+from types import SimpleNamespace
+
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from src.backend.api.legacy import *  # noqa: F401,F403
+
+CustomNamespace = SimpleNamespace
+"""
+
+_CURRENT_PREAMBLE = """\
 import sys
 import asyncio
 from pathlib import Path
@@ -146,13 +159,38 @@ from src.backend.core.common_types import *  # noqa: F401,F403
 
 CustomNamespace = SimpleNamespace
 """
+
+# 旧版脚本的特征导入前缀（来自 main 分支时代的 Coze 插件）
+_LEGACY_IMPORT_PATTERNS = (
+    "from app.schemas.segment_schemas",
+    "from app.backend.schemas.segment_schemas",
+    "from app.schemas import",
+    "from app.backend.schemas import",
+)
+
+
+def _is_legacy_script(content: str) -> bool:
+    """检测脚本是否为旧版 Coze 插件生成的格式。"""
+    return any(pat in content for pat in _LEGACY_IMPORT_PATTERNS)
+
+
+def _preprocess_script(script_content: str) -> str:
+    """在用户脚本前注入标准导入，并包装成 async main()。
+    自动检测旧版脚本（from app.schemas.segment_schemas import *）并切换到兼容 preamble。
+    """
     script_content = script_content.strip().strip('"').strip("'")
+
+    is_legacy = _is_legacy_script(script_content)
+    preamble = _LEGACY_PREAMBLE if is_legacy else _CURRENT_PREAMBLE
 
     import_lines: List[str] = []
     code_lines: List[str] = []
     for line in script_content.split("\n"):
         stripped = line.strip()
         if stripped.startswith("import ") or stripped.startswith("from "):
+            # 旧版模式下，过滤掉 legacy 导入行（compat 已全部提供）
+            if is_legacy and any(pat in stripped for pat in _LEGACY_IMPORT_PATTERNS):
+                continue
             import_lines.append(line)
         elif not stripped or stripped.startswith("#"):
             (import_lines if not code_lines else code_lines).append(line)
