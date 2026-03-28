@@ -30,7 +30,7 @@ def create_draft(width: int, height: int) -> str:
 
 	try:
 		settings = get_settings_manager()
-		output_dir = settings.require("effective_output_path")
+		output_dir = settings.require("draft_folder")
 
 		draft_folder = draft.DraftFolder(output_dir)
 		script = draft_folder.create_draft(

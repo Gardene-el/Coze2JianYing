@@ -6,11 +6,9 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-/** 仅包含 Python backend 实际使用的字段（草稿路径 + 预计算的有效路径） */
+/** 仅包含 Python backend 实际使用的字段 */
 export interface SettingsPayload {
   draft_folder?: string;
-  effective_assets_base_path?: string;
-  effective_output_path?: string;
 }
 
 export interface ServiceStatusResponse {

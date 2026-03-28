@@ -28,7 +28,7 @@ def create_audio_segment(
 
 	try:
 		settings = get_settings_manager()
-		output_dir = settings.require("effective_output_path")
+		output_dir = settings.require("draft_folder")
 		draft_audio_dir = create_audio_directory(output_dir, segment_id)
 		audio_path = download_audio_file(material_url, draft_audio_dir)
 

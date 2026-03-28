@@ -69,8 +69,8 @@ export const createSettingsPersistSlice: StateCreator<
       relayWorkerUrl: (workerUrl as string) || get().relayWorkerUrl,
     });
 
-    // ── Step 4: resolve effective paths in main process (fs check), then push
-    //    draft_folder + transfer_enabled + effective paths into Python memory.
+    // ── Step 4: validate draft folder in main process (fs check), then push
+    //    to Python memory.
     const current = get();
     const guiSettings = {
       draftFolder: current.draftFolder,
@@ -78,16 +78,11 @@ export const createSettingsPersistSlice: StateCreator<
     const effectivePaths = window.electronAPI
       ? await window.electronAPI
           .invoke(GUI_SETTINGS_CHANNELS.resolveEffectivePaths, guiSettings)
-          .catch(() => ({ assetsBasePath: "", outputPath: "" }))
-      : { assetsBasePath: "", outputPath: "" };
+          .catch(() => ({ draftFolder: "" }))
+      : { draftFolder: "" };
     guiSettingsAPI
       .put({
-        draft_folder: current.draftFolder,
-        effective_assets_base_path: (
-          effectivePaths as { assetsBasePath: string }
-        ).assetsBasePath,
-        effective_output_path: (effectivePaths as { outputPath: string })
-          .outputPath,
+        draft_folder: (effectivePaths as { draftFolder: string }).draftFolder,
       })
       .catch(() => {
         /* non-fatal */
@@ -98,27 +93,22 @@ export const createSettingsPersistSlice: StateCreator<
     set({ ...patch });
     const current = get();
 
-    // Resolve effective paths before building the PUT payload.
+    // Validate draft folder in main process (fs check), then push to Python memory.
     const guiSettings = {
       draftFolder: current.draftFolder,
     };
     const effectivePaths = window.electronAPI
       ? await window.electronAPI
           .invoke(GUI_SETTINGS_CHANNELS.resolveEffectivePaths, guiSettings)
-          .catch(() => ({ assetsBasePath: "", outputPath: "" }))
-      : { assetsBasePath: "", outputPath: "" };
+          .catch(() => ({ draftFolder: "" }))
+      : { draftFolder: "" };
 
-    // Push effective paths into Python memory (best-effort, non-fatal).
-    // Python uses these values for in-progress tasks; the authoritative
+    // Push draft_folder into Python memory (best-effort, non-fatal).
+    // Python uses this value for in-progress tasks; the authoritative
     // persistence is in the Electron store via IPC below.
     guiSettingsAPI
       .put({
-        draft_folder: current.draftFolder,
-        effective_assets_base_path: (
-          effectivePaths as { assetsBasePath: string }
-        ).assetsBasePath,
-        effective_output_path: (effectivePaths as { outputPath: string })
-          .outputPath,
+        draft_folder: (effectivePaths as { draftFolder: string }).draftFolder,
       })
       .catch(() => {
         /* non-fatal */

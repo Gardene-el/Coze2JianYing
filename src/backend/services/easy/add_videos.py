@@ -28,7 +28,7 @@ def add_videos(
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 	settings = get_settings_manager()
-	draft_dir = os.path.join(settings.require("effective_output_path"), draft_id)
+	draft_dir = os.path.join(settings.require("draft_folder"), draft_id)
 	draft_video_dir = os.path.join(draft_dir, "assets", "videos")
 	os.makedirs(name=draft_video_dir, exist_ok=True)
 

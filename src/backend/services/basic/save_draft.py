@@ -25,6 +25,6 @@ def save_draft(draft_id: str) -> str:
 	script = DRAFT_CACHE[draft_id]
 	script.save()
 
-	logger.info("save draft success: %s", os.path.join(get_settings_manager().require("effective_output_path"), draft_id))
+	logger.info("save draft success: %s", os.path.join(get_settings_manager().require("draft_folder"), draft_id))
 	return draft_id
 

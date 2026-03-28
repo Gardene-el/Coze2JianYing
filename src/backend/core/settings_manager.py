@@ -3,10 +3,10 @@
 
 归属：core/ — 纯内存状态，持久化完全由 Electron store 负责。
 Python 进程只需在内存中维护由前端通过 PUT /gui/settings 推送过来的值：
-  draft_folder, transfer_enabled, effective_output_path, effective_assets_base_path
+  effective_output_path
 
 路径决策逻辑已迁移到 Electron 主进程的 PathResolverService（TypeScript）。
-Python 服务直接读取预计算好的 effective_* 路径，不再执行任何 fs 判断。
+Python 服务直接读取预计算好的 draft_folder，不再执行任何 fs 判断。
 """
 from typing import Any, Dict, Optional
 from src.backend.utils.logger import logger
@@ -29,11 +29,9 @@ class SettingsManager:
 
         self.logger = logger
         self._settings: Dict[str, Any] = {
-            "draft_folder": "",
-            # Pre-computed by Electron main process PathResolverService.
+            # Validated by Electron main process PathResolverService.
             # Must be non-empty before any draft/segment operation; use require() to enforce.
-            "effective_output_path": "",
-            "effective_assets_base_path": "",
+            "draft_folder": "",
         }
         self._initialized = True
 
@@ -59,8 +57,6 @@ class SettingsManager:
         """批量更新内存设置（仅保留已知键，忽略其他字段）"""
         allowed = {
             "draft_folder",
-            "effective_assets_base_path",
-            "effective_output_path",
         }
         for key, value in data.items():
             if key in allowed:

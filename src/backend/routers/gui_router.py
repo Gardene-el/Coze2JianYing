@@ -34,9 +34,7 @@ gui_router = APIRouter(tags=["GUI 管理"])
 # ─── Pydantic 请求/响应模型 ───────────────────────────────────────────
 
 class SettingsPayload(BaseModel):
-    draft_folder: str = ""
-    effective_output_path: Optional[str] = None
-    effective_assets_base_path: Optional[str] = None
+    draft_folder: Optional[str] = None
 
 
 class GenerateDraftPayload(BaseModel):
@@ -91,9 +89,9 @@ async def detect_path() -> Dict[str, str]:
 @gui_router.post("/draft/generate")
 async def generate_draft(payload: GenerateDraftPayload) -> Dict[str, Any]:
     logger.info("开始生成草稿...")
-    effective_output_path = get_settings_manager().require("effective_output_path")
+    draft_folder = get_settings_manager().require("draft_folder")
     try:
-        gen = DraftGenerator(output_base_dir=effective_output_path)
+        gen = DraftGenerator(output_base_dir=draft_folder)
         paths: List[str] = await asyncio.to_thread(gen.generate, payload.content)
         logger.info("草稿生成成功，共 %d 个文件: %s", len(paths), paths)
         return {"paths": paths}
@@ -231,8 +229,8 @@ async def execute_script(payload: ExecutePayload, request: Request) -> Dict[str,
 
 @gui_router.get("/replay/{draft_id}")
 async def replay_draft(draft_id: str) -> Dict[str, Any]:
-    output_path = get_settings_manager().require("effective_output_path")
-    draft_dir = Path(output_path) / draft_id
+    draft_folder = get_settings_manager().require("draft_folder")
+    draft_dir = Path(draft_folder) / draft_id
 
     if not draft_dir.exists():
         raise HTTPException(status_code=404, detail=f"草稿 {draft_id} 不存在")

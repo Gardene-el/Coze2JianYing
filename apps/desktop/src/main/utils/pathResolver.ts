@@ -12,17 +12,14 @@
  * only needs `sm.get("effective_output_path")` — zero decision logic.
  */
 import { statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
 
 import { app } from 'electron';
 
 import type { GuiSettings } from '@/types/store';
 
 export interface EffectivePaths {
-  /** Resolved output (draft) path.  Empty string = Python should use its own fallback. */
-  outputPath: string;
-  /** Resolved assets base path.  Empty string = Python should use its own fallback. */
-  assetsBasePath: string;
+  /** Resolved draft folder path.  Empty string = Python should use its own fallback. */
+  draftFolder: string;
 }
 
 /** Candidate JianyingPro draft folder templates (Windows only). */
@@ -46,38 +43,22 @@ export class PathResolverService {
   // ─── public API ───────────────────────────────────────────────────────────
 
   /**
-   * Compute the effective draft output path.
+   * Validate and return the configured draft folder.
    *
-   * Returns the configured `draftFolder` when transfer is enabled and the
-   * directory actually exists.  Otherwise returns `""` to signal that Python
-   * should fall back to its own `config.drafts_dir`.
+   * Returns `draftFolder` when the directory actually exists, otherwise `""`
+   * to signal that Python should fall back to its own `config.drafts_dir`.
    */
-  resolveOutputPath(settings: GuiSettings): string {
+  resolveDraftFolder(settings: GuiSettings): string {
     if (settings.draftFolder && this.isValidDir(settings.draftFolder)) {
       return settings.draftFolder;
     }
     return '';
   }
 
-  /**
-   * Compute the effective assets base path.
-   *
-   * When transfer is enabled and `draftFolder` is valid, assets are stored in
-   * a `CozeJianYingAssistantAssets` sibling directory next to `draftFolder`.
-   * Otherwise returns `""` so Python uses `config.assets_dir`.
-   */
-  resolveAssetsBasePath(settings: GuiSettings): string {
-    if (settings.draftFolder && this.isValidDir(settings.draftFolder)) {
-      return join(dirname(settings.draftFolder), 'CozeJianYingAssistantAssets');
-    }
-    return '';
-  }
-
-  /** Compute both effective paths in one call (for IPC handler). */
+  /** Validate effective paths in one call (for IPC handler). */
   resolveEffectivePaths(settings: GuiSettings): EffectivePaths {
     return {
-      assetsBasePath: this.resolveAssetsBasePath(settings),
-      outputPath: this.resolveOutputPath(settings),
+      draftFolder: this.resolveDraftFolder(settings),
     };
   }
 

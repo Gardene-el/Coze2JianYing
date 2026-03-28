@@ -37,7 +37,7 @@ def create_video_segment(
 
 	try:
 		settings = get_settings_manager()
-		output_dir = settings.require("effective_output_path")
+		output_dir = settings.require("draft_folder")
 		draft_video_dir = create_video_directory(output_dir, segment_id)
 		video_path = download_video_file(material_url, draft_video_dir)
 		video_material = create_video_material(video_path, crop_settings)

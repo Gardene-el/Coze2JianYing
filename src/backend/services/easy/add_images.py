@@ -29,7 +29,7 @@ def add_images(
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 	settings = get_settings_manager()
-	draft_dir = os.path.join(settings.require("effective_output_path"), draft_id)
+	draft_dir = os.path.join(settings.require("draft_folder"), draft_id)
 	draft_image_dir = os.path.join(draft_dir, "assets", "images")
 	os.makedirs(name=draft_image_dir, exist_ok=True)
 

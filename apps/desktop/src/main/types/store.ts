@@ -9,10 +9,8 @@ export interface GuiSettings {
 }
 
 export interface EffectivePaths {
-  /** Resolved draft output path.  Empty string = use Python's config.drafts_dir fallback. */
-  outputPath: string;
-  /** Resolved assets base path.  Empty string = use Python's config.assets_dir fallback. */
-  assetsBasePath: string;
+  /** Resolved draft folder path.  Empty string = use Python's config.drafts_dir fallback. */
+  draftFolder: string;
 }
 
 export interface ElectronMainStore {
