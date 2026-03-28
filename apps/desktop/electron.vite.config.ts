@@ -49,10 +49,12 @@ export default defineConfig({
       outDir: 'dist/main',
       rollupOptions: {
         // Native modules must be externalized to work correctly.
-        // Note: `undici` was previously externalized to avoid a crash caused by
-        // Rollup hoisting its `require('node:sqlite')` call (SqliteCacheStore)
-        // to the top of the bundle in Electron's Node.js < 22.5. Electron 38
-        // ships with Node.js 22.14.0 (>= 22.5), so undici is now bundled.
+        // Note: `undici` and `fetch-socks` are externalized because undici v7
+        // exports `SqliteCacheStore` which requires `node:sqlite` at the module
+        // top level. Rollup hoists this `require()` to the bundle scope, causing
+        // an immediate crash on Electron startup — Electron does NOT support
+        // `node:sqlite` regardless of its bundled Node.js version (the module is
+        // deliberately excluded from Electron's allowlist).
         external: [...getExternalDependencies()],
         output: {
           // Prevent debug package from being bundled into index.js to avoid side-effect pollution

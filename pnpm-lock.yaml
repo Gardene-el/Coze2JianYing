@@ -33,9 +33,6 @@ importers:
       axios:
         specifier: ^1.8.4
         version: 1.14.0
-      electron:
-        specifier: ^41.0.0
-        version: 41.1.0
       lucide-react:
         specifier: ^0.562.0
         version: 0.562.0(react@19.2.4)
@@ -112,19 +109,25 @@ importers:
       cloudflared:
         specifier: ^0.7.1
         version: 0.7.1
+      fetch-socks:
+        specifier: ^1.3.2
+        version: 1.3.2
+      undici:
+        specifier: ^7.16.0
+        version: 7.24.6
     devDependencies:
       '@c2jy/tunnel-core':
         specifier: workspace:*
         version: link:../../packages/tunnel-core
       '@electron-toolkit/preload':
         specifier: ^3.0.2
-        version: 3.0.2(electron@38.8.6)
+        version: 3.0.2(electron@41.0.2)
       '@electron-toolkit/tsconfig':
         specifier: ^2.0.0
         version: 2.0.0(@types/node@24.12.0)
       '@electron-toolkit/utils':
         specifier: ^4.0.0
-        version: 4.0.0(electron@38.8.6)
+        version: 4.0.0(electron@41.0.2)
       '@lobechat/desktop-bridge':
         specifier: workspace:*
         version: link:../../packages/desktop-bridge
@@ -174,8 +177,8 @@ importers:
         specifier: ^8.0.2
         version: 8.0.4
       electron:
-        specifier: ^38.7.2
-        version: 38.8.6
+        specifier: 41.0.2
+        version: 41.0.2
       electron-builder:
         specifier: ^26.0.12
         version: 26.8.1(electron-builder-squirrel-windows@26.8.1)
@@ -209,9 +212,6 @@ importers:
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
-      fetch-socks:
-        specifier: ^1.3.2
-        version: 1.3.2
       fflate:
         specifier: ^0.8.2
         version: 0.8.2
@@ -257,9 +257,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-      undici:
-        specifier: ^7.16.0
-        version: 7.24.6
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -4553,13 +4550,8 @@ packages:
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
-  electron@38.8.6:
-    resolution: {integrity: sha512-lyBhcVi9QYAZL6FO6r5twAWAjWnYomo3iVDvrb5SJZlq928BGemHOKG0tPIq41NOLaCu9f3XdEEjMkjQPjprRg==}
-    engines: {node: '>= 12.20.55'}
-    hasBin: true
-
-  electron@41.1.0:
-    resolution: {integrity: sha512-0XRFyxRqetmqtkkBvV++wGbHYJ7bD++f6EgJW8y9kX4pPRagwlmKDtzqXZhKiu0DIQppm3sXxzHWK9GYP91OKQ==}
+  electron@41.0.2:
+    resolution: {integrity: sha512-raotm/aO8kOs1jD8SI8ssJ7EKciQOY295AOOprl1TxW7B0At8m5Ae7qNU1xdMxofiHMR8cNEGi9PKD3U+yT/mA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -10589,17 +10581,17 @@ snapshots:
 
   '@dual-bundle/import-meta-resolve@4.2.1': {}
 
-  '@electron-toolkit/preload@3.0.2(electron@38.8.6)':
+  '@electron-toolkit/preload@3.0.2(electron@41.0.2)':
     dependencies:
-      electron: 38.8.6
+      electron: 41.0.2
 
   '@electron-toolkit/tsconfig@2.0.0(@types/node@24.12.0)':
     dependencies:
       '@types/node': 24.12.0
 
-  '@electron-toolkit/utils@4.0.0(electron@38.8.6)':
+  '@electron-toolkit/utils@4.0.0(electron@41.0.2)':
     dependencies:
-      electron: 38.8.6
+      electron: 41.0.2
 
   '@electron/asar@3.4.1':
     dependencies:
@@ -14960,15 +14952,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@38.8.6:
-    dependencies:
-      '@electron/get': 2.0.3
-      '@types/node': 22.19.15
-      extract-zip: 2.0.1
-    transitivePeerDependencies:
-      - supports-color
-
-  electron@41.1.0:
+  electron@41.0.2:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 24.12.0
