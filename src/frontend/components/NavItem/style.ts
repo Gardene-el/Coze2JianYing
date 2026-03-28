@@ -17,6 +17,10 @@ export const navItemStyles = createStaticStyles(({ css, cssVar }) => ({
       background-color 0.15s ease,
       color 0.15s ease;
     user-select: none;
+    border: none;
+    background: none;
+    outline: none;
+    text-align: left;
 
     &:hover {
       background-color: ${cssVar.colorBgTextHover};

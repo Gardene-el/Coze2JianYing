@@ -39,6 +39,10 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
     height: 5px;
     cursor: row-resize;
     z-index: 10;
+    border: none;
+    background: transparent;
+    padding: 0;
+    outline: none;
   `,
   /** 折叠后底部吸附标签 */
   collapsedTab: css`
@@ -49,8 +53,10 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
     height: 28px;
     cursor: row-resize;
     user-select: none;
+    border: none;
     border-top: 2px solid ${cssVar.colorBorderSecondary};
     background: ${cssVar.colorBgLayout};
+    outline: none;
     font-size: 12px;
     color: ${cssVar.colorTextSecondary};
     transition: background 0.15s;
