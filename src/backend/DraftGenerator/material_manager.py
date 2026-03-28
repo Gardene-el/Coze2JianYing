@@ -2,14 +2,11 @@
 素材管理器
 负责下载网络素材到草稿的Assets文件夹，并创建对应的Material对象
 """
-import os
-import requests
-import hashlib
 from pathlib import Path
 from typing import Union, Optional, Dict, Any
-from urllib.parse import urlparse, unquote
 import pyJianYingDraft as draft
 from src.backend.utils.logger import logger
+from src.backend.utils.download import download as _download, _detect_content_type, _build_filename
 
 
 class MaterialManager:
@@ -71,81 +68,6 @@ class MaterialManager:
         else:
             self.logger.debug(f"Assets文件夹已存在: {self.assets_path}")
     
-    def _get_extension_from_content_type(self, content_type: str) -> str:
-        """
-        根据Content-Type获取文件扩展名
-        
-        Args:
-            content_type: HTTP Content-Type header值
-            
-        Returns:
-            文件扩展名 (带点，如 '.jpg')
-        """
-        # Content-Type 映射表
-        mime_to_ext = {
-            # 图片
-            'image/jpeg': '.jpg',
-            'image/jpg': '.jpg',
-            'image/png': '.png',
-            'image/gif': '.gif',
-            'image/webp': '.webp',
-            'image/bmp': '.bmp',
-            'image/svg+xml': '.svg',
-            # 视频
-            'video/mp4': '.mp4',
-            'video/quicktime': '.mov',
-            'video/x-msvideo': '.avi',
-            'video/x-matroska': '.mkv',
-            'video/webm': '.webm',
-            # 音频
-            'audio/mpeg': '.mp3',
-            'audio/mp3': '.mp3',
-            'audio/wav': '.wav',
-            'audio/wave': '.wav',
-            'audio/x-wav': '.wav',
-            'audio/aac': '.aac',
-            'audio/ogg': '.ogg',
-            'audio/flac': '.flac',
-        }
-        
-        # 移除参数部分 (如 "image/jpeg; charset=utf-8")
-        content_type = content_type.split(';')[0].strip().lower()
-        
-        return mime_to_ext.get(content_type, '.mp4')  # 默认 .mp4
-    
-    def _get_filename_from_url(self, url: str, content_type: Optional[str] = None) -> str:
-        """
-        从URL提取文件名
-        
-        Args:
-            url: 素材URL
-            content_type: HTTP Content-Type (可选，用于无扩展名URL)
-            
-        Returns:
-            文件名
-        """
-        # 解析URL
-        parsed = urlparse(url)
-        
-        # 尝试从路径获取文件名
-        path = unquote(parsed.path)
-        filename = os.path.basename(path)
-        
-        # 如果没有扩展名，使用Content-Type或生成唯一文件名
-        if not filename or '.' not in filename:
-            # 使用URL的MD5作为文件名
-            url_hash = hashlib.md5(url.encode()).hexdigest()[:12]
-            
-            # 尝试从Content-Type获取扩展名
-            if content_type:
-                ext = self._get_extension_from_content_type(content_type)
-                filename = f"material_{url_hash}{ext}"
-                self.logger.info(f"根据Content-Type ({content_type}) 生成文件名: {filename}")
-            else:
-                filename = f"material_{url_hash}.mp4"  # 默认为mp4
-                self.logger.warning(f"无法从URL提取文件名，使用默认mp4: {filename}")
-        
-        return filename
     
     def _detect_material_type(self, file_path: Path) -> str:
         """
@@ -289,124 +211,32 @@ class MaterialManager:
         Raises:
             requests.RequestException: 下载失败
         """
-        # 如果没有指定文件名,先发送HEAD请求获取Content-Type
-        content_type = None
-        if filename is None:
-            try:
-                # 增加更长的超时时间和更好的请求头
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                }
-                head_response = requests.head(url, timeout=30, allow_redirects=True, headers=headers)
-                content_type = head_response.headers.get('Content-Type', None)
-                self.logger.debug(f"检测到Content-Type: {content_type}")
-            except Exception as e:
-                self.logger.warning(f"HEAD请求失败,将使用默认扩展名: {e}")
-        
-        # 确定文件名
-        if filename is None:
-            filename = self._get_filename_from_url(url, content_type)
-        
-        # 目标路径
-        target_path = self.assets_path / filename
-        
-        # 检查文件是否已存在
-        if target_path.exists() and not force_download:
-            self.logger.info(f"素材已存在，跳过下载: {filename}")
-            return str(target_path)
-        
-        # 下载文件 - 添加重试机制
+        # 不强制重新下载时，预测文件名并检查是否已存在
+        if not force_download:
+            content_type = _detect_content_type(url)
+            target_filename = _build_filename(url=url, filename=filename, content_type=content_type)
+            target_path = self.assets_path / target_filename
+            if target_path.exists():
+                self.logger.info(f"素材已存在，跳过下载: {target_filename}")
+                return str(target_path)
+
         self.logger.info(f"开始下载素材: {url}")
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                # 更好的请求头和更长的超时时间
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': 'image/*,video/*,audio/*,*/*',
-                    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1'
-                }
-                
-                response = requests.get(
-                    url, 
-                    stream=True, 
-                    timeout=60,  # 增加到60秒超时
-                    headers=headers,
-                    allow_redirects=True
-                )
-                response.raise_for_status()
-                
-                # 检查响应的Content-Type是否合理
-                actual_content_type = response.headers.get('Content-Type', '')
-                self.logger.debug(f"实际Content-Type: {actual_content_type}")
-                
-                # 创建临时文件先写入
-                temp_path = target_path.with_suffix(target_path.suffix + '.tmp')
-                
-                # 写入文件，增加进度监控
-                total_size = int(response.headers.get('Content-Length', 0))
-                downloaded_size = 0
-                
-                with open(temp_path, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-                            downloaded_size += len(chunk)
-                            
-                            # 每下载1MB打印一次进度（避免日志过多）
-                            if downloaded_size % (1024 * 1024) == 0:
-                                if total_size > 0:
-                                    progress = (downloaded_size / total_size) * 100
-                                    self.logger.debug(f"下载进度: {progress:.1f}% ({downloaded_size / 1024 / 1024:.1f}MB)")
-                
-                # 检查下载的文件大小是否合理
-                if temp_path.stat().st_size < 100:  # 小于100字节可能是错误页面
-                    self.logger.warning(f"下载的文件过小({temp_path.stat().st_size}字节)，可能是错误内容")
-                    temp_path.unlink()  # 删除临时文件
-                    if attempt < max_retries - 1:
-                        self.logger.info(f"第{attempt + 1}次尝试失败，等待2秒后重试...")
-                        import time
-                        time.sleep(2)
-                        continue
-                    else:
-                        raise ValueError("下载的文件过小，可能是错误内容")
-                
-                # 检查实际文件内容并修正扩展名（如果需要）
-                correct_filename = self._fix_filename_by_content(temp_path, filename)
-                if correct_filename != filename:
-                    self.logger.info(f"根据文件内容修正扩展名: {filename} -> {correct_filename}")
-                    final_path = self.assets_path / correct_filename
-                    temp_path.rename(final_path)
-                else:
-                    final_path = target_path
-                    temp_path.rename(final_path)
-                
-                self.logger.info(f"✅ 素材下载完成: {final_path.name} ({final_path.stat().st_size / 1024 / 1024:.2f} MB)")
-                return str(final_path)
-                
-            except requests.RequestException as e:
-                self.logger.warning(f"第{attempt + 1}次下载尝试失败: {e}")
-                if attempt < max_retries - 1:
-                    self.logger.info(f"等待{(attempt + 1) * 2}秒后重试...")
-                    import time
-                    time.sleep((attempt + 1) * 2)  # 递增等待时间
-                else:
-                    self.logger.error(f"❌ 所有下载尝试均失败: {url}")
-                    raise
-            except Exception as e:
-                self.logger.error(f"下载过程中发生未知错误: {e}")
-                if attempt < max_retries - 1:
-                    self.logger.info(f"等待{(attempt + 1) * 2}秒后重试...")
-                    import time
-                    time.sleep((attempt + 1) * 2)
-                else:
-                    raise
-        
-        # 如果所有重试都失败，这里不应该到达，但为了类型安全添加
-        raise RuntimeError("下载失败：所有重试尝试均已用尽")
+        local_path = _download(url, str(self.assets_path), filename=filename)
+
+        # 根据实际文件内容修正扩展名（如文件头与扩展名不符）
+        file_path = Path(local_path)
+        correct_filename = self._fix_filename_by_content(file_path, file_path.name)
+        if correct_filename != file_path.name:
+            self.logger.info(f"根据文件内容修正扩展名: {file_path.name} -> {correct_filename}")
+            correct_path = file_path.parent / correct_filename
+            file_path.rename(correct_path)
+            local_path = str(correct_path)
+
+        self.logger.info(
+            f"✅ 素材下载完成: {Path(local_path).name} "
+            f"({Path(local_path).stat().st_size / 1024 / 1024:.2f} MB)"
+        )
+        return local_path
     
     def create_material(
         self,
