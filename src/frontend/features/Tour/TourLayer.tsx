@@ -48,7 +48,7 @@ const TourLayer = () => {
       {
         title: '配置剪映草稿路径',
         description:
-          '在此处手动填写或点击「自动检测」按钮检测剪映草稿文件夹路径。配置完成后点击「完成」返回拉取模式页面。',
+          '在此处手动填写或点击「自动检测」按钮检测剪映草稿文件夹路径。配置完成后点击「完成」返回粘贴id页面。',
         target: () => document.querySelector('[data-tour="draft-path"]') as unknown as HTMLElement,
         prevButtonProps: { children: '<' },
       },

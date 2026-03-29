@@ -7,7 +7,7 @@ export interface ReplayExecuteResponse {
 }
 
 /**
- * 拉取模式执行服务 — 将 Worker 录制数据转发给本地 Python 后端执行。
+ * 粘贴id执行服务 — 将 Worker 录制数据转发给本地 Python 后端执行。
  * 调用前需确保后端已启动（useEnsureBackend）。
  */
 export const guiReplayAPI = {

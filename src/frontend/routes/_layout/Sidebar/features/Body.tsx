@@ -28,7 +28,7 @@ const SidebarBody = () => {
       >
         <CollapsibleNavGroup groupKey="auto" title="云端" icon={<ApiOutlined />}>
           <NavItem to="/cloud-service" icon={<CloudServerOutlined />} label="直连模式" />
-          <NavItem to="/replay" icon={<HistoryOutlined />} label="拉取模式" />
+          <NavItem to="/replay" icon={<HistoryOutlined />} label="粘贴id" />
         </CollapsibleNavGroup>
 
         <CollapsibleNavGroup groupKey="manual" title="手动" icon={<ThunderboltOutlined />}>

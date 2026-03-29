@@ -125,8 +125,11 @@ const ReplayPage = () => {
   return (
     <PageContainer>
       {ctx}
-      <PageHeader title="拉取模式" />
-      <Card title="📷 输入草稿id来进行拉取" style={{ marginBottom: 16 }}>
+      <PageHeader title="粘贴id" />
+      <Card
+        title="📷 粘贴草稿id相关内容进所选框进行拉取，Coze2JianYing可以智能识别草稿id"
+        style={{ marginBottom: 16 }}
+      >
         <Input.Search
           value={draftId}
           onChange={(e) => setDraftId(e.target.value)}
