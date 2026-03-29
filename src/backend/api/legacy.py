@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from src.backend.exceptions import CustomError, CustomException
+
 # ── 内部别名导入新服务，避免与下方 async wrapper 同名冲突 ──────────────
 from src.backend.services.basic.create_draft import create_draft as _create_draft
 from src.backend.services.basic.add_track import add_track as _add_track
@@ -66,12 +68,24 @@ async def create_draft(req: "CreateDraftRequest") -> "CreateDraftResponse":  # t
 
 
 async def add_track(draft_id: str, req: "AddTrackRequest") -> "AddTrackResponse":  # type: ignore[name-defined]
-    """兼容旧版: add_track(draft_id, req) -> AddTrackResponse"""
-    _add_track(
-        draft_id,
-        req.track_type,
-        track_name=req.track_name if req.track_name and req.track_name != "None" else None,
-    )
+    """兼容旧版: add_track(draft_id, req) -> AddTrackResponse
+
+    旧版 add_track 仅注册元数据，从不因同类型轨道已存在而报错。
+    新版 create_draft 会预建 main_track (video)，重复添加 video 类型时
+    pyJianYingDraft 会抛 NameError，此处捕获后静默跳过。
+    """
+    try:
+        _add_track(
+            draft_id,
+            req.track_type,
+            track_name=req.track_name if req.track_name and req.track_name != "None" else None,
+        )
+    except CustomException as e:
+        if e.err == CustomError.PARAM_VALIDATION_FAILED:
+            # 轨道已存在等参数错误：旧版从不报错，忽略之
+            pass
+        else:
+            raise
     return AddTrackResponse()  # type: ignore[name-defined]
 
 
