@@ -26,7 +26,11 @@ export class ProxyConfigValidator {
     }
 
     // Validate proxy type
-    if (!ProxyConfigValidator.SUPPORTED_TYPES.includes(config.proxyType as any)) {
+    if (
+      !ProxyConfigValidator.SUPPORTED_TYPES.includes(
+        config.proxyType as 'http' | 'https' | 'socks5',
+      )
+    ) {
       errors.push(
         `Unsupported proxy type: ${config.proxyType}. Supported types: ${ProxyConfigValidator.SUPPORTED_TYPES.join(', ')}`,
       )

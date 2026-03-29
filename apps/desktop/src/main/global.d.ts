@@ -37,13 +37,14 @@ declare module 'node-mac-permissions' {
  * Stub declaration so TypeScript compiles on other platforms.
  */
 declare module 'electron-liquid-glass' {
+  import type { BrowserWindow } from 'electron'
   interface LiquidGlassOptions {
     blurRadius?: number
     tintOpacity?: number
   }
   const liquidGlass: {
-    applyEffect(browserWindow: any, options?: LiquidGlassOptions): void
-    removeEffect(browserWindow: any): void
+    applyEffect(browserWindow: BrowserWindow, options?: LiquidGlassOptions): void
+    removeEffect(browserWindow: BrowserWindow): void
   }
   export default liquidGlass
 }

@@ -103,6 +103,11 @@ export default class SystemController extends ControllerModule {
 
     const mainWindow = this.app.browserManager.getMainWindow()?.browserWindow
 
+    if (!mainWindow) {
+      logger.warn('[FullDiskAccess] No main window found, skipping dialog')
+      return 'skipped'
+    }
+
     // Get localized strings
     const t = this.app.i18n.ns('dialog')
     const title = options?.title || t('fullDiskAccess.title')
@@ -113,7 +118,7 @@ export default class SystemController extends ControllerModule {
 
     logger.info('[FullDiskAccess] Showing native prompt dialog')
 
-    const result = await dialog.showMessageBox(mainWindow!, {
+    const result = await dialog.showMessageBox(mainWindow, {
       buttons: [openSettingsButtonText, skipButtonText],
       cancelId: 1,
       defaultId: 0,
@@ -166,7 +171,11 @@ export default class SystemController extends ControllerModule {
   }): Promise<string | undefined> {
     const mainWindow = this.app.browserManager.getMainWindow()?.browserWindow
 
-    const result = await dialog.showOpenDialog(mainWindow!, {
+    if (!mainWindow) {
+      return undefined
+    }
+
+    const result = await dialog.showOpenDialog(mainWindow, {
       defaultPath: payload?.defaultPath,
       properties: ['openDirectory', 'createDirectory'],
       title: payload?.title || 'Select Folder',

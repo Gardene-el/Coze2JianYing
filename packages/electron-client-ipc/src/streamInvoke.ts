@@ -23,7 +23,7 @@ export const streamInvoke = async (input: RequestInfo | URL, init?: RequestInit)
   }
 
   return new Promise<Response>((resolve, reject) => {
-    let streamController: ReadableStreamDefaultController<any>
+    let streamController: ReadableStreamDefaultController<Uint8Array>
     let responseResolved = false
 
     const stream = new ReadableStream({

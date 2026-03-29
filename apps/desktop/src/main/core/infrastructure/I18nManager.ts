@@ -68,7 +68,7 @@ export class I18nManager {
   /**
    * Basic translation function
    */
-  t = (key: string, options?: any) => {
+  t = (key: string, options?: Record<string, unknown>) => {
     const result = this.i18n.t(key, options) as string
 
     // If translation result is the same as key, translation might be missing
@@ -85,7 +85,7 @@ export class I18nManager {
    * @returns Translation function bound to namespace
    */
   createNamespacedT(namespace: string) {
-    return (key: string, options: any = {}) => {
+    return (key: string, options: Record<string, unknown> = {}) => {
       // Copy options to avoid modifying the original object
       const mergedOptions = { ...options, ns: namespace }
       // Set namespace

@@ -193,7 +193,7 @@ export class RendererProtocolManager {
         try {
           return await buildFileResponse(filePath)
         } catch (error) {
-          const code = (error as any).code
+          const code = (error as NodeJS.ErrnoException).code
 
           if (code === 'ENOENT') {
             logger.warn(`Export asset missing on disk ${filePath}, falling back`, error)

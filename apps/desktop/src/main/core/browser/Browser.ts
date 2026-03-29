@@ -271,7 +271,7 @@ export default class Browser {
       this.app.menuManager.showContextMenu('default', {
         isEditable,
         linkURL: linkURL || undefined,
-        mediaType: mediaType as any,
+        mediaType: mediaType,
         selectionText: selectionText || undefined,
         srcURL: srcURL || undefined,
         x,
@@ -346,7 +346,7 @@ export default class Browser {
     if (!parentIdentifier) return
 
     // todo: fix ts type
-    const parentWin = this.app.browserManager.retrieveByIdentifier(parentIdentifier as any)
+    const parentWin = this.app.browserManager.retrieveByIdentifier(parentIdentifier)
     if (!parentWin) return
 
     logger.debug(`[${this.identifier}] Found parent window: ${parentIdentifier}`)
@@ -420,14 +420,14 @@ export default class Browser {
         await this._browserWindow?.loadURL(urlWithLocale)
         logger.info(`[${this.identifier}] Reconnection successful to ${urlWithLocale}`)
         return { success: true }
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error(`[${this.identifier}] Retry connection failed:`, err)
         try {
           await this._browserWindow?.loadFile(join(resourcesDir, 'error.html'))
         } catch (loadErr) {
           logger.error(`[${this.identifier}] Failed to reload error page:`, loadErr)
         }
-        return { error: err.message, success: false }
+        return { error: err instanceof Error ? err.message : String(err), success: false }
       }
     })
     logger.debug(`[${this.identifier}] Set up retry-connection handler.`)

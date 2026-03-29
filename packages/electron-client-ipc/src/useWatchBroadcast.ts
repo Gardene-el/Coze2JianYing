@@ -6,8 +6,11 @@ import type { MainBroadcastEventKey, MainBroadcastParams } from './events'
 
 interface ElectronAPI {
   ipcRenderer: {
-    on: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
-    removeListener: (event: MainBroadcastEventKey, listener: (e: any, data: any) => void) => void
+    on: (event: MainBroadcastEventKey, listener: (e: unknown, data: unknown) => void) => void
+    removeListener: (
+      event: MainBroadcastEventKey,
+      listener: (e: unknown, data: unknown) => void,
+    ) => void
   }
 }
 
@@ -30,7 +33,7 @@ export const useWatchBroadcast = <T extends MainBroadcastEventKey>(
   useEffect(() => {
     if (!window.electron) return
 
-    const listener = (_e: any, data: MainBroadcastParams<T>) => {
+    const listener = (_e: unknown, data: MainBroadcastParams<T>) => {
       handlerRef.current(data)
     }
 

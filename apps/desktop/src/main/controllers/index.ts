@@ -3,14 +3,15 @@ import { IoCContainer } from '@/core/infrastructure/IoCContainer'
 import type { ShortcutActionType } from '@/shortcuts'
 import { IpcService } from '@/utils/ipc'
 
-const shortcutDecorator = (name: string) => (target: any, methodName: string, descriptor?: any) => {
-  const actions = IoCContainer.shortcuts.get(target.constructor) || []
-  actions.push({ methodName, name })
+const shortcutDecorator =
+  (name: string) => (target: object, methodName: string, descriptor?: PropertyDescriptor) => {
+    const actions = IoCContainer.shortcuts.get(target.constructor) || []
+    actions.push({ methodName, name })
 
-  IoCContainer.shortcuts.set(target.constructor, actions)
+    IoCContainer.shortcuts.set(target.constructor, actions)
 
-  return descriptor
-}
+    return descriptor
+  }
 
 /**
  *  shortcut inject decorator
@@ -18,7 +19,8 @@ const shortcutDecorator = (name: string) => (target: any, methodName: string, de
 export const shortcut = (method: ShortcutActionType) => shortcutDecorator(method)
 
 const protocolDecorator =
-  (urlType: string, action: string) => (target: any, methodName: string, descriptor?: any) => {
+  (urlType: string, action: string) =>
+  (target: object, methodName: string, descriptor?: PropertyDescriptor) => {
     const handlers = IoCContainer.protocolHandlers.get(target.constructor) || []
     handlers.push({ action, methodName, urlType })
 

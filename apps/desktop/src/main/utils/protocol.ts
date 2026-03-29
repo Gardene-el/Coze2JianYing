@@ -43,7 +43,7 @@ export const getVersionInfo = (): { channel: AppChannel; protocolScheme: string 
  * @param schema Object to validate
  * @returns Whether it's a valid MCP Schema
  */
-function validateMcpSchema(schema: any): schema is McpSchema {
+function validateMcpSchema(schema: unknown): schema is McpSchema {
   if (!schema || typeof schema !== 'object') return false
 
   // Required field validation

@@ -25,10 +25,12 @@ import { TrayManager } from './ui/TrayManager'
 const logger = createLogger('core:App')
 
 export type ShortcutMethodMap = Map<string, () => Promise<void>>
-export type ProtocolHandlerMap = Map<string, { controller: any; methodName: string }>
+export type ProtocolHandlerMap = Map<string, { controller: object; methodName: string }>
 
+// biome-ignore lint/suspicious/noExplicitAny: standard TypeScript pattern for class type
 type Class<T> = new (...args: any[]) => T
 
+// biome-ignore lint/suspicious/noExplicitAny: Vite import.meta.glob returns dynamic module map
 const importAll = (r: any) => Object.values(r).map((v: any) => v.default)
 
 export class App {
@@ -228,7 +230,7 @@ export class App {
    * @param data Parsed protocol data
    * @returns Whether successfully handled
    */
-  async handleProtocolRequest(urlType: string, action: string, data: any): Promise<boolean> {
+  async handleProtocolRequest(urlType: string, action: string, data: unknown): Promise<boolean> {
     const key = `${urlType}:${action}`
     const handler = this.protocolHandlerMap.get(key)
 
@@ -239,7 +241,9 @@ export class App {
 
     try {
       logger.debug(`Dispatching protocol request ${key} to controller`)
-      const result = await handler.controller[handler.methodName](data)
+      const result = await (handler.controller as Record<string, (data: unknown) => unknown>)[
+        handler.methodName
+      ](data)
       return result !== false // Assume controller returning false indicates handling failure
     } catch (error) {
       logger.error(`Error handling protocol request ${key}:`, error)
@@ -318,10 +322,12 @@ export class App {
   /**
    * all controllers in app
    */
+  // biome-ignore lint/suspicious/noExplicitAny: Map from class constructor to instance, type-erased by design
   private controllers = new Map<Class<any>, any>()
   /**
    * all services in app
    */
+  // biome-ignore lint/suspicious/noExplicitAny: Map from class constructor to instance, type-erased by design
   private services = new Map<Class<any>, any>()
 
   shortcutMethodMap: ShortcutMethodMap = new Map()

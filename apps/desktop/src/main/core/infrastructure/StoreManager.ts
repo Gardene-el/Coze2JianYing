@@ -41,7 +41,7 @@ export class StoreManager {
    */
   get<K extends StoreKey>(key: K, defaultValue?: ElectronMainStore[K]): ElectronMainStore[K] {
     logger.debug('Getting configuration value for key:', key)
-    return this.store.get(key, defaultValue as any)
+    return this.store.get(key, defaultValue as ElectronMainStore[K])
   }
 
   /**

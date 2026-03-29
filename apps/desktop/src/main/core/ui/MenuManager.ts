@@ -1,6 +1,6 @@
 import type { Menu } from 'electron'
 
-import type { IMenuPlatform, MenuOptions } from '@/menus'
+import type { ContextMenuData, IMenuPlatform, MenuOptions } from '@/menus'
 import { createMenuImpl } from '@/menus'
 import { createLogger } from '@/utils/logger'
 
@@ -30,7 +30,7 @@ export class MenuManager {
   /**
    * Build and show context menu
    */
-  showContextMenu(type: string, data?: any) {
+  showContextMenu(type: string, data?: ContextMenuData) {
     logger.debug(`Showing context menu of type: ${type}`)
     const menu = this.platformImpl.buildContextMenu(type, data)
     menu.popup() // popup must be called in main process

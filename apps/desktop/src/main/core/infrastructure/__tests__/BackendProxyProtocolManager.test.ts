@@ -73,7 +73,7 @@ describe('BackendProxyProtocolManager', () => {
     } as any)
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    const [calledUrl, init] = fetchMock.mock.calls[0]!
+    const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit]
     expect(calledUrl).toBe('https://remote.example.com/trpc/hello?batch=1')
     expect(init).toBeDefined()
     if (!init) throw new Error('Expected fetch init to be defined')
@@ -113,7 +113,7 @@ describe('BackendProxyProtocolManager', () => {
       url: 'lobe-backend://app/api/upload',
     } as any)
 
-    const [, init] = fetchMock.mock.calls[0]!
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
     expect(init).toBeDefined()
     if (!init) throw new Error('Expected fetch init to be defined')
 

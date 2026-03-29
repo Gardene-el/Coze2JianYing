@@ -127,7 +127,9 @@ export class ProxyDispatcherManager {
   /**
    * Safely destroy dispatcher
    */
-  private static async safeDestroyDispatcher(dispatcher: any): Promise<void> {
+  private static async safeDestroyDispatcher(
+    dispatcher: { destroy: () => Promise<void> } | null,
+  ): Promise<void> {
     try {
       if (dispatcher && typeof dispatcher.destroy === 'function') {
         await dispatcher.destroy()

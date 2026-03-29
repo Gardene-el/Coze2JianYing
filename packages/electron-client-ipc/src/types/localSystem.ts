@@ -8,7 +8,7 @@ export interface LocalFileItem {
   lastAccessTime: Date
   // Spotlight specific metadata
   metadata?: {
-    [key: string]: any
+    [key: string]: unknown
   }
   modifiedTime: Date
   name: string
@@ -75,7 +75,7 @@ export interface RenameLocalFileParams {
 }
 
 export interface RenameLocalFileResult {
-  error?: any
+  error?: string
   newPath: string
   success: boolean
 }

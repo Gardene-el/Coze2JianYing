@@ -11,7 +11,10 @@ import { appRoutes } from './router/routes'
 // Electron 生产包加载本地文件，basename 不带前缀
 const router = createBrowserRouter(appRoutes, { basename: '/' })
 
-createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Root element not found')
+
+createRoot(rootElement).render(
   <BootErrorBoundary>
     <SPAGlobalProvider>
       <RouterProvider router={router} />

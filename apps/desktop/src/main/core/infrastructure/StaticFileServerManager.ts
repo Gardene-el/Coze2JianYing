@@ -1,4 +1,4 @@
-import { createServer } from 'node:http'
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 
 import { getPort } from 'get-port-please'
 
@@ -27,7 +27,7 @@ const getAllowedOrigin = (rawOrigin?: string) => {
 
 export class StaticFileServerManager {
   private fileService: FileService
-  private httpServer: any = null
+  private httpServer: Server | null = null
   private serverPort: number = 0
   private isInitialized = false
 
@@ -132,7 +132,7 @@ export class StaticFileServerManager {
   /**
    * Handle HTTP requests
    */
-  private async handleHttpRequest(req: any, res: any): Promise<void> {
+  private async handleHttpRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
     try {
       // Check if the response has already ended
       if (res.destroyed || res.headersSent) {

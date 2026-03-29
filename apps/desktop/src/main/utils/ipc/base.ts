@@ -10,19 +10,19 @@ export interface IpcContext {
 }
 
 // Metadata storage for decorated methods
-const methodMetadata = new WeakMap<any, Map<string, string>>()
+const methodMetadata = new WeakMap<object, Map<string, string>>()
 const ipcContextStorage = new AsyncLocalStorage<IpcContext>()
 
 // Decorator for IPC methods
 export function IpcMethod() {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (target: object, propertyKey: string, descriptor: PropertyDescriptor) => {
     const ctor = target.constructor
 
     if (!methodMetadata.has(ctor)) {
       methodMetadata.set(ctor, new Map())
     }
 
-    const methods = methodMetadata.get(ctor)!
+    const methods = methodMetadata.get(ctor) as Map<string, string>
     methods.set(propertyKey, propertyKey)
 
     return descriptor
@@ -51,7 +51,7 @@ export class IpcHandler {
 
     this.registeredChannels.add(channel)
 
-    ipcMain.handle(channel, async (event: IpcMainInvokeEvent, ...args: any[]) => {
+    ipcMain.handle(channel, async (event: IpcMainInvokeEvent, ...args: unknown[]) => {
       const context: IpcContext = {
         event,
         sender: event.sender,
@@ -70,7 +70,7 @@ export class IpcHandler {
   }
 
   // Send events to renderer
-  sendToRenderer<T = any>(webContents: WebContents, channel: string, data: T) {
+  sendToRenderer<T = unknown>(webContents: WebContents, channel: string, data: T) {
     webContents.send(channel, data)
   }
 }
@@ -90,7 +90,7 @@ export abstract class IpcService {
 
     if (methods) {
       methods.forEach((methodName, propertyKey) => {
-        const method = (this as any)[propertyKey]
+        const method = (this as Record<string, unknown>)[propertyKey]
         if (typeof method === 'function') {
           this.registerMethod(methodName, method.bind(this))
         }
@@ -110,6 +110,7 @@ export abstract class IpcService {
 
 // Service constructor with groupName
 export interface IpcServiceConstructor {
+  // biome-ignore lint/suspicious/noExplicitAny: allows subclasses with specific constructor args
   new (...args: any[]): IpcService
   readonly groupName: string
 }
@@ -117,9 +118,9 @@ export interface IpcServiceConstructor {
 // Create services function that infers types from service constructors
 export function createServices<T extends readonly IpcServiceConstructor[]>(
   serviceConstructors: T,
-  ...constructorArgs: any[]
+  ...constructorArgs: unknown[]
 ): CreateServicesResult<T> {
-  const services = {} as any
+  const services = {} as CreateServicesResult<T>
 
   for (const ServiceConstructor of serviceConstructors) {
     const instance = new ServiceConstructor(...constructorArgs)

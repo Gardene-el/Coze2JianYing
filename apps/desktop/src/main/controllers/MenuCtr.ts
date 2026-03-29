@@ -1,3 +1,4 @@
+import type { ContextMenuData } from '@/menus'
 import { ControllerModule, IpcMethod } from './index'
 
 export default class MenuController extends ControllerModule {
@@ -15,7 +16,7 @@ export default class MenuController extends ControllerModule {
    * Show context menu
    */
   @IpcMethod()
-  showContextMenu(params: { data?: any; type: string }) {
+  showContextMenu(params: { data?: ContextMenuData; type: string }) {
     return this.app.menuManager.showContextMenu(params.type, params.data)
   }
 

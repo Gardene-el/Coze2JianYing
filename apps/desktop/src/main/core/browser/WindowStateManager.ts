@@ -1,7 +1,7 @@
 import type Electron from 'electron'
 import type { BrowserWindow } from 'electron'
 import { screen } from 'electron'
-
+import type { ElectronMainStore, StoreKey } from '@/types/store'
 import { createLogger } from '@/utils/logger'
 
 import type { App } from '../App'
@@ -42,7 +42,7 @@ export class WindowStateManager {
    * Load saved window state from persistent storage
    */
   loadState(): WindowState | undefined {
-    return this.app.storeManager.get(this.stateKey as any) as WindowState | undefined
+    return this.app.storeManager.get(this.stateKey as StoreKey) as WindowState | undefined
   }
 
   /**
@@ -60,7 +60,7 @@ export class WindowStateManager {
       logger.debug(
         `[${this.identifier}] Saving window state on ${context}: ${JSON.stringify(state)}`,
       )
-      this.app.storeManager.set(this.stateKey as any, state)
+      this.app.storeManager.set(this.stateKey as StoreKey, state as ElectronMainStore[StoreKey])
     } catch (error) {
       logger.error(`[${this.identifier}] Failed to save window state on ${context}:`, error)
     }

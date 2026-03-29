@@ -27,7 +27,7 @@ export const genDiff = () => {
 
     const prodJSON = readJSON(filepath)
 
-    const diffResult = diff(prodJSON, devJSON as any)
+    const diffResult = diff(prodJSON, devJSON as Record<string, unknown>)
     const remove = diffResult.filter((item) => item.op === 'remove')
     if (remove.length === 0) {
       consola.success(tagWhite(ns), colors.gray(filepath))

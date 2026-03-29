@@ -8,7 +8,7 @@ export interface ShortcutConfig {
    */
   id: string
 }
-export type ShortcutActionType = Record<string, any>
+export type ShortcutActionType = Record<string, unknown>
 
 export interface ShortcutUpdateResult {
   errorType?:

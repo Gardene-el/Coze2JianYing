@@ -62,5 +62,5 @@ export class RouteVariants {
     ...options,
   })
 
-  private static isValidLocale = (locale: string): boolean => locales.includes(locale as any)
+  private static isValidLocale = (locale: string): boolean => locales.includes(locale as Locales)
 }

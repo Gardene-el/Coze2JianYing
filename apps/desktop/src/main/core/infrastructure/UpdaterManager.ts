@@ -5,6 +5,7 @@ import type {
   UpdaterStage,
   UpdaterState,
 } from '@lobechat/electron-client-ipc'
+import type { BrowserWindow as ElectronBrowserWindow } from 'electron'
 import log from 'electron-log'
 import { autoUpdater } from 'electron-updater'
 
@@ -252,7 +253,7 @@ export class UpdaterManager {
     const { BrowserWindow, app } = require('electron')
     if (!isWindows) {
       const allWindows = BrowserWindow.getAllWindows()
-      allWindows.forEach((window: any) => {
+      allWindows.forEach((window: ElectronBrowserWindow) => {
         if (!window.isDestroyed()) {
           window.close()
         }

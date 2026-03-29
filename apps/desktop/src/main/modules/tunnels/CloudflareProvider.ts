@@ -152,7 +152,7 @@ export class CloudflareProvider implements ITunnelProvider {
             clearTimeout(timeout)
             t.off('stdout', onOutput)
             t.off('stderr', onOutput)
-            resolve(resolvedUrl!)
+            resolve(resolvedUrl as string)
           }, 10_000)
         })
 

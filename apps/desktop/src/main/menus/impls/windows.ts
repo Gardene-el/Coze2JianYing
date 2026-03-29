@@ -210,7 +210,9 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
     return template
   }
 
-  private getUpdateMenuItem(t: (key: string, opts?: any) => string): MenuItemConstructorOptions {
+  private getUpdateMenuItem(
+    t: (key: string, opts?: Record<string, unknown>) => string,
+  ): MenuItemConstructorOptions {
     const { stage } = this.app.updaterManager.getUpdaterState()
 
     switch (stage) {
@@ -261,11 +263,11 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
     // Link actions
     if (hasLink) {
       template.push({
-        click: () => shell.openExternal(data!.linkURL!),
+        click: () => shell.openExternal(data?.linkURL ?? ''),
         label: t('context.openLink'),
       })
       template.push({
-        click: () => clipboard.writeText(data!.linkURL!),
+        click: () => clipboard.writeText(data?.linkURL ?? ''),
         label: t('context.copyLink'),
       })
       template.push({ type: 'separator' })
@@ -276,13 +278,13 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
       template.push({
         click: () => {
           const mainWindow = this.app.browserManager.getMainWindow()
-          mainWindow.webContents.downloadURL(data!.srcURL!)
+          mainWindow.webContents.downloadURL(data?.srcURL ?? '')
         },
         label: t('context.saveImage'),
       })
       template.push({
         click: () => {
-          clipboard.writeText(data!.srcURL!)
+          clipboard.writeText(data?.srcURL ?? '')
         },
         label: t('context.copyImageAddress'),
       })
@@ -304,7 +306,7 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
       template.push({
         click: () => {
           const mainWindow = this.app.browserManager.getMainWindow()
-          mainWindow.webContents.inspectElement(data.x!, data.y!)
+          mainWindow.webContents.inspectElement(data.x as number, data.y as number)
         },
         label: t('context.inspectElement'),
       })
@@ -336,11 +338,11 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
     // Link actions
     if (hasLink) {
       template.push({
-        click: () => shell.openExternal(data!.linkURL!),
+        click: () => shell.openExternal(data?.linkURL ?? ''),
         label: t('context.openLink'),
       })
       template.push({
-        click: () => clipboard.writeText(data!.linkURL!),
+        click: () => clipboard.writeText(data?.linkURL ?? ''),
         label: t('context.copyLink'),
       })
       template.push({ type: 'separator' })
@@ -351,13 +353,13 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
       template.push({
         click: () => {
           const mainWindow = this.app.browserManager.getMainWindow()
-          mainWindow.webContents.downloadURL(data!.srcURL!)
+          mainWindow.webContents.downloadURL(data?.srcURL ?? '')
         },
         label: t('context.saveImage'),
       })
       template.push({
         click: () => {
-          clipboard.writeText(data!.srcURL!)
+          clipboard.writeText(data?.srcURL ?? '')
         },
         label: t('context.copyImageAddress'),
       })
@@ -378,7 +380,7 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
       template.push({
         click: () => {
           const mainWindow = this.app.browserManager.getMainWindow()
-          mainWindow.webContents.inspectElement(data.x!, data.y!)
+          mainWindow.webContents.inspectElement(data.x as number, data.y as number)
         },
         label: t('context.inspectElement'),
       })
@@ -422,7 +424,7 @@ export class WindowsMenu extends BaseMenuPlatform implements IMenuPlatform {
       template.push({
         click: () => {
           const mainWindow = this.app.browserManager.getMainWindow()
-          mainWindow.webContents.inspectElement(data.x!, data.y!)
+          mainWindow.webContents.inspectElement(data.x as number, data.y as number)
         },
         label: t('context.inspectElement'),
       })
