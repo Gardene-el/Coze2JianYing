@@ -1,45 +1,44 @@
 import { PlayCircleOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
-import { Button, Card, Input, message, Space, Spin, Tag } from 'antd'
-import { createStaticStyles } from 'antd-style'
+import { Button, Card, Input, message, Space, Spin, Tag, Typography } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 
 import PageContainer from '@/components/PageContainer'
 import PageHeader from '@/components/PageHeader'
 import { useEnsureBackend } from '@/hooks/useEnsureBackend'
 import { guiReplayAPI } from '@/services/gui/replay'
-import { workerReplayAPI } from '@/services/worker/replay'
+import { type WorkerReplayResult, workerReplayAPI } from '@/services/worker/replay'
 import { initialSettingsState } from '@/store/settings/initialState'
 import { useSettingsStore } from '@/store/settings/store'
+import { extractDraftIds } from '@/utils/extractDraftIds'
 
 const DEFAULT_WORKER_URL = initialSettingsState.relayWorkerUrl
 
-const styles = createStaticStyles(({ css, cssVar }) => ({
-  json: css`
-    width: 100%;
-    max-height: 500px;
-    overflow: auto;
-    padding: 12px;
-    font-family: ${cssVar.fontFamilyCode};
-    font-size: 12px;
-    line-height: 1.6;
-    background: ${cssVar.colorBgLayout};
-    border: 1px solid ${cssVar.colorBorderSecondary};
-    border-radius: ${cssVar.borderRadius};
-    white-space: pre;
-  `,
-}))
+type QueryStatus = 'idle' | 'loading' | 'success' | 'error'
+type ExecStatus = 'idle' | 'loading' | 'success' | 'error'
 
-type ExecuteStatus = 'idle' | 'loading' | 'success' | 'error'
+interface IdState {
+  queryStatus: QueryStatus
+  queryResult: WorkerReplayResult | null
+  queryError: string
+  execStatus: ExecStatus
+  execMsg: string
+}
+
+const defaultIdState = (): IdState => ({
+  queryStatus: 'idle',
+  queryResult: null,
+  queryError: '',
+  execStatus: 'idle',
+  execMsg: '',
+})
 
 const ReplayPage = () => {
   const [msgApi, ctx] = message.useMessage()
-  const [draftId, setDraftId] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<object | null>(null)
-
-  const [executing, setExecuting] = useState(false)
-  const [execStatus, setExecStatus] = useState<ExecuteStatus>('idle')
-  const [execMsg, setExecMsg] = useState('')
+  const [rawInput, setRawInput] = useState('')
+  const [extractedIds, setExtractedIds] = useState<string[]>([])
+  const [idStates, setIdStates] = useState<Map<string, IdState>>(new Map())
+  const [querying, setQuerying] = useState(false)
+  const [executingAll, setExecutingAll] = useState(false)
 
   const { ensureReady } = useEnsureBackend()
 
@@ -77,50 +76,88 @@ const ReplayPage = () => {
     }
   }
 
+  const handleInputChange = (val: string) => {
+    setRawInput(val)
+    setExtractedIds(extractDraftIds(val))
+    setIdStates(new Map())
+  }
+
+  /** 函数式更新，安全地修改单个 ID 的状态 */
+  const updateIdState = (id: string, patch: Partial<IdState>) => {
+    setIdStates((prev) => {
+      const next = new Map(prev)
+      next.set(id, { ...(next.get(id) ?? defaultIdState()), ...patch })
+      return next
+    })
+  }
+
   const handleQuery = async () => {
-    if (!draftId.trim()) return msgApi.warning('请输入 Draft ID')
-    if (!urlInput.trim()) {
-      msgApi.error('未配置 云服务器地址，请在下方填写')
-      return
-    }
-    setLoading(true)
-    setResult(null)
-    setExecStatus('idle')
-    setExecMsg('')
+    if (extractedIds.length === 0) return msgApi.warning('未识别到有效的草稿 ID')
+    if (!urlInput.trim()) return msgApi.error('未配置云服务器地址，请在下方填写')
+
+    setQuerying(true)
+    // 初始化所有 ID 为 loading 状态
+    const initial = new Map<string, IdState>()
+    for (const id of extractedIds) initial.set(id, { ...defaultIdState(), queryStatus: 'loading' })
+    setIdStates(initial)
+
+    // 并行拉取所有 ID
+    await Promise.allSettled(
+      extractedIds.map(async (id) => {
+        try {
+          const data = await workerReplayAPI.get(urlInput, id)
+          updateIdState(id, { queryStatus: 'success', queryResult: data })
+        } catch (e: unknown) {
+          updateIdState(id, { queryStatus: 'error', queryError: (e as Error).message })
+        }
+      }),
+    )
+    setQuerying(false)
+  }
+
+  const handleExecuteOne = async (id: string) => {
+    if (!urlInput.trim()) return msgApi.error('未配置云服务器地址，请在下方填写')
+    updateIdState(id, { execStatus: 'loading', execMsg: '执行中…' })
     try {
-      const data = await workerReplayAPI.get(urlInput, draftId.trim())
-      setResult(data)
+      await ensureReady()
+      const res = await guiReplayAPI.execute(urlInput, id)
+      updateIdState(id, { execStatus: 'success', execMsg: `成功 ${res.calls_executed} 条` })
+      msgApi.success(`草稿 ${id.slice(0, 13)}… 已生成（${res.calls_executed} 条调用）`)
     } catch (e: unknown) {
-      msgApi.error(`拉取失败: ${(e as Error).message}`)
-    } finally {
-      setLoading(false)
+      const msg = (e as Error).message
+      updateIdState(id, { execStatus: 'error', execMsg: msg })
+      msgApi.error(`执行失败: ${msg}`)
     }
   }
 
-  const handleExecute = async () => {
-    if (!result) return msgApi.warning('请先拉取数据')
-    if (!urlInput.trim()) {
-      msgApi.error('未配置云服务器地址，请在下方填写')
-      return
-    }
-    setExecuting(true)
-    setExecStatus('loading')
-    setExecMsg('准备后端中…')
+  const handleExecuteAll = async () => {
+    const fetchedIds = extractedIds.filter(
+      (id) => (idStates.get(id)?.queryStatus ?? 'idle') === 'success',
+    )
+    if (fetchedIds.length === 0) return msgApi.warning('暂无可执行的草稿')
+    if (!urlInput.trim()) return msgApi.error('未配置云服务器地址，请在下方填写')
+
+    setExecutingAll(true)
     try {
       await ensureReady()
-      setExecMsg('执行中…')
-      const res = await guiReplayAPI.execute(urlInput, draftId.trim())
-      setExecStatus('success')
-      setExecMsg(`执行成功，共处理 ${res.calls_executed} 条调用`)
-      msgApi.success(`草稿已生成（${res.calls_executed} 条调用）`)
+      for (const id of fetchedIds) {
+        updateIdState(id, { execStatus: 'loading', execMsg: '执行中…' })
+        try {
+          const res = await guiReplayAPI.execute(urlInput, id)
+          updateIdState(id, { execStatus: 'success', execMsg: `成功 ${res.calls_executed} 条` })
+        } catch (e: unknown) {
+          updateIdState(id, { execStatus: 'error', execMsg: (e as Error).message })
+        }
+      }
+      msgApi.success(`全部执行完毕，共 ${fetchedIds.length} 个草稿`)
     } catch (e: unknown) {
-      setExecStatus('error')
-      setExecMsg(`执行失败: ${(e as Error).message}`)
-      msgApi.error(`执行失败: ${(e as Error).message}`)
+      msgApi.error(`后端启动失败: ${(e as Error).message}`)
     } finally {
-      setExecuting(false)
+      setExecutingAll(false)
     }
   }
+
+  const hasFetched = extractedIds.some((id) => idStates.get(id)?.queryStatus === 'success')
 
   return (
     <PageContainer>
@@ -130,56 +167,118 @@ const ReplayPage = () => {
         title="📷 粘贴草稿id相关内容进所选框进行拉取，Coze2JianYing可以智能识别草稿id"
         style={{ marginBottom: 16 }}
       >
-        <Input.Search
-          value={draftId}
-          onChange={(e) => setDraftId(e.target.value)}
-          placeholder="输入 Draft ID，例如 1710000000000-xxxxx"
-          enterButton={
-            <>
-              <SearchOutlined /> 拉取
-            </>
+        {/* 输入区 */}
+        <Input.TextArea
+          value={rawInput}
+          onChange={(e) => handleInputChange(e.target.value)}
+          placeholder={
+            '粘贴草稿 ID，支持以下格式：\n• 纯 ID（多行或任意分隔符均可）\n• JSON: {"draft_id": "..."}\n• JSON: {"draft_ids": ["..."]}'
           }
-          loading={loading}
-          onSearch={handleQuery}
-          style={{ maxWidth: 560, marginBottom: 16 }}
+          autoSize={{ minRows: 3, maxRows: 8 }}
+          style={{ marginBottom: 8, fontFamily: 'monospace' }}
         />
 
-        {loading && <Spin />}
+        {/* 识别反馈 */}
+        {rawInput && (
+          <div style={{ marginBottom: 12 }}>
+            {extractedIds.length > 0 ? (
+              <Space wrap>
+                <Typography.Text type="secondary">
+                  识别到 {extractedIds.length} 个草稿ID：
+                </Typography.Text>
+                {extractedIds.map((id) => (
+                  <Tag key={id} color="blue">
+                    {id}
+                  </Tag>
+                ))}
+              </Space>
+            ) : (
+              <Tag color="warning">未能识别到有效的草稿 ID</Tag>
+            )}
+          </div>
+        )}
 
-        {result && !loading && (
-          <>
-            <div className={styles.json}>{JSON.stringify(result, null, 2)}</div>
-            <Space style={{ marginTop: 12 }} wrap>
-              <Button
-                type="primary"
-                icon={<PlayCircleOutlined />}
-                loading={executing}
-                disabled={executing}
-                onClick={handleExecute}
-              >
-                执行到草稿
-              </Button>
-              {execStatus !== 'idle' && (
-                <Tag
-                  color={
-                    execStatus === 'loading'
-                      ? 'processing'
-                      : execStatus === 'success'
-                        ? 'success'
-                        : 'error'
-                  }
+        {/* 操作按钮 */}
+        <Space style={{ marginBottom: idStates.size > 0 ? 16 : 0 }}>
+          <Button
+            type="primary"
+            icon={<SearchOutlined />}
+            loading={querying}
+            disabled={extractedIds.length === 0}
+            onClick={handleQuery}
+          >
+            {`拉取${extractedIds.length > 1 ? `（${extractedIds.length} 个）` : ''}`}
+          </Button>
+          {hasFetched && (
+            <Button
+              icon={<PlayCircleOutlined />}
+              loading={executingAll}
+              disabled={executingAll}
+              onClick={handleExecuteAll}
+            >
+              全部执行
+            </Button>
+          )}
+        </Space>
+
+        {/* 每个 ID 的结果行 */}
+        {idStates.size > 0 && (
+          <div>
+            {extractedIds.map((id) => {
+              const state = idStates.get(id) ?? defaultIdState()
+              return (
+                <div
+                  key={id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 0',
+                    borderBottom: '1px solid var(--ant-color-border-secondary)',
+                    flexWrap: 'wrap',
+                  }}
                 >
-                  {executing ? (
-                    <>
-                      <Spin size="small" /> {execMsg}
-                    </>
-                  ) : (
-                    execMsg
+                  <Typography.Text code copyable style={{ flex: 1, minWidth: 200 }}>
+                    {id}
+                  </Typography.Text>
+
+                  {state.queryStatus === 'loading' && <Spin size="small" />}
+                  {state.queryStatus === 'success' && state.queryResult && (
+                    <Tag color="success">{state.queryResult.total} 条调用</Tag>
                   )}
-                </Tag>
-              )}
-            </Space>
-          </>
+                  {state.queryStatus === 'error' && (
+                    <Tag color="error" title={state.queryError}>
+                      拉取失败
+                    </Tag>
+                  )}
+
+                  {state.execStatus !== 'idle' && (
+                    <Tag
+                      color={
+                        state.execStatus === 'loading'
+                          ? 'processing'
+                          : state.execStatus === 'success'
+                            ? 'success'
+                            : 'error'
+                      }
+                    >
+                      {state.execMsg}
+                    </Tag>
+                  )}
+
+                  <Button
+                    size="small"
+                    icon={<PlayCircleOutlined />}
+                    disabled={state.queryStatus !== 'success' || state.execStatus === 'loading'}
+                    loading={state.execStatus === 'loading'}
+                    onClick={() => handleExecuteOne(id)}
+                  >
+                    执行
+                  </Button>
+                </div>
+              )
+            })}
+          </div>
         )}
       </Card>
 
