@@ -1,10 +1,12 @@
-import { ReloadOutlined, SearchOutlined } from '@ant-design/icons'
-import { Button, Card, Input, message, Space, Spin } from 'antd'
+import { PlayCircleOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
+import { Button, Card, Input, message, Space, Spin, Tag } from 'antd'
 import { createStaticStyles } from 'antd-style'
 import { useEffect, useRef, useState } from 'react'
 
 import PageContainer from '@/components/PageContainer'
 import PageHeader from '@/components/PageHeader'
+import { useEnsureBackend } from '@/hooks/useEnsureBackend'
+import { guiReplayAPI } from '@/services/gui/replay'
 import { workerReplayAPI } from '@/services/worker/replay'
 import { initialSettingsState } from '@/store/settings/initialState'
 import { useSettingsStore } from '@/store/settings/store'
@@ -27,11 +29,19 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
   `,
 }))
 
+type ExecuteStatus = 'idle' | 'loading' | 'success' | 'error'
+
 const ReplayPage = () => {
   const [msgApi, ctx] = message.useMessage()
   const [draftId, setDraftId] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<object | null>(null)
+
+  const [executing, setExecuting] = useState(false)
+  const [execStatus, setExecStatus] = useState<ExecuteStatus>('idle')
+  const [execMsg, setExecMsg] = useState('')
+
+  const { ensureReady } = useEnsureBackend()
 
   const relayWorkerUrl = useSettingsStore((s) => s.relayWorkerUrl)
   const saveSettings = useSettingsStore((s) => s.saveSettings)
@@ -75,6 +85,8 @@ const ReplayPage = () => {
     }
     setLoading(true)
     setResult(null)
+    setExecStatus('idle')
+    setExecMsg('')
     try {
       const data = await workerReplayAPI.get(urlInput, draftId.trim())
       setResult(data)
@@ -82,6 +94,31 @@ const ReplayPage = () => {
       msgApi.error(`拉取失败: ${(e as Error).message}`)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExecute = async () => {
+    if (!result) return msgApi.warning('请先拉取数据')
+    if (!urlInput.trim()) {
+      msgApi.error('未配置云服务器地址，请在下方填写')
+      return
+    }
+    setExecuting(true)
+    setExecStatus('loading')
+    setExecMsg('准备后端中…')
+    try {
+      await ensureReady()
+      setExecMsg('执行中…')
+      const res = await guiReplayAPI.execute(urlInput, draftId.trim())
+      setExecStatus('success')
+      setExecMsg(`执行成功，共处理 ${res.calls_executed} 条调用`)
+      msgApi.success(`草稿已生成（${res.calls_executed} 条调用）`)
+    } catch (e: unknown) {
+      setExecStatus('error')
+      setExecMsg(`执行失败: ${(e as Error).message}`)
+      msgApi.error(`执行失败: ${(e as Error).message}`)
+    } finally {
+      setExecuting(false)
     }
   }
 
@@ -106,7 +143,41 @@ const ReplayPage = () => {
 
         {loading && <Spin />}
 
-        {result && !loading && <div className={styles.json}>{JSON.stringify(result, null, 2)}</div>}
+        {result && !loading && (
+          <>
+            <div className={styles.json}>{JSON.stringify(result, null, 2)}</div>
+            <Space style={{ marginTop: 12 }} wrap>
+              <Button
+                type="primary"
+                icon={<PlayCircleOutlined />}
+                loading={executing}
+                disabled={executing}
+                onClick={handleExecute}
+              >
+                执行到草稿
+              </Button>
+              {execStatus !== 'idle' && (
+                <Tag
+                  color={
+                    execStatus === 'loading'
+                      ? 'processing'
+                      : execStatus === 'success'
+                        ? 'success'
+                        : 'error'
+                  }
+                >
+                  {executing ? (
+                    <>
+                      <Spin size="small" /> {execMsg}
+                    </>
+                  ) : (
+                    execMsg
+                  )}
+                </Tag>
+              )}
+            </Space>
+          </>
+        )}
       </Card>
 
       <Card title="☁️ 云服务器地址" style={{ marginBottom: 12 }}>
