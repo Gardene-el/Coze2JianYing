@@ -2,7 +2,7 @@
 
 ## 概述
 
-`scripts/generate_coze_openapi.py` 是一个自动化工具，用于从 FastAPI 应用生成符合 Coze 平台要求的 OpenAPI 3.0.1 规范文件。
+`scripts/openapi_generator/main.py` 是一个自动化工具，用于从 FastAPI 应用生成符合 Coze 平台要求的 OpenAPI 3.0.1 规范文件。
 
 ## 快速开始
 
@@ -10,16 +10,16 @@
 
 ```bash
 # 生成默认 OpenAPI 文件（使用 localhost）
-python scripts/generate_coze_openapi.py
+python scripts/openapi_generator/main.py
 
 # 使用自定义服务器 URL（推荐用于 Coze 导入）
-python scripts/generate_coze_openapi.py --server-url https://your-domain.ngrok-free.app
+python scripts/openapi_generator/main.py --server-url https://your-domain.ngrok-free.app
 
 # 生成 JSON 格式
-python scripts/generate_coze_openapi.py --format json
+python scripts/openapi_generator/main.py --format json
 
 # 指定输出文件名
-python scripts/generate_coze_openapi.py --output my_api.yaml
+python scripts/openapi_generator/main.py --output my_api.yaml
 ```
 
 ### 命令行参数
@@ -37,11 +37,7 @@ python scripts/generate_coze_openapi.py --output my_api.yaml
 首先确保 API 服务正在运行：
 
 ```bash
-# 方式一：直接启动
-python start_api.py
-
-# 方式二：使用 GUI 的"云端服务"标签页启动
-python app/main.py
+python -m src.backend.main
 ```
 
 ### 2. 配置 ngrok（可选但推荐）
@@ -57,7 +53,7 @@ ngrok http 8000
 ### 3. 生成 OpenAPI 文件
 
 ```bash
-python scripts/generate_coze_openapi.py --server-url https://abc123.ngrok-free.app
+python scripts/openapi_generator/main.py --server-url https://abc123.ngrok-free.app
 ```
 
 ### 4. 导入到 Coze 平台
@@ -185,26 +181,29 @@ RespExample: &id001
 递归转换 schema 对象，处理所有 OpenAPI 3.1.0 到 3.0.1 的不兼容问题。
 
 **处理内容：**
-- `exclusiveMinimum`/`exclusiveMaximum` 数值 → 布尔值
-- `anyOf: [type: X, type: 'null']` → `type: X, nullable: true`
-- 移除所有 `title` 字段
-- 递归处理嵌套对象和数组
+
+* `exclusiveMinimum`/`exclusiveMaximum` 数值 → 布尔值
+* `anyOf: [type: X, type: 'null']` → `type: X, nullable: true`
+* 移除所有 `title` 字段
+* 递归处理嵌套对象和数组
 
 #### `resolve_refs(schema: Dict, root: Dict) -> Any`
 
 解析并内联所有 `$ref` 引用，确保没有 schema 引用。
 
 **处理内容：**
-- 识别 `$ref: "#/components/schemas/Model"` 引用
-- 从 root schema 中查找对应定义
-- 递归解析嵌套引用
-- 返回完全展开的 schema
+
+* 识别 `$ref: "#/components/schemas/Model"` 引用
+* 从 root schema 中查找对应定义
+* 递归解析嵌套引用
+* 返回完全展开的 schema
 
 #### `generate_coze_openapi(app, server_url: str) -> Dict`
 
 主函数，生成完整的 Coze 兼容 OpenAPI 规范。
 
 **处理流程：**
+
 1. 从 FastAPI app 提取原始 OpenAPI schema
 2. 移除 `components/schemas` 和 `components/examples` 部分
 3. 遍历所有 paths 和 operations
@@ -226,8 +225,8 @@ class NoAliasDumper(yaml.SafeDumper):
 
 脚本从以下文件自动扫描所有 API 端点：
 
-- `app/api/new_draft_routes.py` - 草稿相关 API
-- `app/api/segment_routes.py` - 片段相关 API
+* `src/backend/api/basic.py` - basic 路由端点
+* `src/backend/api/easy.py` - easy 路由端点
 
 共计 30+ 个端点被自动发现和处理。
 
@@ -236,10 +235,11 @@ class NoAliasDumper(yaml.SafeDumper):
 ### Q1: 生成的文件导入 Coze 时报错？
 
 **A:** 重新生成文件，确保使用最新版本的脚本。常见错误已被修复：
-- `exclusiveMinimum` 类型错误 ✅
-- `type: 'null'` 不支持 ✅
-- YAML 锚点解析错误 ✅
-- `title` 字段解析错误 ✅
+
+* `exclusiveMinimum` 类型错误 ✅
+* `type: 'null'` 不支持 ✅
+* YAML 锚点解析错误 ✅
+* `title` 字段解析错误 ✅
 
 ### Q2: 如何验证生成的文件？
 
@@ -265,22 +265,7 @@ grep -E "&id|\\*id" coze_openapi.yaml
 
 ### Q5: 如何添加新的 API 端点？
 
-只需在 `app/api/` 中的路由文件中添加新端点，重新运行生成脚本即可自动包含。
-
-## 测试
-
-运行测试套件：
-
-```bash
-python scripts/test_generate_coze_openapi.py
-```
-
-测试包含：
-- YAML 格式生成测试
-- JSON 格式生成测试
-- Schema 结构验证
-- 服务器 URL 自定义测试
-- OpenAPI 3.0.1 兼容性测试
+只需在 `src/backend/api/` 中的路由文件中添加新端点，重新运行生成脚本即可自动包含。
 
 ## 故障排除
 
@@ -293,8 +278,8 @@ cd /path/to/Coze2JianYing
 # 确保依赖已安装
 pip install -r requirements.txt
 
-# 确保 API 服务已启动
-python start_api.py
+# 启动后端服务
+python -m src.backend.main
 ```
 
 ### 问题：ngrok URL 不工作
@@ -313,16 +298,17 @@ python start_api.py
 ## 更新日志
 
 ### v1.0 (Commit 2074260)
-- ✅ 初始版本发布
-- ✅ OpenAPI 3.0.1 完全兼容
-- ✅ 移除 components 部分
-- ✅ 内联所有 schema
-- ✅ 自动发现所有端点
-- ✅ 修复所有已知解析错误
+
+* ✅ 初始版本发布
+* ✅ OpenAPI 3.0.1 完全兼容
+* ✅ 移除 components 部分
+* ✅ 内联所有 schema
+* ✅ 自动发现所有端点
+* ✅ 修复所有已知解析错误
 
 ## 相关资源
 
-- [Coze 平台文档](https://www.coze.cn/open/docs/guides/import)
-- [OpenAPI 3.0.1 规范](https://spec.openapis.org/oas/v3.0.1)
-- [FastAPI 文档](https://fastapi.tiangolo.com/)
-- [ngrok 文档](https://ngrok.com/docs)
+* [Coze 平台文档](https://www.coze.cn/open/docs/guides/import)
+* [OpenAPI 3.0.1 规范](https://spec.openapis.org/oas/v3.0.1)
+* [FastAPI 文档](https://fastapi.tiangolo.com/)
+* [ngrok 文档](https://ngrok.com/docs)
