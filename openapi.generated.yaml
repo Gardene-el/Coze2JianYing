@@ -8,7 +8,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Create Draft
+      summary: 创建草稿
+      description: 创建一个新的剪映草稿，返回草稿 ID，后续所有操作均通过此 ID 引用该草稿。
       operationId: create_draft
       requestBody:
         content:
@@ -27,7 +28,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Save Draft
+      summary: 保存草稿
+      description: 将当前草稿内容持久化写入磁盘，使剪映可以读取到最新编辑结果。
       operationId: save_draft
       parameters:
       - name: draft_id
@@ -35,6 +37,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       responses:
         '200':
           description: Successful Response
@@ -46,7 +50,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Segment
+      summary: 添加片段到草稿
+      description: 将已创建的片段（音频/视频/文本/贴纸）添加到指定草稿的对应轨道中。
       operationId: add_segment
       parameters:
       - name: draft_id
@@ -54,6 +59,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -71,7 +78,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Track
+      summary: 添加轨道
+      description: 在草稿中新建一条指定类型的轨道（audio/video/text/sticker/effect/filter）。
       operationId: add_track
       parameters:
       - name: draft_id
@@ -79,6 +87,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -96,7 +106,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Effect
+      summary: 添加全局特效
+      description: 在草稿上添加一个覆盖指定时间范围的全局特效。
       operationId: add_effect
       parameters:
       - name: draft_id
@@ -104,6 +115,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -121,7 +134,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Filter
+      summary: 添加全局滤镜
+      description: 在草稿上添加一个覆盖指定时间范围的全局色彩滤镜。
       operationId: add_filter
       parameters:
       - name: draft_id
@@ -129,6 +143,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -146,7 +162,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Create Audio Segment
+      summary: 创建音频片段
+      description: 根据素材 URL 和时间范围创建音频片段，返回片段 ID，后续可将其添加到草稿轨道。
       operationId: create_audio_segment
       requestBody:
         content:
@@ -165,7 +182,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Create Video Segment
+      summary: 创建视频片段
+      description: 根据素材 URL 和时间范围创建视频片段，返回片段 ID，后续可将其添加到草稿轨道。
       operationId: create_video_segment
       requestBody:
         content:
@@ -184,7 +202,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Create Text Segment
+      summary: 创建文本片段
+      description: 根据文本内容和时间范围创建文本片段，支持字体、样式、描边、阴影等设置，返回片段 ID。
       operationId: create_text_segment
       requestBody:
         content:
@@ -203,7 +222,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Create Sticker Segment
+      summary: 创建贴纸片段
+      description: 根据素材 URL 和时间范围创建贴纸片段，返回片段 ID，后续可将其添加到草稿轨道。
       operationId: create_sticker_segment
       requestBody:
         content:
@@ -222,7 +242,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Audio Effect
+      summary: 为音频片段添加音效
+      description: 为指定音频片段添加音场、变调或语音转歌曲等音效。
       operationId: add_audio_effect
       parameters:
       - name: segment_id
@@ -230,6 +251,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -247,7 +270,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Audio Fade
+      summary: 为音频片段添加淡入淡出
+      description: 为指定音频片段设置淡入和淡出的时长。
       operationId: add_audio_fade
       parameters:
       - name: segment_id
@@ -255,6 +279,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -272,7 +298,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Audio Keyframe
+      summary: 为音频片段添加音量关键帧
+      description: 在指定时间点为音频片段添加音量关键帧，实现音量随时间的动态变化。
       operationId: add_audio_keyframe
       parameters:
       - name: segment_id
@@ -280,6 +307,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -297,7 +326,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Sticker Keyframe
+      summary: 为贴纸片段添加关键帧
+      description: 在指定时间点为贴纸片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
       operationId: add_sticker_keyframe
       parameters:
       - name: segment_id
@@ -305,6 +335,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -322,7 +354,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Text Animation
+      summary: 为文本片段添加动画
+      description: 为指定文本片段添加入场、出场或循环动画。
       operationId: add_text_animation
       parameters:
       - name: segment_id
@@ -330,6 +363,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -347,7 +382,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Text Bubble
+      summary: 为文本片段添加气泡
+      description: 为指定文本片段添加气泡背景装饰特效。
       operationId: add_text_bubble
       parameters:
       - name: segment_id
@@ -355,6 +391,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -372,7 +410,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Text Effect
+      summary: 为文本片段添加花字特效
+      description: 为指定文本片段添加花字（文字样式特效）。
       operationId: add_text_effect
       parameters:
       - name: segment_id
@@ -380,6 +419,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -397,7 +438,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Text Keyframe
+      summary: 为文本片段添加关键帧
+      description: 在指定时间点为文本片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
       operationId: add_text_keyframe
       parameters:
       - name: segment_id
@@ -405,6 +447,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -422,7 +466,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Animation
+      summary: 为视频片段添加动画
+      description: 为指定视频片段添加入场、出场或组合动画。
       operationId: add_video_animation
       parameters:
       - name: segment_id
@@ -430,6 +475,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -447,7 +494,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Background Filling
+      summary: 为视频片段添加背景填充
+      description: 为指定视频片段设置模糊或纯色背景填充，用于填补画面空白区域。
       operationId: add_video_background_filling
       parameters:
       - name: segment_id
@@ -455,6 +503,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -472,7 +522,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Effect
+      summary: 为视频片段添加特效
+      description: 为指定视频片段添加场景特效或人物特效。
       operationId: add_video_effect
       parameters:
       - name: segment_id
@@ -480,6 +531,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -497,7 +550,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Fade
+      summary: 为视频片段添加淡入淡出
+      description: 为指定视频片段设置画面淡入和淡出的时长。
       operationId: add_video_fade
       parameters:
       - name: segment_id
@@ -505,6 +559,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -522,7 +578,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Filter
+      summary: 为视频片段添加滤镜
+      description: 为指定视频片段添加色彩滤镜效果。
       operationId: add_video_filter
       parameters:
       - name: segment_id
@@ -530,6 +587,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -547,7 +606,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Keyframe
+      summary: 为视频片段添加关键帧
+      description: 在指定时间点为视频片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
       operationId: add_video_keyframe
       parameters:
       - name: segment_id
@@ -555,6 +615,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -572,7 +634,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Mask
+      summary: 为视频片段添加蒙版
+      description: 为指定视频片段添加形状蒙版（如圆形、矩形、线性等），支持羽化、旋转和反转。
       operationId: add_video_mask
       parameters:
       - name: segment_id
@@ -580,6 +643,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -597,7 +662,8 @@ paths:
     post:
       tags:
       - basic
-      summary: Add Video Transition
+      summary: 为视频片段添加转场
+      description: 为指定视频片段设置转场动画效果及时长。
       operationId: add_video_transition
       parameters:
       - name: segment_id
@@ -605,6 +671,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 片段的唯一标识 ID
+        description: 片段的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -622,7 +690,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Audios
+      summary: 批量添加音频
+      description: 解析音频信息 JSON，批量创建音频片段并添加到草稿，返回片段 ID 列表。
       operationId: add_audios
       parameters:
       - name: draft_id
@@ -630,6 +699,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -647,7 +718,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Captions
+      summary: 批量添加字幕
+      description: 解析字幕信息 JSON，批量创建文本片段并添加到草稿，支持字体、颜色、阴影等样式设置。
       operationId: add_captions
       parameters:
       - name: draft_id
@@ -655,6 +727,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -672,7 +746,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Videos
+      summary: 批量添加视频
+      description: 解析视频信息 JSON，批量创建视频片段并添加到草稿，返回片段 ID 列表。
       operationId: add_videos
       parameters:
       - name: draft_id
@@ -680,6 +755,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -697,7 +774,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Images
+      summary: 批量添加图片
+      description: 解析图片信息 JSON，批量创建图片片段并添加到草稿，返回片段 ID 列表。
       operationId: add_images
       parameters:
       - name: draft_id
@@ -705,6 +783,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -722,7 +802,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Effects
+      summary: 批量添加特效
+      description: 解析特效信息 JSON，批量创建特效片段并添加到草稿，返回片段 ID 列表。
       operationId: add_effects
       parameters:
       - name: draft_id
@@ -730,6 +811,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -747,7 +830,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Masks
+      summary: 批量添加遮罩
+      description: 为指定的多个片段批量应用遇罩效果，支持形状、缩放、缩放、旋转和羽化设置。
       operationId: add_masks
       parameters:
       - name: draft_id
@@ -755,6 +839,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
@@ -772,7 +858,8 @@ paths:
     post:
       tags:
       - easy
-      summary: Add Keyframes
+      summary: 批量添加关键帧
+      description: 解析关键帧信息 JSON，批量为多个片段添加动画关键帧。
       operationId: add_keyframes
       parameters:
       - name: draft_id
@@ -780,6 +867,8 @@ paths:
         required: true
         schema:
           type: string
+          description: 草稿的唯一标识 ID
+        description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
