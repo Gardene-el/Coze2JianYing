@@ -31,7 +31,7 @@ if PROJECT_ROOT not in sys.path:
 
 from src.backend.api.basic import router as basic_router  # noqa: E402
 from src.backend.api.easy import router as easy_router  # noqa: E402
-from src.backend.api_main import app  # noqa: E402
+from src.backend.main import gui_app as app  # noqa: E402
 import src.backend.core.common_types as _common_types  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
@@ -315,6 +315,52 @@ def build_min_components(selected_paths: dict[str, Any], all_components: dict[st
     return {"schemas": ordered_schemas} if ordered_schemas else {}
 
 
+def inline_nullable_refs(spec: dict[str, Any]) -> dict[str, Any]:
+    """将所有 nullable $ref 属性展开为内联 schema（去除 required 列表）。
+
+    Coze 客户端在解析 OpenAPI 时，会将被 $ref 引用的 schema 中的 required 字段无条件视为
+    必填，而不考虑宿主属性本身是否为 nullable/可选。通过把可选对象展开为内联副本并去掉
+    required，可使 Coze 正确推断出这些子字段也是可选的。
+
+    只替换 usage site（属性引用处），components/schemas 中的原始定义不受影响。
+    """
+    all_schemas = spec.get("components", {}).get("schemas", {})
+    if not all_schemas:
+        return spec
+
+    def inline_properties(properties: dict[str, Any]) -> None:
+        for prop_name, prop_schema in list(properties.items()):
+            if not isinstance(prop_schema, dict):
+                continue
+            ref = prop_schema.get("$ref")
+            if ref and prop_schema.get("nullable") is True:
+                match = REF_PATTERN.match(ref)
+                if match:
+                    schema_name = match.group("name")
+                    referenced = all_schemas.get(schema_name)
+                    if referenced is not None:
+                        inlined = deepcopy(referenced)
+                        inlined.pop("required", None)
+                        inlined["nullable"] = True
+                        # 保留 property 级别的 description 覆盖
+                        if "description" in prop_schema:
+                            inlined["description"] = prop_schema["description"]
+                        properties[prop_name] = inlined
+
+    def walk(obj: Any) -> None:
+        if isinstance(obj, dict):
+            if "properties" in obj and isinstance(obj["properties"], dict):
+                inline_properties(obj["properties"])
+            for value in obj.values():
+                walk(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                walk(item)
+
+    walk(spec)
+    return spec
+
+
 def create_spec(server_url: str, title: str, version: str, description: str) -> dict[str, Any]:
     """创建最终 OpenAPI 文档。"""
     full_schema = app.openapi()
@@ -340,6 +386,9 @@ def create_spec(server_url: str, title: str, version: str, description: str) -> 
 
     # 规范化 schema 名称和引用
     spec = normalize_schemas_and_refs(spec)
+
+    # 将 nullable $ref 属性展开为内联 schema（消除 Coze 客户端对可选对象子字段的强制必填行为）
+    spec = inline_nullable_refs(spec)
 
     return spec
 

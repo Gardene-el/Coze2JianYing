@@ -7,794 +7,794 @@ paths:
   /drafts/create_draft:
     post:
       tags:
-        - basic
+      - basic
       summary: Create Draft
       operationId: create_draft
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateDraftRequest"
+              $ref: '#/components/schemas/CreateDraftRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateDraftResponse"
+                $ref: '#/components/schemas/CreateDraftResponse'
   /drafts/{draft_id}/save_draft:
     post:
       tags:
-        - basic
+      - basic
       summary: Save Draft
       operationId: save_draft
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SaveDraftResponse"
+                $ref: '#/components/schemas/SaveDraftResponse'
   /drafts/{draft_id}/add_segment:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Segment
       operationId: add_segment
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddSegmentRequest"
+              $ref: '#/components/schemas/AddSegmentRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddSegmentResponse"
+                $ref: '#/components/schemas/AddSegmentResponse'
   /drafts/{draft_id}/add_track:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Track
       operationId: add_track
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddTrackRequest"
+              $ref: '#/components/schemas/AddTrackRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddTrackResponse"
+                $ref: '#/components/schemas/AddTrackResponse'
   /drafts/{draft_id}/add_effect:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Effect
       operationId: add_effect
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddEffectRequest"
+              $ref: '#/components/schemas/AddEffectRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddEffectResponse"
+                $ref: '#/components/schemas/AddEffectResponse'
   /drafts/{draft_id}/add_filter:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Filter
       operationId: add_filter
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddFilterRequest"
+              $ref: '#/components/schemas/AddFilterRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddFilterResponse"
+                $ref: '#/components/schemas/AddFilterResponse'
   /segments/create_audio_segment:
     post:
       tags:
-        - basic
+      - basic
       summary: Create Audio Segment
       operationId: create_audio_segment
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateAudioSegmentRequest"
+              $ref: '#/components/schemas/CreateAudioSegmentRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateAudioSegmentResponse"
+                $ref: '#/components/schemas/CreateAudioSegmentResponse'
   /segments/create_video_segment:
     post:
       tags:
-        - basic
+      - basic
       summary: Create Video Segment
       operationId: create_video_segment
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateVideoSegmentRequest"
+              $ref: '#/components/schemas/CreateVideoSegmentRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateVideoSegmentResponse"
+                $ref: '#/components/schemas/CreateVideoSegmentResponse'
   /segments/create_text_segment:
     post:
       tags:
-        - basic
+      - basic
       summary: Create Text Segment
       operationId: create_text_segment
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateTextSegmentRequest"
+              $ref: '#/components/schemas/CreateTextSegmentRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateTextSegmentResponse"
+                $ref: '#/components/schemas/CreateTextSegmentResponse'
   /segments/create_sticker_segment:
     post:
       tags:
-        - basic
+      - basic
       summary: Create Sticker Segment
       operationId: create_sticker_segment
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateStickerSegmentRequest"
+              $ref: '#/components/schemas/CreateStickerSegmentRequest'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateStickerSegmentResponse"
+                $ref: '#/components/schemas/CreateStickerSegmentResponse'
   /segments/{segment_id}/add_audio_effect:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Audio Effect
       operationId: add_audio_effect
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddAudioEffectRequest"
+              $ref: '#/components/schemas/AddAudioEffectRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddAudioEffectResponse"
+                $ref: '#/components/schemas/AddAudioEffectResponse'
   /segments/{segment_id}/add_audio_fade:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Audio Fade
       operationId: add_audio_fade
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddAudioFadeRequest"
+              $ref: '#/components/schemas/AddAudioFadeRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddAudioFadeResponse"
+                $ref: '#/components/schemas/AddAudioFadeResponse'
   /segments/{segment_id}/add_audio_keyframe:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Audio Keyframe
       operationId: add_audio_keyframe
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddAudioKeyframeRequest"
+              $ref: '#/components/schemas/AddAudioKeyframeRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddAudioKeyframeResponse"
+                $ref: '#/components/schemas/AddAudioKeyframeResponse'
   /segments/{segment_id}/add_sticker_keyframe:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Sticker Keyframe
       operationId: add_sticker_keyframe
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddStickerKeyframeRequest"
+              $ref: '#/components/schemas/AddStickerKeyframeRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddStickerKeyframeResponse"
+                $ref: '#/components/schemas/AddStickerKeyframeResponse'
   /segments/{segment_id}/add_text_animation:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Text Animation
       operationId: add_text_animation
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddTextAnimationRequest"
+              $ref: '#/components/schemas/AddTextAnimationRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddTextAnimationResponse"
+                $ref: '#/components/schemas/AddTextAnimationResponse'
   /segments/{segment_id}/add_text_bubble:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Text Bubble
       operationId: add_text_bubble
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddTextBubbleRequest"
+              $ref: '#/components/schemas/AddTextBubbleRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddTextBubbleResponse"
+                $ref: '#/components/schemas/AddTextBubbleResponse'
   /segments/{segment_id}/add_text_effect:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Text Effect
       operationId: add_text_effect
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddTextEffectRequest"
+              $ref: '#/components/schemas/AddTextEffectRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddTextEffectResponse"
+                $ref: '#/components/schemas/AddTextEffectResponse'
   /segments/{segment_id}/add_text_keyframe:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Text Keyframe
       operationId: add_text_keyframe
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddTextKeyframeRequest"
+              $ref: '#/components/schemas/AddTextKeyframeRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddTextKeyframeResponse"
+                $ref: '#/components/schemas/AddTextKeyframeResponse'
   /segments/{segment_id}/add_video_animation:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Animation
       operationId: add_video_animation
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoAnimationRequest"
+              $ref: '#/components/schemas/AddVideoAnimationRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoAnimationResponse"
+                $ref: '#/components/schemas/AddVideoAnimationResponse'
   /segments/{segment_id}/add_video_background_filling:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Background Filling
       operationId: add_video_background_filling
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoBackgroundFillingRequest"
+              $ref: '#/components/schemas/AddVideoBackgroundFillingRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoBackgroundFillingResponse"
+                $ref: '#/components/schemas/AddVideoBackgroundFillingResponse'
   /segments/{segment_id}/add_video_effect:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Effect
       operationId: add_video_effect
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoEffectRequest"
+              $ref: '#/components/schemas/AddVideoEffectRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoEffectResponse"
+                $ref: '#/components/schemas/AddVideoEffectResponse'
   /segments/{segment_id}/add_video_fade:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Fade
       operationId: add_video_fade
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoFadeRequest"
+              $ref: '#/components/schemas/AddVideoFadeRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoFadeResponse"
+                $ref: '#/components/schemas/AddVideoFadeResponse'
   /segments/{segment_id}/add_video_filter:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Filter
       operationId: add_video_filter
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoFilterRequest"
+              $ref: '#/components/schemas/AddVideoFilterRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoFilterResponse"
+                $ref: '#/components/schemas/AddVideoFilterResponse'
   /segments/{segment_id}/add_video_keyframe:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Keyframe
       operationId: add_video_keyframe
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoKeyframeRequest"
+              $ref: '#/components/schemas/AddVideoKeyframeRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoKeyframeResponse"
+                $ref: '#/components/schemas/AddVideoKeyframeResponse'
   /segments/{segment_id}/add_video_mask:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Mask
       operationId: add_video_mask
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoMaskRequest"
+              $ref: '#/components/schemas/AddVideoMaskRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoMaskResponse"
+                $ref: '#/components/schemas/AddVideoMaskResponse'
   /segments/{segment_id}/add_video_transition:
     post:
       tags:
-        - basic
+      - basic
       summary: Add Video Transition
       operationId: add_video_transition
       parameters:
-        - name: segment_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideoTransitionRequest"
+              $ref: '#/components/schemas/AddVideoTransitionRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideoTransitionResponse"
+                $ref: '#/components/schemas/AddVideoTransitionResponse'
   /drafts/{draft_id}/add_audios:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Audios
       operationId: add_audios
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddAudiosRequest"
+              $ref: '#/components/schemas/AddAudiosRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddAudiosResponse"
+                $ref: '#/components/schemas/AddAudiosResponse'
   /drafts/{draft_id}/add_captions:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Captions
       operationId: add_captions
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddCaptionsRequest"
+              $ref: '#/components/schemas/AddCaptionsRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddCaptionsResponse"
+                $ref: '#/components/schemas/AddCaptionsResponse'
   /drafts/{draft_id}/add_videos:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Videos
       operationId: add_videos
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddVideosRequest"
+              $ref: '#/components/schemas/AddVideosRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddVideosResponse"
+                $ref: '#/components/schemas/AddVideosResponse'
   /drafts/{draft_id}/add_images:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Images
       operationId: add_images
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddImagesRequest"
+              $ref: '#/components/schemas/AddImagesRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddImagesResponse"
+                $ref: '#/components/schemas/AddImagesResponse'
   /drafts/{draft_id}/add_effects:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Effects
       operationId: add_effects
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddEffectsRequest"
+              $ref: '#/components/schemas/AddEffectsRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddEffectsResponse"
+                $ref: '#/components/schemas/AddEffectsResponse'
   /drafts/{draft_id}/add_masks:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Masks
       operationId: add_masks
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddMasksRequest"
-        required: true
+              $ref: '#/components/schemas/AddMasksRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddMasksResponse"
+                $ref: '#/components/schemas/AddMasksResponse'
   /drafts/{draft_id}/add_keyframes:
     post:
       tags:
-        - easy
+      - easy
       summary: Add Keyframes
       operationId: add_keyframes
       parameters:
-        - name: draft_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddKeyframesRequest"
-        required: true
+              $ref: '#/components/schemas/AddKeyframesRequest'
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AddKeyframesResponse"
+                $ref: '#/components/schemas/AddKeyframesResponse'
 servers:
-  - url: https://coze2jianying.pages.dev
+- url: https://coze2jianying.pages.dev
 components:
   schemas:
     TimeRange:
@@ -810,8 +810,8 @@ components:
           description: 持续时长（微秒）
       type: object
       required:
-        - start
-        - duration
+      - start
+      - duration
       description: 时间范围模型（微秒）
     ClipSettings:
       properties:
@@ -846,9 +846,9 @@ components:
           description: Y 轴位置偏移
           default: 0.0
       type: object
-      description: "图像调节设置（镜像 pyJianYingDraft.ClipSettings）
+      description: '图像调节设置（镜像 pyJianYingDraft.ClipSettings）
 
-        对应 pyJianYingDraft 的 ClipSettings 类，用于控制片段的变换属性"
+        对应 pyJianYingDraft 的 ClipSettings 类，用于控制片段的变换属性'
     TextStyle:
       properties:
         font_size:
@@ -863,9 +863,9 @@ components:
           type: array
           description: 文字颜色 RGB (0.0-1.0)
           default:
-            - 1.0
-            - 1.0
-            - 1.0
+          - 1.0
+          - 1.0
+          - 1.0
         alpha:
           type: number
           maximum: 1.0
@@ -888,7 +888,7 @@ components:
           type: integer
           maximum: 2.0
           minimum: 0.0
-          description: "对齐方式: 0=左对齐, 1=居中, 2=右对齐"
+          description: '对齐方式: 0=左对齐, 1=居中, 2=右对齐'
           default: 0
         vertical:
           type: boolean
@@ -913,9 +913,9 @@ components:
           description: 每行最大宽度（占屏幕宽度比例 0-1）
           default: 0.82
       type: object
-      description: "文本样式（镜像 pyJianYingDraft.TextStyle）
+      description: '文本样式（镜像 pyJianYingDraft.TextStyle）
 
-        对应 pyJianYingDraft 的 TextStyle 类，用于控制文本的样式属性"
+        对应 pyJianYingDraft 的 TextStyle 类，用于控制文本的样式属性'
     TextBorder:
       properties:
         color:
@@ -924,9 +924,9 @@ components:
           type: array
           description: 描边颜色 RGB (0.0-1.0)
           default:
-            - 0.0
-            - 0.0
-            - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         alpha:
           type: number
           maximum: 1.0
@@ -949,9 +949,9 @@ components:
           type: array
           description: 阴影颜色 RGB (0.0-1.0)
           default:
-            - 0.0
-            - 0.0
-            - 0.0
+          - 0.0
+          - 0.0
+          - 0.0
         alpha:
           type: number
           maximum: 1.0
@@ -1027,7 +1027,7 @@ components:
           default: 0.5
       type: object
       required:
-        - color
+      - color
       description: 文本背景参数（镜像 pyJianYingDraft.TextBackground）
     CropSettings:
       properties:
@@ -1080,9 +1080,9 @@ components:
           description: 右下角 Y 坐标 (0.0-1.0)
           default: 1.0
       type: object
-      description: "裁剪设置（镜像 pyJianYingDraft.CropSettings）
+      description: '裁剪设置（镜像 pyJianYingDraft.CropSettings）
 
-        对应 pyJianYingDraft 的 CropSettings 类，用于定义裁剪区域的四个角点坐标"
+        对应 pyJianYingDraft 的 CropSettings 类，用于定义裁剪区域的四个角点坐标'
     CreateDraftRequest:
       properties:
         draft_name:
@@ -1127,7 +1127,7 @@ components:
           description: 草稿 UUID
       type: object
       required:
-        - draft_id
+      - draft_id
       description: 创建草稿响应
       example:
         draft_id: 12345678-1234-1234-1234-123456789abc
@@ -1146,7 +1146,7 @@ components:
           description: 目标轨道索引，None 则自动选择
       type: object
       required:
-        - segment_id
+      - segment_id
       description: 添加片段到草稿请求
       example:
         segment_id: 87654321-4321-4321-4321-cba987654321
@@ -1159,14 +1159,14 @@ components:
       properties:
         track_type:
           type: string
-          description: "轨道类型: audio/video/text/sticker/effect/filter"
+          description: '轨道类型: audio/video/text/sticker/effect/filter'
         track_name:
           type: string
           nullable: true
           description: 轨道名称
       type: object
       required:
-        - track_type
+      - track_type
       description: 添加轨道请求
       example:
         track_name: 背景音乐
@@ -1181,7 +1181,7 @@ components:
           type: string
           description: 特效类型
         target_timerange:
-          $ref: "#/components/schemas/TimeRange"
+          $ref: '#/components/schemas/TimeRange'
           description: 时间范围
         params:
           items:
@@ -1192,14 +1192,14 @@ components:
           description: 特效参数列表
       type: object
       required:
-        - effect_type
-        - target_timerange
+      - effect_type
+      - target_timerange
       description: 添加全局特效请求
       example:
         effect_type: VideoSceneEffectType.XXX
         params:
-          - 0.5
-          - 1.0
+        - 0.5
+        - 1.0
         target_timerange:
           duration: 5000000
           start: 0
@@ -1213,7 +1213,7 @@ components:
           type: string
           description: 滤镜类型
         target_timerange:
-          $ref: "#/components/schemas/TimeRange"
+          $ref: '#/components/schemas/TimeRange'
           description: 时间范围
         intensity:
           type: number
@@ -1223,8 +1223,8 @@ components:
           default: 100.0
       type: object
       required:
-        - filter_type
-        - target_timerange
+      - filter_type
+      - target_timerange
       description: 添加全局滤镜请求
       example:
         filter_type: FilterType.XXX
@@ -1242,12 +1242,22 @@ components:
           type: string
           description: 音频素材 URL
         target_timerange:
-          $ref: "#/components/schemas/TimeRange"
+          $ref: '#/components/schemas/TimeRange'
           description: 在轨道上的时间范围
         source_timerange:
-          $ref: "#/components/schemas/TimeRange"
-          nullable: true
+          properties:
+            start:
+              type: integer
+              minimum: 0.0
+              description: 开始时间（微秒）
+            duration:
+              type: integer
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: 持续时长（微秒）
+          type: object
           description: 素材裁剪范围
+          nullable: true
         speed:
           type: number
           minimum: 0.0
@@ -1266,8 +1276,8 @@ components:
           default: false
       type: object
       required:
-        - material_url
-        - target_timerange
+      - material_url
+      - target_timerange
       description: 创建音频片段请求
       example:
         change_pitch: false
@@ -1287,7 +1297,7 @@ components:
           description: Segment UUID
       type: object
       required:
-        - segment_id
+      - segment_id
       description: 创建片段响应
       example:
         segment_id: 87654321-4321-4321-4321-cba987654321
@@ -1297,12 +1307,22 @@ components:
           type: string
           description: 视频素材 URL
         target_timerange:
-          $ref: "#/components/schemas/TimeRange"
+          $ref: '#/components/schemas/TimeRange'
           description: 在轨道上的时间范围
         source_timerange:
-          $ref: "#/components/schemas/TimeRange"
-          nullable: true
+          properties:
+            start:
+              type: integer
+              minimum: 0.0
+              description: 开始时间（微秒）
+            duration:
+              type: integer
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: 持续时长（微秒）
+          type: object
           description: 素材裁剪范围
+          nullable: true
         speed:
           type: number
           minimum: 0.0
@@ -1320,17 +1340,97 @@ components:
           description: 是否跟随变速改变音调
           default: false
         clip_settings:
-          $ref: "#/components/schemas/ClipSettings"
-          nullable: true
+          properties:
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 透明度 (0.0-1.0)
+              default: 1.0
+            rotation:
+              type: number
+              description: 旋转角度（度）
+              default: 0.0
+            scale_x:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: X 轴缩放比例
+              default: 1.0
+            scale_y:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: Y 轴缩放比例
+              default: 1.0
+            transform_x:
+              type: number
+              description: X 轴位置偏移
+              default: 0.0
+            transform_y:
+              type: number
+              description: Y 轴位置偏移
+              default: 0.0
+          type: object
           description: 图像调节设置
-        crop_settings:
-          $ref: "#/components/schemas/CropSettings"
           nullable: true
+        crop_settings:
+          properties:
+            upper_left_x:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 左上角 X 坐标 (0.0-1.0)
+              default: 0.0
+            upper_left_y:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 左上角 Y 坐标 (0.0-1.0)
+              default: 0.0
+            upper_right_x:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 右上角 X 坐标 (0.0-1.0)
+              default: 1.0
+            upper_right_y:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 右上角 Y 坐标 (0.0-1.0)
+              default: 0.0
+            lower_left_x:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 左下角 X 坐标 (0.0-1.0)
+              default: 0.0
+            lower_left_y:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 左下角 Y 坐标 (0.0-1.0)
+              default: 1.0
+            lower_right_x:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 右下角 X 坐标 (0.0-1.0)
+              default: 1.0
+            lower_right_y:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 右下角 Y 坐标 (0.0-1.0)
+              default: 1.0
+          type: object
           description: 裁剪设置
+          nullable: true
       type: object
       required:
-        - material_url
-        - target_timerange
+      - material_url
+      - target_timerange
       description: 创建视频片段请求
       example:
         change_pitch: false
@@ -1366,7 +1466,7 @@ components:
           description: Segment UUID
       type: object
       required:
-        - segment_id
+      - segment_id
       description: 创建片段响应
       example:
         segment_id: 87654321-4321-4321-4321-cba987654321
@@ -1377,7 +1477,7 @@ components:
           minLength: 1
           description: 文本内容
         target_timerange:
-          $ref: "#/components/schemas/TimeRange"
+          $ref: '#/components/schemas/TimeRange'
           description: 在轨道上的时间范围
         font_family:
           type: string
@@ -1385,29 +1485,224 @@ components:
           description: 字体名称
           default: 文轩体
         text_style:
-          $ref: "#/components/schemas/TextStyle"
-          nullable: true
+          properties:
+            font_size:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: 字体大小（与剤映中定义一致）
+              default: 8.0
+            color:
+              items:
+                type: number
+              type: array
+              description: 文字颜色 RGB (0.0-1.0)
+              default:
+              - 1.0
+              - 1.0
+              - 1.0
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 文字不透明度 0.0-1.0
+              default: 1.0
+            bold:
+              type: boolean
+              description: 是否加粗
+              default: false
+            italic:
+              type: boolean
+              description: 是否斜体
+              default: false
+            underline:
+              type: boolean
+              description: 是否下划线
+              default: false
+            align:
+              type: integer
+              maximum: 2.0
+              minimum: 0.0
+              description: '对齐方式: 0=左对齐, 1=居中, 2=右对齐'
+              default: 0
+            vertical:
+              type: boolean
+              description: 是否竖排文本
+              default: false
+            letter_spacing:
+              type: integer
+              description: 字符间距（与剤映中定义一致）
+              default: 0
+            line_spacing:
+              type: integer
+              description: 行间距（与剤映中定义一致）
+              default: 0
+            auto_wrapping:
+              type: boolean
+              description: 是否自动换行（开启后 type 为 subtitle）
+              default: false
+            max_line_width:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 每行最大宽度（占屏幕宽度比例 0-1）
+              default: 0.82
+          type: object
           description: 文本样式（字体大小、颜色、加粗等）
+          nullable: true
         text_border:
-          $ref: "#/components/schemas/TextBorder"
-          nullable: true
+          properties:
+            color:
+              items:
+                type: number
+              type: array
+              description: 描边颜色 RGB (0.0-1.0)
+              default:
+              - 0.0
+              - 0.0
+              - 0.0
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 描边不透明度 0.0-1.0
+              default: 1.0
+            width:
+              type: number
+              maximum: 100.0
+              minimum: 0.0
+              description: 描边宽度 0-100（与剤映中定义一致）
+              default: 40.0
+          type: object
           description: 文本描边，None 表示无描边
+          nullable: true
         text_shadow:
-          $ref: "#/components/schemas/TextShadow"
-          nullable: true
+          properties:
+            color:
+              items:
+                type: number
+              type: array
+              description: 阴影颜色 RGB (0.0-1.0)
+              default:
+              - 0.0
+              - 0.0
+              - 0.0
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 阴影不透明度 0.0-1.0
+              default: 0.9
+            diffuse:
+              type: number
+              maximum: 100.0
+              minimum: 0.0
+              description: 阴影扩散程度 0-100
+              default: 15.0
+            distance:
+              type: number
+              maximum: 100.0
+              minimum: 0.0
+              description: 阴影距离 0-100
+              default: 5.0
+            angle:
+              type: number
+              maximum: 180.0
+              minimum: -180.0
+              description: 阴影角度 -180 到 180
+              default: -45.0
+          type: object
           description: 文本阴影，None 表示无阴影
+          nullable: true
         text_background:
-          $ref: "#/components/schemas/TextBackground"
-          nullable: true
+          properties:
+            color:
+              type: string
+              description: 背景颜色，格式为 '#RRGGBB'
+            style:
+              type: integer
+              maximum: 2.0
+              minimum: 1.0
+              description: 背景样式 1 或 2
+              default: 1
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 背景不透明度 0.0-1.0
+              default: 1.0
+            round_radius:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 圆角半径 0-1
+              default: 0.0
+            height:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 背景高度 0-1
+              default: 0.14
+            width:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 背景宽度 0-1
+              default: 0.14
+            horizontal_offset:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 水平偏移 0-1
+              default: 0.5
+            vertical_offset:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 竖直偏移 0-1
+              default: 0.5
+          type: object
           description: 文本背景，None 表示无背景
-        clip_settings:
-          $ref: "#/components/schemas/ClipSettings"
           nullable: true
+        clip_settings:
+          properties:
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 透明度 (0.0-1.0)
+              default: 1.0
+            rotation:
+              type: number
+              description: 旋转角度（度）
+              default: 0.0
+            scale_x:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: X 轴缩放比例
+              default: 1.0
+            scale_y:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: Y 轴缩放比例
+              default: 1.0
+            transform_x:
+              type: number
+              description: X 轴位置偏移
+              default: 0.0
+            transform_y:
+              type: number
+              description: Y 轴位置偏移
+              default: 0.0
+          type: object
           description: 图像调节设置（位置、缩放、旋转、透明度）
+          nullable: true
       type: object
       required:
-        - text_content
-        - target_timerange
+      - text_content
+      - target_timerange
       description: 创建文本片段请求
       example:
         clip_settings:
@@ -1428,9 +1723,9 @@ components:
           auto_wrapping: false
           bold: false
           color:
-            - 1.0
-            - 1.0
-            - 1.0
+          - 1.0
+          - 1.0
+          - 1.0
           font_size: 8.0
           italic: false
           letter_spacing: 0
@@ -1445,7 +1740,7 @@ components:
           description: Segment UUID
       type: object
       required:
-        - segment_id
+      - segment_id
       description: 创建片段响应
       example:
         segment_id: 87654321-4321-4321-4321-cba987654321
@@ -1455,16 +1750,47 @@ components:
           type: string
           description: 贴纸素材 URL
         target_timerange:
-          $ref: "#/components/schemas/TimeRange"
+          $ref: '#/components/schemas/TimeRange'
           description: 在轨道上的时间范围
         clip_settings:
-          $ref: "#/components/schemas/ClipSettings"
-          nullable: true
+          properties:
+            alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 透明度 (0.0-1.0)
+              default: 1.0
+            rotation:
+              type: number
+              description: 旋转角度（度）
+              default: 0.0
+            scale_x:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: X 轴缩放比例
+              default: 1.0
+            scale_y:
+              type: number
+              minimum: 0.0
+              exclusiveMinimum: true
+              description: Y 轴缩放比例
+              default: 1.0
+            transform_x:
+              type: number
+              description: X 轴位置偏移
+              default: 0.0
+            transform_y:
+              type: number
+              description: Y 轴位置偏移
+              default: 0.0
+          type: object
           description: 图像调节设置（位置、缩放、旋转、透明度）
+          nullable: true
       type: object
       required:
-        - material_url
-        - target_timerange
+      - material_url
+      - target_timerange
       description: 创建贴纸片段请求
       example:
         clip_settings:
@@ -1485,7 +1811,7 @@ components:
           description: Segment UUID
       type: object
       required:
-        - segment_id
+      - segment_id
       description: 创建片段响应
       example:
         segment_id: 87654321-4321-4321-4321-cba987654321
@@ -1493,7 +1819,7 @@ components:
       properties:
         effect_type:
           type: string
-          description: "音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType"
+          description: '音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType'
         params:
           items:
             type: number
@@ -1502,13 +1828,13 @@ components:
           description: 特效参数列表（范围 0-100）
       type: object
       required:
-        - effect_type
+      - effect_type
       description: 添加音频特效请求（用于 AudioSegment）
       example:
         effect_type: AudioSceneEffectType.VOICE_CHANGER
         params:
-          - 50.0
-          - 75.0
+        - 50.0
+        - 75.0
     AddAudioEffectResponse:
       properties: {}
       type: object
@@ -1523,8 +1849,8 @@ components:
           description: 淡出时长
       type: object
       required:
-        - in_duration
-        - out_duration
+      - in_duration
+      - out_duration
       description: 添加音频淡入淡出请求（用于 AudioSegment）
       example:
         in_duration: 1s
@@ -1544,8 +1870,8 @@ components:
           description: 音量值 0-2
       type: object
       required:
-        - time_offset
-        - volume
+      - time_offset
+      - volume
       description: 添加音频关键帧请求（用于 AudioSegment）
       example:
         time_offset: 2000000
@@ -1565,12 +1891,12 @@ components:
           description: 关键帧值
         property:
           type: string
-          description: "属性名称: position_x, position_y, scale, rotation, opacity 等"
+          description: '属性名称: position_x, position_y, scale, rotation, opacity 等'
       type: object
       required:
-        - time_offset
-        - value
-        - property
+      - time_offset
+      - value
+      - property
       description: 添加贴纸关键帧请求（用于 StickerSegment）
       example:
         property: scale
@@ -1584,7 +1910,7 @@ components:
       properties:
         animation_type:
           type: string
-          description: "动画类型: TextAnimationType"
+          description: '动画类型: TextAnimationType'
         duration:
           type: string
           nullable: true
@@ -1592,7 +1918,7 @@ components:
           default: 1s
       type: object
       required:
-        - animation_type
+      - animation_type
       description: 添加文本动画请求（用于 TextSegment）
       example:
         animation_type: TextAnimationType.TYPEWRITER
@@ -1611,8 +1937,8 @@ components:
           description: 资源 ID
       type: object
       required:
-        - effect_id
-        - resource_id
+      - effect_id
+      - resource_id
       description: 添加文本气泡请求（用于 TextSegment）
       example:
         effect_id: bubble_effect_123
@@ -1628,10 +1954,10 @@ components:
           description: 花字特效 ID
       type: object
       required:
-        - effect_id
+      - effect_id
       description: 添加花字特效请求（用于 TextSegment）
       example:
-        effect_id: "7296357486490144036"
+        effect_id: '7296357486490144036'
     AddTextEffectResponse:
       properties: {}
       type: object
@@ -1647,12 +1973,12 @@ components:
           description: 关键帧值
         property:
           type: string
-          description: "属性名称: position_x, position_y, scale, rotation, opacity 等"
+          description: '属性名称: position_x, position_y, scale, rotation, opacity 等'
       type: object
       required:
-        - time_offset
-        - value
-        - property
+      - time_offset
+      - value
+      - property
       description: 添加文本关键帧请求（用于 TextSegment）
       example:
         property: position_x
@@ -1666,7 +1992,7 @@ components:
       properties:
         animation_type:
           type: string
-          description: "动画类型: IntroType | OutroType | GroupAnimationType"
+          description: '动画类型: IntroType | OutroType | GroupAnimationType'
         duration:
           type: string
           nullable: true
@@ -1674,7 +2000,7 @@ components:
           default: 1s
       type: object
       required:
-        - animation_type
+      - animation_type
       description: 添加视频动画请求（用于 VideoSegment）
       example:
         animation_type: IntroType.FADE_IN
@@ -1687,7 +2013,7 @@ components:
       properties:
         fill_type:
           type: string
-          description: "填充类型: blur 或 color"
+          description: '填充类型: blur 或 color'
         blur:
           type: number
           nullable: true
@@ -1697,10 +2023,10 @@ components:
           type: string
           nullable: true
           description: 填充颜色（fill_type=color 时）
-          default: "#00000000"
+          default: '#00000000'
       type: object
       required:
-        - fill_type
+      - fill_type
       description: 添加视频背景填充请求（用于 VideoSegment）
       example:
         blur: 0.0625
@@ -1713,7 +2039,7 @@ components:
       properties:
         effect_type:
           type: string
-          description: "视频特效类型: VideoSceneEffectType | VideoCharacterEffectType"
+          description: '视频特效类型: VideoSceneEffectType | VideoCharacterEffectType'
         params:
           items:
             type: number
@@ -1722,12 +2048,12 @@ components:
           description: 特效参数列表
       type: object
       required:
-        - effect_type
+      - effect_type
       description: 添加视频特效请求（用于 VideoSegment）
       example:
         effect_type: VideoSceneEffectType.GLITCH
         params:
-          - 50.0
+        - 50.0
     AddVideoEffectResponse:
       properties: {}
       type: object
@@ -1742,8 +2068,8 @@ components:
           description: 淡出时长
       type: object
       required:
-        - in_duration
-        - out_duration
+      - in_duration
+      - out_duration
       description: 添加视频淡入淡出请求（用于 VideoSegment）
       example:
         in_duration: 1s
@@ -1765,7 +2091,7 @@ components:
           default: 100.0
       type: object
       required:
-        - filter_type
+      - filter_type
       description: 添加视频滤镜请求（用于 VideoSegment）
       example:
         filter_type: FilterType.XXX
@@ -1785,12 +2111,12 @@ components:
           description: 关键帧值
         property:
           type: string
-          description: "属性名称: position_x, position_y, scale, rotation, opacity 等"
+          description: '属性名称: position_x, position_y, scale, rotation, opacity 等'
       type: object
       required:
-        - time_offset
-        - value
-        - property
+      - time_offset
+      - value
+      - property
       description: 添加视频关键帧请求（用于 VideoSegment）
       example:
         property: position_x
@@ -1847,7 +2173,7 @@ components:
           description: 矩形蒙版圆角 0-100，仅在 mask_type=矩形 时生效
       type: object
       required:
-        - mask_type
+      - mask_type
       description: 添加视频蒙版请求（用于 VideoSegment）
       example:
         center_x: 0.0
@@ -1873,7 +2199,7 @@ components:
           default: 1s
       type: object
       required:
-        - transition_type
+      - transition_type
       description: 添加视频转场请求（用于 VideoSegment）
       example:
         duration: 1s
@@ -1889,7 +2215,7 @@ components:
           description: 音频信息列表，JSON字符串
       type: object
       required:
-        - audio_infos
+      - audio_infos
       description: 批量添加音频请求参数。
     AddAudiosResponse:
       properties:
@@ -1908,7 +2234,7 @@ components:
         text_color:
           type: string
           description: 文本颜色（十六进制）
-          default: "#ffffff"
+          default: '#ffffff'
         border_color:
           type: string
           nullable: true
@@ -1979,12 +2305,41 @@ components:
           description: 是否启用文本阴影
           default: false
         shadow_info:
-          $ref: "#/components/schemas/ShadowInfo"
-          nullable: true
+          properties:
+            shadow_alpha:
+              type: number
+              maximum: 1.0
+              minimum: 0.0
+              description: 阴影不透明度
+              default: 1.0
+            shadow_color:
+              type: string
+              description: 阴影颜色（十六进制）
+              default: '#000000'
+            shadow_diffuse:
+              type: number
+              maximum: 100.0
+              minimum: 0.0
+              description: 阴影扩散程度
+              default: 15.0
+            shadow_distance:
+              type: number
+              maximum: 100.0
+              minimum: 0.0
+              description: 阴影距离
+              default: 5.0
+            shadow_angle:
+              type: number
+              maximum: 180.0
+              minimum: -180.0
+              description: 阴影角度
+              default: -45.0
+          type: object
           description: 文本阴影参数
+          nullable: true
       type: object
       required:
-        - captions
+      - captions
       description: 批量添加字幕请求参数。
     AddCaptionsResponse:
       properties:
@@ -2022,7 +2377,7 @@ components:
           default: 0
       type: object
       required:
-        - video_infos
+      - video_infos
       description: 批量添加视频请求参数。
     AddVideosResponse:
       properties:
@@ -2060,7 +2415,7 @@ components:
           default: 0
       type: object
       required:
-        - image_infos
+      - image_infos
       description: 批量添加图片请求参数。
     AddImagesResponse:
       properties:
@@ -2078,7 +2433,7 @@ components:
           description: 特效信息列表，JSON字符串
       type: object
       required:
-        - effect_infos
+      - effect_infos
       description: 添加特效请求参数。
     AddEffectsResponse:
       properties:
@@ -2128,7 +2483,7 @@ components:
           type: boolean
           description: 是否反转遮罩
           default: false
-        roundCorner:
+        round_corner:
           type: integer
           description: 圆角半径（0-100）
           default: 0
@@ -2145,7 +2500,7 @@ components:
           description: 关键帧信息列表，JSON字符串
       type: object
       required:
-        - keyframes
+      - keyframes
       description: 添加关键帧请求参数。
     AddKeyframesResponse:
       properties: {}
@@ -2162,7 +2517,7 @@ components:
         shadow_color:
           type: string
           description: 阴影颜色（十六进制）
-          default: "#000000"
+          default: '#000000'
         shadow_diffuse:
           type: number
           maximum: 100.0
