@@ -123,7 +123,8 @@ def ensure_coze2jianying_file() -> str:
 # 记录所有通过 Coze 工具调用的 API 操作
 
 import asyncio
-from src.backend.schemas.general_schemas import *
+from src.backend.schemas import *
+from src.backend.core.common_types import *
 
 # API 调用记录将追加在下方
 """
@@ -150,7 +151,7 @@ def append_api_call_to_file(file_path: str, api_call_code: str):
     return content
 
 
-def generate_api_handlers(api_dir: Path, schema_file: Path, output_dir: Path) -> int:
+def generate_api_handlers(api_dir: Path, schema_dir: Path, output_dir: Path) -> int:
     """生成 API handler。"""
     print("步骤 1: 扫描 API 端点...")
     scanner = APIScanner(str(api_dir))
@@ -162,8 +163,7 @@ def generate_api_handlers(api_dir: Path, schema_file: Path, output_dir: Path) ->
         return 0
 
     print("步骤 2: 加载 Schema 信息...")
-    schema_extractor = SchemaExtractor(str(schema_file))
-    print(f"加载了 {len(schema_extractor.schemas)} 个 schema 定义")
+    schema_extractor = SchemaExtractor(str(schema_dir))
     print()
 
     print("步骤 3: 初始化生成器模块...")
@@ -204,15 +204,14 @@ def generate_api_handlers(api_dir: Path, schema_file: Path, output_dir: Path) ->
     return generated_count
 
 
-def generate_custom_handlers(schema_file: Path, output_dir: Path) -> int:
+def generate_custom_handlers(schema_dir: Path, output_dir: Path) -> int:
     """生成自定义类 handler。"""
     print("步骤 1: 加载 Schema 信息...")
-    schema_extractor = SchemaExtractor(str(schema_file))
-    print(f"加载了 {len(schema_extractor.schemas)} 个 schema 定义")
+    schema_extractor = SchemaExtractor(str(schema_dir))
     print()
 
     print("步骤 2: 扫描自定义类...")
-    generator = CustomClassHandlerGenerator(str(schema_file), schema_extractor)
+    generator = CustomClassHandlerGenerator(str(schema_dir), schema_extractor)
     custom_classes = generator.scan_custom_classes()
     print(f"找到 {len(custom_classes)} 个目标自定义类")
     print()
@@ -270,16 +269,16 @@ def main() -> None:
         print("参数冲突：--api-only 与 --custom-only 不能同时使用")
         raise SystemExit(1)
 
-    api_dir = PROJECT_ROOT / "backend" / "api"
-    schema_file = PROJECT_ROOT / "backend" / "schemas" / "general_schemas.py"
-    output_dir = PROJECT_ROOT / "coze_plugin" / "raw_tools"
+    api_dir = PROJECT_ROOT / "src" / "backend" / "api"
+    schema_dir = PROJECT_ROOT / "src" / "backend" / "schemas"
+    output_dir = PROJECT_ROOT / "plugins" / "coze"
 
     print("=" * 60)
     print("Coze Handler 一键生成器")
     print("=" * 60)
     print(f"项目根目录: {PROJECT_ROOT}")
     print(f"API 目录: {api_dir}")
-    print(f"Schema 文件: {schema_file}")
+    print(f"Schema 目录: {schema_dir}")
     print(f"输出目录: {output_dir}")
     print()
 
@@ -291,10 +290,10 @@ def main() -> None:
 
     total_generated = 0
     if not args.custom_only:
-        total_generated += generate_api_handlers(api_dir, schema_file, output_dir)
+        total_generated += generate_api_handlers(api_dir, schema_dir, output_dir)
 
     if not args.api_only:
-        total_generated += generate_custom_handlers(schema_file, output_dir)
+        total_generated += generate_custom_handlers(schema_dir, output_dir)
 
     print()
     print("=" * 60)

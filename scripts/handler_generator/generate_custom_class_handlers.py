@@ -35,26 +35,40 @@ class CustomClassHandlerGenerator:
     # 需要生成 handler 的自定义类列表
     TARGET_CLASSES = ['TimeRange', 'ClipSettings', 'TextStyle', 'CropSettings']
 
-    def __init__(self, schema_file: str, schema_extractor: SchemaExtractor):
-        self.schema_file = Path(schema_file)
+    def __init__(self, schema_source: str, schema_extractor: SchemaExtractor):
+        self.schema_source = Path(schema_source)
         self.schema_extractor = schema_extractor
         self.custom_classes: List[CustomClass] = []
 
     def scan_custom_classes(self) -> List[CustomClass]:
-        """扫描 general_schemas.py 中的自定义类"""
+        """扫描 schema 文件或目录中的自定义类"""
+        if self.schema_source.is_dir():
+            py_files = [
+                f for f in self.schema_source.rglob("*.py")
+                if f.name != "__init__.py"
+            ]
+        else:
+            py_files = [self.schema_source]
+
+        seen = set()
+        for file_path in py_files:
+            self._scan_file(file_path, seen)
+
+        return self.custom_classes
+
+    def _scan_file(self, file_path: Path, seen: set) -> None:
+        """扫描单个文件中的目标自定义类"""
         try:
-            with open(self.schema_file, 'r', encoding='utf-8') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 tree = ast.parse(content)
 
-            # 遍历 AST 查找目标类定义
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
-                    if node.name in self.TARGET_CLASSES:
-                        # 提取类的字段信息
+                    if node.name in self.TARGET_CLASSES and node.name not in seen:
+                        seen.add(node.name)
                         fields = self.schema_extractor.get_schema_fields(node.name)
                         docstring = ast.get_docstring(node) or ""
-
                         custom_class = CustomClass(
                             class_name=node.name,
                             fields=fields,
@@ -64,9 +78,7 @@ class CustomClassHandlerGenerator:
                         print(f"  找到自定义类: {node.name} ({len(fields)} 个字段)")
 
         except Exception as e:
-            print(f"警告: 扫描自定义类时出错: {e}")
-
-        return self.custom_classes
+            print(f"警告: 扫描自定义类时出错 ({file_path}): {e}")
 
     def generate_handler_content(self, custom_class: CustomClass) -> str:
         """生成 handler.py 的完整内容"""

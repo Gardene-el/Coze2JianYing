@@ -107,7 +107,10 @@ class APIScanner:
 
     def scan_all(self) -> List[APIEndpointInfo]:
         """扫描所有 API 文件"""
-        api_files = list(self.api_dir.glob('*_routes.py'))
+        api_files = [
+            f for f in self.api_dir.glob("*.py")
+            if f.name not in ("__init__.py", "legacy.py", "router.py")
+        ]
 
         for api_file in api_files:
             print(f"扫描文件: {api_file.name}")

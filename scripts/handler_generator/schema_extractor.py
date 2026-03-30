@@ -12,26 +12,40 @@ from typing import Any, Dict, List
 class SchemaExtractor:
     """提取 Pydantic Schema 的字段信息"""
 
-    def __init__(self, schema_file: str):
-        self.schema_file = Path(schema_file)
+    def __init__(self, schema_path: str):
+        self.schema_path = Path(schema_path)
         self.schemas = {}
         self._load_schemas()
 
     def _load_schemas(self):
-        """加载 schema 文件内容"""
+        """加载 schema 文件或目录下所有 .py 文件"""
+        if self.schema_path.is_dir():
+            py_files = [
+                f for f in self.schema_path.rglob("*.py")
+                if f.name != "__init__.py"
+            ]
+        else:
+            py_files = [self.schema_path]
+
+        for file_path in py_files:
+            self._load_file(file_path)
+
+        print(f"加载了 {len(self.schemas)} 个 schema 定义（共扫描 {len(py_files)} 个文件）")
+
+    def _load_file(self, file_path: Path):
+        """从单个文件加载 schema"""
         try:
-            with open(self.schema_file, "r", encoding="utf-8") as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 tree = ast.parse(content)
 
-            # 查找所有类定义
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     fields = self._extract_class_fields(node)
                     self.schemas[node.name] = fields
 
         except Exception as e:
-            print(f"警告: 加载 schema 文件时出错: {e}")
+            print(f"警告: 加载 schema 文件 {file_path} 时出错: {e}")
 
     def _extract_class_fields(self, class_node: ast.ClassDef) -> List[Dict[str, Any]]:
         """提取类的字段信息"""
@@ -178,7 +192,19 @@ class SchemaExtractor:
             return f"[{', '.join(elements)}]"
         elif isinstance(value_node, ast.Call):
             if isinstance(value_node.func, ast.Name) and value_node.func.id == "Field":
-                # 从 Field() 提取默认值
+                # 检查 default_factory 关键字（如 default_factory=list）
+                for keyword in value_node.keywords:
+                    if keyword.arg == "default_factory":
+                        if isinstance(keyword.value, ast.Name):
+                            factory = keyword.value.id
+                            if factory == "list":
+                                return "[]"
+                            elif factory == "dict":
+                                return "{}"
+                            elif factory == "set":
+                                return "set()"
+                        return "[]"  # 未知 factory 默认用 []
+                # 从 Field() 第一个位置参数提取默认值
                 if value_node.args:
                     first_arg = value_node.args[0]
                     if isinstance(first_arg, ast.Constant):
@@ -193,6 +219,14 @@ class SchemaExtractor:
                             if isinstance(elt, ast.Constant):
                                 elements.append(str(elt.value))
                         return f"[{', '.join(elements)}]"
+                # 检查 default 关键字
+                for keyword in value_node.keywords:
+                    if keyword.arg == "default":
+                        if isinstance(keyword.value, ast.Constant):
+                            val = keyword.value.value
+                            if isinstance(val, str):
+                                return f'"{val}"'
+                            return str(val)
                 return "..."
         return "..."
 
