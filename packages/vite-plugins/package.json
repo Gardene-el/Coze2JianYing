@@ -1,0 +1,18 @@
+{
+  "name": "@c2jy/vite-plugins",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared Vite plugins and renderer build config for Coze2JianYing",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:vite --external:@vitejs/plugin-react --external:vite-plugin-node-polyfills --external:vite-tsconfig-paths"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./src/index.ts"
+}

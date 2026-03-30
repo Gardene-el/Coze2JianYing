@@ -1,16 +1,14 @@
 import { resolve } from 'node:path'
-
-import dotenv from 'dotenv'
-import { defineConfig } from 'electron-vite'
-import type { PluginOption, ViteDevServer } from 'vite'
-import { loadEnv } from 'vite'
-
 import {
   sharedOptimizeDeps,
   sharedRendererDefine,
   sharedRendererPlugins,
   sharedRollupOutput,
-} from '../../plugins/vite/sharedRendererConfig'
+} from '@c2jy/vite-plugins'
+import dotenv from 'dotenv'
+import { defineConfig } from 'electron-vite'
+import type { PluginOption, ViteDevServer } from 'vite'
+import { loadEnv } from 'vite'
 import { getExternalDependencies } from './native-deps.config.mjs'
 
 /**
