@@ -103,7 +103,7 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
             and isinstance(converted["allOf"][0], dict)
             and "$ref" in converted["allOf"][0]
         ):
-            return {"$ref": converted["allOf"][0]["$ref"]}
+            return {"$ref": converted["allOf"][0]["$ref"], "nullable": True}
 
         return converted
 
@@ -179,74 +179,9 @@ def build_selected_paths(full_schema: dict[str, Any]) -> dict[str, Any]:
     return selected_paths
 
 
-def normalize_schema_name(name: str) -> str:
-    """规范化 schema 名称，移除 FastAPI 自动生成的冗余后缀。"""
-    return name
-
-
-def normalize_schemas_and_refs(spec: dict[str, Any]) -> dict[str, Any]:
-    """规范化所有 schema 名称并更新引用。"""
-    schemas = spec.get("components", {}).get("schemas", {})
-    if not schemas:
-        return spec
-    
-    # 建立旧名称到新名称的映射
-    name_mapping: dict[str, str] = {}
-    for old_name in schemas:
-        new_name = normalize_schema_name(old_name)
-        if new_name != old_name:
-            name_mapping[old_name] = new_name
-    
-    if not name_mapping:
-        return spec
-    
-    # 更新 schemas 中的名称
-    new_schemas: dict[str, Any] = {}
-    for old_name, schema in schemas.items():
-        new_name = name_mapping.get(old_name, old_name)
-        new_schemas[new_name] = schema
-    
-    spec = deepcopy(spec)
-    spec["components"]["schemas"] = new_schemas
-    
-    # 递归更新所有 $ref 引用
-    def update_refs(obj: Any) -> Any:
-        if isinstance(obj, dict):
-            if "$ref" in obj:
-                ref = obj["$ref"]
-                if ref.startswith("#/components/schemas/"):
-                    old_name = ref[len("#/components/schemas/"):]
-                    if old_name in name_mapping:
-                        obj["$ref"] = f"#/components/schemas/{name_mapping[old_name]}"
-            return {k: update_refs(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [update_refs(item) for item in obj]
-        return obj
-    
-    return update_refs(spec)
-
-
-def get_dynamic_endpoint_groups() -> list[str]:
-    """从 basic_router 和 easy_router 中动态获取 endpoint 顺序。"""
-    endpoint_groups = []
-    for router in (basic_router, easy_router):
-        for route in router.routes:
-            if isinstance(route, APIRoute):
-                func_name = route.endpoint.__name__
-                words = func_name.split('_')
-                schema_prefix = ''.join(word.capitalize() for word in words)
-                if schema_prefix not in endpoint_groups:
-                    endpoint_groups.append(schema_prefix)
-    return endpoint_groups
-
-
-def reorder_schemas(schemas: dict[str, Any]) -> dict[str, Any]:
-    """重排序 schemas：通用类在前，相关 Request/Response 连续。"""
-    if not schemas:
-        return schemas
-
-    # 动态扫描 common_types 中定义的所有 BaseModel 子类，按源码定义顺序排列
-    common_schemas = [
+def _get_common_schema_names_ordered() -> list[str]:
+    """获取 common_types 中定义的所有 BaseModel 子类名称，按源码定义顺序排列。"""
+    return [
         name
         for name, cls in sorted(
             (
@@ -259,30 +194,25 @@ def reorder_schemas(schemas: dict[str, Any]) -> dict[str, Any]:
             key=lambda nc: inspect.getsourcelines(nc[1])[1],
         )
     ]
-    
-    # 动态获取 endpoint 分组（基于 basic.py 中的路由顺序）
-    endpoint_groups = get_dynamic_endpoint_groups()
+
+
+def reorder_schemas(schemas: dict[str, Any]) -> dict[str, Any]:
+    """重排序 schemas：通用类（按源码定义顺序）在前，其余保持原序。"""
+    if not schemas:
+        return schemas
 
     ordered_schemas: dict[str, Any] = {}
-    
-    # 1. 添加通用 schemas
-    for name in common_schemas:
+
+    # 1. 添加通用 schemas（按源码定义顺序）
+    for name in _get_common_schema_names_ordered():
         if name in schemas:
             ordered_schemas[name] = schemas[name]
-    
-    # 2. 按组添加 Request/Response/Body triplets
-    for group in endpoint_groups:
-        # 先添加 Request, Response, 然后 Body
-        for suffix in ["Request", "Response", "Body"]:
-            full_name = f"{group}{suffix}"
-            if full_name in schemas:
-                ordered_schemas[full_name] = schemas[full_name]
-    
-    # 3. 添加剩余的未分类 schemas
+
+    # 2. 添加剩余 schemas
     for name, schema in schemas.items():
         if name not in ordered_schemas:
             ordered_schemas[name] = schema
-    
+
     return ordered_schemas
 
 
@@ -313,6 +243,70 @@ def build_min_components(selected_paths: dict[str, Any], all_components: dict[st
     # 重排序 schemas
     ordered_schemas = reorder_schemas(resolved)
     return {"schemas": ordered_schemas} if ordered_schemas else {}
+
+
+def inline_endpoint_schemas(spec: dict[str, Any]) -> dict[str, Any]:
+    """将 paths 中仅被引用一次的 Request/Response schema 内联展开。
+
+    通用数据结构（common_types 中定义的 BaseModel 子类）保留为 $ref 引用，
+    其余 schema（如 XxxRequest / XxxResponse）直接展开到 paths 中，
+    随后从 components/schemas 中移除已内联的 schema。
+    """
+    all_schemas = spec.get("components", {}).get("schemas", {})
+    if not all_schemas:
+        return spec
+
+    # 收集通用 schema 名称（来自 common_types）
+    common_schema_names: set[str] = set(_get_common_schema_names_ordered())
+
+    # 收集所有被通用 schema 内部引用的 schema（递归），这些也应保留
+    def collect_transitive_common(names: set[str]) -> set[str]:
+        result = set(names)
+        queue = list(names)
+        while queue:
+            name = queue.pop()
+            schema = all_schemas.get(name)
+            if schema is None:
+                continue
+            for ref_name in collect_schema_refs(schema):
+                if ref_name not in result:
+                    result.add(ref_name)
+                    queue.append(ref_name)
+        return result
+
+    keep_as_ref = collect_transitive_common(common_schema_names)
+
+    inlined_names: set[str] = set()
+
+    def try_inline(obj: Any) -> Any:
+        """递归替换 $ref 为内联 schema（仅对非通用 schema）。"""
+        if isinstance(obj, dict):
+            ref = obj.get("$ref")
+            if ref and isinstance(ref, str):
+                match = REF_PATTERN.match(ref)
+                if match:
+                    schema_name = match.group("name")
+                    if schema_name not in keep_as_ref and schema_name in all_schemas:
+                        inlined_names.add(schema_name)
+                        return deepcopy(all_schemas[schema_name])
+            return {k: try_inline(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [try_inline(item) for item in obj]
+        return obj
+
+    spec = deepcopy(spec)
+    spec["paths"] = try_inline(spec["paths"])
+
+    # 从 components/schemas 中移除已内联的 schema
+    schemas = spec.get("components", {}).get("schemas", {})
+    for name in inlined_names:
+        schemas.pop(name, None)
+
+    # 如果 schemas 为空，移除整个 components
+    if not schemas:
+        spec.pop("components", None)
+
+    return spec
 
 
 def inline_nullable_refs(spec: dict[str, Any]) -> dict[str, Any]:
@@ -384,11 +378,11 @@ def create_spec(server_url: str, title: str, version: str, description: str) -> 
     if converted_components:
         spec["components"] = converted_components
 
-    # 规范化 schema 名称和引用
-    spec = normalize_schemas_and_refs(spec)
-
     # 将 nullable $ref 属性展开为内联 schema（消除 Coze 客户端对可选对象子字段的强制必填行为）
     spec = inline_nullable_refs(spec)
+
+    # 将一次性 Request/Response schema 内联到 paths 中，仅保留通用数据结构的 $ref
+    spec = inline_endpoint_schemas(spec)
 
     return spec
 
