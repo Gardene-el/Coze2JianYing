@@ -81,7 +81,7 @@ def convert_schema_to_openapi_3_0(schema: Any) -> Any:
 
         converted: dict[str, Any] = {}
         for key, value in schema.items():
-            if key == "title":
+            if key in {"title", "example"}:
                 continue
 
             if key == "exclusiveMinimum" and isinstance(value, (int, float)):
