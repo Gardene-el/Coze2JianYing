@@ -332,7 +332,7 @@ def inline_nullable_refs(spec: dict[str, Any]) -> dict[str, Any]:
                 if match:
                     schema_name = match.group("name")
                     referenced = all_schemas.get(schema_name)
-                    if referenced is not None:
+                    if referenced is not None and "required" in referenced:
                         inlined = deepcopy(referenced)
                         inlined.pop("required", None)
                         inlined["nullable"] = True
