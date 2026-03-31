@@ -35,7 +35,7 @@ from src.backend.schemas.basic.create_sticker_segment import (
 )
 from src.backend.schemas.basic.create_text_segment import CreateTextSegmentRequest, CreateTextSegmentResponse
 from src.backend.schemas.basic.create_video_segment import CreateVideoSegmentRequest, CreateVideoSegmentResponse
-from src.backend.schemas.basic.save_draft import SaveDraftRequest, SaveDraftResponse
+from src.backend.schemas.basic.save_draft import SaveDraftResponse
 from src.backend.services import basic as service
 
 
@@ -77,7 +77,7 @@ def add_segment(
 	draft_id: str = Path(..., description="草稿的唯一标识 ID"),
 	request: AddSegmentRequest = ...,
 ) -> AddSegmentResponse:
-	service.add_segment(draft_id=draft_id, segment_id=request.segment_id)
+	service.add_segment(draft_id=draft_id, segment_id=request.segment_id, track_name=request.track_name)
 	return AddSegmentResponse()
 
 
