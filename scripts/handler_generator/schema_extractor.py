@@ -8,6 +8,8 @@ import ast
 from pathlib import Path
 from typing import Any, Dict, List
 
+from .shared import BASIC_TYPES
+
 
 class SchemaExtractor:
     """提取 Pydantic Schema 的字段信息"""
@@ -244,19 +246,6 @@ class SchemaExtractor:
         Returns:
             自定义类型列表，如 ["TimeRange"], ["ClipSettings"]
         """
-        basic_types = {
-            "str",
-            "int",
-            "float",
-            "bool",
-            "Any",
-            "None",
-            "Dict",
-            "List",
-            "Optional",
-            "Tuple",
-            "Union",
-        }
         custom_types = []
 
         # 移除泛型括号，提取所有类型名
@@ -266,7 +255,7 @@ class SchemaExtractor:
         type_names = re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", type_string)
 
         for type_name in type_names:
-            if type_name not in basic_types and type_name not in custom_types:
+            if type_name not in BASIC_TYPES and type_name not in custom_types:
                 custom_types.append(type_name)
 
         return custom_types

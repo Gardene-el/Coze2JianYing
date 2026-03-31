@@ -36,6 +36,8 @@ from handler_generator import (  # noqa: E402
     CustomClassHandlerGenerator,
 )
 
+_TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+
 
 def _generate_complete_handler(
     endpoint,
@@ -84,6 +86,9 @@ def _generate_complete_handler(
     # 将 Windows 路径的反斜杠替换为正斜杠，避免字符串转义问题
     source_file_path = str(endpoint.source_file).replace("\\", "/")
 
+    # 从模板文件读取文件工具函数
+    file_utils_code = (_TEMPLATES_DIR / "file_utils.py").read_text(encoding="utf-8")
+
     content = f'''"""
 {endpoint.func_name} 工具处理器
 
@@ -107,43 +112,7 @@ from runtime import Args
 {output_class}
 
 
-def ensure_coze2jianying_file() -> str:
-    """
-    确保 /tmp 目录下存在 coze2jianying.py 文件
-
-    Returns:
-        coze2jianying.py 文件的完整路径
-    """
-    file_path = "/tmp/coze2jianying.py"
-
-    if not os.path.exists(file_path):
-        # 创建初始文件内容
-        initial_content = """# Coze2JianYing API 调用记录
-# 此文件由 Coze 工具自动生成和更新
-# 记录所有通过 Coze 工具调用的 API 操作
-
-import asyncio
-from src.backend.schemas import *
-from src.backend.core.common_types import *
-
-# API 调用记录将追加在下方
-"""
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(initial_content)
-
-    return file_path
-
-
-def append_api_call_to_file(file_path: str, api_call_code: str):
-    """
-    将 API 调用代码追加到 coze2jianying.py 文件
-
-    Args:
-        file_path: coze2jianying.py 文件路径
-        api_call_code: 要追加的 API 调用代码
-    """
-    with open(file_path, 'a', encoding='utf-8') as f:
-        f.write("\\n" + api_call_code + "\\n")
+{file_utils_code}
 
 
 {handler_func}

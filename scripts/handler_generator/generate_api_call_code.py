@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 
 from .api_endpoint_info import APIEndpointInfo
 from .schema_extractor import SchemaExtractor
+from .shared import BASIC_TYPES, ID_REFERENCE_FIELDS
 
 
 class APICallCodeGenerator:
@@ -113,22 +114,7 @@ class APICallCodeGenerator:
         type_name = self._extract_type_name(field_type)
 
         # 基本类型不是复杂类型
-        basic_types = {
-            "str",
-            "int",
-            "float",
-            "bool",
-            "None",
-            "Any",
-            "List",
-            "Dict",
-            "Tuple",
-            "Set",
-            "Optional",
-            "Union",
-        }
-
-        if type_name in basic_types:
+        if type_name in BASIC_TYPES:
             return False
 
         # 其他类型（如 TimeRange, ClipSettings 等）视为复杂类型
@@ -159,8 +145,7 @@ class APICallCodeGenerator:
             return False
 
         # 只有 draft_id 和 segment_id 是对象引用
-        # 其他 *_id 字段（effect_id, filter_id, resource_id 等）是配置字符串
-        if field_name in ("draft_id", "segment_id"):
+        if field_name in ID_REFERENCE_FIELDS:
             return True
 
         return False
@@ -216,7 +201,9 @@ class APICallCodeGenerator:
         if self._is_id_field(field_name, field_type):
             return "{" + access_expr + "}"
         if self._should_quote_type(field_type):
-            return '"{' + access_expr + '}"'
+            # 条件检查中不加引号，这样 f-string 求值后是原始值（None / 字符串）
+            # 加引号会导致 "None" is not None → 永远 True 的 bug
+            return "{" + access_expr + "}"
         if self._is_complex_type(field_type):
             return "{_is_meaningful_object(" + access_expr + ")}" 
 
@@ -230,7 +217,11 @@ class APICallCodeGenerator:
         elif endpoint.has_segment_id:
             target_id_name = "segment_id"
 
-        request_construction = ""
+        # ---- f-string 体内的代码行（0 缩进） ----
+        inner_lines: list[str] = []
+        inner_lines.append("# API 调用: " + endpoint.func_name)
+        inner_lines.append("# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
         if endpoint.request_model:
             request_fields = self.schema_extractor.get_schema_fields(
                 endpoint.request_model
@@ -244,19 +235,16 @@ class APICallCodeGenerator:
                 else:
                     required_fields.append(field)
 
-            request_construction = "\n# 构造 request 对象\n"
-            request_construction += "req_params_{generated_uuid} = {{}}\n"
+            inner_lines.append("")
+            inner_lines.append("# 构造 request 对象")
+            inner_lines.append("req_params_{generated_uuid} = {{}}")
 
             for field in required_fields:
                 field_name = field["name"]
                 field_type = field["type"]
                 formatted_value = self._format_param_value(field_name, field_type)
-                request_construction += (
-                    "req_params_{generated_uuid}['"
-                    + field_name
-                    + "'] = "
-                    + formatted_value
-                    + "\n"
+                inner_lines.append(
+                    "req_params_{generated_uuid}['" + field_name + "'] = " + formatted_value
                 )
 
             for field in optional_fields:
@@ -266,24 +254,21 @@ class APICallCodeGenerator:
                 condition_value = self._format_condition_value(field_name, field_type)
 
                 if self._is_complex_type(field_type):
-                    request_construction += "if " + condition_value + ":\n"
+                    inner_lines.append("if " + condition_value + ":")
                 else:
-                    request_construction += "if " + condition_value + " is not None:\n"
+                    inner_lines.append("if " + condition_value + " is not None:")
 
-                request_construction += (
-                    "    req_params_{generated_uuid}['"
-                    + field_name
-                    + "'] = "
-                    + formatted_value
-                    + "\n"
+                inner_lines.append(
+                    "    req_params_{generated_uuid}['" + field_name + "'] = " + formatted_value
                 )
 
-            request_construction += (
+            inner_lines.append(
                 "req_{generated_uuid} = "
                 + endpoint.request_model
-                + "(**req_params_{generated_uuid})\n"
+                + "(**req_params_{generated_uuid})"
             )
 
+        # API 调用语句
         api_call_params = []
         if target_id_name:
             object_type = target_id_name.replace("_id", "")
@@ -291,34 +276,34 @@ class APICallCodeGenerator:
         if endpoint.request_model:
             api_call_params.append("req_{generated_uuid}")
 
-        api_call_code = "        # 生成 API 调用代码\n"
-        api_call_code += '        api_call = f"""\n'
-        api_call_code += "# API 调用: " + endpoint.func_name + "\n"
-        api_call_code += "# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+        inner_lines.append("")
+        inner_lines.append(
+            "resp_{generated_uuid} = await " + endpoint.func_name + "(" + ", ".join(api_call_params) + ")"
+        )
 
-        if request_construction:
-            api_call_code += request_construction
-
-        api_call_code += "\n"
-        api_call_code += "resp_{generated_uuid} = await " + endpoint.func_name + "("
-        api_call_code += ", ".join(api_call_params)
-        api_call_code += ")\n"
-
+        # 提取 output 中的 ID 字段
         has_output_draft_id = any(f["name"] == "draft_id" for f in output_fields)
         has_output_segment_id = any(f["name"] == "segment_id" for f in output_fields)
 
         if has_output_draft_id:
-            api_call_code += "\n"
-            api_call_code += "draft_{generated_uuid} = resp_{generated_uuid}.draft_id\n"
+            inner_lines.append("")
+            inner_lines.append("draft_{generated_uuid} = resp_{generated_uuid}.draft_id")
 
         if has_output_segment_id:
-            api_call_code += "\n"
-            api_call_code += "segment_{generated_uuid} = resp_{generated_uuid}.segment_id\n"
+            inner_lines.append("")
+            inner_lines.append("segment_{generated_uuid} = resp_{generated_uuid}.segment_id")
 
-        api_call_code += '"""\n'
-        api_call_code += "\n"
-        api_call_code += "        # 写入 API 调用到文件\n"
-        api_call_code += "        coze_file = ensure_coze2jianying_file()\n"
-        api_call_code += "        append_api_call_to_file(coze_file, api_call)\n"
+        # ---- 组装：外层使用 8 空格缩进（嵌入 handler try 块） ----
+        I = "        "  # noqa: E741
+        outer_lines = [
+            I + "# 生成 API 调用代码",
+            I + 'api_call = f"""',
+            "\n".join(inner_lines),
+            '"""',
+            "",
+            I + "# 写入 API 调用到文件",
+            I + "coze_file = ensure_coze2jianying_file()",
+            I + "append_api_call_to_file(coze_file, api_call)",
+        ]
 
-        return api_call_code
+        return "\n".join(outer_lines) + "\n"

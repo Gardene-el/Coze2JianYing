@@ -9,6 +9,7 @@ import re
 
 from .api_endpoint_info import APIEndpointInfo
 from .schema_extractor import SchemaExtractor
+from .shared import EXCLUDED_OUTPUT_FIELDS, should_have_api_call_field
 
 
 class FolderCreator:
@@ -157,7 +158,7 @@ class FolderCreator:
         output_params_section = self._format_output_parameters(endpoint)
 
         # 检查是否应该有 api_call 字段，如果有则添加使用说明
-        should_have_api_call = self._should_have_api_call_field(endpoint.func_name)
+        should_have_api_call = should_have_api_call_field(endpoint.func_name)
         api_call_note = ""
         if should_have_api_call:
             api_call_note = (
@@ -246,21 +247,6 @@ class FolderCreator:
 
         return "\n".join(params)
 
-    def _should_have_api_call_field(self, func_name: str) -> bool:
-        """
-        判断函数是否应该有 api_call 字段
-
-        排除以下函数：
-        - add_track
-        - add_segment
-        """
-        excluded_add_functions = {
-            "add_track",
-            "add_segment",
-        }
-
-        return func_name.startswith("add_") and func_name not in excluded_add_functions
-
     def _format_output_parameters(self, endpoint: APIEndpointInfo) -> str:
         """格式化输出参数"""
         if not endpoint.response_model or not self.schema_extractor:
@@ -269,13 +255,12 @@ class FolderCreator:
         fields = self.schema_extractor.get_schema_fields(endpoint.response_model)
 
         # 过滤掉不需要的字段
-        excluded_fields = {"timestamp"}
         filtered_fields = [
-            field for field in fields if field["name"] not in excluded_fields
+            field for field in fields if field["name"] not in EXCLUDED_OUTPUT_FIELDS
         ]
 
         # 如果需要 api_call 字段则添加
-        if self._should_have_api_call_field(endpoint.func_name):
+        if should_have_api_call_field(endpoint.func_name):
             filtered_fields.append(
                 {
                     "name": "api_call",
