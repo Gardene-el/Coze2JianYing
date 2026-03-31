@@ -10,7 +10,7 @@ class AddAudioKeyframeRequest(BaseModel):
     volume: float = Field(..., description="音量值 0-2")
 
     model_config = ConfigDict(
-        json_schema_extra={"example": {"time_offset": 2000000, "value": 0.8}}
+        json_schema_extra={"example": {"time_offset": 2000000, "volume": 0.8}}
     )
 
 class AddAudioKeyframeResponse(BaseModel):

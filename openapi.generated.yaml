@@ -1174,10 +1174,6 @@ components:
         对应 pyJianYingDraft 的 CropSettings 类，用于定义裁剪区域的四个角点坐标'
     CreateDraftRequest:
       properties:
-        draft_name:
-          type: string
-          description: 项目名称
-          default: Coze剪映项目
         width:
           type: integer
           minimum: 0.0
@@ -1190,23 +1186,9 @@ components:
           exclusiveMinimum: true
           description: 视频高度（像素）
           default: 1080
-        fps:
-          type: integer
-          maximum: 120.0
-          minimum: 0.0
-          exclusiveMinimum: true
-          description: 帧率
-          default: 30
-        allow_replace:
-          type: boolean
-          description: 是否允许替换同名草稿
-          default: true
       type: object
       description: 创建草稿请求
       example:
-        allow_replace: true
-        draft_name: 我的视频项目
-        fps: 30
         height: 1080
         width: 1920
     CreateDraftResponse:
@@ -1239,7 +1221,6 @@ components:
       description: 添加片段到草稿请求
       example:
         segment_id: 87654321-4321-4321-4321-cba987654321
-        track_index: 0
     AddSegmentResponse:
       properties: {}
       type: object
@@ -1964,7 +1945,7 @@ components:
       description: 添加音频关键帧请求（用于 AudioSegment）
       example:
         time_offset: 2000000
-        value: 0.8
+        volume: 0.8
     AddAudioKeyframeResponse:
       properties: {}
       type: object

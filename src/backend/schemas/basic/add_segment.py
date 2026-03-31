@@ -13,7 +13,7 @@ class AddSegmentRequest(BaseModel):
         json_schema_extra={
             "example": {
                 "segment_id": "87654321-4321-4321-4321-cba987654321",
-                "track_index": 0,
+                "track_name": None,
             }
         }
     )
