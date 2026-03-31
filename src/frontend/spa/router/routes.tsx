@@ -10,6 +10,10 @@ const ScriptExecutorPage = lazy(() => import('@/routes/ScriptExecutor'))
 const ReplayPage = lazy(() => import('@/routes/Replay'))
 const SettingsPage = lazy(() => import('@/routes/Settings'))
 const ToolGeneratorPage = lazy(() => import('@/routes/ToolGenerator'))
+const TutorialDocsLayout = lazy(() => import('@/routes/TutorialDocs'))
+const GettingStartedPage = lazy(() => import('@/routes/TutorialDocs/features/GettingStarted'))
+const ApiDocsPage = lazy(() => import('@/routes/TutorialDocs/features/ApiDocs'))
+const EnumExplorerPage = lazy(() => import('@/routes/TutorialDocs/features/EnumExplorer'))
 
 const LazyWrapper = ({ children }: { children: ReactNode }) => (
   <Suspense fallback={<Spin size="large" style={{ margin: '40px auto', display: 'block' }} />}>
@@ -73,6 +77,41 @@ export const appRoutes: RouteObject[] = [
                 <ToolGeneratorPage />
               </LazyWrapper>
             ),
+          },
+          {
+            path: 'tutorial-docs',
+            element: (
+              <LazyWrapper>
+                <TutorialDocsLayout />
+              </LazyWrapper>
+            ),
+            children: [
+              { index: true, element: <Navigate replace to="getting-started" /> },
+              {
+                path: 'getting-started',
+                element: (
+                  <LazyWrapper>
+                    <GettingStartedPage />
+                  </LazyWrapper>
+                ),
+              },
+              {
+                path: 'api-docs',
+                element: (
+                  <LazyWrapper>
+                    <ApiDocsPage />
+                  </LazyWrapper>
+                ),
+              },
+              {
+                path: 'enums',
+                element: (
+                  <LazyWrapper>
+                    <EnumExplorerPage />
+                  </LazyWrapper>
+                ),
+              },
+            ],
           },
         ],
       },

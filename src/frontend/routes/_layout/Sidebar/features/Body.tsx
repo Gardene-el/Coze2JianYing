@@ -1,5 +1,6 @@
 import {
   ApiOutlined,
+  BookOutlined,
   CloudServerOutlined,
   CodeOutlined,
   EditOutlined,
@@ -38,6 +39,7 @@ const SidebarBody = () => {
 
         <CollapsibleNavGroup groupKey="tools" title="工具" icon={<ToolOutlined />}>
           <NavItem to="/tool-generator" icon={<ToolOutlined />} label="插件生成器" />
+          <NavItem to="/tutorial-docs" icon={<BookOutlined />} label="教程文档" />
         </CollapsibleNavGroup>
       </Accordion>
 

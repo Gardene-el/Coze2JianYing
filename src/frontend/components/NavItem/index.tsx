@@ -14,7 +14,7 @@ const NavItem = ({ to, icon, label }: NavItemProps) => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
-  const isActive = pathname === to
+  const isActive = pathname === to || pathname.startsWith(`${to}/`)
 
   return (
     <button
