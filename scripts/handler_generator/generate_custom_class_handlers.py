@@ -81,44 +81,28 @@ class CustomClassHandlerGenerator:
             print(f"警告: 扫描自定义类时出错 ({file_path}): {e}")
 
     def generate_handler_content(self, custom_class: CustomClass) -> str:
-        """生成 handler.py 的完整内容"""
+        """生成 handler.py 的完整内容（使用 Jinja2 模板）。"""
+        from jinja2 import Environment, FileSystemLoader
 
-        # 生成 Input 类
+        templates_dir = Path(__file__).resolve().parent / "templates"
+        env = Environment(
+            loader=FileSystemLoader(str(templates_dir)),
+            keep_trailing_newline=True,
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+        template = env.get_template("custom_handler.py.j2")
+
         input_class = self._generate_input_class(custom_class)
-
-        # 生成自定义类的定义
         class_definition = self._generate_class_definition(custom_class)
-
-        # 生成 handler 函数
         handler_func = self._generate_handler_function(custom_class)
 
-        content = f'''"""
-{custom_class.tool_name} 工具处理器
-
-为 {custom_class.class_name} 类生成对象
-{custom_class.docstring}
-
-此工具接收 {custom_class.class_name} 的所有参数（可选，使用原始默认值），
-并返回一个包含 {custom_class.class_name} 数据的字典。
-
-注意：handler 直接返回 Dict[str, Any]，而不是 NamedTuple，
-以确保在 Coze 平台中正确的 JSON 对象序列化。
-"""
-
-import json
-from typing import NamedTuple, Optional, Dict, Any, List
-from runtime import Args
-
-
-{class_definition}
-
-
-{input_class}
-
-
-{handler_func}
-'''
-        return content
+        return template.render(
+            custom_class=custom_class,
+            class_definition=class_definition,
+            input_class=input_class,
+            handler_func=handler_func,
+        )
 
     def _generate_class_definition(self, custom_class: CustomClass) -> str:
         """生成自定义类的定义（NamedTuple形式）"""

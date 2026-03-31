@@ -1,8 +1,15 @@
 """
 步骤 4：生成 coze2jianying.py 文件写入逻辑
 负责生成 API 调用代码，将调用记录写入 /tmp/coze2jianying.py
+
+重构说明：
+  生成目标从 "构造 Request 对象" 简化为 "直接 kwargs 调用 service 函数"。
+  service 函数为同步函数，不使用 await。
 """
 
+from __future__ import annotations
+
+import re
 from typing import Any, Dict, List
 
 from .api_endpoint_info import APIEndpointInfo
@@ -11,299 +18,173 @@ from .shared import BASIC_TYPES, ID_REFERENCE_FIELDS
 
 
 class APICallCodeGenerator:
-    """步骤 4：生成 API 调用记录代码"""
+    """步骤 4：生成 API 调用记录代码（直接 kwargs 调用 service 函数）"""
 
     def __init__(self, schema_extractor: SchemaExtractor):
         self.schema_extractor = schema_extractor
 
-    def _should_quote_type(self, field_type: str) -> bool:
-        """
-        判断字段类型是否需要在 f-string 中用引号包裹
+    # ── 类型判断工具 ──────────────────────────────────────────────
 
-        Args:
-            field_type: 字段的类型字符串，如 "str", "int", "Optional[str]" 等
-
-        Returns:
-            True 如果需要引号（字符串类型），False 否则
-        """
-        # 去除空格
-        field_type = field_type.strip()
-
-        # 字符串类型需要引号
-        if field_type == "str":
+    @staticmethod
+    def _should_quote_type(field_type: str) -> bool:
+        """字段类型是否为字符串族（f-string 中需要引号包裹）。"""
+        ft = field_type.strip()
+        if ft == "str":
             return True
+        return "[str]" in ft or ft.endswith("str")
 
-        # Optional[str], List[str] 等包含 str 的复杂类型也需要引号
-        # 但要排除 "string" 等其他包含 str 的词
-        if "str" in field_type and (
-            "[str]" in field_type or field_type.endswith("str")
-        ):
+    @staticmethod
+    def _is_optional(field: Dict[str, Any]) -> bool:
+        """字段是否可选（有默认值或类型包含 Optional）。"""
+        if "Optional" in field["type"]:
             return True
+        return field["default"] not in ("...", "Ellipsis")
 
-        # 其他类型（int, float, bool, List[int], Dict 等）不需要引号
-        return False
-
-    def _is_optional_field(self, field: Dict[str, Any]) -> bool:
-        """
-        判断字段是否为可选字段（可以不传递）
-
-        Args:
-            field: 字段信息字典，包含 name, type, default, description
-
-        Returns:
-            True 如果字段是可选的（有默认值或类型包含 Optional）
-        """
-        field_type = field["type"]
-        field_default = field["default"]
-
-        # 如果类型中包含 Optional，说明可以为 None
-        if "Optional" in field_type:
-            return True
-
-        # 如果有默认值且不是 "..." 或 "Ellipsis"（Pydantic 的必需字段标记），说明是可选的
-        # SchemaExtractor 会将 ... 转换为字符串 "..." 或 Ellipsis 对象的字符串表示
-        if field_default not in ("...", "Ellipsis"):
-            return True
-
-        return False
-
-    def _extract_type_name(self, field_type: str) -> str:
-        """
-        从类型字符串中提取核心类型名
-
-        例如：
-        - "TimeRange" -> "TimeRange"
-        - "Optional[TimeRange]" -> "TimeRange"
-        - "Optional[List[ClipSettings]]" -> "ClipSettings"
-        - "List[str]" -> "str"
-
-        Args:
-            field_type: 字段类型字符串
-
-        Returns:
-            核心类型名
-        """
-        import re
-
-        # 去除空格
-        field_type = field_type.strip()
-
-        # 使用正则表达式提取最内层的类型名
-        # 匹配大写字母开头的类型名（自定义类型通常是 PascalCase）
-        matches = re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", field_type)
-
-        if matches:
-            # 返回最后一个匹配（最内层类型）
-            # 例如 Optional[List[ClipSettings]] 会匹配 [Optional, List, ClipSettings]
-            # 我们要返回 ClipSettings
-            return matches[-1]
-
-        return field_type
+    @staticmethod
+    def _extract_type_name(field_type: str) -> str:
+        """从类型字符串中提取最内层 PascalCase 类型名。"""
+        matches = re.findall(r"\b([A-Z][a-zA-Z0-9_]*)\b", field_type.strip())
+        return matches[-1] if matches else field_type
 
     def _is_complex_type(self, field_type: str) -> bool:
-        """
-        判断字段类型是否为复杂类型（需要类型构造）
+        """类型是否为自定义复杂类型（如 TimeRange, ClipSettings）。"""
+        return self._extract_type_name(field_type) not in BASIC_TYPES
 
-        Args:
-            field_type: 字段类型字符串
-
-        Returns:
-            True 如果是复杂类型（如 TimeRange, ClipSettings 等自定义类型）
-        """
-        # 提取核心类型名
-        type_name = self._extract_type_name(field_type)
-
-        # 基本类型不是复杂类型
-        if type_name in BASIC_TYPES:
+    @staticmethod
+    def _is_id_reference(field_name: str, field_type: str) -> bool:
+        """字段是否为 ID 引用（draft_id / segment_id）。"""
+        if field_name not in ID_REFERENCE_FIELDS:
             return False
+        ft = field_type.strip()
+        return ft == "str" or "[str]" in ft or ft.endswith("str")
 
-        # 其他类型（如 TimeRange, ClipSettings 等）视为复杂类型
-        # 在 Coze 中这些会是 CustomNamespace，需要转换为类型构造调用
-        return True
-
-    def _is_id_field(self, field_name: str, field_type: str) -> bool:
-        """
-        判断字段是否为 ID 引用字段（需要引用之前创建的对象）
-
-        ID 字段的特征：
-        1. 字段名是 draft_id 或 segment_id（这些是引用之前创建的对象）
-        2. 字段类型是 str
-        3. 这些字段在 handler 中应该引用之前创建的对象变量
-
-        注意：其他以 _id 结尾的字段（如 effect_id, filter_id 等）通常是
-        配置字符串或资源标识符，不是对象引用，因此不应被视为 ID 引用字段
-
-        Args:
-            field_name: 字段名称
-            field_type: 字段类型
-
-        Returns:
-            True 如果是 ID 引用字段
-        """
-        # 字段必须是字符串类型
-        if not self._should_quote_type(field_type):
-            return False
-
-        # 只有 draft_id 和 segment_id 是对象引用
-        if field_name in ID_REFERENCE_FIELDS:
-            return True
-
-        return False
+    # ── 值格式化 ──────────────────────────────────────────────────
 
     def _format_param_value(self, field_name: str, field_type: str) -> str:
-        """
-        根据字段类型格式化参数值
+        """格式化字段值（用于 handler.py 的 f-string 体内）。"""
+        access = "args.input." + field_name
 
-        Args:
-            field_name: 字段名称
-            field_type: 字段类型
-
-        Returns:
-            格式化后的参数值字符串（用于写入 handler.py 的 f-string 中）
-        """
-        # 构造访问表达式：args.input.field_name
-        access_expr = "args.input." + field_name
-
-        # 检查是否为 ID 引用字段
-        if self._is_id_field(field_name, field_type):
-            # ID 字段：引用之前创建的对象变量
-            # 例如：segment_id -> segment_{args.input.segment_id}
-            #      draft_id -> draft_{args.input.draft_id}
-            object_type = field_name.replace("_id", "")  # segment_id -> segment
-            return object_type + "_{" + access_expr + "}"
-        elif self._should_quote_type(field_type):
-            # 普通字符串类型：需要在 handler.py 的 f-string 中是 "{args.input.xxx}"
-            # 使用单层大括号，这样在 handler 运行时会插值
-            return '"{' + access_expr + '}"'
-        elif self._is_complex_type(field_type):
-            # 复杂类型（如 TimeRange, ClipSettings）：调用 _to_type_constructor 生成类型构造表达式
-            # 例如：CustomNamespace(start=0, duration=5000000) -> TimeRange(start=0, duration=5000000)
-            type_name = self._extract_type_name(field_type)
-            return "{_to_type_constructor(" + access_expr + ", '" + type_name + "')}"
-        else:
-            # 非字符串的基本类型：需要在 handler.py 的 f-string 中是 {args.input.xxx}
-            return "{" + access_expr + "}"
-
-    def _format_condition_value(self, field_name: str, field_type: str) -> str:
-        """
-        根据字段类型格式化条件检查中的值
-        用于生成 'if <value> is not None:' 中的 <value> 部分
-
-        Args:
-            field_name: 字段名称
-            field_type: 字段类型
-
-        Returns:
-            格式化后的条件值字符串（用于 if 条件中）
-        """
-        access_expr = "args.input." + field_name
-
-        if self._is_id_field(field_name, field_type):
-            return "{" + access_expr + "}"
+        if self._is_id_reference(field_name, field_type):
+            prefix = field_name.replace("_id", "")
+            return prefix + "_{" + access + "}"
         if self._should_quote_type(field_type):
-            # 条件检查中不加引号，这样 f-string 求值后是原始值（None / 字符串）
-            # 加引号会导致 "None" is not None → 永远 True 的 bug
-            return "{" + access_expr + "}"
+            return '"{' + access + '}"'
         if self._is_complex_type(field_type):
-            return "{_is_meaningful_object(" + access_expr + ")}" 
+            type_name = self._extract_type_name(field_type)
+            return "{_to_type_constructor(" + access + ", '" + type_name + "')}"
+        return "{" + access + "}"
 
-        return "{" + access_expr + "}"
+    def _format_condition(self, field_name: str, field_type: str) -> str:
+        """格式化可选字段的存在性检查条件。"""
+        access = "args.input." + field_name
+        if self._is_complex_type(field_type):
+            return "{_is_meaningful_object(" + access + ")}"
+        return "{" + access + "} is not None"
 
-    def generate_api_call_code(self, endpoint: APIEndpointInfo, output_fields: List[Dict[str, Any]]) -> str:
-        """生成 API 调用记录代码"""
-        target_id_name = None
+    # ── 核心生成方法 ──────────────────────────────────────────────
+
+    def _classify_fields(
+        self, endpoint: APIEndpointInfo
+    ) -> tuple[list[Dict[str, Any]], list[Dict[str, Any]]]:
+        """将 request 模型字段分为 required / optional 两组。"""
+        if not endpoint.request_model:
+            return [], []
+        fields = self.schema_extractor.get_schema_fields(endpoint.request_model)
+        required, optional = [], []
+        for f in fields:
+            (optional if self._is_optional(f) else required).append(f)
+        return required, optional
+
+    def generate_api_call_code(
+        self, endpoint: APIEndpointInfo, output_fields: List[Dict[str, Any]]
+    ) -> str:
+        """生成 API 调用记录代码。
+
+        生成的代码在 handler 运行时被求值为一段 Python 脚本字符串，
+        最终通过 exec() 在用户本地执行。
+
+        目标格式示例（单次 API 调用）::
+
+            result_{uuid} = create_video_segment(
+                material_url="xxx",
+                target_timerange=TimeRange(start=0, duration=5000000),
+            )
+        """
+        required_fields, optional_fields = self._classify_fields(endpoint)
+
+        # ── 构造 f-string body（0 缩进，handler 运行时求值）──
+        lines: list[str] = [
+            "# API 调用: " + endpoint.func_name,
+            "# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}",
+        ]
+
+        # 收集函数调用参数
+        call_args: list[str] = []
+
+        # 路径参数（draft_id / segment_id → 引用之前创建的变量）
         if endpoint.has_draft_id:
-            target_id_name = "draft_id"
-        elif endpoint.has_segment_id:
-            target_id_name = "segment_id"
+            call_args.append("draft_{args.input.draft_id}")
+        if endpoint.has_segment_id:
+            call_args.append("segment_{args.input.segment_id}")
 
-        # ---- f-string 体内的代码行（0 缩进） ----
-        inner_lines: list[str] = []
-        inner_lines.append("# API 调用: " + endpoint.func_name)
-        inner_lines.append("# 时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        # 必需的 request 字段
+        for f in required_fields:
+            val = self._format_param_value(f["name"], f["type"])
+            call_args.append(f["name"] + "=" + val)
 
-        if endpoint.request_model:
-            request_fields = self.schema_extractor.get_schema_fields(
-                endpoint.request_model
-            )
+        # 可选 request 字段需要条件判断，不能直接放在参数列表中
+        # 因此使用 dict + **kwargs 模式来处理
+        has_optional = bool(optional_fields)
 
-            required_fields = []
-            optional_fields = []
-            for field in request_fields:
-                if self._is_optional_field(field):
-                    optional_fields.append(field)
-                else:
-                    required_fields.append(field)
-
-            inner_lines.append("")
-            inner_lines.append("# 构造 request 对象")
-            inner_lines.append("req_params_{generated_uuid} = {{}}")
-
-            for field in required_fields:
-                field_name = field["name"]
-                field_type = field["type"]
-                formatted_value = self._format_param_value(field_name, field_type)
-                inner_lines.append(
-                    "req_params_{generated_uuid}['" + field_name + "'] = " + formatted_value
+        if has_optional:
+            lines.append("")
+            lines.append("_optional_{generated_uuid} = {{}}")
+            for f in optional_fields:
+                cond = self._format_condition(f["name"], f["type"])
+                val = self._format_param_value(f["name"], f["type"])
+                lines.append("if " + cond + ":")
+                lines.append(
+                    "    _optional_{generated_uuid}['"
+                    + f["name"]
+                    + "'] = "
+                    + val
                 )
 
-            for field in optional_fields:
-                field_name = field["name"]
-                field_type = field["type"]
-                formatted_value = self._format_param_value(field_name, field_type)
-                condition_value = self._format_condition_value(field_name, field_type)
+        # 构造函数调用
+        lines.append("")
 
-                if self._is_complex_type(field_type):
-                    inner_lines.append("if " + condition_value + ":")
-                else:
-                    inner_lines.append("if " + condition_value + " is not None:")
-
-                inner_lines.append(
-                    "    req_params_{generated_uuid}['" + field_name + "'] = " + formatted_value
-                )
-
-            inner_lines.append(
-                "req_{generated_uuid} = "
-                + endpoint.request_model
-                + "(**req_params_{generated_uuid})"
-            )
-
-        # API 调用语句
-        api_call_params = []
-        if target_id_name:
-            object_type = target_id_name.replace("_id", "")
-            api_call_params.append(object_type + "_{args.input." + target_id_name + "}")
-        if endpoint.request_model:
-            api_call_params.append("req_{generated_uuid}")
-
-        inner_lines.append("")
-        inner_lines.append(
-            "resp_{generated_uuid} = await " + endpoint.func_name + "(" + ", ".join(api_call_params) + ")"
-        )
-
-        # 提取 output 中的 ID 字段
+        # 判断返回值：创建型端点返回 ID，其他端点无返回值
         has_output_draft_id = any(f["name"] == "draft_id" for f in output_fields)
         has_output_segment_id = any(f["name"] == "segment_id" for f in output_fields)
 
         if has_output_draft_id:
-            inner_lines.append("")
-            inner_lines.append("draft_{generated_uuid} = resp_{generated_uuid}.draft_id")
+            lhs = "draft_{generated_uuid}"
+        elif has_output_segment_id:
+            lhs = "segment_{generated_uuid}"
+        else:
+            lhs = None
 
-        if has_output_segment_id:
-            inner_lines.append("")
-            inner_lines.append("segment_{generated_uuid} = resp_{generated_uuid}.segment_id")
+        # 拼装调用行
+        if has_optional:
+            call_args.append("**_optional_{generated_uuid}")
 
-        # ---- 组装：外层使用 8 空格缩进（嵌入 handler try 块） ----
-        I = "        "  # noqa: E741
-        outer_lines = [
+        args_str = ", ".join(call_args)
+
+        if lhs:
+            lines.append(lhs + " = " + endpoint.func_name + "(" + args_str + ")")
+        else:
+            lines.append(endpoint.func_name + "(" + args_str + ")")
+
+        # ── 包装为 handler 中的 f-string + 文件写入 ──
+        I = "        "  # noqa: E741  8-space indent (inside handler try block)
+        outer = [
             I + "# 生成 API 调用代码",
             I + 'api_call = f"""',
-            "\n".join(inner_lines),
+            "\n".join(lines),
             '"""',
             "",
             I + "# 写入 API 调用到文件",
             I + "coze_file = ensure_coze2jianying_file()",
             I + "append_api_call_to_file(coze_file, api_call)",
         ]
-
-        return "\n".join(outer_lines) + "\n"
+        return "\n".join(outer) + "\n"

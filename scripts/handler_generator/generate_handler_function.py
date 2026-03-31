@@ -1,15 +1,19 @@
 """
 步骤 5：生成 handler 函数
 负责生成主 handler 函数的框架代码，包括 UUID 生成和错误处理
+
+重构说明：
+  简化返回值构造，移除冗余 Output 字段的手动映射。
+  运行时辅助函数（_to_type_constructor 等）不再在此嵌入，
+  改由 main.py 通过 Jinja2 模板按需注入。
 """
 
-from pathlib import Path
+from __future__ import annotations
+
 from typing import Any, Dict, List
 
 from .api_endpoint_info import APIEndpointInfo
 from .shared import ID_REFERENCE_FIELDS, infer_default_for_type
-
-_TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
 
 class HandlerFunctionGenerator:
@@ -23,57 +27,30 @@ class HandlerFunctionGenerator:
     ) -> str:
         """生成 handler 函数"""
 
-        # 生成返回值
-        return_values = []
+        # 构造 Output(...) 关键字参数列表
+        output_params: list[str] = []
         for field in output_fields:
-            field_name = field["name"]
-            # 对于 draft_id 和 segment_id，返回纯 UUID
-            if field_name in ID_REFERENCE_FIELDS:
-                return_values.append(f'        "{field_name}": f"{{generated_uuid}}"')
-            elif field_name == "success":
-                return_values.append(f'        "{field_name}": True')
-            elif field_name == "message":
-                return_values.append(f'        "{field_name}": "操作成功"')
-            elif field_name == "api_call":
-                # 对于 api_call 字段，返回生成的 API 调用代码字符串
-                return_values.append(f'        "{field_name}": api_call')
+            name = field["name"]
+            if name in ID_REFERENCE_FIELDS:
+                output_params.append(f'{name}=f"{{generated_uuid}}"')
+            elif name == "success":
+                output_params.append(f"{name}=True")
+            elif name == "message":
+                output_params.append(f'{name}="操作成功"')
+            elif name == "api_call":
+                output_params.append(f"{name}=api_call")
             else:
-                # 其他字段使用默认值
                 default = field.get("default", "None")
-                if default == "..." or default == "Ellipsis":
+                if default in ("...", "Ellipsis"):
                     default = infer_default_for_type(field.get("type", "Any"))
-                return_values.append(f'        "{field_name}": {default}')
+                output_params.append(f"{name}={default}")
 
-        if not return_values:
-            return_values.append("success=True")
-            return_values.append('message="操作成功"')
-
-        # 生成 Output() 构造调用，使用关键字参数
-        output_params = []
-        for val in return_values:
-            # 将 "field": value 格式转换为 field=value 格式
-            if '": ' in val:
-                # 移除前导空格和引号
-                val = val.strip()
-                if val.startswith('"'):
-                    # 格式: "field": value
-                    parts = val.split('": ', 1)
-                    field_name = parts[0].strip('"')
-                    field_value = parts[1]
-                    output_params.append(f"{field_name}={field_value}")
-                else:
-                    output_params.append(val)
-            else:
-                output_params.append(val)
+        if not output_params:
+            output_params = ["success=True", 'message="操作成功"']
 
         output_construction = ", ".join(output_params)
 
-        # 从模板文件读取辅助函数定义（用于处理 CustomNamespace）
-        helper_functions = (_TEMPLATES_DIR / "runtime_helpers.py").read_text(encoding="utf-8") + "\n\n"
-
-        handler_function = (
-            helper_functions
-            + f'''def handler(args: Args[Input]) -> Dict[str, Any]:
+        handler_function = f'''def handler(args: Args[Input]) -> Dict[str, Any]:
     """
     {endpoint.func_name} 的主处理函数
 
@@ -111,6 +88,5 @@ class HandlerFunctionGenerator:
 
         return Output(success=False, message=error_msg)._asdict()
 '''
-        )
 
         return handler_function

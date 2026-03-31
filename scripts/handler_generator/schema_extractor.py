@@ -19,6 +19,12 @@ class SchemaExtractor:
         self.schemas = {}
         self._load_schemas()
 
+    def load_additional_file(self, file_path: str | Path) -> None:
+        """加载额外的 Python 文件中的类定义（如 common_types.py）。"""
+        fp = Path(file_path)
+        if fp.exists():
+            self._load_file(fp)
+
     def _load_schemas(self):
         """加载 schema 文件或目录下所有 .py 文件"""
         if self.schema_path.is_dir():

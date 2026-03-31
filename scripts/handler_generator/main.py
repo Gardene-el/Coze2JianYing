@@ -5,6 +5,10 @@
 功能：
 - 扫描 app/backend/api 中的 POST 端点，生成对应工具到 coze_plugin/raw_tools
 - 扫描 general_schemas.py 中的自定义类，生成 make_* 工具
+
+重构说明：
+  使用 Jinja2 模板引擎替代 f-string 拼接，模板与逻辑分离。
+  运行时辅助函数（_to_type_constructor 等）仅在 handler 使用复杂类型时注入。
 """
 
 from __future__ import annotations
@@ -13,6 +17,8 @@ import argparse
 import shutil
 import sys
 from pathlib import Path
+
+from jinja2 import Environment, FileSystemLoader
 
 
 def _ensure_sys_path() -> Path:
@@ -38,6 +44,14 @@ from handler_generator import (  # noqa: E402
 
 _TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
+# Jinja2 环境 — 禁用自动转义、保持原始缩进
+_JINJA_ENV = Environment(
+    loader=FileSystemLoader(str(_TEMPLATES_DIR)),
+    keep_trailing_newline=True,
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
+
 
 def _generate_complete_handler(
     endpoint,
@@ -46,15 +60,11 @@ def _generate_complete_handler(
     handler_func_gen: HandlerFunctionGenerator,
     schema_extractor: SchemaExtractor,
 ) -> str:
-    """生成完整的 handler.py 内容（与 scripts/generate_handler_from_api.py 一致）。"""
+    """生成完整的 handler.py 内容。"""
 
-    # 步骤 3：生成 Input 类
+    # 步骤 3：生成 Input / Output 类
     input_class = input_output_gen.generate_input_class(endpoint)
-
-    # 步骤 3：获取 Output 字段
     output_fields = input_output_gen.get_output_fields(endpoint)
-
-    # 步骤 3：生成 Output 类
     output_class = input_output_gen.generate_output_class(endpoint, output_fields)
 
     # 步骤 4：生成 API 调用代码
@@ -65,59 +75,47 @@ def _generate_complete_handler(
         endpoint, output_fields, api_call_code
     )
 
-    # 收集所有自定义类型依赖
+    # 收集自定义类型依赖
     custom_types = set()
     custom_types.update(input_output_gen.get_custom_types_from_input(endpoint))
     custom_types.update(input_output_gen.get_custom_types_from_output(endpoint))
 
-    # 生成自定义类型的定义（复制到文件中，而不是import）
     custom_type_definitions = ""
     if custom_types:
         sorted_types = sorted(custom_types)
         type_defs = schema_extractor.get_multiple_class_sources(sorted_types)
         if type_defs:
-            custom_type_definitions = (
-                "\n# ========== 自定义类型定义 ==========\n"
-                "# 以下类型定义从 general_schemas.py 复制而来\n"
-                "# Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义\n\n"
-                f"{type_defs}\n\n"
-            )
+            custom_type_definitions = type_defs
 
-    # 将 Windows 路径的反斜杠替换为正斜杠，避免字符串转义问题
+    # 判断是否需要运行时辅助函数（_to_type_constructor / _is_meaningful_object）
+    # 规则：只要 Input 中存在自定义复杂类型字段就需要
+    needs_runtime_helpers = bool(custom_types)
+
+    # Windows 路径的反斜杠替换为正斜杠
     source_file_path = str(endpoint.source_file).replace("\\", "/")
 
     # 从模板文件读取文件工具函数
     file_utils_code = (_TEMPLATES_DIR / "file_utils.py").read_text(encoding="utf-8")
 
-    content = f'''"""
-{endpoint.func_name} 工具处理器
+    # 运行时辅助函数（按需注入）
+    runtime_helpers_code = ""
+    if needs_runtime_helpers:
+        runtime_helpers_code = (_TEMPLATES_DIR / "runtime_helpers.py").read_text(
+            encoding="utf-8"
+        )
 
-自动从 API 端点生成: {endpoint.path}
-源文件: {source_file_path}
-"""
-
-import os
-import json
-import uuid
-import time
-from typing import NamedTuple, Dict, Any, Optional, List
-from runtime import Args
-
-{custom_type_definitions}
-# Input 类型定义
-{input_class}
-
-
-# Output 类型定义
-{output_class}
-
-
-{file_utils_code}
-
-
-{handler_func}
-'''
-    return content
+    template = _JINJA_ENV.get_template("handler.py.j2")
+    return template.render(
+        endpoint=endpoint,
+        source_file_path=source_file_path,
+        custom_type_definitions=custom_type_definitions,
+        input_class=input_class,
+        output_class=output_class,
+        file_utils_code=file_utils_code,
+        needs_runtime_helpers=needs_runtime_helpers,
+        runtime_helpers_code=runtime_helpers_code,
+        handler_func=handler_func,
+    )
 
 
 def generate_api_handlers(api_dir: Path, schema_dir: Path, output_dir: Path) -> int:
@@ -133,6 +131,9 @@ def generate_api_handlers(api_dir: Path, schema_dir: Path, output_dir: Path) -> 
 
     print("步骤 2: 加载 Schema 信息...")
     schema_extractor = SchemaExtractor(str(schema_dir))
+    # 补充加载 common_types.py 中的自定义类型（TimeRange 等）
+    common_types_file = schema_dir.parent / "core" / "common_types.py"
+    schema_extractor.load_additional_file(common_types_file)
     print()
 
     print("步骤 3: 初始化生成器模块...")
@@ -176,11 +177,18 @@ def generate_api_handlers(api_dir: Path, schema_dir: Path, output_dir: Path) -> 
 def generate_custom_handlers(schema_dir: Path, output_dir: Path) -> int:
     """生成自定义类 handler。"""
     print("步骤 1: 加载 Schema 信息...")
+    # SchemaExtractor 需要扫描 schemas 目录以获取字段定义
     schema_extractor = SchemaExtractor(str(schema_dir))
+    # 补充加载 common_types.py 中的自定义类型（TimeRange 等）
+    common_types_path = schema_dir.parent / "core" / "common_types.py"
+    schema_extractor.load_additional_file(common_types_path)
     print()
 
     print("步骤 2: 扫描自定义类...")
-    generator = CustomClassHandlerGenerator(str(schema_dir), schema_extractor)
+    # 自定义类型定义在 core/common_types.py，而非 schemas 目录
+    common_types_path = schema_dir.parent / "core" / "common_types.py"
+    scan_source = str(common_types_path) if common_types_path.exists() else str(schema_dir)
+    generator = CustomClassHandlerGenerator(scan_source, schema_extractor)
     custom_classes = generator.scan_custom_classes()
     print(f"找到 {len(custom_classes)} 个目标自定义类")
     print()

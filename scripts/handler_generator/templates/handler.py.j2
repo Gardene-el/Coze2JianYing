@@ -1,0 +1,38 @@
+"""
+{{ endpoint.func_name }} 工具处理器
+
+自动从 API 端点生成: {{ endpoint.path }}
+源文件: {{ source_file_path }}
+"""
+
+import os
+import json
+import uuid
+import time
+from typing import NamedTuple, Dict, Any, Optional, List
+from runtime import Args
+
+{% if custom_type_definitions %}
+# ========== 自定义类型定义 ==========
+# 以下类型定义从 schemas 复制而来
+# Coze 平台不支持跨文件 import，因此需要在每个工具中重复定义
+
+{{ custom_type_definitions }}
+
+{% endif %}
+# Input 类型定义
+{{ input_class }}
+
+
+# Output 类型定义
+{{ output_class }}
+
+
+{{ file_utils_code }}
+
+
+{% if needs_runtime_helpers %}
+{{ runtime_helpers_code }}
+
+{% endif %}
+{{ handler_func }}

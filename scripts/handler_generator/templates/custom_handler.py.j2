@@ -1,0 +1,25 @@
+"""
+{{ custom_class.tool_name }} 工具处理器
+
+为 {{ custom_class.class_name }} 类生成对象
+{{ custom_class.docstring }}
+
+此工具接收 {{ custom_class.class_name }} 的所有参数（可选，使用原始默认值），
+并返回一个包含 {{ custom_class.class_name }} 数据的字典。
+
+注意：handler 直接返回 Dict[str, Any]，而不是 NamedTuple，
+以确保在 Coze 平台中正确的 JSON 对象序列化。
+"""
+
+import json
+from typing import NamedTuple, Optional, Dict, Any, List
+from runtime import Args
+
+
+{{ class_definition }}
+
+
+{{ input_class }}
+
+
+{{ handler_func }}

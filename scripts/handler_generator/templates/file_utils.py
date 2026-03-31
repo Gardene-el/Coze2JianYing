@@ -8,13 +8,12 @@ def ensure_coze2jianying_file() -> str:
     file_path = "/tmp/coze2jianying.py"
 
     if not os.path.exists(file_path):
-        # 创建初始文件内容
+        # 创建初始文件内容（与 gui_router._CURRENT_PREAMBLE 保持对齐）
         initial_content = """# Coze2JianYing API 调用记录
 # 此文件由 Coze 工具自动生成和更新
 # 记录所有通过 Coze 工具调用的 API 操作
 
-import asyncio
-from src.backend.schemas import *
+from src.backend.services.basic import *
 from src.backend.core.common_types import *
 
 # API 调用记录将追加在下方

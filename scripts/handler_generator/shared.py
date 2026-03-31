@@ -3,6 +3,8 @@
 集中管理各模块间重复定义的常量和逻辑
 """
 
+from __future__ import annotations
+
 # ── 类型分类 ────────────────────────────────────────────────────────
 
 BASIC_TYPES = frozenset({
@@ -18,8 +20,14 @@ ID_REFERENCE_FIELDS = frozenset({"draft_id", "segment_id"})
 
 # ── Output 过滤 ─────────────────────────────────────────────────────
 
-EXCLUDED_OUTPUT_FIELDS = frozenset({"timestamp"})
-"""从 Output 类和 README 输出参数中过滤掉的字段"""
+EXCLUDED_OUTPUT_FIELDS = frozenset({
+    "timestamp",
+    "error_code",
+    "category",
+    "level",
+    "details",
+})
+"""从 Output 类和 README 输出参数中过滤掉的字段（从未被赋有意义值的字段）"""
 
 # ── api_call 字段判定 ───────────────────────────────────────────────
 
