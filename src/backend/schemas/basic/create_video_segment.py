@@ -5,7 +5,10 @@ from src.backend.core.common_types import ClipSettings, CropSettings, TimeRange
 class CreateVideoSegmentRequest(BaseModel):
     """创建视频片段请求"""
 
-    material_url: str = Field(..., description="视频素材 URL")
+    material_url: str = Field(
+        "https://gardene-el.github.io/Coze2JianYing/assets/video.mp4",
+        description="视频素材 URL",
+    )
     target_timerange: TimeRange = Field(..., description="在轨道上的时间范围")
     source_timerange: Optional[TimeRange] = Field(None, description="素材裁剪范围")
     speed: float = Field(1.0, description="播放速度", gt=0)

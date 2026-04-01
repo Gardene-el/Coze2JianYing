@@ -12,7 +12,7 @@ from src.backend.core.common_types import (
 class CreateTextSegmentRequest(BaseModel):
     """创建文本片段请求"""
 
-    text_content: str = Field(..., description="文本内容", min_length=1)
+    text_content: str = Field("据说pyJianYingDraft效果还不错?", description="文本内容", min_length=1)
     target_timerange: TimeRange = Field(..., description="在轨道上的时间范围")
     font_family: Optional[str] = Field("文轩体", description="字体名称")
     text_style: Optional[TextStyle] = Field(

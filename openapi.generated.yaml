@@ -261,6 +261,7 @@ paths:
                 material_url:
                   type: string
                   description: 音频素材 URL
+                  default: https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3
                 target_timerange:
                   $ref: '#/components/schemas/TimeRange'
                   description: 在轨道上的时间范围
@@ -289,14 +290,13 @@ paths:
                   maximum: 2.0
                   minimum: 0.0
                   description: 音量 0-2
-                  default: 1.0
+                  default: 0.6
                 change_pitch:
                   type: boolean
                   description: 是否跟随变速改变音调
-                  default: false
+                  default: true
               type: object
               required:
-              - material_url
               - target_timerange
               description: 创建音频片段请求
         required: true
@@ -329,6 +329,7 @@ paths:
                 material_url:
                   type: string
                   description: 视频素材 URL
+                  default: https://gardene-el.github.io/Coze2JianYing/assets/video.mp4
                 target_timerange:
                   $ref: '#/components/schemas/TimeRange'
                   description: 在轨道上的时间范围
@@ -372,7 +373,6 @@ paths:
                   description: 裁剪设置
               type: object
               required:
-              - material_url
               - target_timerange
               description: 创建视频片段请求
         required: true
@@ -406,6 +406,7 @@ paths:
                   type: string
                   minLength: 1
                   description: 文本内容
+                  default: 据说pyJianYingDraft效果还不错?
                 target_timerange:
                   $ref: '#/components/schemas/TimeRange'
                   description: 在轨道上的时间范围
@@ -482,7 +483,6 @@ paths:
                   description: 图像调节设置（位置、缩放、旋转、透明度）
               type: object
               required:
-              - text_content
               - target_timerange
               description: 创建文本片段请求
         required: true
