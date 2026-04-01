@@ -1,35 +1,50 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Coze2JianYing API
-  version: v1
-  description: 包含 basic 和 easy 全量端点，用于 Coze OpenAPI 接入。
+  description: 剪映草稿操作 API + Electron 前端管理端点
+  version: 1.0.0
 paths:
-  /drafts/create_draft:
-    post:
+  /gui/health:
+    get:
       tags:
-      - basic
-      summary: 创建草稿
-      description: 创建一个新的剪映草稿，返回草稿 ID，后续所有操作均通过此 ID 引用该草稿。
-      operationId: create_draft
+      - GUI 管理
+      summary: Health
+      operationId: health_gui_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Gui Health Get
+  /gui/settings:
+    get:
+      tags:
+      - GUI 管理
+      summary: Get Settings
+      operationId: get_settings_gui_settings_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Get Settings Gui Settings Get
+    put:
+      tags:
+      - GUI 管理
+      summary: Update Settings
+      operationId: update_settings_gui_settings_put
       requestBody:
         content:
           application/json:
             schema:
-              properties:
-                width:
-                  type: integer
-                  minimum: 0.0
-                  exclusiveMinimum: true
-                  description: 视频宽度（像素）
-                  default: 1920
-                height:
-                  type: integer
-                  minimum: 0.0
-                  exclusiveMinimum: true
-                  description: 视频高度（像素）
-                  default: 1080
-              type: object
-              description: 创建草稿请求
+              $ref: '#/components/schemas/SettingsPayload'
         required: true
       responses:
         '200':
@@ -37,268 +52,43 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  draft_id:
-                    type: string
-                    description: 草稿 UUID
-                type: object
-                required:
-                - draft_id
-                description: 创建草稿响应
-  /drafts/{draft_id}/save_draft:
-    post:
-      tags:
-      - basic
-      summary: 保存草稿
-      description: 将当前草稿内容持久化写入磁盘，使剪映可以读取到最新编辑结果。
-      operationId: save_draft
-      parameters:
-      - name: draft_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 草稿的唯一标识 ID
-        description: 草稿的唯一标识 ID
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 保存草稿响应
-  /drafts/{draft_id}/add_segment:
-    post:
-      tags:
-      - basic
-      summary: 添加片段到草稿
-      description: 将已创建的片段（音频/视频/文本/贴纸）添加到指定草稿的对应轨道中。
-      operationId: add_segment
-      parameters:
-      - name: draft_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 草稿的唯一标识 ID
-        description: 草稿的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                segment_id:
-                  type: string
-                  description: Segment UUID
-                track_name:
-                  type: string
-                  nullable: true
-                  description: 目标轨道索引，None 则自动选择
-              type: object
-              required:
-              - segment_id
-              description: 添加片段到草稿请求
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加片段到草稿响应
-  /drafts/{draft_id}/add_track:
-    post:
-      tags:
-      - basic
-      summary: 添加轨道
-      description: 在草稿中新建一条指定类型的轨道（audio/video/text/sticker/effect/filter）。
-      operationId: add_track
-      parameters:
-      - name: draft_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 草稿的唯一标识 ID
-        description: 草稿的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                track_type:
-                  type: string
-                  description: '轨道类型: audio/video/text/sticker/effect/filter'
-                track_name:
-                  type: string
-                  nullable: true
-                  description: 轨道名称
-              type: object
-              required:
-              - track_type
-              description: 添加轨道请求
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加轨道响应
-  /drafts/{draft_id}/add_effect:
-    post:
-      tags:
-      - basic
-      summary: 添加全局特效
-      description: 在草稿上添加一个覆盖指定时间范围的全局特效。
-      operationId: add_effect
-      parameters:
-      - name: draft_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 草稿的唯一标识 ID
-        description: 草稿的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                effect_type:
-                  type: string
-                  description: 特效类型
-                target_timerange:
-                  $ref: '#/components/schemas/TimeRange'
-                  description: 时间范围
-                params:
-                  items:
-                    type: number
-                    nullable: true
-                  type: array
-                  nullable: true
-                  description: 特效参数列表
-              type: object
-              required:
-              - effect_type
-              - target_timerange
-              description: 添加全局特效请求
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加全局特效响应
-  /drafts/{draft_id}/add_filter:
-    post:
-      tags:
-      - basic
-      summary: 添加全局滤镜
-      description: 在草稿上添加一个覆盖指定时间范围的全局色彩滤镜。
-      operationId: add_filter
-      parameters:
-      - name: draft_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 草稿的唯一标识 ID
-        description: 草稿的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                filter_type:
-                  type: string
-                  description: 滤镜类型
-                target_timerange:
-                  $ref: '#/components/schemas/TimeRange'
-                  description: 时间范围
-                intensity:
-                  type: number
-                  maximum: 100.0
-                  minimum: 0.0
-                  description: 滤镜强度 0-100
-                  default: 100.0
-              type: object
-              required:
-              - filter_type
-              - target_timerange
-              description: 添加全局滤镜请求
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加全局滤镜响应
-  /segments/create_audio_segment:
-    post:
-      tags:
-      - basic
-      summary: 创建音频片段
-      description: 根据素材 URL 和时间范围创建音频片段，返回片段 ID，后续可将其添加到草稿轨道。
-      operationId: create_audio_segment
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                material_url:
-                  type: string
-                  description: 音频素材 URL
-                  default: https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3
-                target_timerange:
-                  $ref: '#/components/schemas/TimeRange'
-                  description: 在轨道上的时间范围
-                source_timerange:
-                  properties:
-                    start:
-                      type: integer
-                      minimum: 0.0
-                      description: 开始时间（微秒）
-                    duration:
-                      type: integer
-                      minimum: 0.0
-                      exclusiveMinimum: true
-                      description: 持续时长（微秒）
-                  type: object
-                  description: 素材裁剪范围
-                  nullable: true
-                speed:
-                  type: number
-                  minimum: 0.0
-                  exclusiveMinimum: true
-                  description: 播放速度
-                  default: 1.0
-                volume:
-                  type: number
-                  maximum: 2.0
-                  minimum: 0.0
-                  description: 音量 0-2
-                  default: 0.6
-                change_pitch:
+                additionalProperties:
                   type: boolean
-                  description: 是否跟随变速改变音调
-                  default: true
-              type: object
-              required:
-              - target_timerange
-              description: 创建音频片段请求
+                type: object
+                title: Response Update Settings Gui Settings Put
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/settings/detect-path:
+    post:
+      tags:
+      - GUI 管理
+      summary: Detect Path
+      operationId: detect_path_gui_settings_detect_path_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Detect Path Gui Settings Detect Path Post
+  /gui/draft/generate:
+    post:
+      tags:
+      - GUI 管理
+      summary: Generate Draft
+      operationId: generate_draft_gui_draft_generate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateDraftPayload'
         required: true
       responses:
         '200':
@@ -306,185 +96,111 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  segment_id:
-                    type: string
-                    description: Segment UUID
+                additionalProperties: true
                 type: object
-                required:
-                - segment_id
-                description: 创建片段响应
-  /segments/create_video_segment:
+                title: Response Generate Draft Gui Draft Generate Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/script/format:
     post:
       tags:
-      - basic
-      summary: 创建视频片段
-      description: 根据素材 URL 和时间范围创建视频片段，返回片段 ID，后续可将其添加到草稿轨道。
-      operationId: create_video_segment
+      - GUI 管理
+      summary: Format Script
+      operationId: format_script_gui_script_format_post
       requestBody:
         content:
           application/json:
             schema:
-              properties:
-                material_url:
+              $ref: '#/components/schemas/ScriptPayload'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
                   type: string
-                  description: 视频素材 URL
-                  default: https://gardene-el.github.io/Coze2JianYing/assets/video.mp4
-                target_timerange:
-                  $ref: '#/components/schemas/TimeRange'
-                  description: 在轨道上的时间范围
-                source_timerange:
-                  properties:
-                    start:
-                      type: integer
-                      minimum: 0.0
-                      description: 开始时间（微秒）
-                    duration:
-                      type: integer
-                      minimum: 0.0
-                      exclusiveMinimum: true
-                      description: 持续时长（微秒）
-                  type: object
-                  description: 素材裁剪范围
-                  nullable: true
-                speed:
-                  type: number
-                  minimum: 0.0
-                  exclusiveMinimum: true
-                  description: 播放速度
-                  default: 1.0
-                volume:
-                  type: number
-                  maximum: 2.0
-                  minimum: 0.0
-                  description: 音量 0-2
-                  default: 1.0
-                change_pitch:
+                type: object
+                title: Response Format Script Gui Script Format Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/script/validate:
+    post:
+      tags:
+      - GUI 管理
+      summary: Validate Script
+      operationId: validate_script_gui_script_validate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScriptPayload'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Validate Script Gui Script Validate Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/script/execute:
+    post:
+      tags:
+      - GUI 管理
+      summary: Execute Script
+      operationId: execute_script_gui_script_execute_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutePayload'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
                   type: boolean
-                  description: 是否跟随变速改变音调
-                  default: false
-                clip_settings:
-                  $ref: '#/components/schemas/ClipSettings'
-                  nullable: true
-                  description: 图像调节设置
-                crop_settings:
-                  $ref: '#/components/schemas/CropSettings'
-                  nullable: true
-                  description: 裁剪设置
-              type: object
-              required:
-              - target_timerange
-              description: 创建视频片段请求
-        required: true
-      responses:
-        '200':
-          description: Successful Response
+                type: object
+                title: Response Execute Script Gui Script Execute Post
+        '422':
+          description: Validation Error
           content:
             application/json:
               schema:
-                properties:
-                  segment_id:
-                    type: string
-                    description: Segment UUID
-                type: object
-                required:
-                - segment_id
-                description: 创建片段响应
-  /segments/create_text_segment:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/replay/execute:
     post:
       tags:
-      - basic
-      summary: 创建文本片段
-      description: 根据文本内容和时间范围创建文本片段，支持字体、样式、描边、阴影等设置，返回片段 ID。
-      operationId: create_text_segment
+      - GUI 管理
+      summary: Execute Replay
+      description: "从 Capture Worker 拉取并执行录制的调用序列。\n\n与粘贴脚本、粘贴草稿相同的一次性执行模式：\n  - 调用方负责在执行前启动\
+        \ Python 后端（通过 useEnsureBackend）\n  - 执行完成后调用方卸载组件自动回收后端\n\n安全约束：仅允许本地请求调用。"
+      operationId: execute_replay_gui_replay_execute_post
       requestBody:
         content:
           application/json:
             schema:
-              properties:
-                text_content:
-                  type: string
-                  minLength: 1
-                  description: 文本内容
-                  default: 据说pyJianYingDraft效果还不错?
-                target_timerange:
-                  $ref: '#/components/schemas/TimeRange'
-                  description: 在轨道上的时间范围
-                font_family:
-                  type: string
-                  nullable: true
-                  description: 字体名称
-                  default: 文轩体
-                text_style:
-                  $ref: '#/components/schemas/TextStyle'
-                  nullable: true
-                  description: 文本样式（字体大小、颜色、加粗等）
-                text_border:
-                  $ref: '#/components/schemas/TextBorder'
-                  nullable: true
-                  description: 文本描边，None 表示无描边
-                text_shadow:
-                  $ref: '#/components/schemas/TextShadow'
-                  nullable: true
-                  description: 文本阴影，None 表示无阴影
-                text_background:
-                  properties:
-                    color:
-                      type: string
-                      description: 背景颜色，格式为 '#RRGGBB'
-                    style:
-                      type: integer
-                      maximum: 2.0
-                      minimum: 1.0
-                      description: 背景样式 1 或 2
-                      default: 1
-                    alpha:
-                      type: number
-                      maximum: 1.0
-                      minimum: 0.0
-                      description: 背景不透明度 0.0-1.0
-                      default: 1.0
-                    round_radius:
-                      type: number
-                      maximum: 1.0
-                      minimum: 0.0
-                      description: 圆角半径 0-1
-                      default: 0.0
-                    height:
-                      type: number
-                      maximum: 1.0
-                      minimum: 0.0
-                      description: 背景高度 0-1
-                      default: 0.14
-                    width:
-                      type: number
-                      maximum: 1.0
-                      minimum: 0.0
-                      description: 背景宽度 0-1
-                      default: 0.14
-                    horizontal_offset:
-                      type: number
-                      maximum: 1.0
-                      minimum: 0.0
-                      description: 水平偏移 0-1
-                      default: 0.5
-                    vertical_offset:
-                      type: number
-                      maximum: 1.0
-                      minimum: 0.0
-                      description: 竖直偏移 0-1
-                      default: 0.5
-                  type: object
-                  description: 文本背景，None 表示无背景
-                  nullable: true
-                clip_settings:
-                  $ref: '#/components/schemas/ClipSettings'
-                  nullable: true
-                  description: 图像调节设置（位置、缩放、旋转、透明度）
-              type: object
-              required:
-              - target_timerange
-              description: 创建文本片段请求
+              $ref: '#/components/schemas/ReplayExecutePayload'
         required: true
       responses:
         '200':
@@ -492,785 +208,62 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  segment_id:
-                    type: string
-                    description: Segment UUID
+                additionalProperties: true
                 type: object
-                required:
-                - segment_id
-                description: 创建片段响应
-  /segments/create_sticker_segment:
-    post:
-      tags:
-      - basic
-      summary: 创建贴纸片段
-      description: 根据素材 URL 和时间范围创建贴纸片段，返回片段 ID，后续可将其添加到草稿轨道。
-      operationId: create_sticker_segment
-      requestBody:
-        content:
-          application/json:
-            schema:
-              properties:
-                material_url:
-                  type: string
-                  description: 贴纸素材 URL
-                target_timerange:
-                  $ref: '#/components/schemas/TimeRange'
-                  description: 在轨道上的时间范围
-                clip_settings:
-                  $ref: '#/components/schemas/ClipSettings'
-                  nullable: true
-                  description: 图像调节设置（位置、缩放、旋转、透明度）
-              type: object
-              required:
-              - material_url
-              - target_timerange
-              description: 创建贴纸片段请求
-        required: true
-      responses:
-        '200':
-          description: Successful Response
+                title: Response Execute Replay Gui Replay Execute Post
+        '422':
+          description: Validation Error
           content:
             application/json:
               schema:
-                properties:
-                  segment_id:
-                    type: string
-                    description: Segment UUID
-                type: object
-                required:
-                - segment_id
-                description: 创建片段响应
-  /segments/{segment_id}/add_audio_effect:
-    post:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/replay/{draft_id}:
+    get:
       tags:
-      - basic
-      summary: 为音频片段添加音效
-      description: 为指定音频片段添加音场、变调或语音转歌曲等音效。
-      operationId: add_audio_effect
+      - GUI 管理
+      summary: Replay Draft
+      operationId: replay_draft_gui_replay__draft_id__get
       parameters:
-      - name: segment_id
+      - name: draft_id
         in: path
         required: true
         schema:
           type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                effect_type:
-                  type: string
-                  description: '音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType'
-                params:
-                  items:
-                    type: number
-                  type: array
-                  nullable: true
-                  description: 特效参数列表（范围 0-100）
-              type: object
-              required:
-              - effect_type
-              description: 添加音频特效请求（用于 AudioSegment）
+          title: Draft Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties: {}
                 type: object
-                description: 添加音频特效响应
-  /segments/{segment_id}/add_audio_fade:
-    post:
+                additionalProperties: true
+                title: Response Replay Draft Gui Replay  Draft Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /gui/logs/stream:
+    get:
       tags:
-      - basic
-      summary: 为音频片段添加淡入淡出
-      description: 为指定音频片段设置淡入和淡出的时长。
-      operationId: add_audio_fade
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                in_duration:
-                  type: string
-                  description: 淡入时长（字符串如 '1s' 或微秒数）
-                out_duration:
-                  type: string
-                  description: 淡出时长
-              type: object
-              required:
-              - in_duration
-              - out_duration
-              description: 添加音频淡入淡出请求（用于 AudioSegment）
+      - GUI 管理
+      summary: Logs Stream
+      operationId: logs_stream_gui_logs_stream_get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加音频淡入淡出响应
-  /segments/{segment_id}/add_audio_keyframe:
-    post:
-      tags:
-      - basic
-      summary: 为音频片段添加音量关键帧
-      description: 在指定时间点为音频片段添加音量关键帧，实现音量随时间的动态变化。
-      operationId: add_audio_keyframe
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                time_offset:
-                  type: integer
-                  minimum: 0.0
-                  description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
-                volume:
-                  type: number
-                  description: 音量值 0-2
-              type: object
-              required:
-              - time_offset
-              - volume
-              description: 添加音频关键帧请求（用于 AudioSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加音频关键帧响应
-  /segments/{segment_id}/add_sticker_keyframe:
-    post:
-      tags:
-      - basic
-      summary: 为贴纸片段添加关键帧
-      description: 在指定时间点为贴纸片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
-      operationId: add_sticker_keyframe
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                time_offset:
-                  type: integer
-                  minimum: 0.0
-                  description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
-                value:
-                  type: number
-                  description: 关键帧值
-                property:
-                  type: string
-                  description: '属性名称: position_x, position_y, scale, rotation, opacity
-                    等'
-              type: object
-              required:
-              - time_offset
-              - value
-              - property
-              description: 添加贴纸关键帧请求（用于 StickerSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加贴纸关键帧响应
-  /segments/{segment_id}/add_text_animation:
-    post:
-      tags:
-      - basic
-      summary: 为文本片段添加动画
-      description: 为指定文本片段添加入场、出场或循环动画。
-      operationId: add_text_animation
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                animation_type:
-                  type: string
-                  description: '动画类型: TextAnimationType'
-                duration:
-                  type: string
-                  nullable: true
-                  description: 动画时长
-                  default: 1s
-              type: object
-              required:
-              - animation_type
-              description: 添加文本动画请求（用于 TextSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加文本动画响应
-  /segments/{segment_id}/add_text_bubble:
-    post:
-      tags:
-      - basic
-      summary: 为文本片段添加气泡
-      description: 为指定文本片段添加气泡背景装饰特效。
-      operationId: add_text_bubble
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                effect_id:
-                  type: string
-                  description: 气泡特效 ID
-                resource_id:
-                  type: string
-                  description: 资源 ID
-              type: object
-              required:
-              - effect_id
-              - resource_id
-              description: 添加文本气泡请求（用于 TextSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加文本气泡响应
-  /segments/{segment_id}/add_text_effect:
-    post:
-      tags:
-      - basic
-      summary: 为文本片段添加花字特效
-      description: 为指定文本片段添加花字（文字样式特效）。
-      operationId: add_text_effect
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                effect_id:
-                  type: string
-                  description: 花字特效 ID
-              type: object
-              required:
-              - effect_id
-              description: 添加花字特效请求（用于 TextSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加花字特效响应
-  /segments/{segment_id}/add_text_keyframe:
-    post:
-      tags:
-      - basic
-      summary: 为文本片段添加关键帧
-      description: 在指定时间点为文本片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
-      operationId: add_text_keyframe
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                time_offset:
-                  type: integer
-                  minimum: 0.0
-                  description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
-                value:
-                  type: number
-                  description: 关键帧值
-                property:
-                  type: string
-                  description: '属性名称: position_x, position_y, scale, rotation, opacity
-                    等'
-              type: object
-              required:
-              - time_offset
-              - value
-              - property
-              description: 添加文本关键帧请求（用于 TextSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加文本关键帧响应
-  /segments/{segment_id}/add_video_animation:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加动画
-      description: 为指定视频片段添加入场、出场或组合动画。
-      operationId: add_video_animation
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                animation_type:
-                  type: string
-                  description: '动画类型: IntroType | OutroType | GroupAnimationType'
-                duration:
-                  type: string
-                  nullable: true
-                  description: 动画时长
-                  default: 1s
-              type: object
-              required:
-              - animation_type
-              description: 添加视频动画请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频动画响应
-  /segments/{segment_id}/add_video_background_filling:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加背景填充
-      description: 为指定视频片段设置模糊或纯色背景填充，用于填补画面空白区域。
-      operationId: add_video_background_filling
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                fill_type:
-                  type: string
-                  description: '填充类型: blur 或 color'
-                blur:
-                  type: number
-                  nullable: true
-                  description: 模糊程度（fill_type=blur 时）
-                  default: 0.0625
-                color:
-                  type: string
-                  nullable: true
-                  description: 填充颜色（fill_type=color 时）
-                  default: '#00000000'
-              type: object
-              required:
-              - fill_type
-              description: 添加视频背景填充请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频背景填充响应
-  /segments/{segment_id}/add_video_effect:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加特效
-      description: 为指定视频片段添加场景特效或人物特效。
-      operationId: add_video_effect
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                effect_type:
-                  type: string
-                  description: '视频特效类型: VideoSceneEffectType | VideoCharacterEffectType'
-                params:
-                  items:
-                    type: number
-                  type: array
-                  nullable: true
-                  description: 特效参数列表
-              type: object
-              required:
-              - effect_type
-              description: 添加视频特效请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频特效响应
-  /segments/{segment_id}/add_video_fade:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加淡入淡出
-      description: 为指定视频片段设置画面淡入和淡出的时长。
-      operationId: add_video_fade
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                in_duration:
-                  type: string
-                  description: 淡入时长（字符串如 '1s' 或微秒数）
-                out_duration:
-                  type: string
-                  description: 淡出时长
-              type: object
-              required:
-              - in_duration
-              - out_duration
-              description: 添加视频淡入淡出请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频淡入淡出响应
-  /segments/{segment_id}/add_video_filter:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加滤镜
-      description: 为指定视频片段添加色彩滤镜效果。
-      operationId: add_video_filter
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                filter_type:
-                  type: string
-                  description: 滤镜类型
-                intensity:
-                  type: number
-                  maximum: 100.0
-                  minimum: 0.0
-                  description: 滤镜强度 0-100
-                  default: 100.0
-              type: object
-              required:
-              - filter_type
-              description: 添加视频滤镜请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频滤镜响应
-  /segments/{segment_id}/add_video_keyframe:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加关键帧
-      description: 在指定时间点为视频片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
-      operationId: add_video_keyframe
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                time_offset:
-                  type: integer
-                  minimum: 0.0
-                  description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
-                value:
-                  type: number
-                  description: 关键帧值
-                property:
-                  type: string
-                  description: '属性名称: position_x, position_y, scale, rotation, opacity
-                    等'
-              type: object
-              required:
-              - time_offset
-              - value
-              - property
-              description: 添加视频关键帧请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频关键帧响应
-  /segments/{segment_id}/add_video_mask:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加蒙版
-      description: 为指定视频片段添加形状蒙版（如圆形、矩形、线性等），支持羽化、旋转和反转。
-      operationId: add_video_mask
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                mask_type:
-                  type: string
-                  description: 蒙版类型（MaskType 枚举名）
-                center_x:
-                  type: number
-                  nullable: true
-                  description: 蒙版中心 X 坐标（以素材像素为单位）
-                  default: 0.0
-                center_y:
-                  type: number
-                  nullable: true
-                  description: 蒙版中心 Y 坐标（以素材像素为单位）
-                  default: 0.0
-                size:
-                  type: number
-                  nullable: true
-                  description: 蒙版主尺寸（占素材高度比例）
-                  default: 0.5
-                feather:
-                  type: number
-                  maximum: 100.0
-                  minimum: 0.0
-                  nullable: true
-                  description: 羽化程度 0-100
-                  default: 0.0
-                invert:
-                  type: boolean
-                  nullable: true
-                  description: 是否反转蒙版
-                  default: false
-                rotation:
-                  type: number
-                  nullable: true
-                  description: 蒙版顺时针旋转角度
-                  default: 0.0
-                rect_width:
-                  type: number
-                  nullable: true
-                  description: 矩形蒙版宽度（占素材宽度比例），仅在 mask_type=矩形 时生效
-                round_corner:
-                  type: number
-                  nullable: true
-                  description: 矩形蒙版圆角 0-100，仅在 mask_type=矩形 时生效
-              type: object
-              required:
-              - mask_type
-              description: 添加视频蒙版请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频蒙版响应
-  /segments/{segment_id}/add_video_transition:
-    post:
-      tags:
-      - basic
-      summary: 为视频片段添加转场
-      description: 为指定视频片段设置转场动画效果及时长。
-      operationId: add_video_transition
-      parameters:
-      - name: segment_id
-        in: path
-        required: true
-        schema:
-          type: string
-          description: 片段的唯一标识 ID
-        description: 片段的唯一标识 ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              properties:
-                transition_type:
-                  type: string
-                  description: 转场类型
-                duration:
-                  type: string
-                  nullable: true
-                  description: 转场时长
-                  default: 1s
-              type: object
-              required:
-              - transition_type
-              description: 添加视频转场请求（用于 VideoSegment）
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                properties: {}
-                type: object
-                description: 添加视频转场响应
+              schema: {}
   /drafts/{draft_id}/add_audios:
     post:
       tags:
       - easy
       summary: 批量添加音频
       description: 解析音频信息 JSON，批量创建音频片段并添加到草稿，返回片段 ID 列表。
-      operationId: add_audios
+      operationId: add_audios_drafts__draft_id__add_audios_post
       parameters:
       - name: draft_id
         in: path
@@ -1278,41 +271,34 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                audio_infos:
-                  type: string
-                  description: 音频信息列表，JSON字符串
-              type: object
-              required:
-              - audio_infos
-              description: 批量添加音频请求参数。
+              $ref: '#/components/schemas/AddAudiosRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties:
-                  segment_ids:
-                    items:
-                      type: string
-                    type: array
-                    description: 音频片段ID列表
-                type: object
-                description: 批量添加音频响应参数。
+                $ref: '#/components/schemas/AddAudiosResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /drafts/{draft_id}/add_captions:
     post:
       tags:
       - easy
       summary: 批量添加字幕
       description: 解析字幕信息 JSON，批量创建文本片段并添加到草稿，支持字体、颜色、阴影等样式设置。
-      operationId: add_captions
+      operationId: add_captions_drafts__draft_id__add_captions_post
       parameters:
       - name: draft_id
         in: path
@@ -1320,118 +306,34 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                captions:
-                  type: string
-                  description: 字幕信息列表，JSON字符串
-                text_color:
-                  type: string
-                  description: 文本颜色（十六进制）
-                  default: '#ffffff'
-                border_color:
-                  type: string
-                  nullable: true
-                  description: 边框颜色（十六进制）
-                alignment:
-                  type: integer
-                  maximum: 5.0
-                  minimum: 0.0
-                  description: 文本对齐方式
-                  default: 1
-                alpha:
-                  type: number
-                  maximum: 1.0
-                  minimum: 0.0
-                  description: 文本透明度
-                  default: 1.0
-                font:
-                  type: string
-                  nullable: true
-                  description: 字体名称
-                font_size:
-                  type: integer
-                  minimum: 1.0
-                  description: 字体大小
-                  default: 15
-                letter_spacing:
-                  type: number
-                  nullable: true
-                  description: 字间距
-                line_spacing:
-                  type: number
-                  nullable: true
-                  description: 行间距
-                scale_x:
-                  type: number
-                  description: 水平缩放
-                  default: 1.0
-                scale_y:
-                  type: number
-                  description: 垂直缩放
-                  default: 1.0
-                transform_x:
-                  type: number
-                  description: 水平位移
-                  default: 0.0
-                transform_y:
-                  type: number
-                  description: 垂直位移
-                  default: 0.0
-                style_text:
-                  type: boolean
-                  description: 是否使用样式文本
-                  default: false
-                underline:
-                  type: boolean
-                  description: 文字下划线开关
-                  default: false
-                italic:
-                  type: boolean
-                  description: 文本斜体开关
-                  default: false
-                bold:
-                  type: boolean
-                  description: 文本加粗开关
-                  default: false
-                has_shadow:
-                  type: boolean
-                  description: 是否启用文本阴影
-                  default: false
-                shadow_info:
-                  $ref: '#/components/schemas/ShadowInfo'
-                  nullable: true
-                  description: 文本阴影参数
-              type: object
-              required:
-              - captions
-              description: 批量添加字幕请求参数。
+              $ref: '#/components/schemas/AddCaptionsRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties:
-                  segment_ids:
-                    items:
-                      type: string
-                    type: array
-                    description: 字幕片段ID列表
-                type: object
-                description: 批量添加字幕响应参数。
+                $ref: '#/components/schemas/AddCaptionsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /drafts/{draft_id}/add_videos:
     post:
       tags:
       - easy
       summary: 批量添加视频
       description: 解析视频信息 JSON，批量创建视频片段并添加到草稿，返回片段 ID 列表。
-      operationId: add_videos
+      operationId: add_videos_drafts__draft_id__add_videos_post
       parameters:
       - name: draft_id
         in: path
@@ -1439,61 +341,34 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                video_infos:
-                  type: string
-                  description: 视频信息列表，JSON字符串
-                alpha:
-                  type: number
-                  description: 全局透明度[0, 1]
-                  default: 1.0
-                scale_x:
-                  type: number
-                  description: X轴缩放比例
-                  default: 1.0
-                scale_y:
-                  type: number
-                  description: Y轴缩放比例
-                  default: 1.0
-                transform_x:
-                  type: integer
-                  description: X轴位置偏移(像素)
-                  default: 0
-                transform_y:
-                  type: integer
-                  description: Y轴位置偏移(像素)
-                  default: 0
-              type: object
-              required:
-              - video_infos
-              description: 批量添加视频请求参数。
+              $ref: '#/components/schemas/AddVideosRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties:
-                  segment_ids:
-                    items:
-                      type: string
-                    type: array
-                    description: 片段ID列表
-                type: object
-                description: 添加视频响应参数。
+                $ref: '#/components/schemas/AddVideosResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /drafts/{draft_id}/add_images:
     post:
       tags:
       - easy
       summary: 批量添加图片
       description: 解析图片信息 JSON，批量创建图片片段并添加到草稿，返回片段 ID 列表。
-      operationId: add_images
+      operationId: add_images_drafts__draft_id__add_images_post
       parameters:
       - name: draft_id
         in: path
@@ -1501,61 +376,34 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                image_infos:
-                  type: string
-                  description: 图片信息列表，JSON字符串
-                alpha:
-                  type: number
-                  description: 全局透明度[0, 1]
-                  default: 1.0
-                scale_x:
-                  type: number
-                  description: X轴缩放比例
-                  default: 1.0
-                scale_y:
-                  type: number
-                  description: Y轴缩放比例
-                  default: 1.0
-                transform_x:
-                  type: integer
-                  description: X轴位置偏移(像素)
-                  default: 0
-                transform_y:
-                  type: integer
-                  description: Y轴位置偏移(像素)
-                  default: 0
-              type: object
-              required:
-              - image_infos
-              description: 批量添加图片请求参数。
+              $ref: '#/components/schemas/AddImagesRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties:
-                  segment_ids:
-                    items:
-                      type: string
-                    type: array
-                    description: 片段ID列表
-                type: object
-                description: 添加图片响应参数。
+                $ref: '#/components/schemas/AddImagesResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /drafts/{draft_id}/add_effects:
     post:
       tags:
       - easy
       summary: 批量添加特效
       description: 解析特效信息 JSON，批量创建特效片段并添加到草稿，返回片段 ID 列表。
-      operationId: add_effects
+      operationId: add_effects_drafts__draft_id__add_effects_post
       parameters:
       - name: draft_id
         in: path
@@ -1563,41 +411,34 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                effect_infos:
-                  type: string
-                  description: 特效信息列表，JSON字符串
-              type: object
-              required:
-              - effect_infos
-              description: 添加特效请求参数。
+              $ref: '#/components/schemas/AddEffectsRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties:
-                  segment_ids:
-                    items:
-                      type: string
-                    type: array
-                    description: 特效片段ID列表
-                type: object
-                description: 添加特效响应参数。
+                $ref: '#/components/schemas/AddEffectsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /drafts/{draft_id}/add_masks:
     post:
       tags:
       - easy
       summary: 批量添加遮罩
       description: 为指定的多个片段批量应用遇罩效果，支持形状、缩放、缩放、旋转和羽化设置。
-      operationId: add_masks
+      operationId: add_masks_drafts__draft_id__add_masks_post
       parameters:
       - name: draft_id
         in: path
@@ -1605,72 +446,34 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                segment_ids:
-                  items:
-                    type: string
-                  type: array
-                  description: 要应用遮罩的片段ID数组
-                name:
-                  type: string
-                  description: 遮罩类型名称
-                  default: 线性
-                X:
-                  type: integer
-                  description: 遮罩中心X坐标（像素）
-                  default: 0
-                Y:
-                  type: integer
-                  description: 遮罩中心Y坐标（像素）
-                  default: 0
-                width:
-                  type: integer
-                  description: 遮罩宽度（像素）
-                  default: 512
-                height:
-                  type: integer
-                  description: 遮罩高度（像素）
-                  default: 512
-                feather:
-                  type: integer
-                  description: 羽化程度（0-100）
-                  default: 0
-                rotation:
-                  type: integer
-                  description: 旋转角度（度）
-                  default: 0
-                invert:
-                  type: boolean
-                  description: 是否反转遮罩
-                  default: false
-                round_corner:
-                  type: integer
-                  description: 圆角半径（0-100）
-                  default: 0
-              type: object
-              description: 添加遮罩请求参数。
+              $ref: '#/components/schemas/AddMasksRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties: {}
-                type: object
-                description: 添加遮罩响应参数。
+                $ref: '#/components/schemas/AddMasksResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /drafts/{draft_id}/add_keyframes:
     post:
       tags:
       - easy
       summary: 批量添加关键帧
       description: 解析关键帧信息 JSON，批量为多个片段添加动画关键帧。
-      operationId: add_keyframes
+      operationId: add_keyframes_drafts__draft_id__add_keyframes_post
       parameters:
       - name: draft_id
         in: path
@@ -1678,158 +481,2413 @@ paths:
         schema:
           type: string
           description: 草稿的唯一标识 ID
+          title: Draft Id
         description: 草稿的唯一标识 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              properties:
-                keyframes:
-                  type: string
-                  description: 关键帧信息列表，JSON字符串
-              type: object
-              required:
-              - keyframes
-              description: 添加关键帧请求参数。
+              $ref: '#/components/schemas/AddKeyframesRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                properties: {}
-                type: object
-                description: 添加关键帧响应参数。
-servers:
-- url: https://coze2jianying.pages.dev
+                $ref: '#/components/schemas/AddKeyframesResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /drafts/create_draft:
+    post:
+      tags:
+      - basic
+      summary: 创建草稿
+      description: 创建一个新的剪映草稿，返回草稿 ID，后续所有操作均通过此 ID 引用该草稿。
+      operationId: create_draft_drafts_create_draft_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDraftRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDraftResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /drafts/{draft_id}/save_draft:
+    post:
+      tags:
+      - basic
+      summary: 保存草稿
+      description: 将当前草稿内容持久化写入磁盘，使剪映可以读取到最新编辑结果。
+      operationId: save_draft_drafts__draft_id__save_draft_post
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 草稿的唯一标识 ID
+          title: Draft Id
+        description: 草稿的唯一标识 ID
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveDraftResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /drafts/{draft_id}/add_segment:
+    post:
+      tags:
+      - basic
+      summary: 添加片段到草稿
+      description: 将已创建的片段（音频/视频/文本/贴纸）添加到指定草稿的对应轨道中。
+      operationId: add_segment_drafts__draft_id__add_segment_post
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 草稿的唯一标识 ID
+          title: Draft Id
+        description: 草稿的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddSegmentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddSegmentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /drafts/{draft_id}/add_track:
+    post:
+      tags:
+      - basic
+      summary: 添加轨道
+      description: 在草稿中新建一条指定类型的轨道（audio/video/text/sticker/effect/filter）。
+      operationId: add_track_drafts__draft_id__add_track_post
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 草稿的唯一标识 ID
+          title: Draft Id
+        description: 草稿的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTrackRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTrackResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /drafts/{draft_id}/add_effect:
+    post:
+      tags:
+      - basic
+      summary: 添加全局特效
+      description: 在草稿上添加一个覆盖指定时间范围的全局特效。
+      operationId: add_effect_drafts__draft_id__add_effect_post
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 草稿的唯一标识 ID
+          title: Draft Id
+        description: 草稿的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddEffectRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddEffectResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /drafts/{draft_id}/add_filter:
+    post:
+      tags:
+      - basic
+      summary: 添加全局滤镜
+      description: 在草稿上添加一个覆盖指定时间范围的全局色彩滤镜。
+      operationId: add_filter_drafts__draft_id__add_filter_post
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 草稿的唯一标识 ID
+          title: Draft Id
+        description: 草稿的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddFilterRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddFilterResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/create_audio_segment:
+    post:
+      tags:
+      - basic
+      summary: 创建音频片段
+      description: 根据素材 URL 和时间范围创建音频片段，返回片段 ID，后续可将其添加到草稿轨道。
+      operationId: create_audio_segment_segments_create_audio_segment_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAudioSegmentRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAudioSegmentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/create_video_segment:
+    post:
+      tags:
+      - basic
+      summary: 创建视频片段
+      description: 根据素材 URL 和时间范围创建视频片段，返回片段 ID，后续可将其添加到草稿轨道。
+      operationId: create_video_segment_segments_create_video_segment_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVideoSegmentRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateVideoSegmentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/create_text_segment:
+    post:
+      tags:
+      - basic
+      summary: 创建文本片段
+      description: 根据文本内容和时间范围创建文本片段，支持字体、样式、描边、阴影等设置，返回片段 ID。
+      operationId: create_text_segment_segments_create_text_segment_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTextSegmentRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTextSegmentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/create_sticker_segment:
+    post:
+      tags:
+      - basic
+      summary: 创建贴纸片段
+      description: 根据素材 URL 和时间范围创建贴纸片段，返回片段 ID，后续可将其添加到草稿轨道。
+      operationId: create_sticker_segment_segments_create_sticker_segment_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStickerSegmentRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStickerSegmentResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_audio_effect:
+    post:
+      tags:
+      - basic
+      summary: 为音频片段添加音效
+      description: 为指定音频片段添加音场、变调或语音转歌曲等音效。
+      operationId: add_audio_effect_segments__segment_id__add_audio_effect_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAudioEffectRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAudioEffectResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_audio_fade:
+    post:
+      tags:
+      - basic
+      summary: 为音频片段添加淡入淡出
+      description: 为指定音频片段设置淡入和淡出的时长。
+      operationId: add_audio_fade_segments__segment_id__add_audio_fade_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAudioFadeRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAudioFadeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_audio_keyframe:
+    post:
+      tags:
+      - basic
+      summary: 为音频片段添加音量关键帧
+      description: 在指定时间点为音频片段添加音量关键帧，实现音量随时间的动态变化。
+      operationId: add_audio_keyframe_segments__segment_id__add_audio_keyframe_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAudioKeyframeRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAudioKeyframeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_sticker_keyframe:
+    post:
+      tags:
+      - basic
+      summary: 为贴纸片段添加关键帧
+      description: 在指定时间点为贴纸片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
+      operationId: add_sticker_keyframe_segments__segment_id__add_sticker_keyframe_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddStickerKeyframeRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddStickerKeyframeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_text_animation:
+    post:
+      tags:
+      - basic
+      summary: 为文本片段添加动画
+      description: 为指定文本片段添加入场、出场或循环动画。
+      operationId: add_text_animation_segments__segment_id__add_text_animation_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTextAnimationRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTextAnimationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_text_bubble:
+    post:
+      tags:
+      - basic
+      summary: 为文本片段添加气泡
+      description: 为指定文本片段添加气泡背景装饰特效。
+      operationId: add_text_bubble_segments__segment_id__add_text_bubble_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTextBubbleRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTextBubbleResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_text_effect:
+    post:
+      tags:
+      - basic
+      summary: 为文本片段添加花字特效
+      description: 为指定文本片段添加花字（文字样式特效）。
+      operationId: add_text_effect_segments__segment_id__add_text_effect_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTextEffectRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTextEffectResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_text_keyframe:
+    post:
+      tags:
+      - basic
+      summary: 为文本片段添加关键帧
+      description: 在指定时间点为文本片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
+      operationId: add_text_keyframe_segments__segment_id__add_text_keyframe_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTextKeyframeRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTextKeyframeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_animation:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加动画
+      description: 为指定视频片段添加入场、出场或组合动画。
+      operationId: add_video_animation_segments__segment_id__add_video_animation_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoAnimationRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoAnimationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_background_filling:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加背景填充
+      description: 为指定视频片段设置模糊或纯色背景填充，用于填补画面空白区域。
+      operationId: add_video_background_filling_segments__segment_id__add_video_background_filling_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoBackgroundFillingRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoBackgroundFillingResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_effect:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加特效
+      description: 为指定视频片段添加场景特效或人物特效。
+      operationId: add_video_effect_segments__segment_id__add_video_effect_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoEffectRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoEffectResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_fade:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加淡入淡出
+      description: 为指定视频片段设置画面淡入和淡出的时长。
+      operationId: add_video_fade_segments__segment_id__add_video_fade_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoFadeRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoFadeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_filter:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加滤镜
+      description: 为指定视频片段添加色彩滤镜效果。
+      operationId: add_video_filter_segments__segment_id__add_video_filter_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoFilterRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoFilterResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_keyframe:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加关键帧
+      description: 在指定时间点为视频片段添加位置、缩放、旋转或透明度等属性的动画关键帧。
+      operationId: add_video_keyframe_segments__segment_id__add_video_keyframe_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoKeyframeRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoKeyframeResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_mask:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加蒙版
+      description: 为指定视频片段添加形状蒙版（如圆形、矩形、线性等），支持羽化、旋转和反转。
+      operationId: add_video_mask_segments__segment_id__add_video_mask_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoMaskRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoMaskResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /segments/{segment_id}/add_video_transition:
+    post:
+      tags:
+      - basic
+      summary: 为视频片段添加转场
+      description: 为指定视频片段设置转场动画效果及时长。
+      operationId: add_video_transition_segments__segment_id__add_video_transition_post
+      parameters:
+      - name: segment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          description: 片段的唯一标识 ID
+          title: Segment Id
+        description: 片段的唯一标识 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddVideoTransitionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddVideoTransitionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
-    TimeRange:
+    AddAudioEffectRequest:
       properties:
-        start:
-          type: integer
-          minimum: 0.0
-          description: 开始时间（微秒）
-        duration:
-          type: integer
-          minimum: 0.0
-          exclusiveMinimum: true
-          description: 持续时长（微秒）
+        effect_type:
+          type: string
+          title: Effect Type
+          description: '音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType'
+        params:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Params
+          description: 特效参数列表（范围 0-100）
       type: object
       required:
-      - start
-      - duration
-      description: 时间范围模型（微秒）
+      - effect_type
+      title: AddAudioEffectRequest
+      description: 添加音频特效请求（用于 AudioSegment）
+      example:
+        effect_type: AudioSceneEffectType.VOICE_CHANGER
+        params:
+        - 50.0
+        - 75.0
+    AddAudioEffectResponse:
+      properties: {}
+      type: object
+      title: AddAudioEffectResponse
+      description: 添加音频特效响应
+    AddAudioFadeRequest:
+      properties:
+        in_duration:
+          type: string
+          title: In Duration
+          description: 淡入时长（字符串如 '1s' 或微秒数）
+        out_duration:
+          type: string
+          title: Out Duration
+          description: 淡出时长
+      type: object
+      required:
+      - in_duration
+      - out_duration
+      title: AddAudioFadeRequest
+      description: 添加音频淡入淡出请求（用于 AudioSegment）
+      example:
+        in_duration: 1s
+        out_duration: 0s
+    AddAudioFadeResponse:
+      properties: {}
+      type: object
+      title: AddAudioFadeResponse
+      description: 添加音频淡入淡出响应
+    AddAudioKeyframeRequest:
+      properties:
+        time_offset:
+          type: integer
+          minimum: 0.0
+          title: Time Offset
+          description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
+        volume:
+          type: number
+          title: Volume
+          description: 音量值 0-2
+      type: object
+      required:
+      - time_offset
+      - volume
+      title: AddAudioKeyframeRequest
+      description: 添加音频关键帧请求（用于 AudioSegment）
+      example:
+        time_offset: 2000000
+        volume: 0.8
+    AddAudioKeyframeResponse:
+      properties: {}
+      type: object
+      title: AddAudioKeyframeResponse
+      description: 添加音频关键帧响应
+    AddAudiosRequest:
+      properties:
+        audio_infos:
+          type: string
+          title: Audio Infos
+          description: 音频信息列表，JSON字符串
+      type: object
+      required:
+      - audio_infos
+      title: AddAudiosRequest
+      description: 批量添加音频请求参数。
+    AddAudiosResponse:
+      properties:
+        segment_ids:
+          items:
+            type: string
+          type: array
+          title: Segment Ids
+          description: 音频片段ID列表
+      type: object
+      title: AddAudiosResponse
+      description: 批量添加音频响应参数。
+    AddCaptionsRequest:
+      properties:
+        captions:
+          type: string
+          title: Captions
+          description: 字幕信息列表，JSON字符串
+        text_color:
+          type: string
+          title: Text Color
+          description: 文本颜色（十六进制）
+          default: '#ffffff'
+        border_color:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Border Color
+          description: 边框颜色（十六进制）
+        alignment:
+          type: integer
+          maximum: 5.0
+          minimum: 0.0
+          title: Alignment
+          description: 文本对齐方式
+          default: 1
+        alpha:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Alpha
+          description: 文本透明度
+          default: 1.0
+        font:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Font
+          description: 字体名称
+        font_size:
+          type: integer
+          minimum: 1.0
+          title: Font Size
+          description: 字体大小
+          default: 15
+        letter_spacing:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Letter Spacing
+          description: 字间距
+        line_spacing:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Line Spacing
+          description: 行间距
+        scale_x:
+          type: number
+          title: Scale X
+          description: 水平缩放
+          default: 1.0
+        scale_y:
+          type: number
+          title: Scale Y
+          description: 垂直缩放
+          default: 1.0
+        transform_x:
+          type: number
+          title: Transform X
+          description: 水平位移
+          default: 0.0
+        transform_y:
+          type: number
+          title: Transform Y
+          description: 垂直位移
+          default: 0.0
+        style_text:
+          type: boolean
+          title: Style Text
+          description: 是否使用样式文本
+          default: false
+        underline:
+          type: boolean
+          title: Underline
+          description: 文字下划线开关
+          default: false
+        italic:
+          type: boolean
+          title: Italic
+          description: 文本斜体开关
+          default: false
+        bold:
+          type: boolean
+          title: Bold
+          description: 文本加粗开关
+          default: false
+        has_shadow:
+          type: boolean
+          title: Has Shadow
+          description: 是否启用文本阴影
+          default: false
+        shadow_info:
+          anyOf:
+          - $ref: '#/components/schemas/ShadowInfo'
+          - type: 'null'
+          description: 文本阴影参数
+      type: object
+      required:
+      - captions
+      title: AddCaptionsRequest
+      description: 批量添加字幕请求参数。
+    AddCaptionsResponse:
+      properties:
+        segment_ids:
+          items:
+            type: string
+          type: array
+          title: Segment Ids
+          description: 字幕片段ID列表
+      type: object
+      title: AddCaptionsResponse
+      description: 批量添加字幕响应参数。
+    AddEffectRequest:
+      properties:
+        effect_type:
+          type: string
+          title: Effect Type
+          description: 特效类型
+        target_timerange:
+          $ref: '#/components/schemas/TimeRange'
+          description: 时间范围
+        params:
+          anyOf:
+          - items:
+              anyOf:
+              - type: number
+              - type: 'null'
+            type: array
+          - type: 'null'
+          title: Params
+          description: 特效参数列表
+      type: object
+      required:
+      - effect_type
+      - target_timerange
+      title: AddEffectRequest
+      description: 添加全局特效请求
+      example:
+        effect_type: VideoSceneEffectType.XXX
+        params:
+        - 0.5
+        - 1.0
+        target_timerange:
+          duration: 5000000
+          start: 0
+    AddEffectResponse:
+      properties: {}
+      type: object
+      title: AddEffectResponse
+      description: 添加全局特效响应
+    AddEffectsRequest:
+      properties:
+        effect_infos:
+          type: string
+          title: Effect Infos
+          description: 特效信息列表，JSON字符串
+      type: object
+      required:
+      - effect_infos
+      title: AddEffectsRequest
+      description: 添加特效请求参数。
+    AddEffectsResponse:
+      properties:
+        segment_ids:
+          items:
+            type: string
+          type: array
+          title: Segment Ids
+          description: 特效片段ID列表
+      type: object
+      title: AddEffectsResponse
+      description: 添加特效响应参数。
+    AddFilterRequest:
+      properties:
+        filter_type:
+          type: string
+          title: Filter Type
+          description: 滤镜类型
+        target_timerange:
+          $ref: '#/components/schemas/TimeRange'
+          description: 时间范围
+        intensity:
+          type: number
+          maximum: 100.0
+          minimum: 0.0
+          title: Intensity
+          description: 滤镜强度 0-100
+          default: 100.0
+      type: object
+      required:
+      - filter_type
+      - target_timerange
+      title: AddFilterRequest
+      description: 添加全局滤镜请求
+      example:
+        filter_type: FilterType.XXX
+        intensity: 100.0
+        target_timerange:
+          duration: 5000000
+          start: 0
+    AddFilterResponse:
+      properties: {}
+      type: object
+      title: AddFilterResponse
+      description: 添加全局滤镜响应
+    AddImagesRequest:
+      properties:
+        image_infos:
+          type: string
+          title: Image Infos
+          description: 图片信息列表，JSON字符串
+        alpha:
+          type: number
+          title: Alpha
+          description: 全局透明度[0, 1]
+          default: 1.0
+        scale_x:
+          type: number
+          title: Scale X
+          description: X轴缩放比例
+          default: 1.0
+        scale_y:
+          type: number
+          title: Scale Y
+          description: Y轴缩放比例
+          default: 1.0
+        transform_x:
+          type: integer
+          title: Transform X
+          description: X轴位置偏移(像素)
+          default: 0
+        transform_y:
+          type: integer
+          title: Transform Y
+          description: Y轴位置偏移(像素)
+          default: 0
+      type: object
+      required:
+      - image_infos
+      title: AddImagesRequest
+      description: 批量添加图片请求参数。
+    AddImagesResponse:
+      properties:
+        segment_ids:
+          items:
+            type: string
+          type: array
+          title: Segment Ids
+          description: 片段ID列表
+      type: object
+      title: AddImagesResponse
+      description: 添加图片响应参数。
+    AddKeyframesRequest:
+      properties:
+        keyframes:
+          type: string
+          title: Keyframes
+          description: 关键帧信息列表，JSON字符串
+      type: object
+      required:
+      - keyframes
+      title: AddKeyframesRequest
+      description: 添加关键帧请求参数。
+    AddKeyframesResponse:
+      properties: {}
+      type: object
+      title: AddKeyframesResponse
+      description: 添加关键帧响应参数。
+    AddMasksRequest:
+      properties:
+        segment_ids:
+          items:
+            type: string
+          type: array
+          title: Segment Ids
+          description: 要应用遮罩的片段ID数组
+        name:
+          type: string
+          title: Name
+          description: 遮罩类型名称
+          default: 线性
+        X:
+          type: integer
+          title: X
+          description: 遮罩中心X坐标（像素）
+          default: 0
+        Y:
+          type: integer
+          title: Y
+          description: 遮罩中心Y坐标（像素）
+          default: 0
+        width:
+          type: integer
+          title: Width
+          description: 遮罩宽度（像素）
+          default: 512
+        height:
+          type: integer
+          title: Height
+          description: 遮罩高度（像素）
+          default: 512
+        feather:
+          type: integer
+          title: Feather
+          description: 羽化程度（0-100）
+          default: 0
+        rotation:
+          type: integer
+          title: Rotation
+          description: 旋转角度（度）
+          default: 0
+        invert:
+          type: boolean
+          title: Invert
+          description: 是否反转遮罩
+          default: false
+        round_corner:
+          type: integer
+          title: Round Corner
+          description: 圆角半径（0-100）
+          default: 0
+      type: object
+      title: AddMasksRequest
+      description: 添加遮罩请求参数。
+    AddMasksResponse:
+      properties: {}
+      type: object
+      title: AddMasksResponse
+      description: 添加遮罩响应参数。
+    AddSegmentRequest:
+      properties:
+        segment_id:
+          type: string
+          title: Segment Id
+          description: Segment UUID
+        track_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Track Name
+          description: 目标轨道索引，None 则自动选择
+      type: object
+      required:
+      - segment_id
+      title: AddSegmentRequest
+      description: 添加片段到草稿请求
+      example:
+        segment_id: 87654321-4321-4321-4321-cba987654321
+    AddSegmentResponse:
+      properties: {}
+      type: object
+      title: AddSegmentResponse
+      description: 添加片段到草稿响应
+    AddStickerKeyframeRequest:
+      properties:
+        time_offset:
+          type: integer
+          minimum: 0.0
+          title: Time Offset
+          description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
+        value:
+          type: number
+          title: Value
+          description: 关键帧值
+        property:
+          type: string
+          title: Property
+          description: KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，可选属性：KeyframeProperty.position_x
+            / KeyframeProperty.position_y / KeyframeProperty.rotation / KeyframeProperty.scale_x
+            / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale
+      type: object
+      required:
+      - time_offset
+      - value
+      - property
+      title: AddStickerKeyframeRequest
+      description: 添加贴纸关键帧请求（用于 StickerSegment）
+      example:
+        property: KeyframeProperty.uniform_scale
+        time_offset: 2000000
+        value: 1.0
+    AddStickerKeyframeResponse:
+      properties: {}
+      type: object
+      title: AddStickerKeyframeResponse
+      description: 添加贴纸关键帧响应
+    AddTextAnimationRequest:
+      properties:
+        animation_type:
+          type: string
+          title: Animation Type
+          description: '动画类型: TextAnimationType'
+        duration:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Duration
+          description: 动画时长
+          default: 1s
+      type: object
+      required:
+      - animation_type
+      title: AddTextAnimationRequest
+      description: 添加文本动画请求（用于 TextSegment）
+      example:
+        animation_type: TextAnimationType.TYPEWRITER
+        duration: 1s
+    AddTextAnimationResponse:
+      properties: {}
+      type: object
+      title: AddTextAnimationResponse
+      description: 添加文本动画响应
+    AddTextBubbleRequest:
+      properties:
+        effect_id:
+          type: string
+          title: Effect Id
+          description: 气泡特效 ID
+        resource_id:
+          type: string
+          title: Resource Id
+          description: 资源 ID
+      type: object
+      required:
+      - effect_id
+      - resource_id
+      title: AddTextBubbleRequest
+      description: 添加文本气泡请求（用于 TextSegment）
+      example:
+        effect_id: bubble_effect_123
+        resource_id: resource_456
+    AddTextBubbleResponse:
+      properties: {}
+      type: object
+      title: AddTextBubbleResponse
+      description: 添加文本气泡响应
+    AddTextEffectRequest:
+      properties:
+        effect_id:
+          type: string
+          title: Effect Id
+          description: 花字特效 ID
+      type: object
+      required:
+      - effect_id
+      title: AddTextEffectRequest
+      description: 添加花字特效请求（用于 TextSegment）
+      example:
+        effect_id: '7296357486490144036'
+    AddTextEffectResponse:
+      properties: {}
+      type: object
+      title: AddTextEffectResponse
+      description: 添加花字特效响应
+    AddTextKeyframeRequest:
+      properties:
+        time_offset:
+          type: integer
+          minimum: 0.0
+          title: Time Offset
+          description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
+        value:
+          type: number
+          title: Value
+          description: 关键帧值
+        property:
+          type: string
+          title: Property
+          description: KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，可选属性：KeyframeProperty.position_x
+            / KeyframeProperty.position_y / KeyframeProperty.rotation / KeyframeProperty.scale_x
+            / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale
+      type: object
+      required:
+      - time_offset
+      - value
+      - property
+      title: AddTextKeyframeRequest
+      description: 添加文本关键帧请求（用于 TextSegment）
+      example:
+        property: KeyframeProperty.position_x
+        time_offset: 2000000
+        value: 0.5
+    AddTextKeyframeResponse:
+      properties: {}
+      type: object
+      title: AddTextKeyframeResponse
+      description: 添加文本关键帧响应
+    AddTrackRequest:
+      properties:
+        track_type:
+          type: string
+          title: Track Type
+          description: '轨道类型: audio/video/text/sticker/effect/filter'
+        track_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Track Name
+          description: 轨道名称
+      type: object
+      required:
+      - track_type
+      title: AddTrackRequest
+      description: 添加轨道请求
+      example:
+        track_name: 背景音乐
+        track_type: audio
+    AddTrackResponse:
+      properties: {}
+      type: object
+      title: AddTrackResponse
+      description: 添加轨道响应
+    AddVideoAnimationRequest:
+      properties:
+        animation_type:
+          type: string
+          title: Animation Type
+          description: '动画类型: IntroType | OutroType | GroupAnimationType'
+        duration:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Duration
+          description: 动画时长
+          default: 1s
+      type: object
+      required:
+      - animation_type
+      title: AddVideoAnimationRequest
+      description: 添加视频动画请求（用于 VideoSegment）
+      example:
+        animation_type: IntroType.FADE_IN
+        duration: 1s
+    AddVideoAnimationResponse:
+      properties: {}
+      type: object
+      title: AddVideoAnimationResponse
+      description: 添加视频动画响应
+    AddVideoBackgroundFillingRequest:
+      properties:
+        fill_type:
+          type: string
+          title: Fill Type
+          description: '填充类型: blur 或 color'
+        blur:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Blur
+          description: 模糊程度（fill_type=blur 时）
+          default: 0.0625
+        color:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Color
+          description: 填充颜色（fill_type=color 时）
+          default: '#00000000'
+      type: object
+      required:
+      - fill_type
+      title: AddVideoBackgroundFillingRequest
+      description: 添加视频背景填充请求（用于 VideoSegment）
+      example:
+        blur: 0.0625
+        fill_type: blur
+    AddVideoBackgroundFillingResponse:
+      properties: {}
+      type: object
+      title: AddVideoBackgroundFillingResponse
+      description: 添加视频背景填充响应
+    AddVideoEffectRequest:
+      properties:
+        effect_type:
+          type: string
+          title: Effect Type
+          description: '视频特效类型: VideoSceneEffectType | VideoCharacterEffectType'
+        params:
+          anyOf:
+          - items:
+              type: number
+            type: array
+          - type: 'null'
+          title: Params
+          description: 特效参数列表
+      type: object
+      required:
+      - effect_type
+      title: AddVideoEffectRequest
+      description: 添加视频特效请求（用于 VideoSegment）
+      example:
+        effect_type: VideoSceneEffectType.GLITCH
+        params:
+        - 50.0
+    AddVideoEffectResponse:
+      properties: {}
+      type: object
+      title: AddVideoEffectResponse
+      description: 添加视频特效响应
+    AddVideoFadeRequest:
+      properties:
+        in_duration:
+          type: string
+          title: In Duration
+          description: 淡入时长（字符串如 '1s' 或微秒数）
+        out_duration:
+          type: string
+          title: Out Duration
+          description: 淡出时长
+      type: object
+      required:
+      - in_duration
+      - out_duration
+      title: AddVideoFadeRequest
+      description: 添加视频淡入淡出请求（用于 VideoSegment）
+      example:
+        in_duration: 1s
+        out_duration: 0s
+    AddVideoFadeResponse:
+      properties: {}
+      type: object
+      title: AddVideoFadeResponse
+      description: 添加视频淡入淡出响应
+    AddVideoFilterRequest:
+      properties:
+        filter_type:
+          type: string
+          title: Filter Type
+          description: 滤镜类型
+        intensity:
+          type: number
+          maximum: 100.0
+          minimum: 0.0
+          title: Intensity
+          description: 滤镜强度 0-100
+          default: 100.0
+      type: object
+      required:
+      - filter_type
+      title: AddVideoFilterRequest
+      description: 添加视频滤镜请求（用于 VideoSegment）
+      example:
+        filter_type: FilterType.XXX
+        intensity: 100.0
+    AddVideoFilterResponse:
+      properties: {}
+      type: object
+      title: AddVideoFilterResponse
+      description: 添加视频滤镜响应
+    AddVideoKeyframeRequest:
+      properties:
+        time_offset:
+          type: integer
+          minimum: 0.0
+          title: Time Offset
+          description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
+        value:
+          type: number
+          title: Value
+          description: 关键帧值
+        property:
+          type: string
+          title: Property
+          description: KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，可选属性：KeyframeProperty.position_x
+            / KeyframeProperty.position_y / KeyframeProperty.rotation / KeyframeProperty.scale_x
+            / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale / KeyframeProperty.alpha
+            / KeyframeProperty.saturation / KeyframeProperty.contrast / KeyframeProperty.brightness
+            / KeyframeProperty.volume
+      type: object
+      required:
+      - time_offset
+      - value
+      - property
+      title: AddVideoKeyframeRequest
+      description: 添加视频关键帧请求（用于 VideoSegment）
+      example:
+        property: KeyframeProperty.position_x
+        time_offset: 2000000
+        value: 0.8
+    AddVideoKeyframeResponse:
+      properties: {}
+      type: object
+      title: AddVideoKeyframeResponse
+      description: 添加视频关键帧响应
+    AddVideoMaskRequest:
+      properties:
+        mask_type:
+          type: string
+          title: Mask Type
+          description: 蒙版类型（MaskType 枚举名）
+        center_x:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Center X
+          description: 蒙版中心 X 坐标（以素材像素为单位）
+          default: 0.0
+        center_y:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Center Y
+          description: 蒙版中心 Y 坐标（以素材像素为单位）
+          default: 0.0
+        size:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Size
+          description: 蒙版主尺寸（占素材高度比例）
+          default: 0.5
+        feather:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            minimum: 0.0
+          - type: 'null'
+          title: Feather
+          description: 羽化程度 0-100
+          default: 0.0
+        invert:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Invert
+          description: 是否反转蒙版
+          default: false
+        rotation:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Rotation
+          description: 蒙版顺时针旋转角度
+          default: 0.0
+        rect_width:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Rect Width
+          description: 矩形蒙版宽度（占素材宽度比例），仅在 mask_type=矩形 时生效
+        round_corner:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Round Corner
+          description: 矩形蒙版圆角 0-100，仅在 mask_type=矩形 时生效
+      type: object
+      required:
+      - mask_type
+      title: AddVideoMaskRequest
+      description: 添加视频蒙版请求（用于 VideoSegment）
+      example:
+        center_x: 0.0
+        center_y: 0.0
+        feather: 0.0
+        invert: false
+        mask_type: 线性
+        rotation: 0.0
+        size: 0.5
+    AddVideoMaskResponse:
+      properties: {}
+      type: object
+      title: AddVideoMaskResponse
+      description: 添加视频蒙版响应
+    AddVideoTransitionRequest:
+      properties:
+        transition_type:
+          type: string
+          title: Transition Type
+          description: 转场类型
+        duration:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Duration
+          description: 转场时长
+          default: 1s
+      type: object
+      required:
+      - transition_type
+      title: AddVideoTransitionRequest
+      description: 添加视频转场请求（用于 VideoSegment）
+      example:
+        duration: 1s
+        transition_type: TransitionType.XXX
+    AddVideoTransitionResponse:
+      properties: {}
+      type: object
+      title: AddVideoTransitionResponse
+      description: 添加视频转场响应
+    AddVideosRequest:
+      properties:
+        video_infos:
+          type: string
+          title: Video Infos
+          description: 视频信息列表，JSON字符串
+        alpha:
+          type: number
+          title: Alpha
+          description: 全局透明度[0, 1]
+          default: 1.0
+        scale_x:
+          type: number
+          title: Scale X
+          description: X轴缩放比例
+          default: 1.0
+        scale_y:
+          type: number
+          title: Scale Y
+          description: Y轴缩放比例
+          default: 1.0
+        transform_x:
+          type: integer
+          title: Transform X
+          description: X轴位置偏移(像素)
+          default: 0
+        transform_y:
+          type: integer
+          title: Transform Y
+          description: Y轴位置偏移(像素)
+          default: 0
+      type: object
+      required:
+      - video_infos
+      title: AddVideosRequest
+      description: 批量添加视频请求参数。
+    AddVideosResponse:
+      properties:
+        segment_ids:
+          items:
+            type: string
+          type: array
+          title: Segment Ids
+          description: 片段ID列表
+      type: object
+      title: AddVideosResponse
+      description: 添加视频响应参数。
     ClipSettings:
       properties:
         alpha:
           type: number
           maximum: 1.0
           minimum: 0.0
+          title: Alpha
           description: 透明度 (0.0-1.0)
           default: 1.0
         rotation:
           type: number
+          title: Rotation
           description: 旋转角度（度）
           default: 0.0
         scale_x:
           type: number
-          minimum: 0.0
-          exclusiveMinimum: true
+          exclusiveMinimum: 0.0
+          title: Scale X
           description: X 轴缩放比例
           default: 1.0
         scale_y:
           type: number
-          minimum: 0.0
-          exclusiveMinimum: true
+          exclusiveMinimum: 0.0
+          title: Scale Y
           description: Y 轴缩放比例
           default: 1.0
         transform_x:
           type: number
+          title: Transform X
           description: X 轴位置偏移
           default: 0.0
         transform_y:
           type: number
+          title: Transform Y
           description: Y 轴位置偏移
           default: 0.0
       type: object
+      title: ClipSettings
       description: '图像调节设置（镜像 pyJianYingDraft.ClipSettings）
 
         对应 pyJianYingDraft 的 ClipSettings 类，用于控制片段的变换属性'
-    TextStyle:
+    CreateAudioSegmentRequest:
       properties:
-        font_size:
+        material_url:
+          type: string
+          title: Material Url
+          description: 音频素材 URL
+          default: https://gardene-el.github.io/Coze2JianYing/assets/audio.mp3
+        target_timerange:
+          $ref: '#/components/schemas/TimeRange'
+          description: 在轨道上的时间范围
+        source_timerange:
+          anyOf:
+          - $ref: '#/components/schemas/TimeRange'
+          - type: 'null'
+          description: 素材裁剪范围
+        speed:
           type: number
+          exclusiveMinimum: 0.0
+          title: Speed
+          description: 播放速度
+          default: 1.0
+        volume:
+          type: number
+          maximum: 2.0
           minimum: 0.0
-          exclusiveMinimum: true
-          description: 字体大小（与剤映中定义一致）
-          default: 8.0
-        color:
+          title: Volume
+          description: 音量 0-2
+          default: 0.6
+        change_pitch:
+          type: boolean
+          title: Change Pitch
+          description: 是否跟随变速改变音调
+          default: true
+      type: object
+      required:
+      - target_timerange
+      title: CreateAudioSegmentRequest
+      description: 创建音频片段请求
+    CreateAudioSegmentResponse:
+      properties:
+        segment_id:
+          type: string
+          title: Segment Id
+          description: Segment UUID
+      type: object
+      required:
+      - segment_id
+      title: CreateAudioSegmentResponse
+      description: 创建片段响应
+      example:
+        segment_id: 87654321-4321-4321-4321-cba987654321
+    CreateDraftRequest:
+      properties:
+        width:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Width
+          description: 视频宽度（像素）
+          default: 1920
+        height:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Height
+          description: 视频高度（像素）
+          default: 1080
+      type: object
+      title: CreateDraftRequest
+      description: 创建草稿请求
+      example:
+        height: 1080
+        width: 1920
+    CreateDraftResponse:
+      properties:
+        draft_id:
+          type: string
+          title: Draft Id
+          description: 草稿 UUID
+      type: object
+      required:
+      - draft_id
+      title: CreateDraftResponse
+      description: 创建草稿响应
+      example:
+        draft_id: 12345678-1234-1234-1234-123456789abc
+    CreateStickerSegmentRequest:
+      properties:
+        material_url:
+          type: string
+          title: Material Url
+          description: 贴纸素材 URL
+        target_timerange:
+          $ref: '#/components/schemas/TimeRange'
+          description: 在轨道上的时间范围
+        clip_settings:
+          anyOf:
+          - $ref: '#/components/schemas/ClipSettings'
+          - type: 'null'
+          description: 图像调节设置（位置、缩放、旋转、透明度）
+      type: object
+      required:
+      - material_url
+      - target_timerange
+      title: CreateStickerSegmentRequest
+      description: 创建贴纸片段请求
+      example:
+        clip_settings:
+          alpha: 1.0
+          rotation: 0.0
+          scale_x: 1.0
+          scale_y: 1.0
+          transform_x: 0.0
+          transform_y: 0.0
+        material_url: https://example.com/sticker.png
+        target_timerange:
+          duration: 3000000
+          start: 0
+    CreateStickerSegmentResponse:
+      properties:
+        segment_id:
+          type: string
+          title: Segment Id
+          description: Segment UUID
+      type: object
+      required:
+      - segment_id
+      title: CreateStickerSegmentResponse
+      description: 创建片段响应
+      example:
+        segment_id: 87654321-4321-4321-4321-cba987654321
+    CreateTextSegmentRequest:
+      properties:
+        text_content:
+          type: string
+          minLength: 1
+          title: Text Content
+          description: 文本内容
+          default: 据说pyJianYingDraft效果还不错?
+        target_timerange:
+          $ref: '#/components/schemas/TimeRange'
+          description: 在轨道上的时间范围
+        font_family:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Font Family
+          description: 字体名称
+          default: 文轩体
+        text_style:
+          anyOf:
+          - $ref: '#/components/schemas/TextStyle'
+          - type: 'null'
+          description: 文本样式（字体大小、颜色、加粗等）
+        text_border:
+          anyOf:
+          - $ref: '#/components/schemas/TextBorder'
+          - type: 'null'
+          description: 文本描边，None 表示无描边
+        text_shadow:
+          anyOf:
+          - $ref: '#/components/schemas/TextShadow'
+          - type: 'null'
+          description: 文本阴影，None 表示无阴影
+        text_background:
+          anyOf:
+          - $ref: '#/components/schemas/TextBackground'
+          - type: 'null'
+          description: 文本背景，None 表示无背景
+        clip_settings:
+          anyOf:
+          - $ref: '#/components/schemas/ClipSettings'
+          - type: 'null'
+          description: 图像调节设置（位置、缩放、旋转、透明度）
+      type: object
+      required:
+      - target_timerange
+      title: CreateTextSegmentRequest
+      description: 创建文本片段请求
+      example:
+        clip_settings:
+          alpha: 1.0
+          rotation: 0.0
+          scale_x: 1.0
+          scale_y: 1.0
+          transform_x: 0.0
+          transform_y: 0.0
+        font_family: 文轩体
+        target_timerange:
+          duration: 3000000
+          start: 0
+        text_content: Hello World
+        text_style:
+          align: 0
+          alpha: 1.0
+          auto_wrapping: false
+          bold: false
+          color:
+          - 1.0
+          - 1.0
+          - 1.0
+          font_size: 8.0
+          italic: false
+          letter_spacing: 0
+          line_spacing: 0
+          max_line_width: 0.82
+          underline: false
+          vertical: false
+    CreateTextSegmentResponse:
+      properties:
+        segment_id:
+          type: string
+          title: Segment Id
+          description: Segment UUID
+      type: object
+      required:
+      - segment_id
+      title: CreateTextSegmentResponse
+      description: 创建片段响应
+      example:
+        segment_id: 87654321-4321-4321-4321-cba987654321
+    CreateVideoSegmentRequest:
+      properties:
+        material_url:
+          type: string
+          title: Material Url
+          description: 视频素材 URL
+          default: https://gardene-el.github.io/Coze2JianYing/assets/video.mp4
+        target_timerange:
+          $ref: '#/components/schemas/TimeRange'
+          description: 在轨道上的时间范围
+        source_timerange:
+          anyOf:
+          - $ref: '#/components/schemas/TimeRange'
+          - type: 'null'
+          description: 素材裁剪范围
+        speed:
+          type: number
+          exclusiveMinimum: 0.0
+          title: Speed
+          description: 播放速度
+          default: 1.0
+        volume:
+          type: number
+          maximum: 2.0
+          minimum: 0.0
+          title: Volume
+          description: 音量 0-2
+          default: 1.0
+        change_pitch:
+          type: boolean
+          title: Change Pitch
+          description: 是否跟随变速改变音调
+          default: false
+        clip_settings:
+          anyOf:
+          - $ref: '#/components/schemas/ClipSettings'
+          - type: 'null'
+          description: 图像调节设置
+        crop_settings:
+          anyOf:
+          - $ref: '#/components/schemas/CropSettings'
+          - type: 'null'
+          description: 裁剪设置
+      type: object
+      required:
+      - target_timerange
+      title: CreateVideoSegmentRequest
+      description: 创建视频片段请求
+      example:
+        change_pitch: false
+        clip_settings:
+          alpha: 1.0
+          rotation: 0.0
+          scale_x: 1.0
+          scale_y: 1.0
+          transform_x: 0.0
+          transform_y: 0.0
+        crop_settings:
+          lower_left_x: 0.0
+          lower_left_y: 1.0
+          lower_right_x: 1.0
+          lower_right_y: 1.0
+          upper_left_x: 0.0
+          upper_left_y: 0.0
+          upper_right_x: 1.0
+          upper_right_y: 0.0
+        material_url: https://example.com/video.mp4
+        source_timerange:
+          duration: 5000000
+          start: 1000000
+        speed: 1.0
+        target_timerange:
+          duration: 5000000
+          start: 0
+        volume: 0.8
+    CreateVideoSegmentResponse:
+      properties:
+        segment_id:
+          type: string
+          title: Segment Id
+          description: Segment UUID
+      type: object
+      required:
+      - segment_id
+      title: CreateVideoSegmentResponse
+      description: 创建片段响应
+      example:
+        segment_id: 87654321-4321-4321-4321-cba987654321
+    CropSettings:
+      properties:
+        upper_left_x:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Upper Left X
+          description: 左上角 X 坐标 (0.0-1.0)
+          default: 0.0
+        upper_left_y:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Upper Left Y
+          description: 左上角 Y 坐标 (0.0-1.0)
+          default: 0.0
+        upper_right_x:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Upper Right X
+          description: 右上角 X 坐标 (0.0-1.0)
+          default: 1.0
+        upper_right_y:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Upper Right Y
+          description: 右上角 Y 坐标 (0.0-1.0)
+          default: 0.0
+        lower_left_x:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Lower Left X
+          description: 左下角 X 坐标 (0.0-1.0)
+          default: 0.0
+        lower_left_y:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Lower Left Y
+          description: 左下角 Y 坐标 (0.0-1.0)
+          default: 1.0
+        lower_right_x:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Lower Right X
+          description: 右下角 X 坐标 (0.0-1.0)
+          default: 1.0
+        lower_right_y:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Lower Right Y
+          description: 右下角 Y 坐标 (0.0-1.0)
+          default: 1.0
+      type: object
+      title: CropSettings
+      description: '裁剪设置（镜像 pyJianYingDraft.CropSettings）
+
+        对应 pyJianYingDraft 的 CropSettings 类，用于定义裁剪区域的四个角点坐标'
+    ExecutePayload:
+      properties:
+        script:
+          type: string
+          title: Script
+      type: object
+      required:
+      - script
+      title: ExecutePayload
+    GenerateDraftPayload:
+      properties:
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - content
+      title: GenerateDraftPayload
+    HTTPValidationError:
+      properties:
+        detail:
           items:
-            type: number
+            $ref: '#/components/schemas/ValidationError'
           type: array
-          description: 文字颜色 RGB (0.0-1.0)
-          default:
-          - 1.0
-          - 1.0
-          - 1.0
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ReplayExecutePayload:
+      properties:
+        worker_url:
+          type: string
+          title: Worker Url
+        draft_id:
+          type: string
+          title: Draft Id
+      type: object
+      required:
+      - worker_url
+      - draft_id
+      title: ReplayExecutePayload
+    SaveDraftResponse:
+      properties: {}
+      type: object
+      title: SaveDraftResponse
+      description: 保存草稿响应
+    ScriptPayload:
+      properties:
+        script:
+          type: string
+          title: Script
+      type: object
+      required:
+      - script
+      title: ScriptPayload
+    SettingsPayload:
+      properties:
+        draft_folder:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Draft Folder
+      type: object
+      title: SettingsPayload
+    ShadowInfo:
+      properties:
+        shadow_alpha:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Shadow Alpha
+          description: 阴影不透明度
+          default: 1.0
+        shadow_color:
+          type: string
+          title: Shadow Color
+          description: 阴影颜色（十六进制）
+          default: '#000000'
+        shadow_diffuse:
+          type: number
+          maximum: 100.0
+          minimum: 0.0
+          title: Shadow Diffuse
+          description: 阴影扩散程度
+          default: 15.0
+        shadow_distance:
+          type: number
+          maximum: 100.0
+          minimum: 0.0
+          title: Shadow Distance
+          description: 阴影距离
+          default: 5.0
+        shadow_angle:
+          type: number
+          maximum: 180.0
+          minimum: -180.0
+          title: Shadow Angle
+          description: 阴影角度
+          default: -45.0
+      type: object
+      title: ShadowInfo
+      description: 文本阴影参数。
+    TextBackground:
+      properties:
+        color:
+          type: string
+          title: Color
+          description: 背景颜色，格式为 '#RRGGBB'
+        style:
+          type: integer
+          maximum: 2.0
+          minimum: 1.0
+          title: Style
+          description: 背景样式 1 或 2
+          default: 1
         alpha:
           type: number
           maximum: 1.0
           minimum: 0.0
-          description: 文字不透明度 0.0-1.0
+          title: Alpha
+          description: 背景不透明度 0.0-1.0
           default: 1.0
-        bold:
-          type: boolean
-          description: 是否加粗
-          default: false
-        italic:
-          type: boolean
-          description: 是否斜体
-          default: false
-        underline:
-          type: boolean
-          description: 是否下划线
-          default: false
-        align:
-          type: integer
-          maximum: 2.0
-          minimum: 0.0
-          description: '对齐方式: 0=左对齐, 1=居中, 2=右对齐'
-          default: 0
-        vertical:
-          type: boolean
-          description: 是否竖排文本
-          default: false
-        letter_spacing:
-          type: integer
-          description: 字符间距（与剤映中定义一致）
-          default: 0
-        line_spacing:
-          type: integer
-          description: 行间距（与剤映中定义一致）
-          default: 0
-        auto_wrapping:
-          type: boolean
-          description: 是否自动换行（开启后 type 为 subtitle）
-          default: false
-        max_line_width:
+        round_radius:
           type: number
           maximum: 1.0
           minimum: 0.0
-          description: 每行最大宽度（占屏幕宽度比例 0-1）
-          default: 0.82
+          title: Round Radius
+          description: 圆角半径 0-1
+          default: 0.0
+        height:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Height
+          description: 背景高度 0-1
+          default: 0.14
+        width:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Width
+          description: 背景宽度 0-1
+          default: 0.14
+        horizontal_offset:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Horizontal Offset
+          description: 水平偏移 0-1
+          default: 0.5
+        vertical_offset:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Vertical Offset
+          description: 竖直偏移 0-1
+          default: 0.5
       type: object
-      description: '文本样式（镜像 pyJianYingDraft.TextStyle）
-
-        对应 pyJianYingDraft 的 TextStyle 类，用于控制文本的样式属性'
+      required:
+      - color
+      title: TextBackground
+      description: 文本背景参数（镜像 pyJianYingDraft.TextBackground）
     TextBorder:
       properties:
         color:
           items:
             type: number
           type: array
+          title: Color
           description: 描边颜色 RGB (0.0-1.0)
           default:
           - 0.0
@@ -1839,15 +2897,18 @@ components:
           type: number
           maximum: 1.0
           minimum: 0.0
+          title: Alpha
           description: 描边不透明度 0.0-1.0
           default: 1.0
         width:
           type: number
           maximum: 100.0
           minimum: 0.0
+          title: Width
           description: 描边宽度 0-100（与剤映中定义一致）
           default: 40.0
       type: object
+      title: TextBorder
       description: 文本描边参数（镜像 pyJianYingDraft.TextBorder）
     TextShadow:
       properties:
@@ -1855,6 +2916,7 @@ components:
           items:
             type: number
           type: array
+          title: Color
           description: 阴影颜色 RGB (0.0-1.0)
           default:
           - 0.0
@@ -1864,162 +2926,153 @@ components:
           type: number
           maximum: 1.0
           minimum: 0.0
+          title: Alpha
           description: 阴影不透明度 0.0-1.0
           default: 0.9
         diffuse:
           type: number
           maximum: 100.0
           minimum: 0.0
+          title: Diffuse
           description: 阴影扩散程度 0-100
           default: 15.0
         distance:
           type: number
           maximum: 100.0
           minimum: 0.0
+          title: Distance
           description: 阴影距离 0-100
           default: 5.0
         angle:
           type: number
           maximum: 180.0
           minimum: -180.0
+          title: Angle
           description: 阴影角度 -180 到 180
           default: -45.0
       type: object
+      title: TextShadow
       description: 文本阴影参数（镜像 pyJianYingDraft.TextShadow）
-    TextBackground:
+    TextStyle:
       properties:
+        font_size:
+          type: number
+          exclusiveMinimum: 0.0
+          title: Font Size
+          description: 字体大小（与剤映中定义一致）
+          default: 8.0
         color:
-          type: string
-          description: 背景颜色，格式为 '#RRGGBB'
-        style:
-          type: integer
-          maximum: 2.0
-          minimum: 1.0
-          description: 背景样式 1 或 2
-          default: 1
+          items:
+            type: number
+          type: array
+          title: Color
+          description: 文字颜色 RGB (0.0-1.0)
+          default:
+          - 1.0
+          - 1.0
+          - 1.0
         alpha:
           type: number
           maximum: 1.0
           minimum: 0.0
-          description: 背景不透明度 0.0-1.0
+          title: Alpha
+          description: 文字不透明度 0.0-1.0
           default: 1.0
-        round_radius:
+        bold:
+          type: boolean
+          title: Bold
+          description: 是否加粗
+          default: false
+        italic:
+          type: boolean
+          title: Italic
+          description: 是否斜体
+          default: false
+        underline:
+          type: boolean
+          title: Underline
+          description: 是否下划线
+          default: false
+        align:
+          type: integer
+          maximum: 2.0
+          minimum: 0.0
+          title: Align
+          description: '对齐方式: 0=左对齐, 1=居中, 2=右对齐'
+          default: 0
+        vertical:
+          type: boolean
+          title: Vertical
+          description: 是否竖排文本
+          default: false
+        letter_spacing:
+          type: integer
+          title: Letter Spacing
+          description: 字符间距（与剤映中定义一致）
+          default: 0
+        line_spacing:
+          type: integer
+          title: Line Spacing
+          description: 行间距（与剤映中定义一致）
+          default: 0
+        auto_wrapping:
+          type: boolean
+          title: Auto Wrapping
+          description: 是否自动换行（开启后 type 为 subtitle）
+          default: false
+        max_line_width:
           type: number
           maximum: 1.0
           minimum: 0.0
-          description: 圆角半径 0-1
-          default: 0.0
-        height:
-          type: number
-          maximum: 1.0
+          title: Max Line Width
+          description: 每行最大宽度（占屏幕宽度比例 0-1）
+          default: 0.82
+      type: object
+      title: TextStyle
+      description: '文本样式（镜像 pyJianYingDraft.TextStyle）
+
+        对应 pyJianYingDraft 的 TextStyle 类，用于控制文本的样式属性'
+    TimeRange:
+      properties:
+        start:
+          type: integer
           minimum: 0.0
-          description: 背景高度 0-1
-          default: 0.14
-        width:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 背景宽度 0-1
-          default: 0.14
-        horizontal_offset:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 水平偏移 0-1
-          default: 0.5
-        vertical_offset:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 竖直偏移 0-1
-          default: 0.5
+          title: Start
+          description: 开始时间（微秒）
+        duration:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Duration
+          description: 持续时长（微秒）
       type: object
       required:
-      - color
-      description: 文本背景参数（镜像 pyJianYingDraft.TextBackground）
-    CropSettings:
+      - start
+      - duration
+      title: TimeRange
+      description: 时间范围模型（微秒）
+    ValidationError:
       properties:
-        upper_left_x:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 左上角 X 坐标 (0.0-1.0)
-          default: 0.0
-        upper_left_y:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 左上角 Y 坐标 (0.0-1.0)
-          default: 0.0
-        upper_right_x:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 右上角 X 坐标 (0.0-1.0)
-          default: 1.0
-        upper_right_y:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 右上角 Y 坐标 (0.0-1.0)
-          default: 0.0
-        lower_left_x:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 左下角 X 坐标 (0.0-1.0)
-          default: 0.0
-        lower_left_y:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 左下角 Y 坐标 (0.0-1.0)
-          default: 1.0
-        lower_right_x:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 右下角 X 坐标 (0.0-1.0)
-          default: 1.0
-        lower_right_y:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 右下角 Y 坐标 (0.0-1.0)
-          default: 1.0
-      type: object
-      description: '裁剪设置（镜像 pyJianYingDraft.CropSettings）
-
-        对应 pyJianYingDraft 的 CropSettings 类，用于定义裁剪区域的四个角点坐标'
-    ShadowInfo:
-      properties:
-        shadow_alpha:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          description: 阴影不透明度
-          default: 1.0
-        shadow_color:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
           type: string
-          description: 阴影颜色（十六进制）
-          default: '#000000'
-        shadow_diffuse:
-          type: number
-          maximum: 100.0
-          minimum: 0.0
-          description: 阴影扩散程度
-          default: 15.0
-        shadow_distance:
-          type: number
-          maximum: 100.0
-          minimum: 0.0
-          description: 阴影距离
-          default: 5.0
-        shadow_angle:
-          type: number
-          maximum: 180.0
-          minimum: -180.0
-          description: 阴影角度
-          default: -45.0
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
       type: object
-      description: 文本阴影参数。
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

@@ -1,4 +1,3 @@
-from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict
 
 class AddVideoKeyframeRequest(BaseModel):
@@ -9,12 +8,21 @@ class AddVideoKeyframeRequest(BaseModel):
     )
     value: float = Field(..., description="关键帧值")
     property: str = Field(
-        ..., description="属性名称: position_x, position_y, scale, rotation, opacity 等"
+        ...,
+        description=(
+            "KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，"
+            "可选属性："
+            "KeyframeProperty.position_x / KeyframeProperty.position_y / "
+            "KeyframeProperty.rotation / "
+            "KeyframeProperty.scale_x / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale / "
+            "KeyframeProperty.alpha / KeyframeProperty.saturation / "
+            "KeyframeProperty.contrast / KeyframeProperty.brightness / KeyframeProperty.volume"
+        ),
     )
 
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {"time_offset": 2000000, "value": 0.8, "property": "position_x"}
+            "example": {"time_offset": 2000000, "value": 0.8, "property": "KeyframeProperty.position_x"}
         }
     )
 

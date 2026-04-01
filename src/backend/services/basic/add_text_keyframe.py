@@ -13,7 +13,11 @@ def _parse_keyframe_property(prop: str) -> draft.KeyframeProperty:
 		raise ValueError("property 不能为空")
 	if "." in name:
 		name = name.split(".")[-1]
-	return draft.KeyframeProperty.from_name(name)
+	try:
+		return draft.KeyframeProperty[name]
+	except KeyError:
+		valid = [m.name for m in draft.KeyframeProperty]
+		raise ValueError(f"无效的关键帧属性 '{name}'，有效值：{valid}")
 
 
 def add_text_keyframe(segment_id: str, time_offset: int, value: float, property: str) -> None:
