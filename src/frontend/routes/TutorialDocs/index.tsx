@@ -7,6 +7,7 @@ const TAB_ITEMS = [
   { label: '新手指引', value: 'getting-started' },
   { label: 'API 文档', value: 'api-docs' },
   { label: '枚举查询', value: 'enums' },
+  { label: '贴纸查询', value: 'stickers' },
 ]
 
 /**

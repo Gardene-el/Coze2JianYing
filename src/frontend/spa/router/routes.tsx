@@ -14,6 +14,7 @@ const TutorialDocsLayout = lazy(() => import('@/routes/TutorialDocs'))
 const GettingStartedPage = lazy(() => import('@/routes/TutorialDocs/features/GettingStarted'))
 const ApiDocsPage = lazy(() => import('@/routes/TutorialDocs/features/ApiDocs'))
 const EnumExplorerPage = lazy(() => import('@/routes/TutorialDocs/features/EnumExplorer'))
+const StickerBrowserPage = lazy(() => import('@/routes/TutorialDocs/features/StickerBrowser'))
 
 const LazyWrapper = ({ children }: { children: ReactNode }) => (
   <Suspense fallback={<Spin size="large" style={{ margin: '40px auto', display: 'block' }} />}>
@@ -108,6 +109,14 @@ export const appRoutes: RouteObject[] = [
                 element: (
                   <LazyWrapper>
                     <EnumExplorerPage />
+                  </LazyWrapper>
+                ),
+              },
+              {
+                path: 'stickers',
+                element: (
+                  <LazyWrapper>
+                    <StickerBrowserPage />
                   </LazyWrapper>
                 ),
               },

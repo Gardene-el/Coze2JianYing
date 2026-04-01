@@ -13,6 +13,7 @@ export default defineConfig(({ mode: envMode }) => {
   return {
     // 开发时用 '/'，Electron 生产打包需要相对路径
     base: isDev ? '/' : './',
+    publicDir: 'assets/public',
 
     plugins: [
       react(),

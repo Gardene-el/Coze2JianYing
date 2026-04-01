@@ -12,17 +12,17 @@ from src.backend.utils.logger import logger
 
 
 def create_sticker_segment(
-	material_url: str,
+	sticker_id: str,
 	target_timerange: TimeRange,
 	clip_settings: Optional[ClipSettings] = None,
 ) -> str:
 	"""创建贴纸片段并写入缓存。"""
 	segment_id = gen_unique_id()
-	logger.info("segment_id: %s, create sticker segment from: %s", segment_id, material_url)
+	logger.info("segment_id: %s, create sticker segment with resource_id: %s", segment_id, sticker_id)
 
 	try:
 		segment = draft.StickerSegment(
-			resource_id=material_url,
+			resource_id=sticker_id,
 			target_timerange=to_draft_timerange(target_timerange),
 			clip_settings=to_draft_clip_settings(clip_settings) if clip_settings is not None else None,
 		)

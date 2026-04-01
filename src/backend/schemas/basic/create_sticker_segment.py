@@ -5,7 +5,7 @@ from src.backend.core.common_types import ClipSettings, TimeRange
 class CreateStickerSegmentRequest(BaseModel):
     """创建贴纸片段请求"""
 
-    material_url: str = Field(..., description="贴纸素材 URL")
+    sticker_id: str = Field(..., description="贴纸资源 ID（纯数字字符串，可从贴纸查询页面获取）")
     target_timerange: TimeRange = Field(..., description="在轨道上的时间范围")
     clip_settings: Optional[ClipSettings] = Field(
         None, description="图像调节设置（位置、缩放、旋转、透明度）"
@@ -14,7 +14,7 @@ class CreateStickerSegmentRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "material_url": "https://example.com/sticker.png",
+                "sticker_id": "7326810673609018675",
                 "target_timerange": {"start": 0, "duration": 3000000},
                 "clip_settings": {
                     "alpha": 1.0,

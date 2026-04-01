@@ -99,6 +99,7 @@ export default defineConfig({
   },
   renderer: {
     root: ROOT_DIR,
+    publicDir: resolve(ROOT_DIR, 'assets/public'),
     build: {
       outDir: resolve(__dirname, 'dist/renderer'),
       rollupOptions: {

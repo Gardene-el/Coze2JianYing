@@ -195,11 +195,11 @@ def create_text_segment(request: CreateTextSegmentRequest) -> CreateTextSegmentR
 	path="/segments/create_sticker_segment",
 	response_model=CreateStickerSegmentResponse,
 	summary="创建贴纸片段",
-	description="根据素材 URL 和时间范围创建贴纸片段，返回片段 ID，后续可将其添加到草稿轨道。",
+	description="根据贴纸资源 ID 和时间范围创建贴纸片段，返回片段 ID，后续可将其添加到草稿轨道。贴纸 ID 可从教程文档→贴纸查询页面获取。",
 )
 def create_sticker_segment(request: CreateStickerSegmentRequest) -> CreateStickerSegmentResponse:
 	segment_id = service.create_sticker_segment(
-		material_url=request.material_url,
+		sticker_id=request.sticker_id,
 		target_timerange=request.target_timerange,
 		clip_settings=request.clip_settings,
 	)
