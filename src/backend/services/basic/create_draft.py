@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Optional
 
 import pyJianYingDraft as draft
 
@@ -11,13 +12,15 @@ from src.backend.utils.helper import gen_unique_id
 from src.backend.utils.logger import logger
 
 
-def create_draft(width: int, height: int) -> str:
+def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[str] = None) -> str:
 	"""
 	基于草稿模板能力创建剪映草稿。
 
 	Args:
 		width: 草稿宽度
 		height: 草稿高度
+		fps: 视频帧率，默认30
+		draft_name: 草稿名称（即剪映中显示的名称），默认使用生成的唯一 ID
 
 	Returns:
 		草稿ID
@@ -26,7 +29,7 @@ def create_draft(width: int, height: int) -> str:
 		CustomException: 草稿创建失败
 	"""
 	draft_id = gen_unique_id()
-	logger.info("draft_id: %s, width: %s, height: %s", draft_id, width, height)
+	logger.info("draft_id: %s, draft_name: %s, width: %s, height: %s, fps: %s", draft_id, draft_name, width, height, fps)
 
 	try:
 		settings = get_settings_manager()
@@ -34,10 +37,10 @@ def create_draft(width: int, height: int) -> str:
 
 		draft_folder = draft.DraftFolder(output_dir)
 		script = draft_folder.create_draft(
-			draft_name=draft_id,
+			draft_name=draft_name or draft_id,
 			width=width,
 			height=height,
-			fps=30,
+			fps=fps,
 			allow_replace=True,
 		)
 

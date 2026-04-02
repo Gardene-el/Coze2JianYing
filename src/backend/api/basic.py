@@ -49,7 +49,12 @@ router = APIRouter(tags=["basic"])
 	description="创建一个新的剪映草稿，返回草稿 ID，后续所有操作均通过此 ID 引用该草稿。",
 )
 def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
-	draft_id = service.create_draft(width=request.width, height=request.height)
+	draft_id = service.create_draft(
+		width=request.width,
+		height=request.height,
+		fps=request.fps,
+		draft_name=request.draft_name,
+	)
 	return CreateDraftResponse(draft_id=draft_id)
 
 
