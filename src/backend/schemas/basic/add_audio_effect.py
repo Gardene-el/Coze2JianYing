@@ -8,7 +8,7 @@ class AddAudioEffectRequest(BaseModel):
         ...,
         description="音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType",
     )
-    params: Optional[List[float]] = Field(
+    params: Optional[List[Optional[float]]] = Field(
         None, description="特效参数列表（范围 0-100）"
     )
 

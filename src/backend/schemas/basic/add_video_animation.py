@@ -7,7 +7,7 @@ class AddVideoAnimationRequest(BaseModel):
     animation_type: str = Field(
         ..., description="动画类型: IntroType | OutroType | GroupAnimationType"
     )
-    duration: Optional[str] = Field("1s", description="动画时长")
+    duration: Optional[str] = Field(None, description="动画时长，省略则使用动画内置时长")
 
     model_config = ConfigDict(
         json_schema_extra={

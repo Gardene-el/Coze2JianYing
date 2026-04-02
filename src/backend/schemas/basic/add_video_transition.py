@@ -5,7 +5,7 @@ class AddVideoTransitionRequest(BaseModel):
     """添加视频转场请求（用于 VideoSegment）"""
 
     transition_type: str = Field(..., description="转场类型")
-    duration: Optional[str] = Field("1s", description="转场时长")
+    duration: Optional[str] = Field(None, description="转场时长，省略则使用转场内置时长")
 
     model_config = ConfigDict(
         json_schema_extra={

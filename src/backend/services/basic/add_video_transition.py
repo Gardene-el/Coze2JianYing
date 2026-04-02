@@ -18,7 +18,7 @@ def _parse_transition_type(transition_type: str) -> draft.TransitionType:
 	return draft.TransitionType.from_name(name)
 
 
-def add_video_transition(segment_id: str, transition_type: str, duration: Optional[str] = "1s") -> None:
+def add_video_transition(segment_id: str, transition_type: str, duration: Optional[str] = None) -> None:
 	"""为视频片段添加转场。"""
 	segment = require_segment(segment_id, draft.VideoSegment)
 

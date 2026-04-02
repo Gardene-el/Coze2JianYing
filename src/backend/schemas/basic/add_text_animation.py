@@ -5,7 +5,7 @@ class AddTextAnimationRequest(BaseModel):
     """添加文本动画请求（用于 TextSegment）"""
 
     animation_type: str = Field(..., description="动画类型: TextAnimationType")
-    duration: Optional[str] = Field("1s", description="动画时长")
+    duration: Optional[str] = Field(None, description="动画时长，省略则使用动画内置时长")
 
     model_config = ConfigDict(
         json_schema_extra={

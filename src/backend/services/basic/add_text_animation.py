@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import pyJianYingDraft as draft
 
 from src.backend.exceptions import CustomError, CustomException
@@ -23,7 +25,7 @@ def _parse_text_animation_type(animation_type: str):
 			return draft.TextLoopAnim.from_name(name)
 
 
-def add_text_animation(segment_id: str, animation_type: str, duration: str = "1s") -> None:
+def add_text_animation(segment_id: str, animation_type: str, duration: Optional[str] = None) -> None:
 	"""为文本片段添加动画。"""
 	segment = require_segment(segment_id, draft.TextSegment)
 

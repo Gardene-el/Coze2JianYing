@@ -29,6 +29,8 @@ class ClipSettings(BaseModel):
     """
 
     alpha: float = Field(1.0, description="透明度 (0.0-1.0)", ge=0.0, le=1.0)
+    flip_horizontal: bool = Field(False, description="是否水平翻转")
+    flip_vertical: bool = Field(False, description="是否垂直翻转")
     rotation: float = Field(0.0, description="旋转角度（度）")
     scale_x: float = Field(1.0, description="X 轴缩放比例", gt=0)
     scale_y: float = Field(1.0, description="Y 轴缩放比例", gt=0)
@@ -126,6 +128,8 @@ def to_draft_timerange(timerange: TimeRange) -> draft.Timerange:
 def to_draft_clip_settings(clip_settings: ClipSettings) -> draft.ClipSettings:
     return draft.ClipSettings(
         alpha=clip_settings.alpha,
+        flip_horizontal=clip_settings.flip_horizontal,
+        flip_vertical=clip_settings.flip_vertical,
         rotation=clip_settings.rotation,
         scale_x=clip_settings.scale_x,
         scale_y=clip_settings.scale_y,

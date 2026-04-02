@@ -41,18 +41,11 @@ def create_draft(width: int, height: int) -> str:
 			allow_replace=True,
 		)
 
-		script.content["canvas_config"]["width"] = width
-		script.content["canvas_config"]["height"] = height
-
 		main_track_name = "main_track"
 		script.add_track(track_type=draft.TrackType.video, track_name=main_track_name, relative_index=0)
 		logger.info("Added empty main track: %s", main_track_name)
 
 		script.save()
-
-		draft_dir = os.path.join(output_dir, draft_id)
-		draft_info_path = os.path.join(draft_dir, "draft_info.json")
-		script.dump(draft_info_path)
 
 	except Exception as e:
 		logger.error("create draft failed: %s", e)

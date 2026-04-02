@@ -281,7 +281,7 @@ def add_text_animation(
 	service.add_text_animation(
 		segment_id=segment_id,
 		animation_type=request.animation_type,
-		duration=request.duration or "1s",
+		duration=request.duration,
 	)
 	return AddTextAnimationResponse()
 
@@ -346,7 +346,7 @@ def add_video_animation(
 	service.add_video_animation(
 		segment_id=segment_id,
 		animation_type=request.animation_type,
-		duration=request.duration or "1s",
+		duration=request.duration,
 	)
 	return AddVideoAnimationResponse()
 
@@ -364,8 +364,8 @@ def add_video_background_filling(
 	service.add_video_background_filling(
 		segment_id=segment_id,
 		fill_type=request.fill_type,
-		blur=request.blur if request.blur is not None else 0.0625,
-		color=request.color if request.color is not None else "#00000000",
+		blur=request.blur,
+		color=request.color,
 	)
 	return AddVideoBackgroundFillingResponse()
 
@@ -444,12 +444,12 @@ def add_video_mask(
 	service.add_video_mask(
 		segment_id=segment_id,
 		mask_type=request.mask_type,
-		center_x=request.center_x if request.center_x is not None else 0.0,
-		center_y=request.center_y if request.center_y is not None else 0.0,
-		size=request.size if request.size is not None else 0.5,
-		feather=request.feather if request.feather is not None else 0.0,
-		invert=request.invert if request.invert is not None else False,
-		rotation=request.rotation if request.rotation is not None else 0.0,
+		center_x=request.center_x,
+		center_y=request.center_y,
+		size=request.size,
+		feather=request.feather,
+		invert=request.invert,
+		rotation=request.rotation,
 		rect_width=request.rect_width,
 		round_corner=request.round_corner,
 	)

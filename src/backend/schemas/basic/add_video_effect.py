@@ -7,7 +7,7 @@ class AddVideoEffectRequest(BaseModel):
     effect_type: str = Field(
         ..., description="视频特效类型: VideoSceneEffectType | VideoCharacterEffectType"
     )
-    params: Optional[List[float]] = Field(None, description="特效参数列表")
+    params: Optional[List[Optional[float]]] = Field(None, description="特效参数列表")
 
     model_config = ConfigDict(
         json_schema_extra={

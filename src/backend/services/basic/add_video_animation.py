@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import pyJianYingDraft as draft
 
 from src.backend.exceptions import CustomError, CustomException
@@ -23,7 +25,7 @@ def _parse_video_animation_type(animation_type: str):
 			return draft.GroupAnimationType.from_name(name)
 
 
-def add_video_animation(segment_id: str, animation_type: str, duration: str = "1s") -> None:
+def add_video_animation(segment_id: str, animation_type: str, duration: Optional[str] = None) -> None:
 	"""为视频片段添加动画。"""
 	segment = require_segment(segment_id, draft.VideoSegment)
 
