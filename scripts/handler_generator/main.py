@@ -240,7 +240,7 @@ def main() -> None:
 
     api_dir = PROJECT_ROOT / "src" / "backend" / "api"
     schema_dir = PROJECT_ROOT / "src" / "backend" / "schemas"
-    output_dir = PROJECT_ROOT / "plugins" / "coze"
+    output_dir = PROJECT_ROOT / "plugins" / "coze" / "generated"
 
     print("=" * 60)
     print("Coze Handler 一键生成器")
