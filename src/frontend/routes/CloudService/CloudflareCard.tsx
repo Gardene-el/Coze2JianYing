@@ -6,7 +6,7 @@
  *  - Named tunnel (token filled): persistent domain via cloudflared
  */
 import { CheckCircleOutlined, CloseCircleOutlined, CopyOutlined } from '@ant-design/icons'
-import { Button, Divider, Form, Input, Space, Tooltip, Typography } from 'antd'
+import { Alert, Button, Divider, Form, Input, Space, Tooltip, Typography } from 'antd'
 import { createStaticStyles } from 'antd-style'
 import { useEffect } from 'react'
 
@@ -34,8 +34,8 @@ interface CloudflareCardProps {
 
 const CloudflareCard = ({
   port,
-  serviceRunning,
-  otherTunnelRunning,
+  serviceRunning: _serviceRunning,
+  otherTunnelRunning: _otherTunnelRunning,
   onSuccess,
   onError,
 }: CloudflareCardProps) => {
@@ -81,6 +81,13 @@ const CloudflareCard = ({
 
   return (
     <>
+      <Alert
+        type="warning"
+        showIcon
+        message="Cloudflare Tunnel 暂时不可用"
+        description="该功能目前尚未完成，暂时无法使用。如需内网穿透，请使用 ngrok。"
+        style={{ marginBottom: 16 }}
+      />
       <Form form={form} layout="vertical" style={{ marginBottom: 12 }}>
         <Form.Item
           name="cfToken"
@@ -110,7 +117,7 @@ const CloudflareCard = ({
           type="primary"
           icon={<CheckCircleOutlined />}
           loading={cloudflareLoading}
-          disabled={cloudflareRunning || !serviceRunning || otherTunnelRunning}
+          disabled={true}
           onClick={handleStart}
         >
           启动

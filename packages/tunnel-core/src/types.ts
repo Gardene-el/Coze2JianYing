@@ -34,7 +34,7 @@ export const TUNNEL_PROVIDER_LIST: TunnelProviderMeta[] = [
   {
     id: 'cloudflare',
     name: 'Cloudflare Tunnel',
-    description: '基于 Cloudflare 全球网络，免登录快速隧道或命名隧道',
+    description: '基于 Cloudflare 全球网络，免登录快速隧道或命名隧道（暂时不可用）',
   },
 ]
 
