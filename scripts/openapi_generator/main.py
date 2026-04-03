@@ -396,7 +396,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--title",
-        default="Coze2JianYing API",
+        default="开源剪映小助手Coze2Jianying",
         help="OpenAPI info.title",
     )
     parser.add_argument(
@@ -406,7 +406,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--description",
-        default="包含 basic 和 easy 全量端点，用于 Coze OpenAPI 接入。",
+        default="用于制作视频的剪映小助手，源码在https://github.com/Gardene-el/Coze2JianYing中。完整提供pyjianyingdraft原样功能，实际生成视频需配合剪映小助手的开源软件和剪映两个软件使用。",
         help="OpenAPI info.description",
     )
     parser.add_argument(
