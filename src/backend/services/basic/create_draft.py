@@ -43,11 +43,6 @@ def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[st
 			fps=fps,
 			allow_replace=True,
 		)
-
-		main_track_name = "main_track"
-		script.add_track(track_type=draft.TrackType.video, track_name=main_track_name, relative_index=0)
-		logger.info("Added empty main track: %s", main_track_name)
-
 		script.save()
 
 	except Exception as e:
