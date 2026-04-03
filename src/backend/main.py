@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.backend.api.router import api_router
 from src.backend.middlewares.response import ResponseMiddleware
-from src.backend.routers.gui_router import gui_router
+from src.backend.api.gui import gui_router
 from src.backend.utils import sse_log
 from src.backend.utils.logger import setup_logger
 
