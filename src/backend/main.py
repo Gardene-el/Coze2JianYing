@@ -32,10 +32,10 @@ async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()
     sse_log.set_event_loop(loop)
     sse_log.install(level=logging.INFO)
-    _gui_logger = logging.getLogger(__name__)
-    _gui_logger.info("=" * 50)
-    _gui_logger.info("Coze2JianYing 服务已就绪")
-    _gui_logger.info("监听地址: http://127.0.0.1:%d", DEFAULT_PORT)
+    logger = logging.getLogger(__name__)
+    logger.info("=" * 50)
+    logger.info("Coze2JianYing 服务已就绪")
+    logger.info("监听地址: http://127.0.0.1:%d", DEFAULT_PORT)
     yield
 
 
