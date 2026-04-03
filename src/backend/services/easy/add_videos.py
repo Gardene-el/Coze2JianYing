@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 import pyJianYingDraft as draft
 
-from src.backend.core.settings_manager import get_settings_manager
+from src.backend.core.draft_store import require_draft_folder
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import require_draft
 from src.backend.utils.download import download
@@ -26,8 +26,7 @@ def add_videos(
 	"""批量添加视频。"""
 	script = require_draft(draft_id)
 
-	settings = get_settings_manager()
-	draft_video_dir = os.path.join(settings.require("draft_folder"), "CozeJianYingAssistantAssets", draft_id, "videos")
+	draft_video_dir = os.path.join(require_draft_folder(), "CozeJianYingAssistantAssets", draft_id, "videos")
 	os.makedirs(name=draft_video_dir, exist_ok=True)
 
 	videos = parse_video_data(video_infos)

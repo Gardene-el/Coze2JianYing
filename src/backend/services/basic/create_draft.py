@@ -5,7 +5,7 @@ from typing import Optional
 
 import pyJianYingDraft as draft
 
-from src.backend.core.settings_manager import get_settings_manager
+from src.backend.core.draft_store import require_draft_folder
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import update_draft_cache
 from src.backend.utils.helper import gen_unique_id
@@ -32,8 +32,7 @@ def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[st
 	logger.info("draft_id: %s, draft_name: %s, width: %s, height: %s, fps: %s", draft_id, draft_name, width, height, fps)
 
 	try:
-		settings = get_settings_manager()
-		output_dir = settings.require("draft_folder")
+		output_dir = require_draft_folder()
 
 		draft_folder = draft.DraftFolder(output_dir)
 		script = draft_folder.create_draft(

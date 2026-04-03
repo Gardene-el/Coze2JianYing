@@ -24,7 +24,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from src.backend.core.settings_manager import get_settings_manager
+from src.backend.core.draft_store import get_draft_folder, require_draft_folder, set_draft_folder
 from src.backend.DraftGenerator.draft_generator import DraftGenerator
 from src.backend.utils.logger import logger
 from src.backend.utils.sse_log import register_subscriber, unregister_subscriber
@@ -75,13 +75,13 @@ async def health() -> Dict[str, str]:
 
 @gui_router.get("/settings")
 async def get_settings() -> Dict[str, Any]:
-    return get_settings_manager().get_all()
+    return {"draft_folder": get_draft_folder()}
 
 
 @gui_router.put("/settings")
 async def update_settings(payload: SettingsPayload) -> Dict[str, bool]:
-    sm = get_settings_manager()
-    sm.update(payload.model_dump(exclude_none=True))
+    if payload.draft_folder is not None:
+        set_draft_folder(payload.draft_folder)
     return {"ok": True}
 
 
@@ -104,7 +104,7 @@ async def detect_path() -> Dict[str, str]:
 @gui_router.post("/draft/generate")
 async def generate_draft(payload: GenerateDraftPayload) -> Dict[str, Any]:
     logger.info("开始生成草稿...")
-    draft_folder = get_settings_manager().require("draft_folder")
+    draft_folder = require_draft_folder()
     try:
         gen = DraftGenerator(output_base_dir=draft_folder)
         paths: List[str] = await asyncio.to_thread(gen.generate, payload.content)
@@ -468,7 +468,7 @@ async def execute_replay(payload: ReplayExecutePayload, request: Request) -> Dic
 
 @gui_router.get("/replay/{draft_id}")
 async def replay_draft(draft_id: str) -> Dict[str, Any]:
-    draft_folder = get_settings_manager().require("draft_folder")
+    draft_folder = require_draft_folder()
     draft_dir = Path(draft_folder) / draft_id
 
     if not draft_dir.exists():

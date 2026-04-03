@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 import pyJianYingDraft as draft
 from pyJianYingDraft.metadata import GroupAnimationType, IntroType, OutroType, TransitionType
 
-from src.backend.core.settings_manager import get_settings_manager
+from src.backend.core.draft_store import require_draft_folder
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import require_draft
 from src.backend.utils.download import download
@@ -27,8 +27,7 @@ def add_images(
 	"""批量添加图片。"""
 	script = require_draft(draft_id)
 
-	settings = get_settings_manager()
-	draft_image_dir = os.path.join(settings.require("draft_folder"), "CozeJianYingAssistantAssets", draft_id, "images")
+	draft_image_dir = os.path.join(require_draft_folder(), "CozeJianYingAssistantAssets", draft_id, "images")
 	os.makedirs(name=draft_image_dir, exist_ok=True)
 
 	images = parse_image_data(image_infos)

@@ -5,7 +5,7 @@ from src.backend.utils.cache import require_draft
 from src.backend.exceptions import CustomException, CustomError
 import os
 from src.backend.utils.download import download
-from src.backend.core.settings_manager import get_settings_manager
+from src.backend.core.draft_store import require_draft_folder
 import json
 from typing import List, Dict, Any
 import uuid
@@ -55,8 +55,7 @@ def add_audios(
 
 def create_audio_directory(draft_id: str) -> str:
     """创建音频资源存储目录"""
-    settings = get_settings_manager()
-    draft_audio_dir = os.path.join(settings.require("draft_folder"), "CozeJianYingAssistantAssets", draft_id, "audios")
+    draft_audio_dir = os.path.join(require_draft_folder(), "CozeJianYingAssistantAssets", draft_id, "audios")
     os.makedirs(name=draft_audio_dir, exist_ok=True)
     logger.info(f"Created audio directory: {draft_audio_dir}")
     return draft_audio_dir
