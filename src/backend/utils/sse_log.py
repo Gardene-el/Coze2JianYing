@@ -10,7 +10,7 @@ from typing import List, Optional
 # 所有已连接的 SSE 客户端队列
 _subscribers: List[asyncio.Queue] = []
 
-# GUI 管理服务的事件循环（由 gui_main.py 在启动后注入）
+# GUI 管理服务的事件循环（由 main.py 在启动后注入）
 _loop: Optional[asyncio.AbstractEventLoop] = None
 
 

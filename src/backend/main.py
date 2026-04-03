@@ -54,8 +54,8 @@ def create_gui_app() -> FastAPI:
     # SSE 端点（text/event-stream）由 _should_bypass 自动穿透
     app.add_middleware(ResponseMiddleware)
 
-    # 管理路由（/gui/*）
-    app.include_router(gui_router, prefix="/gui")
+    # 管理路由（/gui/*）——仅供 Electron 前端内部使用，不暴露在 OpenAPI 文档中
+    app.include_router(gui_router, prefix="/gui", include_in_schema=False)
 
     # 草稿操作路由（/drafts/*, /segments/*）
     app.include_router(api_router)
@@ -90,7 +90,7 @@ async def _on_startup() -> None:
 def run(host: str = "127.0.0.1", port: int = DEFAULT_PORT) -> None:
     """启动服务器（阻塞调用）。"""
     uvicorn.run(
-        "src.backend.gui_main:gui_app",
+        "src.backend.main:gui_app",
         host=host,
         port=port,
         log_level="info",

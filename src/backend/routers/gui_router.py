@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import requests as _http  # sync HTTP client (project dep), used for replay self-calls
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -29,7 +29,16 @@ from src.backend.DraftGenerator.draft_generator import DraftGenerator
 from src.backend.utils.logger import logger
 from src.backend.utils.sse_log import register_subscriber, unregister_subscriber
 
-gui_router = APIRouter(tags=["GUI 管理"])
+# ─── 安全依赖：仅允许本机请求访问 /gui/* ────────────────────────────────
+
+def _require_localhost(request: Request) -> None:
+    """拒绝所有非本机来源的请求，防止外部进程调用 GUI 内部端点。"""
+    host = request.client.host if request.client else ""
+    if host not in ("127.0.0.1", "::1", "localhost"):
+        raise HTTPException(status_code=403, detail="/gui/* 端点仅限本机访问")
+
+
+gui_router = APIRouter(tags=["GUI 管理"], dependencies=[Depends(_require_localhost)])
 
 
 # ─── Pydantic 请求/响应模型 ───────────────────────────────────────────
@@ -243,12 +252,8 @@ async def validate_script(payload: ScriptPayload) -> Dict[str, Any]:
 
 
 @gui_router.post("/script/execute")
-async def execute_script(payload: ExecutePayload, request: Request) -> Dict[str, bool]:
-    # 安全约束：仅允许本地请求执行任意脚本
-    client_host = request.client.host if request.client else ""
-    if client_host not in ("127.0.0.1", "::1", "localhost"):
-        raise HTTPException(status_code=403, detail="只允许本地连接执行脚本")
-
+async def execute_script(payload: ExecutePayload) -> Dict[str, bool]:
+    # 安全约束已由路由器级依赖 _require_localhost 统一处理
     def _run() -> None:
         script_content = _extract_script_from_input(payload.script)
         processed = _preprocess_script(script_content)
