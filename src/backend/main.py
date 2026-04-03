@@ -11,6 +11,7 @@ Backend 统一入口
 import argparse
 import asyncio
 import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
@@ -25,6 +26,19 @@ from src.backend.utils.logger import setup_logger
 DEFAULT_PORT = 20211
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """将当前事件循环注入 SSE 日志模块，使跨线程日志推送成功。"""
+    loop = asyncio.get_running_loop()
+    sse_log.set_event_loop(loop)
+    sse_log.install(level=logging.INFO)
+    _gui_logger = logging.getLogger(__name__)
+    _gui_logger.info("=" * 50)
+    _gui_logger.info("Coze2JianYing 服务已就绪")
+    _gui_logger.info("监听地址: http://127.0.0.1:%d", DEFAULT_PORT)
+    yield
+
+
 def create_app() -> FastAPI:
     """构造并返回统一 FastAPI 应用。"""
     app = FastAPI(
@@ -34,6 +48,7 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url=None,
         openapi_url="/openapi.json",
+        lifespan=lifespan,
     )
 
     # 仅允许本地来源（Electron 加载 localhost 页面）
@@ -63,18 +78,6 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-
-@app.on_event("startup")
-async def _on_startup() -> None:
-    """将当前事件循环注入 SSE 日志模块，使跨线程日志推送成功。"""
-    loop = asyncio.get_running_loop()
-    sse_log.set_event_loop(loop)
-    sse_log.install(level=logging.INFO)
-    _gui_logger = logging.getLogger(__name__)
-    _gui_logger.info("=" * 50)
-    _gui_logger.info("Coze2JianYing 服务已就绪")
-    _gui_logger.info("监听地址: http://127.0.0.1:%d", DEFAULT_PORT)
 
 
 def run(host: str = "127.0.0.1", port: int = DEFAULT_PORT) -> None:
