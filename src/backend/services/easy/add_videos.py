@@ -28,8 +28,7 @@ def add_videos(
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 	settings = get_settings_manager()
-	draft_dir = os.path.join(settings.require("draft_folder"), draft_id)
-	draft_video_dir = os.path.join(draft_dir, "assets", "videos")
+	draft_video_dir = os.path.join(settings.require("draft_folder"), "CozeJianYingAssistantAssets", draft_id, "videos")
 	os.makedirs(name=draft_video_dir, exist_ok=True)
 
 	videos = parse_video_data(video_infos)

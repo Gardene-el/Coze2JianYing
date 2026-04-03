@@ -29,8 +29,7 @@ def add_images(
 		raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 	settings = get_settings_manager()
-	draft_dir = os.path.join(settings.require("draft_folder"), draft_id)
-	draft_image_dir = os.path.join(draft_dir, "assets", "images")
+	draft_image_dir = os.path.join(settings.require("draft_folder"), "CozeJianYingAssistantAssets", draft_id, "images")
 	os.makedirs(name=draft_image_dir, exist_ok=True)
 
 	images = parse_image_data(image_infos)

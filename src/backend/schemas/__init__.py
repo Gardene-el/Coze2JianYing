@@ -4,7 +4,6 @@ Pydantic Schemas 模块
 """
 
 from src.backend.schemas.basic import *
-from src.backend.schemas.easy import *
 
 __all__ = [
     # Segment schemas

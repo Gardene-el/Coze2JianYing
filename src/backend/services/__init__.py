@@ -9,7 +9,4 @@ Services package — 业务逻辑层
 - draft_saver.py     DraftSaver：状态数据 → pyJianYingDraft 调用 → 保存草稿文件
 """
 
-from src.backend.services.easy import *  # noqa: F401,F403
-from src.backend.services.basic import *  # noqa: F401,F403
-
 __version__ = "0.1.0"
