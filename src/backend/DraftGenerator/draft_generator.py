@@ -7,8 +7,13 @@ from pathlib import Path
 from typing import Optional, Dict, List, Any
 import os
 from src.backend.utils.logger import logger
-from .coze_parser import CozeOutputParser
-from .converter import DraftInterfaceConverter
+from .coze_parser import parse_coze_output, normalize_draft_data, print_draft_summary
+from .converter import (
+    convert_image_segment_config,
+    convert_video_segment_config,
+    convert_audio_segment_config,
+    convert_text_segment_config,
+)
 from .material_manager import MaterialManager, create_material_manager
 import pyJianYingDraft as draft
 from pyJianYingDraft import ScriptFile  
@@ -29,7 +34,6 @@ class DraftGenerator:
         self.output_base_dir = output_base_dir
         self.logger.info("输出目录: %s", self.output_base_dir)
         
-        self.parser = CozeOutputParser()
         self.material_managers: Dict[str, MaterialManager] = {}
         
         # 确保输出目录存在
@@ -61,20 +65,20 @@ class DraftGenerator:
             
             # 1. 解析Coze输出
             self.logger.info("步骤1: 解析Coze输出...")
-            self.parser.parse_from_clipboard(content)
-            self.parser.print_summary()
-            
+            parsed_data = parse_coze_output(content)
+            print_draft_summary(parsed_data)
+
             # 2. 获取标准化数据
             self.logger.info("步骤2: 标准化数据结构...")
-            normalized_data = self.parser.get_normalized_data()
+            normalized_data = normalize_draft_data(parsed_data)
             self.logger.info("✅ 数据标准化完成")
-            
+
             # 3. 转换所有草稿
             draft_paths = self._convert_drafts(normalized_data)
-            
+
             # 恢复原始输出目录
             self.output_base_dir = original_output_dir
-            
+
             self.logger.info(f"草稿生成完成，输出到: {draft_paths}")
             return draft_paths
             
@@ -104,20 +108,20 @@ class DraftGenerator:
             
             # 1. 解析Coze输出
             self.logger.info("步骤1: 解析Coze输出...")
-            self.parser.parse_from_file(file_path)
-            self.parser.print_summary()
-            
+            parsed_data = parse_coze_output(file_path, is_file=True)
+            print_draft_summary(parsed_data)
+
             # 2. 获取标准化数据
             self.logger.info("步骤2: 标准化数据结构...")
-            normalized_data = self.parser.get_normalized_data()
+            normalized_data = normalize_draft_data(parsed_data)
             self.logger.info("✅ 数据标准化完成")
-            
+
             # 3. 转换所有草稿
             draft_paths = self._convert_drafts(normalized_data)
-            
+
             # 恢复原始输出目录
             self.output_base_dir = original_output_dir
-            
+
             return draft_paths
             
         except Exception as e:
@@ -218,10 +222,7 @@ class DraftGenerator:
         )
         self.material_managers[draft_id] = material_manager  # 使用 draft_id 作为键
         
-        # 4. 初始化Converter
-        converter = DraftInterfaceConverter()
-        
-        # 5. 处理所有轨道
+        # 4. 处理所有轨道
         tracks = draft_data.get('tracks', [])
         self.logger.info(f"处理 {len(tracks)} 条轨道...")
         
@@ -242,7 +243,6 @@ class DraftGenerator:
                         segment=segment,
                         track_type=track_type,
                         track_name=track_name,
-                        converter=converter,
                         material_manager=material_manager,
                         script=script,
                         seg_idx=seg_idx
@@ -303,7 +303,6 @@ class DraftGenerator:
         segment: Dict[str, Any],
         track_type: str,
         track_name: str,
-        converter: DraftInterfaceConverter,
         material_manager: MaterialManager,
         script: ScriptFile,
         seg_idx: int
@@ -349,33 +348,33 @@ class DraftGenerator:
             material_obj = segment.get('_material_object')
             
             if segment_type == 'video' and material_obj:
-                video_segment = converter.convert_video_segment_config(
+                video_segment = convert_video_segment_config(
                     segment_config=segment,
                     video_material=material_obj
                 )
                 script.add_segment(video_segment, track_name)
                 self.logger.info(f"    ✅ 视频片段 {seg_idx} 添加到轨道 {track_name}")
-                
+
             elif segment_type == 'audio' and material_obj:
-                audio_segment = converter.convert_audio_segment_config(
+                audio_segment = convert_audio_segment_config(
                     segment_config=segment,
                     audio_material=material_obj
                 )
                 script.add_segment(audio_segment, track_name)
                 self.logger.info(f"    ✅ 音频片段 {seg_idx} 添加到轨道 {track_name}")
-                
+
             elif segment_type == 'image' and material_path:
                 # 图片片段：直接使用本地文件路径 material_path
-                video_segment = converter.convert_image_segment_config(
+                video_segment = convert_image_segment_config(
                     segment_config=segment,
                     image_file_path=material_path
                 )
                 script.add_segment(video_segment, track_name)
                 self.logger.info(f"    ✅ 图片片段 {seg_idx} 添加到轨道 {track_name}")
-                
+
             elif segment_type == 'text':
                 self.logger.info(f"    转换文本片段...")
-                text_segment = converter.convert_text_segment_config(segment)
+                text_segment = convert_text_segment_config(segment)
                 self.logger.info(f"    文本片段创建完成，类型: {type(text_segment)}")
                 self.logger.info(f"    添加到轨道 {track_name}...")
                 script.add_segment(text_segment, track_name)
