@@ -13,7 +13,7 @@ from src.backend.core.common_types import (
 	to_draft_crop_settings,
 	to_draft_timerange,
 )
-from src.backend.core.settings_manager import get_settings_manager
+from src.backend.core.draft_store import require_draft_folder
 from src.backend.exceptions import CustomError, CustomException
 from src.backend.utils.cache import update_segment_cache
 from src.backend.utils.download import download
@@ -36,8 +36,7 @@ def create_video_segment(
 	logger.info("segment_id: %s, create video segment from: %s", segment_id, material_url)
 
 	try:
-		settings = get_settings_manager()
-		output_dir = settings.require("draft_folder")
+		output_dir = require_draft_folder()
 		draft_video_dir = create_video_directory(output_dir, segment_id)
 		video_path = download_video_file(material_url, draft_video_dir)
 		video_material = create_video_material(video_path, crop_settings)
