@@ -63,7 +63,7 @@ from src.backend.schemas.basic.create_audio_segment import CreateAudioSegmentRes
 
 async def create_draft(req: "CreateDraftRequest") -> "CreateDraftResponse":  # type: ignore[name-defined]
     """兼容旧版: create_draft(req) -> CreateDraftResponse"""
-    draft_id = _create_draft(req.width, req.height)
+    draft_id = _create_draft(req.width, req.height, fps=req.fps, draft_name=req.draft_name)
     return CreateDraftResponse(draft_id=draft_id)  # type: ignore[name-defined]
 
 
