@@ -25,7 +25,7 @@ from src.backend.utils.logger import setup_logger
 DEFAULT_PORT = 20211
 
 
-def create_gui_app() -> FastAPI:
+def create_app() -> FastAPI:
     """构造并返回统一 FastAPI 应用。"""
     app = FastAPI(
         title="Coze2JianYing API",
@@ -62,10 +62,10 @@ def create_gui_app() -> FastAPI:
     return app
 
 
-gui_app = create_gui_app()
+app = create_app()
 
 
-@gui_app.on_event("startup")
+@app.on_event("startup")
 async def _on_startup() -> None:
     """将当前事件循环注入 SSE 日志模块，使跨线程日志推送成功。"""
     loop = asyncio.get_running_loop()
@@ -80,7 +80,7 @@ async def _on_startup() -> None:
 def run(host: str = "127.0.0.1", port: int = DEFAULT_PORT) -> None:
     """启动服务器（阻塞调用）。"""
     uvicorn.run(
-        "src.backend.main:gui_app",
+        "src.backend.main:app",
         host=host,
         port=port,
         log_level="info",

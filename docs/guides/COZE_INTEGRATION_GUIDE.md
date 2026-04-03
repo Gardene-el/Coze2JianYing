@@ -80,7 +80,7 @@ python -m src.backend.main
 或使用 uvicorn 直接启动：
 
 ```bash
-uvicorn src.backend.main:create_gui_app --host 127.0.0.1 --port 20211 --factory
+uvicorn src.backend.main:app --host 127.0.0.1 --port 20211
 ```
 
 ### 步骤 2：验证服务运行
