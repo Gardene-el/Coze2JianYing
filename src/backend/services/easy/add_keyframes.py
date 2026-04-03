@@ -8,20 +8,16 @@ from pyJianYingDraft.keyframe import KeyframeProperty
 from pyJianYingDraft.segment import VisualSegment
 
 from src.backend.exceptions import CustomError, CustomException
-from src.backend.utils.cache import DRAFT_CACHE
+from src.backend.utils.cache import require_draft
 from src.backend.utils.logger import logger
 
 
 def add_keyframes(draft_id: str, keyframes: str) -> None:
 	"""批量添加关键帧。"""
-	if (not draft_id) or (draft_id not in DRAFT_CACHE):
-		raise CustomException(CustomError.INVALID_DRAFT_URL)
-
+	script: ScriptFile = require_draft(draft_id)
 	keyframe_items = parse_keyframes_data(keyframes)
 	if len(keyframe_items) == 0:
 		raise CustomException(CustomError.INVALID_KEYFRAME_INFO)
-
-	script: ScriptFile = DRAFT_CACHE[draft_id]
 
 	for keyframe_item in keyframe_items:
 		segment = find_segment_by_id(script, keyframe_item["segment_id"])

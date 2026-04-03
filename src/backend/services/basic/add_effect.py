@@ -6,7 +6,7 @@ import pyJianYingDraft as draft
 
 from src.backend.core.common_types import TimeRange, to_draft_timerange
 from src.backend.exceptions import CustomError, CustomException
-from src.backend.utils.cache import DRAFT_CACHE, update_draft_cache
+from src.backend.utils.cache import require_draft, update_draft_cache
 from src.backend.utils.logger import logger
 
 
@@ -46,9 +46,7 @@ def add_effect(
 	params: Optional[list[float | None]] = None,
 ) -> None:
 	"""向草稿添加全局特效片段。"""
-	if (not draft_id) or (draft_id not in DRAFT_CACHE):
-		raise CustomException(CustomError.INVALID_DRAFT_URL)
-	script = DRAFT_CACHE[draft_id]
+	script = require_draft(draft_id)
 
 	logger.info("draft_id: %s, add global effect: %s", draft_id, effect_type)
 

@@ -10,7 +10,7 @@ from pyJianYingDraft.metadata import GroupAnimationType, IntroType, OutroType, T
 
 from src.backend.core.settings_manager import get_settings_manager
 from src.backend.exceptions import CustomError, CustomException
-from src.backend.utils.cache import DRAFT_CACHE
+from src.backend.utils.cache import require_draft
 from src.backend.utils.download import download
 from src.backend.utils.logger import logger
 
@@ -25,8 +25,7 @@ def add_images(
 	transform_y: int = 0,
 ) -> List[str]:
 	"""批量添加图片。"""
-	if (not draft_id) or (draft_id not in DRAFT_CACHE):
-		raise CustomException(CustomError.INVALID_DRAFT_URL)
+	script = require_draft(draft_id)
 
 	settings = get_settings_manager()
 	draft_image_dir = os.path.join(settings.require("draft_folder"), "CozeJianYingAssistantAssets", draft_id, "images")
@@ -36,7 +35,6 @@ def add_images(
 	if len(images) == 0:
 		raise CustomException(CustomError.INVALID_IMAGE_INFO)
 
-	script = DRAFT_CACHE[draft_id]
 	track_name = f"image_track_{uuid.uuid4().hex[:12]}"
 	script.add_track(track_type=draft.TrackType.video, track_name=track_name, relative_index=10)
 

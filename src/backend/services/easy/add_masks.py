@@ -7,7 +7,7 @@ from pyJianYingDraft.segment import VisualSegment
 from pyJianYingDraft.video_segment import VideoSegment
 
 from src.backend.exceptions import CustomError, CustomException
-from src.backend.utils.cache import DRAFT_CACHE
+from src.backend.utils.cache import require_draft
 from src.backend.utils.logger import logger
 
 
@@ -25,12 +25,10 @@ def add_masks(
 	round_corner: int = 0,
 ) -> None:
 	"""批量添加遮罩。"""
-	if (not draft_id) or (draft_id not in DRAFT_CACHE):
-		raise CustomException(CustomError.INVALID_DRAFT_URL)
+	script: ScriptFile = require_draft(draft_id)
 	if not segment_ids:
 		raise CustomException(CustomError.INVALID_MASK_INFO)
 
-	script: ScriptFile = DRAFT_CACHE[draft_id]
 	mask_type = find_mask_type_by_name(name)
 	if mask_type is None:
 		raise CustomException(CustomError.MASK_NOT_FOUND)

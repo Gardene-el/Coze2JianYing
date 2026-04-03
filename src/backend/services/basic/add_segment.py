@@ -5,14 +5,12 @@ from typing import Optional
 import pyJianYingDraft as draft
 
 from src.backend.exceptions import CustomError, CustomException
-from src.backend.utils.cache import DRAFT_CACHE, SEGMENT_CACHE, require_segment, update_draft_cache
+from src.backend.utils.cache import SEGMENT_CACHE, require_draft, require_segment, update_draft_cache
 from src.backend.utils.logger import logger
 
 
 def add_segment(draft_id: str, segment_id: str, track_name: Optional[str] = None) -> None:
-	if (not draft_id) or (draft_id not in DRAFT_CACHE):
-		raise CustomException(CustomError.INVALID_DRAFT_URL)
-	script = DRAFT_CACHE[draft_id]
+	script = require_draft(draft_id)
 
 	segment = require_segment(
 		segment_id,

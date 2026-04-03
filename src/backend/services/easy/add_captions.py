@@ -5,7 +5,7 @@ import uuid
 from src.backend.utils.logger import logger
 from pyJianYingDraft import ScriptFile, TrackType, TextSegment, TextStyle, ClipSettings, Timerange, FontType, TextBorder, TextShadow
 from pyJianYingDraft.metadata import TextIntro, TextOutro, TextLoopAnim
-from src.backend.utils.cache import DRAFT_CACHE
+from src.backend.utils.cache import require_draft
 from src.backend.exceptions import CustomException, CustomError
 from src.backend.schemas.easy.add_captions import ShadowInfo
 
@@ -89,10 +89,8 @@ def add_captions(
                  f"style_text: {style_text}, underline: {underline}, italic: {italic}, bold: {bold}, has_shadow: {has_shadow}, shadow_info: {shadow_info}")
     
     try:
-        # 1. 验证草稿ID
-        if (not draft_id) or (draft_id not in DRAFT_CACHE):
-            logger.error(f"Invalid draft_id or draft not found in cache: {draft_id}")
-            raise CustomException(CustomError.INVALID_DRAFT_URL)
+        # 1. 获取草稿（ID 无效抛 INVALID_DRAFT_URL，不存在抛 DRAFT_NOT_FOUND）
+        script: ScriptFile = require_draft(draft_id)
 
         # 2. 解析字幕信息
         caption_items = parse_captions_data(json_str=captions)
@@ -102,15 +100,12 @@ def add_captions(
 
         logger.info(f"Parsed {len(caption_items)} caption items")
 
-        # 3. 从缓存中获取草稿
-        script: ScriptFile = DRAFT_CACHE[draft_id]
-
-        # 4. 添加字幕轨道
+        # 3. 添加字幕轨道
         track_name = f"caption_track_{uuid.uuid4().hex[:12]}"
         script.add_track(track_type=TrackType.text, track_name=track_name)
         logger.info(f"Added caption track: {track_name}")
 
-        # 5. 遍历字幕信息，添加字幕到草稿中的指定轨道，收集片段ID
+        # 4. 遍历字幕信息，添加字幕到草稿中的指定轨道，收集片段ID
         segment_ids = []
         for i, caption in enumerate(caption_items):
             try:

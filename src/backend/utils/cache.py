@@ -95,3 +95,13 @@ def require_segment(
         raise CustomException(CustomError.INVALID_SEGMENT_TYPE, f"expect {expect}, got {type(segment).__name__}")
     return segment
 
+
+def require_draft(draft_id: str) -> 'draft.ScriptFile':
+    """获取草稿缓存，draft_id 为空时抛出 INVALID_DRAFT_URL，不存在时抛出 DRAFT_NOT_FOUND。"""
+    if not draft_id:
+        raise CustomException(CustomError.INVALID_DRAFT_URL)
+    script = DRAFT_CACHE.get(draft_id)
+    if script is None:
+        raise CustomException(CustomError.DRAFT_NOT_FOUND)
+    return script
+

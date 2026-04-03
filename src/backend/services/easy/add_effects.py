@@ -8,7 +8,7 @@ from pyJianYingDraft import EffectSegment, Timerange, TrackType
 from pyJianYingDraft.metadata import VideoCharacterEffectType, VideoSceneEffectType
 
 from src.backend.exceptions import CustomError, CustomException
-from src.backend.utils.cache import DRAFT_CACHE
+from src.backend.utils.cache import require_draft
 from src.backend.utils.logger import logger
 
 
@@ -16,14 +16,11 @@ def add_effects(draft_id: str, effect_infos: str) -> List[str]:
 	"""批量添加特效。"""
 	logger.info("add_effects started, draft_id: %s", draft_id)
 
-	if (not draft_id) or (draft_id not in DRAFT_CACHE):
-		raise CustomException(CustomError.INVALID_DRAFT_URL)
-
+	script = require_draft(draft_id)
 	effect_items = parse_effects_data(effect_infos)
 	if len(effect_items) == 0:
 		raise CustomException(CustomError.INVALID_EFFECT_INFO)
 
-	script = DRAFT_CACHE[draft_id]
 	track_name = f"effect_track_{uuid.uuid4().hex[:12]}"
 	script.add_track(track_type=TrackType.effect, track_name=track_name)
 

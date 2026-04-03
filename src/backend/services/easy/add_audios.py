@@ -1,7 +1,7 @@
 from src.backend.utils.logger import logger
 import pyJianYingDraft as draft
 from pyJianYingDraft.local_materials import AudioMaterial
-from src.backend.utils.cache import DRAFT_CACHE
+from src.backend.utils.cache import require_draft
 from src.backend.exceptions import CustomException, CustomError
 import os
 from src.backend.utils.download import download
@@ -30,8 +30,7 @@ def add_audios(
     """
     logger.info(f"add_audios, draft_id: {draft_id}, audio_infos: {audio_infos}")
 
-    validate_draft_id(draft_id)
-    script: draft.ScriptFile = DRAFT_CACHE[draft_id]
+    script = require_draft(draft_id)
     
     # 创建音频资源目录
     draft_audio_dir = create_audio_directory(draft_id)
@@ -52,13 +51,6 @@ def add_audios(
     logger.info(f"Audio track created, draft_id: {draft_id}")
     
     return segment_ids
-
-
-def validate_draft_id(draft_id: str) -> None:
-    """验证草稿ID是否可用。"""
-    if (not draft_id) or (draft_id not in DRAFT_CACHE):
-        logger.error(f"Invalid draft id or draft not found in cache, draft_id: {draft_id}")
-        raise CustomException(CustomError.INVALID_DRAFT_URL)
 
 
 def create_audio_directory(draft_id: str) -> str:
