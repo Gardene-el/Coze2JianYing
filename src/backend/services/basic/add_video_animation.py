@@ -33,12 +33,19 @@ def add_video_animation(segment_id: str, animation_type: str, duration: Optional
 
 	try:
 		animation = _parse_video_animation_type(animation_type)
-		segment.add_animation(animation_type=animation, duration=duration)
 	except CustomException:
 		raise
 	except Exception as e:
 		logger.error("add video animation failed: %s", e)
 		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	try:
+		segment.add_animation(animation_type=animation, duration=duration)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video animation failed: %s", e)
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video animation success: %s", segment_id)

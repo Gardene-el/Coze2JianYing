@@ -29,7 +29,7 @@ def create_sticker_segment(
 
 	except Exception as e:
 		logger.error("create sticker segment failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("create sticker segment success: %s", segment_id)

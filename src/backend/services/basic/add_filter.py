@@ -46,6 +46,13 @@ def add_filter(
 
 	try:
 		filter_meta = _parse_filter_type(filter_type)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add global filter parse failed: %s", e)
+		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	try:
 		track_name = _first_track_name_by_type(script, draft.TrackType.filter)
 		script.add_filter(
 			filter_meta=filter_meta,
@@ -57,7 +64,7 @@ def add_filter(
 		raise
 	except Exception as e:
 		logger.error("add global filter failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_draft_cache(draft_id, script)
 	logger.info("add global filter success: %s", draft_id)

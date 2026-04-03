@@ -37,6 +37,13 @@ def add_video_mask(
 
 	try:
 		mask = _parse_mask_type(mask_type)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video mask failed: %s", e)
+		raise CustomException(CustomError.MASK_NOT_FOUND, str(e))
+
+	try:
 		segment.add_mask(
 			mask_type=mask,
 			center_x=float(center_x),
@@ -52,7 +59,7 @@ def add_video_mask(
 		raise
 	except Exception as e:
 		logger.error("add video mask failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.MASK_ADD_FAILED, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video mask success: %s", segment_id)

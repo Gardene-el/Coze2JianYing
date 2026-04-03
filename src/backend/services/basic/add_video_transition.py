@@ -26,12 +26,19 @@ def add_video_transition(segment_id: str, transition_type: str, duration: Option
 
 	try:
 		transition = _parse_transition_type(transition_type)
-		segment.add_transition(transition_type=transition, duration=duration)
 	except CustomException:
 		raise
 	except Exception as e:
 		logger.error("add video transition failed: %s", e)
 		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	try:
+		segment.add_transition(transition_type=transition, duration=duration)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video transition failed: %s", e)
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video transition success: %s", segment_id)

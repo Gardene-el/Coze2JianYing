@@ -30,12 +30,19 @@ def add_video_effect(segment_id: str, effect_type: str, params: Optional[list[fl
 
 	try:
 		effect = _parse_video_effect_type(effect_type)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video effect failed: %s", e)
+		raise CustomException(CustomError.EFFECT_NOT_FOUND, str(e))
+
+	try:
 		segment.add_effect(effect_type=effect, params=params)
 	except CustomException:
 		raise
 	except Exception as e:
 		logger.error("add video effect failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.EFFECT_ADD_FAILED, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video effect success: %s", segment_id)

@@ -34,6 +34,13 @@ def add_track(
 
 	try:
 		parsed_track_type = _parse_track_type(track_type)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add track failed: %s", e)
+		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	try:
 		script.add_track(
 			track_type=parsed_track_type,
 			track_name=track_name,
@@ -45,7 +52,7 @@ def add_track(
 		raise
 	except Exception as e:
 		logger.error("add track failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_draft_cache(draft_id, script)
 	logger.info("add track success: %s", draft_id)

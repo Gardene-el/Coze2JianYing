@@ -19,7 +19,7 @@ def add_text_bubble(segment_id: str, effect_id: str, resource_id: str) -> None:
 		raise
 	except Exception as e:
 		logger.error("add text bubble failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add text bubble success: %s", segment_id)

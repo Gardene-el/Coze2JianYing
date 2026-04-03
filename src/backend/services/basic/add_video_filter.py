@@ -24,12 +24,19 @@ def add_video_filter(segment_id: str, filter_type: str, intensity: float = 100.0
 
 	try:
 		filter_meta = _parse_filter_type(filter_type)
-		segment.add_filter(filter_type=filter_meta, intensity=float(intensity))
 	except CustomException:
 		raise
 	except Exception as e:
 		logger.error("add video filter failed: %s", e)
 		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+
+	try:
+		segment.add_filter(filter_type=filter_meta, intensity=float(intensity))
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video filter failed: %s", e)
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video filter success: %s", segment_id)

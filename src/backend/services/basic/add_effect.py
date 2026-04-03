@@ -52,6 +52,13 @@ def add_effect(
 
 	try:
 		effect = _parse_effect_type(effect_type)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add global effect parse failed: %s", e)
+		raise CustomException(CustomError.EFFECT_NOT_FOUND, str(e))
+
+	try:
 		track_name = _first_track_name_by_type(script, draft.TrackType.effect)
 		script.add_effect(
 			effect=effect,
@@ -63,7 +70,7 @@ def add_effect(
 		raise
 	except Exception as e:
 		logger.error("add global effect failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.EFFECT_ADD_FAILED, str(e))
 
 	update_draft_cache(draft_id, script)
 	logger.info("add global effect success: %s", draft_id)

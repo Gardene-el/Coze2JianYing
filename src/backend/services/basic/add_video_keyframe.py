@@ -28,12 +28,19 @@ def add_video_keyframe(segment_id: str, time_offset: int, value: float, property
 
 	try:
 		key_property = _parse_keyframe_property(property)
+	except CustomException:
+		raise
+	except Exception as e:
+		logger.error("add video keyframe failed: %s", e)
+		raise CustomException(CustomError.INVALID_KEYFRAME_INFO, str(e))
+
+	try:
 		segment.add_keyframe(_property=key_property, time_offset=int(time_offset), value=float(value))
 	except CustomException:
 		raise
 	except Exception as e:
 		logger.error("add video keyframe failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.KEYFRAME_ADD_FAILED, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video keyframe success: %s", segment_id)

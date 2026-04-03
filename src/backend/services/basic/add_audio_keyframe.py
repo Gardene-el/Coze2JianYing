@@ -19,7 +19,7 @@ def add_audio_keyframe(segment_id: str, time_offset: int, volume: float) -> None
 		raise
 	except Exception as e:
 		logger.error("add audio keyframe failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.KEYFRAME_ADD_FAILED, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add audio keyframe success: %s", segment_id)

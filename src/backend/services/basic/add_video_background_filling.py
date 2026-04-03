@@ -24,7 +24,7 @@ def add_video_background_filling(
 		raise
 	except Exception as e:
 		logger.error("add video background filling failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.INTERNAL_SERVER_ERROR, str(e))
 
 	update_segment_cache(segment_id, segment)
 	logger.info("add video background filling success: %s", segment_id)

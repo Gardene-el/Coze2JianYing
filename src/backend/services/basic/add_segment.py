@@ -25,7 +25,7 @@ def add_segment(draft_id: str, segment_id: str, track_name: Optional[str] = None
 		raise
 	except Exception as e:
 		logger.error("add segment failed: %s", e)
-		raise CustomException(CustomError.PARAM_VALIDATION_FAILED, str(e))
+		raise CustomException(CustomError.INVALID_SEGMENT_TYPE, str(e))
 
 	update_draft_cache(draft_id, script)
 	SEGMENT_CACHE.pop(segment_id, None)
