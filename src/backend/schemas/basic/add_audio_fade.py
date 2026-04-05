@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field, ConfigDict
 class AddAudioFadeRequest(BaseModel):
     """添加音频淡入淡出请求（用于 AudioSegment）"""
 
-    in_duration: str = Field(..., description="淡入时长（字符串如 '1s' 或微秒数）")
-    out_duration: str = Field(..., description="淡出时长")
+    in_duration: str = Field(..., description="淡入时长（字符串如 '1s' 或微秒整数）")
+    out_duration: str = Field(..., description="淡出时长（字符串如 '2s' 或微秒整数）")
 
     model_config = ConfigDict(
         json_schema_extra={"example": {"in_duration": "1s", "out_duration": "0s"}}

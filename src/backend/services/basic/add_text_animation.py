@@ -26,7 +26,12 @@ def _parse_text_animation_type(animation_type: str):
 
 
 def add_text_animation(segment_id: str, animation_type: str, duration: Optional[str] = None) -> None:
-	"""为文本片段添加动画。"""
+	"""为文本片段添加动画。
+
+	注意：若需同时使用入场/出场动画（TextIntro/TextOutro）与循环动画（TextLoopAnim），
+	必须先调用本接口添加入场/出场动画，再添加循环动画。顺序颠倒会导致
+	TextLoopAnim 的时间范围计算错误（循环部分会覆盖入出场动画所占时长）。
+	"""
 	segment = require_segment(segment_id, draft.TextSegment)
 
 	logger.info("segment_id: %s, add text animation: %s", segment_id, animation_type)

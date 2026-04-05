@@ -6,7 +6,7 @@ class AddSegmentRequest(BaseModel):
 
     segment_id: str = Field(..., description="Segment UUID")
     track_name: Optional[str] = Field(
-        None, description="目标轨道索引，None 则自动选择"
+        None, description="目标轨道名称（通过 add_track 创建时指定的名称），同类型轨道只有一条时可省略"
     )
 
     model_config = ConfigDict(

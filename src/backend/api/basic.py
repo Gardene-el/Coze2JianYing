@@ -392,8 +392,8 @@ def add_video_effect(
 @router.post(
 	path="/segments/{segment_id}/add_video_fade",
 	response_model=AddVideoFadeResponse,
-	summary="为视频片段添加淡入淡出",
-	description="为指定视频片段设置画面淡入和淡出的时长。",
+	summary="为视频片段添加音频淡入淡出",
+	description="为指定视频片段设置音频淡入和淡出的时长，仅对有音轨的视频片段有效。库底层使用 AudioFade，若需视频画面渐进渐出请使用 add_video_animation 选择 IntroType.渐显 / OutroType.渐隐。",
 )
 def add_video_fade(
 	segment_id: str = Path(..., description="片段的唯一标识 ID"),
@@ -465,7 +465,7 @@ def add_video_mask(
 	path="/segments/{segment_id}/add_video_transition",
 	response_model=AddVideoTransitionResponse,
 	summary="为视频片段添加转场",
-	description="为指定视频片段设置转场动画效果及时长。",
+	description="为指定视频片段设置转场动画及时长。注意：转场应添加在前一个片段上，效果发生在该片段与其后一个片段之间。",
 )
 def add_video_transition(
 	segment_id: str = Path(..., description="片段的唯一标识 ID"),

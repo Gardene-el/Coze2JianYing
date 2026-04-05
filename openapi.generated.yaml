@@ -106,7 +106,7 @@ paths:
                 track_name:
                   type: string
                   nullable: true
-                  description: 目标轨道索引，None 则自动选择
+                  description: 目标轨道名称（通过 add_track 创建时指定的名称），同类型轨道只有一条时可省略
               type: object
               required:
               - segment_id
@@ -575,14 +575,16 @@ paths:
               properties:
                 effect_type:
                   type: string
-                  description: '音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType'
+                  description: '音效类型: AudioSceneEffectType | ToneEffectType | SpeechToSongType，格式为枚举成员名称（如
+                    ''8bit''），或带类前缀（如 ''AudioSceneEffectType._8bit''）。成员名称与剪映中显示的名称一致'
                 params:
                   items:
                     type: number
                     nullable: true
                   type: array
                   nullable: true
-                  description: 特效参数列表（范围 0-100）
+                  description: 特效参数列表（范围 0-100），参数顺序以对应枚举类成员的 annotation 为准，未提供或为
+                    None 的项使用默认值
               type: object
               required:
               - effect_type
@@ -619,10 +621,10 @@ paths:
               properties:
                 in_duration:
                   type: string
-                  description: 淡入时长（字符串如 '1s' 或微秒数）
+                  description: 淡入时长（字符串如 '1s' 或微秒整数）
                 out_duration:
                   type: string
-                  description: 淡出时长
+                  description: 淡出时长（字符串如 '2s' 或微秒整数）
               type: object
               required:
               - in_duration
@@ -750,11 +752,12 @@ paths:
               properties:
                 animation_type:
                   type: string
-                  description: '动画类型: TextAnimationType'
+                  description: '动画类型: TextIntro | TextOutro | TextLoopAnim，格式为枚举成员名称（如
+                    ''打字机''），或带类前缀（如 ''TextIntro.打字机''）。注意：若需同时使用入场/出场动画（TextIntro/TextOutro）与循环动画（TextLoopAnim），必须先添加入场/出场动画，再添加循环动画；顺序颠倒会导致循环动画时间范围计算错误'
                 duration:
                   type: string
                   nullable: true
-                  description: 动画时长，省略则使用动画内置时长
+                  description: 动画时长，省略则使用动画内置时长（字符串如 '1s' 或微秒整数），循环动画忽略此参数
               type: object
               required:
               - animation_type
@@ -917,11 +920,12 @@ paths:
               properties:
                 animation_type:
                   type: string
-                  description: '动画类型: IntroType | OutroType | GroupAnimationType'
+                  description: '动画类型: IntroType | OutroType | GroupAnimationType，格式为枚举成员名称（如
+                    ''渐显''、''渐隐''），或带类前缀（如 ''IntroType.渐显''）'
                 duration:
                   type: string
                   nullable: true
-                  description: 动画时长，省略则使用动画内置时长
+                  description: 动画时长，省略则使用动画内置时长（字符串如 '1s' 或微秒整数）
               type: object
               required:
               - animation_type
@@ -958,14 +962,14 @@ paths:
               properties:
                 fill_type:
                   type: string
-                  description: '填充类型: blur 或 color'
+                  description: '填充类型: blur（模糊）或 color（纯色），背景填充仅对底层视频轨道上的片段生效'
                 blur:
                   type: number
-                  description: 模糊程度（fill_type=blur 时）
+                  description: 模糊程度，范围 0.0-1.0，仅在 fill_type=blur 时有效。剪映四档模糊对应值为 0.0625（低）、0.375（中）、0.75（高）、1.0（最高）
                   default: 0.0625
                 color:
                   type: string
-                  description: 填充颜色（fill_type=color 时）
+                  description: 填充颜色，格式为 '#RRGGBBAA'，仅在 fill_type=color 时有效
                   default: '#00000000'
               type: object
               required:
@@ -1003,14 +1007,16 @@ paths:
               properties:
                 effect_type:
                   type: string
-                  description: '视频特效类型: VideoSceneEffectType | VideoCharacterEffectType'
+                  description: '视频特效类型: VideoSceneEffectType | VideoCharacterEffectType，格式为枚举成员名称（如
+                    ''1998''），或带类前缀（如 ''VideoSceneEffectType._1998''）。成员名称与剪映中显示的名称一致'
                 params:
                   items:
                     type: number
                     nullable: true
                   type: array
                   nullable: true
-                  description: 特效参数列表
+                  description: 特效参数列表（范围 0-100），参数顺序以对应枚举类成员的 annotation 为准，未提供或为
+                    None 的项使用默认值
               type: object
               required:
               - effect_type
@@ -1028,8 +1034,9 @@ paths:
     post:
       tags:
       - basic
-      summary: 为视频片段添加淡入淡出
-      description: 为指定视频片段设置画面淡入和淡出的时长。
+      summary: 为视频片段添加音频淡入淡出
+      description: 为指定视频片段设置音频淡入和淡出的时长，仅对有音轨的视频片段有效。库底层使用 AudioFade，若需视频画面渐进渐出请使用
+        add_video_animation 选择 IntroType.渐显 / OutroType.渐隐。
       operationId: add_video_fade
       parameters:
       - name: segment_id
@@ -1047,15 +1054,15 @@ paths:
               properties:
                 in_duration:
                   type: string
-                  description: 淡入时长（字符串如 '1s' 或微秒数）
+                  description: 音频淡入时长（字符串如 '1s' 或微秒整数）
                 out_duration:
                   type: string
-                  description: 淡出时长
+                  description: 音频淡出时长（字符串如 '2s' 或微秒整数）
               type: object
               required:
               - in_duration
               - out_duration
-              description: 添加视频淡入淡出请求（用于 VideoSegment）
+              description: 为视频片段添加音频淡入淡出请求（用于 VideoSegment，仅对有音轨的视频片段有效）
       responses:
         '200':
           description: Successful Response
@@ -1064,7 +1071,7 @@ paths:
               schema:
                 properties: {}
                 type: object
-                description: 添加视频淡入淡出响应
+                description: 添加视频音频淡入淡出响应
   /segments/{segment_id}/add_video_filter:
     post:
       tags:
@@ -1135,14 +1142,18 @@ paths:
                   description: 时间偏移量，单位：微秒（1秒 = 1,000,000微秒）
                 value:
                   type: number
-                  description: 关键帧值
+                  description: 关键帧值，具体范围依属性而定，见 property 说明
                 property:
                   type: string
-                  description: KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，可选属性：KeyframeProperty.position_x
-                    / KeyframeProperty.position_y / KeyframeProperty.rotation / KeyframeProperty.scale_x
-                    / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale /
-                    KeyframeProperty.alpha / KeyframeProperty.saturation / KeyframeProperty.contrast
-                    / KeyframeProperty.brightness / KeyframeProperty.volume
+                  description: KeyframeProperty 枚举成员名称，可仅写名称（如 'position_x'）或带前缀（如
+                    'KeyframeProperty.position_x'）。可选属性及值域：position_x（右移为正，单位：剪映显示值/草稿宽度）/
+                    position_y（上移为正，单位：剪映显示值/草稿高度）/ rotation（顺时针旋转角度）/ scale_x（X轴缩放比例，1.0不缩放，与
+                    uniform_scale 互斥）/ scale_y（Y轴缩放比例，1.0不缩放，与 uniform_scale 互斥）/
+                    uniform_scale（XY等比缩放，1.0不缩放）/ alpha（不透明度，1.0完全不透明，仅 VideoSegment
+                    有效）/ saturation（饱和度，0.0为原始，范围 -1.0~1.0，仅 VideoSegment 有效）/ contrast（对比度，0.0为原始，范围
+                    -1.0~1.0，仅 VideoSegment 有效）/ brightness（亮度，0.0为原始，范围 -1.0~1.0，仅
+                    VideoSegment 有效）/ volume（音量，1.0为原始音量，仅 VideoSegment 和 AudioSegment
+                    有效）
               type: object
               required:
               - time_offset
@@ -1234,7 +1245,7 @@ paths:
       tags:
       - basic
       summary: 为视频片段添加转场
-      description: 为指定视频片段设置转场动画效果及时长。
+      description: 为指定视频片段设置转场动画及时长。注意：转场应添加在前一个片段上，效果发生在该片段与其后一个片段之间。
       operationId: add_video_transition
       parameters:
       - name: segment_id
@@ -1252,15 +1263,15 @@ paths:
               properties:
                 transition_type:
                   type: string
-                  description: 转场类型
+                  description: 转场类型（TransitionType 枚举成员名称，如 '信号故障'），格式可带前缀（如 'TransitionType.信号故障'）
                 duration:
                   type: string
                   nullable: true
-                  description: 转场时长，省略则使用转场内置时长
+                  description: 转场时长，省略则使用转场内置时长（字符串如 '0.5s' 或微秒整数）
               type: object
               required:
               - transition_type
-              description: 添加视频转场请求（用于 VideoSegment）
+              description: 添加视频转场请求（用于 VideoSegment）。注意：转场应添加在前一个片段上，效果发生在该片段与其后一个片段之间
       responses:
         '200':
           description: Successful Response
