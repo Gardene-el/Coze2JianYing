@@ -34,8 +34,8 @@ class ClipSettings(BaseModel):
     rotation: float = Field(0.0, description="旋转角度（度）")
     scale_x: float = Field(1.0, description="X 轴缩放比例", gt=0)
     scale_y: float = Field(1.0, description="Y 轴缩放比例", gt=0)
-    transform_x: float = Field(0.0, description="X 轴位置偏移")
-    transform_y: float = Field(0.0, description="Y 轴位置偏移")
+    transform_x: float = Field(0.0, description="水平位移，单位为半个画布宽（右移为正）")
+    transform_y: float = Field(0.0, description="垂直位移，单位为半个画布高（下移为负）；参考：剪映导入字幕时此值约为 -0.8")
 
 
 class TextStyle(BaseModel):
@@ -70,7 +70,7 @@ class TextShadow(BaseModel):
     """文本阴影参数（镜像 pyJianYingDraft.TextShadow）"""
 
     color: List[float] = Field([0.0, 0.0, 0.0], description="阴影颜色 RGB (0.0-1.0)")
-    alpha: float = Field(0.9, description="阴影不透明度 0.0-1.0", ge=0.0, le=1.0)
+    alpha: float = Field(1.0, description="阴影不透明度 0.0-1.0", ge=0.0, le=1.0)
     diffuse: float = Field(15.0, description="阴影扩散程度 0-100", ge=0.0, le=100.0)
     distance: float = Field(5.0, description="阴影距离 0-100", ge=0.0, le=100.0)
     angle: float = Field(-45.0, description="阴影角度 -180 到 180", ge=-180.0, le=180.0)

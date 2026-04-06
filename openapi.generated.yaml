@@ -38,6 +38,10 @@ paths:
                   type: string
                   nullable: true
                   description: 草稿名称（剪映中显示的名称），默认使用自动生成的唯一 ID
+                maintrack_adsorb:
+                  type: boolean
+                  description: 是否开启主轨道吸附（无空隙拼接），默认为 True
+                  default: true
               type: object
               description: 创建草稿请求
         required: true
@@ -148,6 +152,18 @@ paths:
                   type: string
                   nullable: true
                   description: 轨道名称
+                mute:
+                  type: boolean
+                  description: 是否静音（仅 audio/video 轨道有效）
+                  default: false
+                relative_index:
+                  type: integer
+                  description: 轨道相对层序，数值越大越靠上
+                  default: 0
+                absolute_index:
+                  type: integer
+                  nullable: true
+                  description: 轨道绝对层序，指定后忽略 relative_index
               type: object
               required:
               - track_type
@@ -713,7 +729,8 @@ paths:
                   type: string
                   description: KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，可选属性：KeyframeProperty.position_x
                     / KeyframeProperty.position_y / KeyframeProperty.rotation / KeyframeProperty.scale_x
-                    / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale
+                    / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale /
+                    KeyframeProperty.alpha
               type: object
               required:
               - time_offset
@@ -881,7 +898,8 @@ paths:
                   type: string
                   description: KeyframeProperty 枚举成员，格式：KeyframeProperty.<name>，可选属性：KeyframeProperty.position_x
                     / KeyframeProperty.position_y / KeyframeProperty.rotation / KeyframeProperty.scale_x
-                    / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale
+                    / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale /
+                    KeyframeProperty.alpha
               type: object
               required:
               - time_offset
@@ -1152,8 +1170,7 @@ paths:
                     uniform_scale（XY等比缩放，1.0不缩放）/ alpha（不透明度，1.0完全不透明，仅 VideoSegment
                     有效）/ saturation（饱和度，0.0为原始，范围 -1.0~1.0，仅 VideoSegment 有效）/ contrast（对比度，0.0为原始，范围
                     -1.0~1.0，仅 VideoSegment 有效）/ brightness（亮度，0.0为原始，范围 -1.0~1.0，仅
-                    VideoSegment 有效）/ volume（音量，1.0为原始音量，仅 VideoSegment 和 AudioSegment
-                    有效）
+                    VideoSegment 有效）/ volume（音量，1.0为原始音量，仅 VideoSegment 有效）
               type: object
               required:
               - time_offset
@@ -1772,11 +1789,11 @@ components:
           default: 1.0
         transform_x:
           type: number
-          description: X 轴位置偏移
+          description: 水平位移，单位为半个画布宽（右移为正）
           default: 0.0
         transform_y:
           type: number
-          description: Y 轴位置偏移
+          description: 垂直位移，单位为半个画布高（下移为负）；参考：剪映导入字幕时此值约为 -0.8
           default: 0.0
       type: object
       description: '图像调节设置（镜像 pyJianYingDraft.ClipSettings）
@@ -1890,7 +1907,7 @@ components:
           maximum: 1.0
           minimum: 0.0
           description: 阴影不透明度 0.0-1.0
-          default: 0.9
+          default: 1.0
         diffuse:
           type: number
           maximum: 100.0

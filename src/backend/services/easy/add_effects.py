@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pyJianYingDraft import EffectSegment, Timerange, TrackType
 from pyJianYingDraft.metadata import VideoCharacterEffectType, VideoSceneEffectType
@@ -54,13 +54,15 @@ def add_effect_to_draft(script, track_name: str, effect: Dict[str, Any]) -> Tupl
 
 
 def find_effect_type_by_name(effect_title: str) -> Optional[Union[VideoSceneEffectType, VideoCharacterEffectType]]:
-	"""根据名称匹配特效类型。"""
-	for effect_type in VideoSceneEffectType:
-		if effect_type.value.name == effect_title:
-			return effect_type
-	for effect_type in VideoCharacterEffectType:
-		if effect_type.value.name == effect_title:
-			return effect_type
+	"""根据名称匹配特效类型（大小写不敏感，忽略空格/下划线差异）。"""
+	try:
+		return VideoSceneEffectType.from_name(effect_title)
+	except Exception:
+		pass
+	try:
+		return VideoCharacterEffectType.from_name(effect_title)
+	except Exception:
+		pass
 	return None
 
 

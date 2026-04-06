@@ -12,7 +12,7 @@ from src.backend.utils.helper import gen_unique_id
 from src.backend.utils.logger import logger
 
 
-def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[str] = None) -> str:
+def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[str] = None, maintrack_adsorb: bool = True) -> str:
 	"""
 	基于草稿模板能力创建剪映草稿。
 
@@ -29,7 +29,7 @@ def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[st
 		CustomException: 草稿创建失败
 	"""
 	draft_id = gen_unique_id()
-	logger.info("draft_id: %s, draft_name: %s, width: %s, height: %s, fps: %s", draft_id, draft_name, width, height, fps)
+	logger.info("draft_id: %s, draft_name: %s, width: %s, height: %s, fps: %s, maintrack_adsorb: %s", draft_id, draft_name, width, height, fps, maintrack_adsorb)
 
 	try:
 		output_dir = require_draft_folder()
@@ -40,6 +40,7 @@ def create_draft(width: int, height: int, fps: int = 30, draft_name: Optional[st
 			width=width,
 			height=height,
 			fps=fps,
+			maintrack_adsorb=maintrack_adsorb,
 			allow_replace=True,
 		)
 		script.save()

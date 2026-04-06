@@ -10,7 +10,7 @@ class AddTextAnimationRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "animation_type": "TextAnimationType.TYPEWRITER",
+                "animation_type": "TextIntro.打字机",
                 "duration": "1s",
             }
         }

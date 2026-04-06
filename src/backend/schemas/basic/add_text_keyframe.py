@@ -14,7 +14,8 @@ class AddTextKeyframeRequest(BaseModel):
             "可选属性："
             "KeyframeProperty.position_x / KeyframeProperty.position_y / "
             "KeyframeProperty.rotation / "
-            "KeyframeProperty.scale_x / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale"
+            "KeyframeProperty.scale_x / KeyframeProperty.scale_y / KeyframeProperty.uniform_scale / "
+            "KeyframeProperty.alpha"
         ),
     )
 

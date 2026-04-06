@@ -54,6 +54,7 @@ def create_draft(request: CreateDraftRequest) -> CreateDraftResponse:
 		height=request.height,
 		fps=request.fps,
 		draft_name=request.draft_name,
+		maintrack_adsorb=request.maintrack_adsorb,
 	)
 	return CreateDraftResponse(draft_id=draft_id)
 
@@ -96,7 +97,14 @@ def add_track(
 	draft_id: str = Path(..., description="草稿的唯一标识 ID"),
 	request: AddTrackRequest = ...,
 ) -> AddTrackResponse:
-	service.add_track(draft_id=draft_id, track_type=request.track_type, track_name=request.track_name)
+	service.add_track(
+		draft_id=draft_id,
+		track_type=request.track_type,
+		track_name=request.track_name,
+		mute=request.mute,
+		relative_index=request.relative_index,
+		absolute_index=request.absolute_index,
+	)
 	return AddTrackResponse()
 
 

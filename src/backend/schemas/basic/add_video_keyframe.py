@@ -22,7 +22,7 @@ class AddVideoKeyframeRequest(BaseModel):
             "saturation（饱和度，0.0为原始，范围 -1.0~1.0，仅 VideoSegment 有效）/ "
             "contrast（对比度，0.0为原始，范围 -1.0~1.0，仅 VideoSegment 有效）/ "
             "brightness（亮度，0.0为原始，范围 -1.0~1.0，仅 VideoSegment 有效）/ "
-            "volume（音量，1.0为原始音量，仅 VideoSegment 和 AudioSegment 有效）"
+            "volume（音量，1.0为原始音量，仅 VideoSegment 有效）"
         ),
     )
 

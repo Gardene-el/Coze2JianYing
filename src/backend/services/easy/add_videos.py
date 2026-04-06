@@ -79,12 +79,14 @@ def add_video_to_draft(
 			video_height = video_material.height
 
 		display_duration = video["end"] - video["start"]
+		canvas_half_width = script.width / 2
+		canvas_half_height = script.height / 2
 		clip_settings = draft.ClipSettings(
 			alpha=alpha,
 			scale_x=scale_x,
 			scale_y=scale_y,
-			transform_x=transform_x / video_width,
-			transform_y=transform_y / video_height,
+			transform_x=transform_x / canvas_half_width,
+			transform_y=transform_y / canvas_half_height,
 		)
 
 		video_segment = draft.VideoSegment(
