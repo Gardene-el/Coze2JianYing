@@ -4,7 +4,7 @@ import {
   FormatPainterOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons'
-import { Alert, Button, Card, message, Space, Spin, Tag } from 'antd'
+import { Alert, Button, message, Space, Spin, Tag } from 'antd'
 import { createStaticStyles } from 'antd-style'
 import { useRef, useState } from 'react'
 
@@ -114,65 +114,59 @@ const ScriptExecutorPage = () => {
     <PageContainer>
       {ctx}
       <PageHeader title="粘贴脚本" />
-      <Card>
-        <textarea
-          ref={textRef}
-          className={styles.textarea}
-          placeholder="粘贴 Python 脚本或 Coze 导出的 JSON…"
-        />
+      <textarea
+        ref={textRef}
+        className={styles.textarea}
+        placeholder="粘贴 Python 脚本或 Coze 导出的 JSON…"
+      />
 
-        {validationMsg && (
-          <Alert type="error" message={validationMsg} showIcon style={{ marginTop: 8 }} />
-        )}
+      {validationMsg && (
+        <Alert type="error" message={validationMsg} showIcon style={{ marginTop: 8 }} />
+      )}
 
-        <Space
-          style={{
-            marginTop: 12,
-            width: '100%',
-            justifyContent: 'space-between',
-          }}
-          wrap
-        >
-          <Space>
-            <Tag bordered={false} color={statusColor[status]}>
-              {status === 'loading' ? (
-                <>
-                  <Spin size="small" /> {statusText}
-                </>
-              ) : (
-                statusText
-              )}
-            </Tag>
-          </Space>
-          <Space wrap>
-            <Button icon={<ClearOutlined />} onClick={handleClear}>
-              清空
-            </Button>
-            <Button
-              icon={<FormatPainterOutlined />}
-              disabled={status === 'loading'}
-              onClick={handleFormat}
-            >
-              格式化输入
-            </Button>
-            <Button
-              icon={<CheckOutlined />}
-              disabled={status === 'loading'}
-              onClick={handleValidate}
-            >
-              验证脚本
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlayCircleOutlined />}
-              loading={status === 'loading'}
-              onClick={handleExecute}
-            >
-              执行脚本
-            </Button>
-          </Space>
+      <Space
+        style={{
+          marginTop: 12,
+          width: '100%',
+          justifyContent: 'space-between',
+        }}
+        wrap
+      >
+        <Space>
+          <Tag bordered={false} color={statusColor[status]}>
+            {status === 'loading' ? (
+              <>
+                <Spin size="small" /> {statusText}
+              </>
+            ) : (
+              statusText
+            )}
+          </Tag>
         </Space>
-      </Card>
+        <Space wrap>
+          <Button icon={<ClearOutlined />} onClick={handleClear}>
+            清空
+          </Button>
+          <Button
+            icon={<FormatPainterOutlined />}
+            disabled={status === 'loading'}
+            onClick={handleFormat}
+          >
+            格式化输入
+          </Button>
+          <Button icon={<CheckOutlined />} disabled={status === 'loading'} onClick={handleValidate}>
+            验证脚本
+          </Button>
+          <Button
+            type="primary"
+            icon={<PlayCircleOutlined />}
+            loading={status === 'loading'}
+            onClick={handleExecute}
+          >
+            执行脚本
+          </Button>
+        </Space>
+      </Space>
     </PageContainer>
   )
 }

@@ -1,11 +1,7 @@
 /**
- * PageHeader — 对齐 LobeHub SettingHeader
- *
- * 渲染大标题（fontSize=24）+ 可选右侧操作区 + 分割线（margin:0）。
- * 消费方无需自己写 Title / Divider，保持各页样式统一。
+ * PageHeader — 与页面内分区标题风格统一，使用 antd Divider 内嵌标题。
  */
-import { Flexbox, Text } from '@lobehub/ui'
-import { Divider } from 'antd'
+import { Divider, Space, Typography } from 'antd'
 import type { FC, ReactNode } from 'react'
 
 interface PageHeaderProps {
@@ -17,15 +13,14 @@ interface PageHeaderProps {
 
 const PageHeader: FC<PageHeaderProps> = ({ title, extra }) => {
   return (
-    <Flexbox gap={24} style={{ paddingTop: 12 }}>
-      <Flexbox horizontal align={'center'} justify={'space-between'}>
-        <Text strong fontSize={24}>
+    <Divider orientation="left" orientationMargin={0} style={{ marginTop: 12 }}>
+      <Space>
+        <Typography.Text strong style={{ fontSize: 18 }}>
           {title}
-        </Text>
+        </Typography.Text>
         {extra}
-      </Flexbox>
-      <Divider style={{ margin: 0 }} />
-    </Flexbox>
+      </Space>
+    </Divider>
   )
 }
 

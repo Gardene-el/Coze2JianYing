@@ -3,7 +3,6 @@ import type { TunnelProvider } from '@c2jy/tunnel-core'
 import {
   Badge,
   Button,
-  Card,
   Divider,
   Empty,
   Input,
@@ -116,18 +115,16 @@ const CloudServicePage = () => {
       <PageHeader title="直连模式" />
 
       {/* ── Coze API 服务 ───────────────────────────────────── */}
-      <Card
-        title={
+      <div style={{ marginBottom: 16 }}>
+        <Divider orientation="left" orientationMargin={0}>
           <Space>
-            <span>Coze API 服务</span>
+            <Text strong>Coze API 服务</Text>
             <Badge
               status={isRunning ? 'success' : 'default'}
               text={isRunning ? '运行中' : '已停止'}
             />
           </Space>
-        }
-        style={{ marginBottom: 16 }}
-      >
+        </Divider>
         <Space wrap>
           <Space.Compact size="small">
             <Input
@@ -159,17 +156,16 @@ const CloudServicePage = () => {
             停止服务
           </Button>
         </Space>
-      </Card>
+      </div>
 
       {/* ── 内网穿透（可选） ────────────────────────────────── */}
-      <Card
-        title={
+      <div>
+        <Divider orientation="left" orientationMargin={0}>
           <Space>
-            <span>内网穿透（可选）</span>
+            <Text strong>内网穿透（可选）</Text>
             {tunnelTag}
           </Space>
-        }
-      >
+        </Divider>
         <div style={{ display: 'flex', gap: 0, minHeight: 160 }}>
           {/* Left: provider list */}
           <div
@@ -217,7 +213,7 @@ const CloudServicePage = () => {
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </PageContainer>
   )
 }

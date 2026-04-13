@@ -1,5 +1,5 @@
 import { FolderOpenOutlined, ReloadOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, message, Space } from 'antd'
+import { Button, Form, Input, message, Space } from 'antd'
 import { useEffect, useRef } from 'react'
 
 import PageContainer from '@/components/PageContainer'
@@ -65,20 +65,18 @@ const SettingsPage = () => {
         onValuesChange={handleValuesChange}
       >
         {/* 剪映路径 */}
-        <Card title="📁 剪映路径" style={{ marginBottom: 16 }}>
-          <div data-tour="draft-path">
-            <Form.Item name="draftFolder" label="剪映草稿文件夹">
-              <Space.Compact style={{ width: '100%' }}>
-                <Form.Item name="draftFolder" noStyle>
-                  <Input placeholder="请配置列映草稿文件夹路径" />
-                </Form.Item>
-                <Button icon={<FolderOpenOutlined />} onClick={handleDetect}>
-                  自动检测
-                </Button>
-              </Space.Compact>
-            </Form.Item>
-          </div>
-        </Card>
+        <div style={{ marginBottom: 16 }} data-tour="draft-path">
+          <Form.Item name="draftFolder" label="剪映草稿文件夹">
+            <Space.Compact style={{ width: '100%' }}>
+              <Form.Item name="draftFolder" noStyle>
+                <Input placeholder="请配置列映草稿文件夹路径" />
+              </Form.Item>
+              <Button icon={<FolderOpenOutlined />} onClick={handleDetect}>
+                自动检测
+              </Button>
+            </Space.Compact>
+          </Form.Item>
+        </div>
 
         <Space>
           <Button icon={<ReloadOutlined />} onClick={() => void loadSettings()}>

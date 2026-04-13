@@ -1,5 +1,5 @@
 import { PlayCircleOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
-import { Button, Card, Input, message, Space, Spin, Tag, Typography } from 'antd'
+import { Button, Divider, Input, message, Space, Spin, Tag, Typography } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 
 import PageContainer from '@/components/PageContainer'
@@ -163,10 +163,10 @@ const ReplayPage = () => {
     <PageContainer>
       {ctx}
       <PageHeader title="粘贴id" />
-      <Card
-        title="📷 粘贴草稿id相关内容进所选框进行拉取，Coze2JianYing可以智能识别草稿id"
-        style={{ marginBottom: 16 }}
-      >
+      <div style={{ marginBottom: 16 }}>
+        <Divider orientation="left" orientationMargin={0}>
+          <Typography.Text strong>草稿 ID</Typography.Text>
+        </Divider>
         {/* 输入区 */}
         <Input.TextArea
           value={rawInput}
@@ -280,9 +280,12 @@ const ReplayPage = () => {
             })}
           </div>
         )}
-      </Card>
+      </div>
 
-      <Card title="☁️ 云服务器地址" style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 12 }}>
+        <Divider orientation="left" orientationMargin={0}>
+          <Typography.Text strong>云服务器地址</Typography.Text>
+        </Divider>
         <Space.Compact style={{ width: '100%', maxWidth: 560 }}>
           <Input
             value={urlInput}
@@ -293,7 +296,7 @@ const ReplayPage = () => {
             重置
           </Button>
         </Space.Compact>
-      </Card>
+      </div>
     </PageContainer>
   )
 }

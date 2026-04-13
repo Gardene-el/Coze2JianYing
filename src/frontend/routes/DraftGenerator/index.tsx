@@ -1,5 +1,5 @@
 import { ClearOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import { Button, Card, message, Space, Spin, Typography } from 'antd'
+import { Button, message, Space, Spin, Typography } from 'antd'
 import { createStaticStyles } from 'antd-style'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -83,41 +83,39 @@ const DraftGeneratorPage = () => {
     <PageContainer>
       {ctx}
       <PageHeader title="粘贴草稿（弃置）" />
-      <Card>
-        <textarea ref={textRef} className={styles.textarea} placeholder="粘贴 JSON 数据…" />
-        <Space
-          style={{
-            marginTop: 12,
-            width: '100%',
-            justifyContent: 'space-between',
-          }}
-          wrap
-        >
-          <Text type="secondary">
-            状态：
-            {loading ? (
-              <>
-                <Spin size="small" /> {status}
-              </>
-            ) : (
-              status
-            )}
-          </Text>
-          <Space>
-            <Button icon={<ClearOutlined />} onClick={handleClear}>
-              清空内容
-            </Button>
-            <Button
-              type="primary"
-              icon={<ThunderboltOutlined />}
-              loading={loading}
-              onClick={handleGenerate}
-            >
-              生成草稿
-            </Button>
-          </Space>
+      <textarea ref={textRef} className={styles.textarea} placeholder="粘贴 JSON 数据…" />
+      <Space
+        style={{
+          marginTop: 12,
+          width: '100%',
+          justifyContent: 'space-between',
+        }}
+        wrap
+      >
+        <Text type="secondary">
+          状态：
+          {loading ? (
+            <>
+              <Spin size="small" /> {status}
+            </>
+          ) : (
+            status
+          )}
+        </Text>
+        <Space>
+          <Button icon={<ClearOutlined />} onClick={handleClear}>
+            清空内容
+          </Button>
+          <Button
+            type="primary"
+            icon={<ThunderboltOutlined />}
+            loading={loading}
+            onClick={handleGenerate}
+          >
+            生成草稿
+          </Button>
         </Space>
-      </Card>
+      </Space>
     </PageContainer>
   )
 }
